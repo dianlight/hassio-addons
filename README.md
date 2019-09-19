@@ -1,2 +1,4 @@
 # hassio-addons
-Hassio.io 
+Hassio.io repository.
+
+**NOTE** See README.md in single addon directories.
