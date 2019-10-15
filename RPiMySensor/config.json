@@ -1,10 +1,11 @@
 {
   "name": "RPi MySensor Gateway",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "slug": "rpi_mysensor_gw",
   "description": "Raspberry Pi MySensor Gateway SPI add-on!",
   "url": "https://github.com/dianlight/hassio-addons",
   "arch": ["armhf", "armv7"],
+  "image": "dianlight/image-{arch}-rpi_mysensor_gw",
   "startup": "before",
   "boot": "auto",
   "options": {
