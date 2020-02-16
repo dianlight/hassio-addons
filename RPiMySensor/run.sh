@@ -4,7 +4,7 @@ set +u
 
 LOGGING=$(bashio::info 'hassio.info.logging' '.logging')
 
-MYSGW_FLAGS="--my-transport=rf24 --my-gateway=ethernet --my-port=5003 --my-config-file=/etc/mysensors.conf --no_init_system" 
+MYSGW_FLAGS="--bin-dir=/data/bin --my-transport=rf24 --my-gateway=ethernet --my-port=5003 --my-config-file=/etc/mysensors.conf --no_init_system" 
 if bashio::config.has_value 'channel'; then
      MYSGW_FLAGS="$MYSGW_FLAGS --my-rf24-channel=$(bashio::config 'channel')"
 fi 
@@ -51,16 +51,30 @@ fi
 
 bashio::log.debug "${MYSGW_FLAGS}"
 
+
 # MySensors.conf customizations
 if bashio::config.has_value 'log_level'; then
      sed -i "s/verbose=.*/verbose=$(bashio::config 'log_level')/g" /etc/mysensors.conf
 fi 
 
-# See https://www.mysensors.org/build/raspberry
-cd /MySensors
-./configure $MYSGW_FLAGS && make && ./bin/mysgw 
+# Test SPI Device
+pwd
+/spidev_test -D /dev/spidev0.0
+
+cd /MySensors 
+if echo $MYSGW_FLAGS | md5sum -c /data/mysensors.config.md5; then
+    #OLD CONFIG SAME AS NEW
+    bashio::log.debug "Old config found. Skipping compilation...."
+    # See https://www.mysensors.org/build/raspberry
+    /data/bin/mysgw 
+else
+    #NEW CONFIG
+    #Salvataggio config
+    echo $MYSGW_FLAGS | md5sum - > /data/mysensors.config.md5
+    # See https://www.mysensors.org/build/raspberry
+    ./configure $MYSGW_FLAGS && make && /data/bin/mysgw 
+fi  
  
 
 ##WebServerUI
 #python3 -m http.server 8000
-

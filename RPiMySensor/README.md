@@ -75,7 +75,7 @@ Example add-on configuration:
     "use_led":{
         "err_pin": 12,
         "rx_pin": 16,
-        "tx_pin": 18
+        "tx_pin": 11
     }
 }
 ```
@@ -111,7 +111,7 @@ you are troubleshooting.
 
 ### Option: `channel`
 
-<0-125>   RF channel for the sensor net. [76]
+<0-125>   RF channel for the sensor net. [75]
 
 ### Option: `pa_level`
 
@@ -249,7 +249,7 @@ SOFTWARE.
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [bookstack]: https://www.bookstackapp.com/
 [buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
-[buymeacoffee]: https://www.buymeacoffee.com/sinclairpaul
+[buymeacoffee]: https://www.buymeacoffee.com/ypKZ2I0
 [commits-shield]: https://img.shields.io/github/commit-activity/y/hassio-addons/addon-bookstack.svg
 [commits]: https://github.com/hassio-addons/addon-bookstack/commits/master
 [contributors]: https://github.com/hassio-addons/addon-bookstack/graphs/contributors

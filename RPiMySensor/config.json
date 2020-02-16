@@ -1,11 +1,11 @@
 {
   "name": "RPi MySensor Gateway",
-  "version": "0.0.19",
-  "slug": "rpi_mysensor_gw",
+  "version": "0.0.25",
+  "slug": "rpi-mysensor-gw",
   "description": "Raspberry Pi MySensor Gateway SPI add-on!",
-  "url": "https://github.com/dianlight/hassio-addons",
+  "url": "https://github.com/dianlight/hassio-addons/tree/master/RPiMySensor",
   "arch": ["armhf", "armv7"],
-  "image": "dianlight/image-{arch}-rpi_mysensor_gw",
+  "_image": "dianlight/rpi-mysensor-gw-{arch}",
   "startup": "before",
   "boot": "auto",
   "options": {
@@ -17,12 +17,12 @@
     "cs_pin":24,
     "use_irq":{
         "rx_buffer":20,
-        "pin":15
+        "pin":18
     },
     "use_led":{
         "err_pin": 12,
         "rx_pin": 16,
-        "tx_pin": 18
+        "tx_pin": 11
     }
   },
   "schema": {
@@ -49,7 +49,8 @@
     "5300/tcp": "TCP communication port"
   },
   "devices":[
-      "/dev/spidev0.0:/dev/spidev0.0:rwm"
+      "/dev/spidev0.0:/dev/spidev0.0:rwm",
+      "/dev/mem:/dev/mem:rw"
   ],
   "udev": true,
   "auto_uart": true,
