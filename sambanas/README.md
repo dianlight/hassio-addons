@@ -71,6 +71,7 @@ List of hosts/networks allowed to access the shared folders.
 
 ### Option: `moredisks` (optional)
 
+***Protection Mode must be disabled to allow this function***
 List of disks or partitions label to search and share
 
 ### Option: `veto_files` (optional)
