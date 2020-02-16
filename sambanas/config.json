@@ -3,7 +3,7 @@
     "version": "9.0-nas",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
-    "url": "https://github.com/home-assistant/hassio-addons/tree/master/samba",
+    "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
     "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
     "startup": "services",
     "boot": "auto",
@@ -27,7 +27,7 @@
       "allow_hosts": ["str"],
       "veto_files": ["str"]
     },
-    "image_": "dianlight/{arch}-addon-sambanas",
+    "image": "dianlight/{arch}-addon-sambanas",
     "udev": true,
     "host_dbus": true,
     "device-tree": true,
