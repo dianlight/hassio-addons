@@ -1,0 +1,3 @@
+[submodule "addon-plex"]
+	path = addon-plex
+	url = https://github.com/dianlight/addon-plex
