@@ -1,5 +1,14 @@
 # Changelog
 
+## 9.2.0-nas
+- [Based on samba addon 9.2.0]
+- Pin base image version
+- Rewrite add-on onto S6 Overlay
+- Use default configuration location
+- Add support for running in compatibility mode (SMB1/NT1)
+- Add dummy files to reduce number of errors/warnings in log output
+- Allow IPv6 link-local hosts by default, consistent with IPv4
+
 ## [9.0-nas] - 2020-02-14
 
 ### Added

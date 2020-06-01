@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start avahi service
+# ==============================================================================
+declare name
+
+# Read hostname from API or setting default "hassio"
+name=$(bashio::info.hostname)
+if bashio::var.is_empty "${name}"; then
+    bashio::log.warning "Can't read hostname, using default."
+    name="hassio"
+fi
+bashio::log.info "Starting the AVAHI daemon for ${name}..."
+
+exec avahi-publish-service -v -f -s $name _smb._tcp 445 

@@ -8,8 +8,11 @@ ENV LANG C.UTF-8
 RUN apk add --no-cache \
         samba-common-tools \
         samba-server \
+        dbus \
         exfat-utils \
+        fuse \
         fuse-exfat \
+        fuse-exfat-utils \
         udev \
         hwids-udev \
         device-mapper-udev \
@@ -18,13 +21,24 @@ RUN apk add --no-cache \
         util-linux \
         e2fsprogs-extra \
         avahi \
-        avahi-tools
+        avahi-compat-libdns_sd \
+        avahi-tools \
+    \
+    && mkdir -p /var/lib/samba \
+    && touch \
+        /etc/samba/lmhosts \
+        /var/lib/samba/account_policy.tdb \
+        /var/lib/samba/registry.tdb \
+        /var/lib/samba/winbindd_idmap.tdb   
 
-
-# Copy data
-COPY data/run.sh /
-COPY data/smb.conf /etc/
-COPY data/moredisk.smb.conf /tmp/
 RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
 
-CMD [ "/run.sh" ]
+# Copy data
+COPY rootfs /
+
+# Copy data
+#COPY data/run.sh /
+#COPY data/smb.conf /etc/
+#COPY data/moredisk.smb.conf /tmp/
+#
+#CMD [ "/run.sh" ]

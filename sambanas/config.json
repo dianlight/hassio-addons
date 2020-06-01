@@ -1,37 +1,45 @@
 {
     "name": "Samba NAS",
-    "version": "9.0-nas",
+    "version": "9.2.0-nas",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
     "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
     "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
     "startup": "services",
     "boot": "auto",
+    "init": false,
     "host_network": true,
     "map": ["config:rw", "ssl:rw", "addons:rw", "share:rw", "backup:rw"],
     "options": {
-      "workgroup": "WORKGROUP",
-      "username": "homeassistant",
-      "password": null,
-      "interface": "",
-      "moredisks": ["<PARTITION LABEL>"],
-      "allow_hosts": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
-      "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"]
+        "workgroup": "WORKGROUP",
+        "username": "homeassistant",
+        "password": null,
+        "interface": "",
+        "allow_hosts": [
+            "10.0.0.0/8",
+            "172.16.0.0/12",
+            "192.168.0.0/16",
+            "fe80::/10"
+        ],
+        "moredisks": ["<PARTITION LABEL>"],
+        "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"],
+        "compatibility_mode": false
     },
     "schema": {
-      "workgroup": "str",
-      "username": "str",
-      "password": "str",
-      "interface": "str",
-      "moredisks":["str"],
-      "allow_hosts": ["str"],
-      "veto_files": ["str"]
+        "workgroup": "str",
+        "username": "str",
+        "password": "str",
+        "interface": "str",
+        "moredisks": ["str"],
+        "allow_hosts": ["str"],
+        "veto_files": ["str"],
+        "compatibility_mode": "bool"
     },
     "image": "dianlight/{arch}-addon-sambanas",
     "udev": true,
     "host_dbus": true,
     "device-tree": true,
     "kernel_modules": true,
-    "privileged": ["SYS_ADMIN","SYS_RAWIO","SYS_RESOURCE"],
+    "privileged": ["SYS_ADMIN", "SYS_RAWIO", "SYS_RESOURCE"],
     "full_access": true
-  }
+}

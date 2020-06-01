@@ -3,7 +3,7 @@
     "username": "homeassistant",
     "password": "test",
     "interface": "",
-    "moredisks": ["TIMEMACHINE","LIBRARY"],
+    "moredisks": ["TIMEMACHINE", "LIBRARY"],
     "allow_hosts": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
     "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"]
-  }
+}
