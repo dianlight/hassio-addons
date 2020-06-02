@@ -1,6 +1,13 @@
-<!--
-[Full Changelog][changelog]
--->
+# Changelog 
+
+## 2.3.3-dev
+
+[Full Changelog from official addon][changelog_2.3.3]
+
+[changelog_2.3.3]: https://github.com/hassio-addons/addon-plex/compare/v2.2.5...v2.3.3
+
+## 2.2.5-dev
+[Full Changelog from official addon][changelog]
 
 This is a general maintenance release based on comunity plex addon 2.2.5-dev
 
