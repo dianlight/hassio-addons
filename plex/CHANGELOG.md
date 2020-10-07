@@ -1,12 +1,18 @@
 # Changelog 
+## 2.4.0-dht
 
-## 2.3.3-dev
+[Full Changelog from official addon][changelog_2.4.0]
+[Full Changelog from official addon][changelog_2.3.4]
+
+[changelog_2.4.0]: https://github.com/hassio-addons/addon-plex/compare/v2.3.3...v2.4.0
+
+## 2.3.3-dht
 
 [Full Changelog from official addon][changelog_2.3.3]
 
 [changelog_2.3.3]: https://github.com/hassio-addons/addon-plex/compare/v2.2.5...v2.3.3
 
-## 2.2.5-dev
+## 2.2.5-dht
 [Full Changelog from official addon][changelog]
 
 This is a general maintenance release based on comunity plex addon 2.2.5-dev
