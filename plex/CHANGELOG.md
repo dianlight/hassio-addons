@@ -1,4 +1,8 @@
 # Changelog 
+## 2.4.0-dht1
+
+- :arrow_up: Updated Plex Media Server to 1.20.2.3402-0fec14d92
+
 ## 2.4.0-dht
 
 [Full Changelog from official addon][changelog_2.4.0]
