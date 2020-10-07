@@ -2,7 +2,6 @@
 ## 2.4.0-dht
 
 [Full Changelog from official addon][changelog_2.4.0]
-[Full Changelog from official addon][changelog_2.3.4]
 
 [changelog_2.4.0]: https://github.com/hassio-addons/addon-plex/compare/v2.3.3...v2.4.0
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 9.3.0-nas
+- [Full Changelog from official addon][changelog_9.3.0]
+- Support new media folder
+- Update Samba to 4.12.6
+- Upgrade Alpine Linux to 3.12
+
+[changelog_9.3.0]: https://github.com/home-assistant/hassio-addons/pull/1569
+
 ## 9.2.0-nas
 - [Based on samba addon 9.2.0]
 - Pin base image version
