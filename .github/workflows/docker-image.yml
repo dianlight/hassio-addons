@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/checkout@v2
       - name: Build the Docker image Plex
-        run: ./build.sh addon-plex\plex 
+        run: ./build.sh addon-plex/plex 
       - name: Build the Docker image Samba
         run: ./build.sh sambanas   
       - name: pull-request
