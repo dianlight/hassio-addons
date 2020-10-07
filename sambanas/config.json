@@ -1,6 +1,6 @@
 {
     "name": "Samba NAS",
-    "version": "9.2.0-nas",
+    "version": "9.3.0-nas",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
     "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
@@ -9,7 +9,7 @@
     "boot": "auto",
     "init": false,
     "host_network": true,
-    "map": ["config:rw", "ssl:rw", "addons:rw", "share:rw", "backup:rw"],
+    "map": ["config:rw", "ssl:rw", "addons:rw", "share:rw", "backup:rw", "media:rw"],
     "options": {
         "workgroup": "WORKGROUP",
         "username": "homeassistant",

@@ -1,13 +1,13 @@
 {
     "name": "Plex Media Server with NAS",
-    "version": "2.3.3-dht",
+    "version": "2.4.0-dht",
     "slug": "plex",
     "description": "Recorded media, live TV, online news, and podcasts ready to stream.",
     "url": "https://github.com/dianlight/addon-plex",
     "webui": "http://[HOST]:[PORT:32400]/web",
     "startup": "services",
     "arch": ["aarch64", "amd64", "armv7", "i386"],
-    "map": ["share:rw", "ssl"],
+    "map": ["media:rw", "share:rw", "ssl"],
     "boot": "auto",
     "image": "dianlight/{arch}-addon-plex",
     "ports": {

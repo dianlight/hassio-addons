@@ -19,10 +19,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/checkout@v2
+        with: 
+          submodules: true
       - name: Build the Docker image Plex
-        run: ./build.sh addon-plex\plex 
+        run: sudo ./build.sh addon-plex/plex 
       - name: Build the Docker image Samba
-        run: ./build.sh sambanas   
+        run:  sudo ./build.sh sambanas   
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:
