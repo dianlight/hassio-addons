@@ -2,15 +2,14 @@
 #!/bin/bash
 
 for addon in "$@"; do
-    if [ -z ${TRAVIS_COMMIT_RANGE} ] || git diff --name-only ${TRAVIS_COMMIT_RANGE} | grep -v README.md | grep -q ${addon}; then
-      echo $(pwd)/${addon}
-      for arch in "armhf" "armv7" "amd64" "aarch64" "i386" ; do
-       echo Target: ${arch}
-       grep ${arch} $(pwd)/${addon}/config.json | grep "\"arch\":" >/dev/null && \
-    		docker run  --rm --privileged -v ~/.docker:/root/.docker -v $(pwd)/${addon}:/data homeassistant/amd64-builder --docker-hub-check --${arch} -t /data \
-        || echo "Unsupported or Error!"
-      done 
-    else
-    	echo "No change in commit range ${TRAVIS_COMMIT_RANGE}"
+
+    if [[ "$(jq -r '.image' ${addon}/config.json)" == 'null' ]]; then
+      echo "${ANSI_YELLOW}No build image set for ${addon}. Skip build!${ANSI_CLEAR}"
+      exit 0
     fi
+
+    archs=$(jq -r '.arch // ["armv7", "armhf", "amd64", "aarch64", "i386"] | [.[] | "--" + .] | join(" ")' ${addon}/config.json)
+    echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
+#    docker run  --rm --privileged -v ~/.docker:/root/.docker -v $(pwd)/${addon}:/data homeassistant/amd64-builder --docker-hub-check --${arch} -t /data 
+    docker run  --rm --privileged -v '/var/run/docker.sock:/var/run/docker.sock' -v $(pwd)/${addon}:/data homeassistant/amd64-builder --docker-hub-check ${archs} -t /data 
 done
