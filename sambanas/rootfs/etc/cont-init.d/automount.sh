@@ -6,11 +6,14 @@ readonly CONF="/etc/samba/smb.conf"
 declare moredisks
 
 # Mount external drive
-if bashio::config.has_value 'moredisks'; then
+bashio::log.info "Protection Mode is $(bashio::addon.protected)"
+if $(bashio::addon.protected) && bashio::config.has_value 'moredisks' ; then
+     bashio::log.warning "MoreDisk ignored because ADDON in Protected Mode!"
+     bashio::config.suggest "protected" "moredisk only work when Protection mode is disabled"
+elif bashio::config.has_value 'moredisks'; then
      bashio::log.warning "MoreDisk option found!"
 
      MOREDISKS=$(bashio::config 'moredisks')
-##    mkdir -p /dev_ && \
      mount /dev_ && \
      bashio::log.info "More Disks mounting.. ${MOREDISKS}" && \
      for disk in $MOREDISKS 
@@ -22,5 +25,5 @@ if bashio::config.has_value 'moredisks'; then
              sed -i "s|%%DISKNAME%%|${disk}|g" "${CONF}" && \
              bashio::log.info "Success!"   
      done || \
-     bashio::log.warning "Protection mode is ON. Unable to mount external drivers!"
+     bashio::log.warning "Unable to mount external drivers!"
 fi

@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.3.0-nas1
+- Bugfixes
+- Expose NAS disk status on MQTT (60s refresh)
+
 ## 9.3.0-nas
 - [Full Changelog from official addon][changelog_9.3.0]
 - Support new media folder

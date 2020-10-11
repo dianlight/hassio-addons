@@ -89,6 +89,30 @@ when you absolutely need it and understand the possible consequences.
 
 Defaults to `false`.
 
+### Option: `mqtt_host`
+
+If using an external mqtt broker, the hostname/URL of the broker. See [MQTT Status Notifications](https://github.com/thomasmauerer/hassio-addons/blob/master/samba-backup/DOCS.md#mqtt-status-notifications) for additional infos.
+
+**Note**: _Do not set this option if you want to use the (on-device) Mosquitto broker addon._
+
+### Option: `mqtt_username`
+
+If using an external mqtt broker, the username to authenticate with the broker.
+
+### Option: `mqtt_password`
+
+If using an external mqtt broker, the password to authenticate with the broker.
+
+### Option: `mqtt_port`
+
+If using an external mqtt broker, the port of the broker. If not specified the default port 1883 will be used.
+
+### Option: `mqtt_topic`
+
+The topic to which status updates will be published. You can only control the root topic with this option, the subtopic is fixed!
+
+_Example_: sambanas/status: "sambanas" is the root topic, whereas "status" is the subtopic.
+
 ## Support
 <!--
 Got questions?
