@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.3.0-nas2
+- Fix autobuild script for empty directories
+- Removed unused debug.
+
 ## 9.3.0-nas1
 - Bugfixes
 - Expose NAS disk status on MQTT (60s refresh)
