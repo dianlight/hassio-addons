@@ -16,7 +16,7 @@ username=$(bashio::config 'mqtt_username');if [ "$username" = "null" ]; then use
 password=$(bashio::config 'mqtt_password');if [ "$password" = "null" ]; then password=$(bashio::services "mqtt" "password"); fi
 port=$(bashio::config 'mqtt_port');if [ "$port" = "null" ]; then port=$(bashio::services "mqtt" "port"); fi
 
-bashio::log.info "MQTT config ${host}:${port} ${username}:${password}"
+#bashio::log.info "MQTT config ${host}:${port} ${username}:${password}"
 
 if bashio::var.has_value "host"; then
     {
