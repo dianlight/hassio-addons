@@ -1,7 +1,6 @@
 # Changelog
-## [Planned]
 
-## 9.3.0-nas3 [Unrelesed]
+## 9.3.0-nas3
 - Fix idmap range not specified warning in log
 - MQTT sensor improvement:
     - Option to disable MQTT integration
