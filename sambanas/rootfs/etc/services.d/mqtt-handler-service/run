@@ -6,6 +6,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for disks info..."
     exec /usr/local/bin/mqtt_daemon.sh
 else
-    bashio::log.warning "No MQTT config."
+    ! bashio::config.false "mqtt_enable" && bashio::log.warning "No MQTT config."
     exec sleep 1440
 fi    

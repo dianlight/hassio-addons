@@ -1,5 +1,15 @@
 # Changelog
 
+## 9.3.0-nas3
+- Fix idmap range not specified warning in log
+- MQTT sensor improvement:
+    - Option to disable MQTT integration
+    - Options to control MQTT autodiscovery 
+    - Added device data to HA discovery messages 
+    - Better Device\Sensors tree
+    - Autoremove discovery on disk unmount
+    - Fix MQTT unique_id to allow HA interface management
+
 ## 9.3.0-nas2
 - Fix autobuild script for empty directories
 - Removed unused debug.
@@ -7,6 +17,7 @@
 ## 9.3.0-nas1
 - Bugfixes
 - Expose NAS disk status on MQTT (60s refresh)
+- Update Samba to 4.12.7
 
 ## 9.3.0-nas
 - [Full Changelog from official addon][changelog_9.3.0]
@@ -25,7 +36,7 @@
 - Add dummy files to reduce number of errors/warnings in log output
 - Allow IPv6 link-local hosts by default, consistent with IPv4
 
-## [9.0-nas] - 2020-02-14
+## 9.0-nas
 
 ### Added
 - Add devfs support

@@ -1,6 +1,6 @@
 {
     "name": "Samba NAS",
-    "version": "9.3.0-nas2",
+    "version": "9.3.0-nas3",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
     "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
@@ -23,7 +23,8 @@
         ],
         "moredisks": ["<PARTITION LABEL>"],
         "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"],
-        "compatibility_mode": false
+        "compatibility_mode": false,
+        "autodiscovery": {}
     },
     "schema": {
         "workgroup": "str",
@@ -33,16 +34,24 @@
         "moredisks": ["str"],
         "allow_hosts": ["str"],
         "veto_files": ["str"],
-        "compatibility_mode": "bool",
+        "compatibility_mode": "bool?",
+        "mqtt_enable": "bool?",
         "mqtt_host": "str?",
         "mqtt_username": "str?",
         "mqtt_password": "str?",
         "mqtt_port": "str?",
-        "mqtt_topic": "str?"
+        "mqtt_topic": "str?",
+        "autodiscovery": {
+            "disable_discovery": "bool?",
+            "disable_persistent": "bool?",
+            "disable_autoremove": "bool?"
+        }
     },
     "image": "dianlight/{arch}-addon-sambanas",
     "services": ["mqtt:want"],
     "udev": true,
+    "usb": true,
+    "devicetree": true,
     "host_dbus": true,
     "device-tree": true,
     "kernel_modules": true,
