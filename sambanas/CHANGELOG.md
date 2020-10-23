@@ -1,5 +1,8 @@
 # Changelog
 
+## 9.3.0-nas4
+- Remove unnecessary devicetree request (Bug #13)
+
 ## 9.3.0-nas3
 - Fix idmap range not specified warning in log
 - MQTT sensor improvement:
