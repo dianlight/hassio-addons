@@ -1,6 +1,6 @@
 {
     "name": "Samba NAS",
-    "version": "9.3.0-nas3",
+    "version": "9.3.0-nas4",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
     "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
@@ -51,7 +51,6 @@
     "services": ["mqtt:want"],
     "udev": true,
     "usb": true,
-    "devicetree": true,
     "host_dbus": true,
     "device-tree": true,
     "kernel_modules": true,
