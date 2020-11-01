@@ -19,7 +19,9 @@ port=$(bashio::config 'mqtt_port');if [ "$port" = "null" ]; then port=$(bashio::
 
 #bashio::log.info "MQTT config ${host}:${port} ${username}:${password}"
 
-if bashio::var.has_value "host" && ! bashio::config.false "mqtt_enable"; then
+[ -z "$host" ] && bashio::log.warn "No MQTT Server found. Homeassistant integration can't work!"
+
+if bashio::var.has_value "host" && ! bashio::config.false "mqtt_enable" && [ -n "$host" ]; then
     {
         echo "-h ${host}"
         echo "--username ${username}"

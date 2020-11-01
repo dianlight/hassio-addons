@@ -1,5 +1,8 @@
 # Changelog
 
+## 9.3.0-nas5 [Unrelesed]
+- Disable MQTT integration in no MQTT service is found
+
 ## 9.3.0-nas4
 - Remove unnecessary devicetree request (Bug #13)
 
