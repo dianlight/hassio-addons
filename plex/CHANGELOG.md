@@ -1,4 +1,13 @@
 # Changelog 
+
+## 2.4.2-dht1
+
+- :arrow_up: Updated Plex Media Server to 1.21.1.3876-3c3adfcb4
+
+[Full Changelog from official addon][changelog_2.4.2]
+
+[changelog_2.4.2]: https://github.com/hassio-addons/addon-plex/compare/v2.4.0...v2.4.2
+
 ## 2.4.0-dht1
 
 - :arrow_up: Updated Plex Media Server to 1.20.2.3402-0fec14d92
