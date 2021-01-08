@@ -1,6 +1,6 @@
 {
     "name": "Plex Media Server with NAS",
-    "version": "2.4.0-dht1",
+    "version": "2.4.2-dht1",
     "slug": "plex",
     "description": "Recorded media, live TV, online news, and podcasts ready to stream.",
     "url": "https://github.com/dianlight/addon-plex",
