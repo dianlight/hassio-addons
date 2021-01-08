@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.3.0-nas5 [Unrelesed]
+## 9.3.0-nas5
 - Disable MQTT integration in no MQTT service is found
 
 ## 9.3.0-nas4
