@@ -1,6 +1,8 @@
 # Changelog
+## 9.3.0-nas6
+- Fix: Ignore MQTT service if the given HA url is invalid.
 
-## 9.3.0-nas5 [Unrelesed]
+## 9.3.0-nas5
 - Disable MQTT integration in no MQTT service is found
 
 ## 9.3.0-nas4
