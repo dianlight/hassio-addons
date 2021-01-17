@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../addon-plex"
 		}
 	],
 	"settings": {}
