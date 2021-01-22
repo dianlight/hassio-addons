@@ -1,5 +1,6 @@
  
 #!/bin/bash
+# use aarch64 on M1
 
 for addon in "$@"; do
 
