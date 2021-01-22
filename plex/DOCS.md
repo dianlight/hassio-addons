@@ -38,6 +38,7 @@ networkdisks:
  - //serverip/share
 cifsusername: hassio
 cifspassword: password 
+cifsversion: "3.0"
 ```
 
 **Note**: _This is just an example, don't copy and paste it! Create your own!_
@@ -101,6 +102,10 @@ The username to use to mount the network shares
 
 The password used to mount the networks shares
 
+#### Option: `cifsversion`
+
+The version of cifs to use. Default `3.0`.
+Valid values are `3.0`, `2.1`, `2.0`, `1.0`. 
 
 ## Solving connection issues with Plex
 
