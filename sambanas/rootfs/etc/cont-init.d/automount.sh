@@ -6,7 +6,11 @@ readonly CONF="/etc/samba/smb.conf"
 declare moredisks
 
 # Mount external drive
-if bashio::config.has_value 'moredisks'; then
+bashio::log.info "Protection Mode is $(bashio::addon.protected)"
+if $(bashio::addon.protected) && bashio::config.has_value 'moredisks' ; then
+     bashio::log.warning "MoreDisk ignored because ADDON in Protected Mode!"
+     bashio::config.suggest "protected" "moredisk only work when Protection mode is disabled"
+elif bashio::config.has_value 'moredisks'; then
      bashio::log.warning "MoreDisk option found!"
 
      MOREDISKS=$(bashio::config 'moredisks')
