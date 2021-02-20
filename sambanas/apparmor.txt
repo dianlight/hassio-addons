@@ -12,19 +12,16 @@ profile addon_samba_nas flags=(attach_disconnected,mediate_deleted) {
   capability,
   file,
   mount,
-#  network,
-#  dbus,
-#  ipc,
   umount,
   remount,
-  change_onexec,
 
   capability setgid,
   capability setuid,
   capability sys_admin, 
   capability dac_read_search, 
-  # capability dac_override,
   capability sys_rawio,
+  capability sys_resource,
+  # capability dac_override,
 
 # S6-Overlay
   /bin/** ix,
