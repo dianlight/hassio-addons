@@ -1,4 +1,13 @@
 # Changelog
+
+## 9.3.0-nas8
+- chore: Support new Supervisor/Hardware ( remov dev_ trick )
+- chore: Apparmor config optimization for broadcast.
+- fix: remove double % sign on HA report. (Bug #38)
+## 9.3.0-nas7
+- Fix: config style for new Supervisor/Hardware
+- Added Apparmor config (PR #36 by @alexbelgium) (Bug #35)
+
 ## 9.3.0-nas6
 - Fix: Ignore MQTT service if the given HA url is invalid.
 

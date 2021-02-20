@@ -5,7 +5,7 @@ declare status
 declare fsdata
 
 topic=$(bashio::config 'mqtt_topic');if [ "$topic" = "null" ]; then topic="sambanas"; fi;
-moredisks=$(bashio::config 'moredisks')
+moredisks=$(bashio::config 'moredisks'); if $(bashio::addon.protected) ; then moredisks=""; fi;
 
 # Home assistand MQTT old message remove
 
@@ -13,7 +13,7 @@ moredisks=$(bashio::config 'moredisks')
 
 # Home assistant auto discovery    
 if [ -f /root/.config/mosquitto_pub ] && ! bashio::config.true "autodiscovery.disable_discovery"; then
-    moredisks=$(bashio::config 'moredisks')
+#    moredisks=$(bashio::config 'moredisks')
     a=({a..z})
     if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r";fi
     bashio::log.info "Sending MQTT autodiscovery..."
@@ -43,7 +43,7 @@ while true; do
         status="$status, \"size_${disk,,}\":\"${fsd[1]}\""
         status="$status, \"used_${disk,,}\":\"${fsd[2]}\""
         status="$status, \"available_${disk,,}\":\"${fsd[3]}\""
-        status="$status, \"use_${disk,,}\":\"${fsd[4]}\""
+        status="$status, \"use_${disk,,}\":\"${fsd[4]%?}\""
     done
     status="$status}"
     # Send status message
