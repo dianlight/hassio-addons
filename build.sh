@@ -4,7 +4,7 @@
 # Check for arch
 arch=$(arch)
 # use aarch64 on Apple M1
-if [[ "$(uname)" == "Darwin" && "${arch}" == "arm64" ]];then
+if [[ "$(uname)" == "Darwin" && "${arch}x" == "arm64x" ]];then
   echo "MacOS on Apple M1 Detected!"
   arch="aarch64"
 fi
@@ -18,10 +18,16 @@ for addon in "$@"; do
       exit 0
     fi
 
-    if [ "${archs}" == "" ];then
+    if [[ "${check}x" == "x" ]];then
+      check=--docker-hub-check
+    else 
+      check=""   
+    fi
+
+    if [[ "${archs}x" == "x" ]];then
       archs=$(jq -r '.arch // ["armv7", "armhf", "amd64", "aarch64", "i386"] | [.[] | "--" + .] | join(" ")' ${addon}/config.json)
     fi
     echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
 #    docker run  --rm --privileged -v ~/.docker:/root/.docker -v $(pwd)/${addon}:/data homeassistant/amd64-builder --docker-hub-check --${arch} -t /data 
-    docker run  --rm --privileged -v ~/.docker:/root/.docker -v '/var/run/docker.sock:/var/run/docker.sock' -v $(pwd)/${addon}:/data homeassistant/${arch}-builder --docker-hub-check ${archs} -t /data 
+    docker run  --rm --privileged -v ~/.docker:/root/.docker -v '/var/run/docker.sock:/var/run/docker.sock' -v $(pwd)/${addon}:/data homeassistant/${arch}-builder ${check} ${archs} -t /data 
 done

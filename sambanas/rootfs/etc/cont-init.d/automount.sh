@@ -14,13 +14,13 @@ elif bashio::config.has_value 'moredisks'; then
      bashio::log.warning "MoreDisk option found!"
 
      MOREDISKS=$(bashio::config 'moredisks')
-     mount /dev_ && \
+#     mount /dev_ && \
      bashio::log.info "More Disks mounting.. ${MOREDISKS}" && \
      for disk in $MOREDISKS 
      do
          bashio::log.info "Mount ${disk}"
          mkdir -p /$disk && \
-             mount -t auto /dev_/disk/by-label/$disk /$disk -o nosuid,relatime,noexec && \
+             mount -t auto /dev/disk/by-label/$disk /$disk -o nosuid,relatime,noexec && \
              cat /tmp/moredisk.smb.conf >> "${CONF}" && \
              sed -i "s|%%DISKNAME%%|${disk}|g" "${CONF}" && \
              bashio::log.info "Success!"   

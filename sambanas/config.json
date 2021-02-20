@@ -1,6 +1,6 @@
 {
     "name": "Samba NAS",
-    "version": "9.3.0-nas7",
+    "version": "9.3.0-nas8",
     "slug": "sambanas",
     "description": "Expose Home Assistant disc with SMB/CIFS",
     "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
@@ -51,8 +51,13 @@
     "udev": true,
     "usb": true,
     "host_dbus": true,
-    "device-tree": true,
     "kernel_modules": true,
-    "privileged": ["SYS_ADMIN", "SYS_RAWIO", "SYS_RESOURCE"],
-    "full_access": true
+    "privileged": ["SYS_ADMIN", "SYS_RAWIO", "SYS_RESOURCE", "SYS_MODULE"],
+
+    "full_access": true,
+    "devicetree": false,
+
+    "apparmor": true,
+    "host_ipc": true
+
 }

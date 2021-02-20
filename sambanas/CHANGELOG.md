@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.3.0-nas8
+- chore: Support new Supervisor/Hardware ( remov dev_ trick )
+- chore: Apparmor config optimization for broadcast.
+- fix: remove double % sign on HA report. (Bug #38)
 ## 9.3.0-nas7
 - Fix: config style for new Supervisor/Hardware
 - Added Apparmor config (thx to @alexbelgium) (Bug #35)
