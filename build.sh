@@ -1,12 +1,13 @@
- 
 #!/bin/bash
 
 # Check for arch
 arch=$(arch)
 # use aarch64 on Apple M1
-if [[ "$(uname)" == "Darwin" && "${arch}x" == "arm64x" ]];then
+if [[ "$(uname)x" == "Darwin" && "${arch}x" == "arm64x" ]]; then
   echo "MacOS on Apple M1 Detected!"
   arch="aarch64"
+elif [[ "${arch}x" == "x86_64x" ]]; then
+  arch="amd64"  
 fi
 
 echo "Running for arch ${arch}"

@@ -6,7 +6,7 @@
 - fix: remove double % sign on HA report. (Bug #38)
 ## 9.3.0-nas7
 - Fix: config style for new Supervisor/Hardware
-- Added Apparmor config (thx to @alexbelgium) (Bug #35)
+- Added Apparmor config (PR #36 by @alexbelgium) (Bug #35)
 
 ## 9.3.0-nas6
 - Fix: Ignore MQTT service if the given HA url is invalid.
