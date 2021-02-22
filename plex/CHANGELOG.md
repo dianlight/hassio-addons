@@ -1,12 +1,12 @@
 # Changelog 
 
-## 2.4.2-dht2
+## 2.4.2-dht3
 - Support Core 2021.2.3 [#40](https://github.com/dianlight/hassio-addons/issues/40)
 - :arrow_up: Updated Plex Media Server to 1.21.3.4046-3c1c83ba4
 
 ## 2.4.2-dht2
-
 - Option to chenge cifs version [#21](https://github.com/dianlight/hassio-addons/issues/21)
+
 ## 2.4.2-dht1
 
 - :arrow_up: Updated Plex Media Server to 1.21.1.3876-3c3adfcb4
@@ -15,7 +15,7 @@
 
 [changelog_2.4.2]: https://github.com/hassio-addons/addon-plex/compare/v2.4.0...v2.4.2
 
-## 2.4.0-dht1
+## 2.4.0-dht1a
 
 - :arrow_up: Updated Plex Media Server to 1.20.2.3402-0fec14d92
 
