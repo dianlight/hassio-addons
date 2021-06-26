@@ -49,8 +49,8 @@
     "5300/tcp": "TCP communication port"
   },
   "devices":[
-      "/dev/spidev0.0:rwm",
-      "/dev/mem:rw"
+      "/dev/spidev0.0",
+      "/dev/mem"
   ],
   "udev": true,
   "uart": true,
