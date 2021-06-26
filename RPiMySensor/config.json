@@ -6,7 +6,7 @@
   "url": "https://github.com/dianlight/hassio-addons/tree/master/RPiMySensor",
   "arch": ["armhf", "armv7"],
   "_image": "dianlight/rpi-mysensor-gw-{arch}",
-  "startup": "before",
+  "startup": "services",
   "boot": "auto",
   "options": {
     "rebuild": false,  
@@ -49,11 +49,11 @@
     "5300/tcp": "TCP communication port"
   },
   "devices":[
-      "/dev/spidev0.0:/dev/spidev0.0:rwm",
-      "/dev/mem:/dev/mem:rw"
+      "/dev/spidev0.0:rwm",
+      "/dev/mem:rw"
   ],
   "udev": true,
-  "auto_uart": true,
+  "uart": true,
   "privileged": [
       "SYS_RAWIO",
       "SYS_RESOURCE",
