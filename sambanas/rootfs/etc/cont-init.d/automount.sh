@@ -2,7 +2,7 @@
 # ==============================================================================
 # Mounting external HD and modify the smb.conf
 # ==============================================================================
-readonly CONF="/etc/samba/smb.conf"
+readonly CONF="/usr/share/tempio/smb.gtpl"
 declare moredisks
 
 # Mount external drive
@@ -21,7 +21,7 @@ elif bashio::config.has_value 'moredisks'; then
          bashio::log.info "Mount ${disk}"
          mkdir -p /$disk && \
              mount -t auto /dev/disk/by-label/$disk /$disk -o nosuid,relatime,noexec && \
-             cat /tmp/moredisk.smb.conf >> "${CONF}" && \
+             cat /tmp/moredisk.smb.gtpl >> "${CONF}" && \
              sed -i "s|%%DISKNAME%%|${disk}|g" "${CONF}" && \
              bashio::log.info "Success!"   
      done || \

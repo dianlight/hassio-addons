@@ -10,8 +10,8 @@
    fruit:wipe_intentionally_left_blank_rfork = yes 
    fruit:delete_empty_adfiles = yes
 
-   netbios name = %%NAME%%
-   workgroup = %%WORKGROUP%%
+   netbios name = {{ env "HOSTNAME" }}
+   workgroup = {{ .workgroup }}
    server string = Samba NAS HomeAssistant config
 
    security = user
@@ -23,77 +23,74 @@
    log level = 1
 
    bind interfaces only = yes
-   interfaces = %%INTERFACE%%
-   hosts allow = %%ALLOW_HOSTS%%
+   interfaces = {{ .interface }}
+   hosts allow = {{ .allow_hosts | join " " }}
 
    idmap config * : backend = tdb
    idmap config * : range = 3000-7999
 
-%%COMPATIBILITY_MODE%%
+   {{ if .compatibility_mode }}
+   client min protocol = NT1
+   server min protocol = NT1
+   {{ end }}
 
 [config]
    browseable = yes
    writeable = yes
    path = /config
 
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
-
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 [addons]
    browseable = yes
    writeable = yes
    path = /addons
-
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
 [ssl]
    browseable = yes
    writeable = yes
    path = /ssl
 
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
-
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 [share]
    browseable = yes
    writeable = yes
    path = /share
-
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
 [backup]
    browseable = yes
    writeable = yes
    path = /backup
 
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
-
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 [media]
    browseable = yes
    writeable = yes
    path = /media
-
-   valid users = %%USERNAME%%
+   valid users = {{ .username }}
    force user = root
    force group = root
-   veto files = %%VETO_FILES%%
-   delete veto files = %%DELETE_VETO_FILES%%
-
+   veto files = /{{ .veto_files | join "/" }}/
+   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+   

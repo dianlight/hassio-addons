@@ -1,5 +1,16 @@
 # Changelog
 
+## 9.5.1-nas
+- [Full Changelog from official addon 9.5.1][changelog_9.5.1]
+- [Full Changelog from official addon 9.5.0][changelog_9.5.0]
+- [Full Changelog from official addon 9.4.0][changelog_9.4.0]
+- Update options schema for passwords (9.3.1)
+
+[changelog_9.5.1]: https://github.com/home-assistant/addons/pull/2070
+[changelog_9.5.0]: https://github.com/home-assistant/addons/pull/2031
+[changelog_9.4.0]: https://github.com/home-assistant/addons/pull/2023
+[changelog_9.3.1]: https://github.com/home-assistant/hassio-addons/pull/1569
+
 ## 9.3.0-nas8
 - chore: Support new Supervisor/Hardware ( remov dev_ trick )
 - chore: Apparmor config optimization for broadcast.
