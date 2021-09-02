@@ -1,14 +1,26 @@
 # Changelog
 
+## 9.5.1-nas1
+
+### ✨ Features 
+
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉 
+
+### 🏗 Chore
+
+- Remove Private Key from log 
+
 ## 9.5.1-nas
 
 ### ✨ Features 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](/DOCS.md)) 🎉 🎉 🎉 
+
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉 
 
 ### 📚 Documentation
 - Correct and update DOCS.md
 
 ### 🏗 Chore
+
 - [Full Changelog from official addon 9.5.1][changelog_9.5.1]
 - [Full Changelog from official addon 9.5.0][changelog_9.5.0]
 - [Full Changelog from official addon 9.4.0][changelog_9.4.0]
