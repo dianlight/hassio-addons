@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.5.1-nas (devel)
+## 9.5.1-nas
 
 ### ✨ Features 
 - 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](/DOCS.md)) 🎉 🎉 🎉 
