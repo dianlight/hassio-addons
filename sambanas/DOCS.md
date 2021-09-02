@@ -15,27 +15,49 @@ Follow these steps to get the add-on installed on your system:
 3. Start the add-on.
 4. Check the add-on log output to see the result.
 
+## Connection
+
+If you are on Windows you use `\\<IP_ADDRESS>\`, if you are on MacOS you use `smb://<IP_ADDRESS>` to connect to the shares.
+
+This addon exposes the following directories over smb (samba):
+
+Directory | Description
+-- | --
+`addons` | This is for your local add-ons.
+`backup` | This is for your snapshots.
+`config` | This is for your Home Assistant configuration.
+`media` | This is for local media files.
+`share` | This is for your data that is shared between add-ons and Home Assistant.
+`ssl` | This is for your SSL certificates.
+
 ## Configuration
 
-Add-on configuration:
+This is an example of a configuration. ***DO NOT USE*** without making the necessary changes especially for the username, password, secret and moredisk part.
+Fields between `<` and `>` indicate values that are omitted and need to be changed.
 
 ```yaml
 workgroup: WORKGROUP
 username: Hassio
 password: '<Your secret password>'
-interface: ''
 allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
   - 192.168.0.0/16
 moredisks:
-  - DISKLABEL1
-  - DISKLABEL2
+  - <DISKLABEL1>
+  - <DISKLABEL2>
 veto_files:
   - "._*"
   - ".DS_Store"
   - Thumbs.db
 compatibility_mode: false  
+medialibrary:
+  enable: true
+  ssh_private_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    <Your super secret private key in base64 form. As form .ssh/id_rsa file>
+    -----END RSA PRIVATE KEY-----
+
 ```
 
 ### Option: `workgroup` (required)
@@ -50,12 +72,6 @@ The username you would like to use to authenticate with the Samba server.
 
 The password that goes with the username configured for authentication.
 
-### Option: `interface` (required)
-
-The network interface Samba should listen on for incoming connections.
-This option should only be used in advanced cases. In general, setting this
-option is not needed.
-
 ### Option: `allow_hosts` (required)
 
 List of hosts/networks allowed to access the shared folders.
@@ -69,11 +85,31 @@ The following Fs are supported:
 - [X] ext3/4
 - [X] fat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 
-Future Fs support:
-- Fuse based fs
-  - [ ] exFat 
-  - [ ] fat32 
-  - [ ] ntfs 
+Unsupported Fs:
+- All Fuse based FS like exFat, fat32, ntfs. Samba don't like fuse.
+### Option: `medialibrary` (optional) ***Exteprimental***
+
+Enables mounting of `moredisk` by the host and not by the container. The disk then becomes visible within the "Media Browser" and the /media directory of each addon.
+
+NOTE<sup>1</sup>: It works only and only on HassOS on other hosts it is not tested and most likely it does not work.
+
+NOTE<sup>2</sup>: It is necessary to enable the access to the SSH port 22222 of the host.   Read the HassOS [Developers Documentation](https://developers.home-assistant.io/docs/operating-system/debugging/#home-assistant-operating-system) or use the [Configutarion Addon](https://community.home-assistant.io/t/add-on-hassos-ssh-port-22222-configurator/264109).
+
+NOTE<sup>3</sup>: It is necessary to pass the SSH private key for root access to the host. Be sure to use secrets files to protect the key from people who don't have access to it. 
+
+NOTE<sup>4</sup>: If the disk in the "Media Browser" is seen empty try restarting Homeassitant.
+ 
+**WARNING: The feature is considered experimental and may cause problems or data loss.**
+
+#### Option: `enable` (optional)
+
+Enable/Disable host mounting option.
+
+Defaults to `false`.
+
+#### Option: `ssh_private_key` (optional)
+
+The ***PRIVATE*** key for SSH access to the host on port 22222.
 
 ### Option: `veto_files` (optional)
 
@@ -141,6 +177,12 @@ Setting this option to `true` will disable the delete of MQTT discovery messages
 Defaults to `false`.
 
 ## Support
+
+### Common problems
+
+* ***The disk does not mount*** : check that the Label of the partition of the disk you want to mount is case-sensitive with the label indicated in the `moredisk` parameter.
+
+* ***In the menu `Media Browser` the folder with the name of the disk is empty*** : it happens when the homeassistant server starts before the add-on. Restart HomeAssitant from menu `Configuration->Server Controls->Server management -> RESTART`
 <!--
 Got questions?
 

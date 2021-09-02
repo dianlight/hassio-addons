@@ -1,42 +1,71 @@
 # Changelog
 
+## 9.5.1-nas
+
+### ✨ Features 
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](/DOCS.md)) 🎉 🎉 🎉 
+
+### 📚 Documentation
+- Correct and update DOCS.md
+
+### 🏗 Chore
+- [Full Changelog from official addon 9.5.1][changelog_9.5.1]
+- [Full Changelog from official addon 9.5.0][changelog_9.5.0]
+- [Full Changelog from official addon 9.4.0][changelog_9.4.0]
+- Update options schema for passwords (Official Addon 9.3.1)
+
+[changelog_9.5.1]: https://github.com/home-assistant/addons/pull/2070
+[changelog_9.5.0]: https://github.com/home-assistant/addons/pull/2031
+[changelog_9.4.0]: https://github.com/home-assistant/addons/pull/2023
+[changelog_9.3.1]: https://github.com/home-assistant/hassio-addons/pull/1569
+
 ## 9.3.0-nas8
+
 - chore: Support new Supervisor/Hardware ( remov dev_ trick )
 - chore: Apparmor config optimization for broadcast.
 - fix: remove double % sign on HA report. (Bug #38)
+
 ## 9.3.0-nas7
+
 - Fix: config style for new Supervisor/Hardware
 - Added Apparmor config (PR #36 by @alexbelgium) (Bug #35)
 
 ## 9.3.0-nas6
+
 - Fix: Ignore MQTT service if the given HA url is invalid.
 
 ## 9.3.0-nas5
+
 - Disable MQTT integration in no MQTT service is found
 
 ## 9.3.0-nas4
+
 - Remove unnecessary devicetree request (Bug #13)
 
 ## 9.3.0-nas3
+
 - Fix idmap range not specified warning in log
 - MQTT sensor improvement:
-    - Option to disable MQTT integration
-    - Options to control MQTT autodiscovery 
-    - Added device data to HA discovery messages 
-    - Better Device\Sensors tree
-    - Autoremove discovery on disk unmount
-    - Fix MQTT unique_id to allow HA interface management
+  - Option to disable MQTT integration
+  - Options to control MQTT autodiscovery
+  - Added device data to HA discovery messages
+  - Better Device\Sensors tree
+  - Autoremove discovery on disk unmount
+  - Fix MQTT unique_id to allow HA interface management
 
 ## 9.3.0-nas2
+
 - Fix autobuild script for empty directories
 - Removed unused debug.
 
 ## 9.3.0-nas1
+
 - Bugfixes
 - Expose NAS disk status on MQTT (60s refresh)
 - Update Samba to 4.12.7
 
 ## 9.3.0-nas
+
 - [Full Changelog from official addon][changelog_9.3.0]
 - Support new media folder
 - Update Samba to 4.12.6
@@ -45,6 +74,7 @@
 [changelog_9.3.0]: https://github.com/home-assistant/hassio-addons/pull/1569
 
 ## 9.2.0-nas
+
 - [Based on samba addon 9.2.0]
 - Pin base image version
 - Rewrite add-on onto S6 Overlay
@@ -56,15 +86,18 @@
 ## 9.0-nas
 
 ### Added
+
 - Add devfs support
 - Add Time Machine support ( share disk can be used for Time Machine backup )
 - Add disk/by-label automount and autoshare
 - Add mDNS service registration
 
 ### Security
+
 - Elevated minimal supported protocol to SMB2
 
 ### Changed
+
 - [Based on samba addon 9.0](https://github.com/home-assistant/hassio-addons/tree/master/samba)
 
 ## 9.0

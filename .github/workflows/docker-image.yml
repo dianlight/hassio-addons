@@ -24,7 +24,9 @@ jobs:
       - name: Build the Docker image Plex
         run: sudo ./build.sh addon-plex/plex 
       - name: Build the Docker image Samba
-        run:  sudo ./build.sh sambanas   
+        run:  |
+          env
+          sudo ./build.sh sambanas   
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:

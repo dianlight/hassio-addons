@@ -1,63 +1,77 @@
 {
-    "name": "Samba NAS",
-    "version": "9.3.0-nas8",
-    "slug": "sambanas",
-    "description": "Expose Home Assistant disc with SMB/CIFS",
-    "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
-    "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
-    "startup": "services",
-    "init": false,
-    "host_network": true,
-    "map": ["config:rw", "ssl:rw", "addons:rw", "share:rw", "backup:rw", "media:rw"],
-    "options": {
-        "workgroup": "WORKGROUP",
-        "username": "homeassistant",
-        "password": null,
-        "interface": "",
-        "allow_hosts": [
-            "10.0.0.0/8",
-            "172.16.0.0/12",
-            "192.168.0.0/16",
-            "fe80::/10"
-        ],
-        "moredisks": ["<PARTITION LABEL>"],
-        "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"],
-        "compatibility_mode": false,
-        "autodiscovery": {}
+  "name": "Samba NAS",
+  "version": "9.5.1-nas",
+  "slug": "sambanas",
+  "description": "Expose Home Assistant disc with SMB/CIFS",
+  "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
+  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "startup": "services",
+  "boot": "auto",
+  "init": false,
+  "hassio_api": true,
+  "host_network": true,
+  "map": [
+    "config:rw",
+    "ssl:rw",
+    "addons:rw",
+    "share:rw",
+    "backup:rw",
+    "media:rw"
+  ],
+  "options": {
+    "workgroup": "WORKGROUP",
+    "username": "homeassistant",
+    "password": null,
+    "allow_hosts": [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16",
+      "fe80::/10"
+    ],
+    "moredisks": ["<PARTITION LABEL>"],
+    "medialibrary": {
+      "enable": false,
+      "ssh_private_key": "<YOU SUPER SECRET PRIVATE KEY>"
     },
-    "schema": {
-        "workgroup": "str",
-        "username": "str",
-        "password": "str",
-        "interface": "str",
-        "moredisks": ["str"],
-        "allow_hosts": ["str"],
-        "veto_files": ["str"],
-        "compatibility_mode": "bool?",
-        "mqtt_enable": "bool?",
-        "mqtt_host": "str?",
-        "mqtt_username": "str?",
-        "mqtt_password": "str?",
-        "mqtt_port": "str?",
-        "mqtt_topic": "str?",
-        "autodiscovery": {
-            "disable_discovery": "bool?",
-            "disable_persistent": "bool?",
-            "disable_autoremove": "bool?"
-        }
+    "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"],
+    "compatibility_mode": false,
+    "autodiscovery": {}
+  },
+  "schema": {
+    "workgroup": "str",
+    "username": "str",
+    "password": "password",
+    "moredisks": ["str"],
+    "medialibrary": {
+      "enable": "bool?",
+      "ssh_private_key": "password?"
     },
-    "image": "dianlight/{arch}-addon-sambanas",
-    "services": ["mqtt:want"],
-    "udev": true,
-    "usb": true,
-    "host_dbus": true,
-    "kernel_modules": true,
-    "privileged": ["SYS_ADMIN", "SYS_RAWIO", "SYS_RESOURCE", "SYS_MODULE"],
+    "allow_hosts": ["str"],
+    "veto_files": ["str"],
+    "compatibility_mode": "bool?",
+    "mqtt_enable": "bool?",
+    "mqtt_host": "str?",
+    "mqtt_username": "str?",
+    "mqtt_password": "password?",
+    "mqtt_port": "str?",
+    "mqtt_topic": "str?",
+    "autodiscovery": {
+      "disable_discovery": "bool?",
+      "disable_persistent": "bool?",
+      "disable_autoremove": "bool?"
+    }
+  },
+  "image": "dianlight/{arch}-addon-sambanas",
+  "services": ["mqtt:want"],
+  "udev": true,
+  "usb": true,
+  "host_dbus": true,
+  "kernel_modules": true,
+  "privileged": ["SYS_ADMIN", "SYS_RAWIO", "SYS_RESOURCE", "SYS_MODULE"],
 
-    "full_access": true,
-    "devicetree": false,
+  "full_access": true,
+  "devicetree": false,
 
-    "apparmor": true,
-    "host_ipc": true
-
+  "apparmor": true,
+  "host_ipc": true
 }
