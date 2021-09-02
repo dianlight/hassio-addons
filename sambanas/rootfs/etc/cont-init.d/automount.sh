@@ -42,7 +42,7 @@ elif bashio::config.has_value 'moredisks'; then
                ssh_private_key=$(bashio::config 'medialibrary.ssh_private_key')
                mkdir -p /root/.ssh
 
-               bashio::log.info "SSH Key: ${ssh_private_key}"
+               #bashio::log.info "SSH Key: ${ssh_private_key}"
                echo "${ssh_private_key}" > /root/.ssh/id_rsa
                #cat /root/.ssh/id_rsa
                chmod ag-rw /root/.ssh/id_rsa
