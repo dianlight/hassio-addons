@@ -35,16 +35,28 @@ fi
 while true; do
     # Create status message
     status="{\"1\":\"1\"";
-    for disk in config addons ssl share backup media $moredisks
+    for disk in config addons ssl share backup media
     do
-    #    bashio::log.info "Inspecting ${disk}"
+        #bashio::log.info "Inspecting ${disk}"
         mapfile -t fsdata < <(df /$disk)
         fsd=(${fsdata[1]})
         status="$status, \"size_${disk,,}\":\"${fsd[1]}\""
         status="$status, \"used_${disk,,}\":\"${fsd[2]}\""
         status="$status, \"available_${disk,,}\":\"${fsd[3]}\""
         status="$status, \"use_${disk,,}\":\"${fsd[4]%?}\""
-    done
+    done    
+    if [ -z "$moredisks" ]; then 
+        for disk in $moredisks
+        do
+            #bashio::log.info "Inspecting /media/${disk}"
+            mapfile -t fsdata < <(df /media/$disk)
+            fsd=(${fsdata[1]})
+            status="$status, \"size_${disk,,}\":\"${fsd[1]}\""
+            status="$status, \"used_${disk,,}\":\"${fsd[2]}\""
+            status="$status, \"available_${disk,,}\":\"${fsd[3]}\""
+            status="$status, \"use_${disk,,}\":\"${fsd[4]%?}\""
+        done
+    fi
     status="$status}"
     # Send status message
     mosquitto_pub -t "homeassistant/sensor/${topic}/state" -m "$status"

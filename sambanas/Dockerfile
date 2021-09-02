@@ -8,32 +8,33 @@ ENV LANG C.UTF-8
 ARG BUILD_ARCH
 ARG CLI_VERSION
 RUN apk add --no-cache \
-        samba-common-tools \
-        samba-server \
-        dbus \
-        exfat-utils \
-        fuse \
-        fuse-exfat \
-        fuse-exfat-utils \
-        udev \
-        hwids-udev \
-        device-mapper-udev \
-        attr \
-        e2fsprogs \
-        util-linux \
-        e2fsprogs-extra \
-        avahi \
-        avahi-compat-libdns_sd \
-        avahi-tools \
-        curl \
-        mosquitto-clients \
+    samba-common-tools \
+    samba-server \
+    dbus \
+    exfat-utils \
+    fuse \
+    fuse-exfat \
+    fuse-exfat-utils \
+    udev \
+    hwids-udev \
+    device-mapper-udev \
+    attr \
+    e2fsprogs \
+    util-linux \
+    e2fsprogs-extra \
+    avahi \
+    avahi-compat-libdns_sd \
+    avahi-tools \
+    curl \
+    mosquitto-clients \
+    openssh-client \
     \
     && mkdir -p /var/lib/samba \
     && touch \
-        /etc/samba/lmhosts \
-        /var/lib/samba/account_policy.tdb \
-        /var/lib/samba/registry.tdb \
-        /var/lib/samba/winbindd_idmap.tdb \
+    /etc/samba/lmhosts \
+    /var/lib/samba/account_policy.tdb \
+    /var/lib/samba/registry.tdb \
+    /var/lib/samba/winbindd_idmap.tdb \
     \    
     && curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 

@@ -29,6 +29,10 @@
       "fe80::/10"
     ],
     "moredisks": ["<PARTITION LABEL>"],
+    "medialibrary": {
+      "enable": false,
+      "ssh_private_key": "<YOU SUPER SECRET PRIVATE KEY>"
+    },
     "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"],
     "compatibility_mode": false,
     "autodiscovery": {}
@@ -39,8 +43,8 @@
     "password": "password",
     "moredisks": ["str"],
     "medialibrary": {
-      "autodetect": "bool?",
-      "ssh_private_key": "str?"
+      "enable": "bool?",
+      "ssh_private_key": "password?"
     },
     "allow_hosts": ["str"],
     "veto_files": ["str"],
@@ -48,7 +52,7 @@
     "mqtt_enable": "bool?",
     "mqtt_host": "str?",
     "mqtt_username": "str?",
-    "mqtt_password": "str?",
+    "mqtt_password": "password?",
     "mqtt_port": "str?",
     "mqtt_topic": "str?",
     "autodiscovery": {

@@ -1,7 +1,7 @@
 [%%DISKNAME%%]
    browseable = yes
    writeable = yes
-   path = /%%DISKNAME%%
+   path = /media/%%DISKNAME%%
 
    valid users = {{ .username }}
    force user = root
