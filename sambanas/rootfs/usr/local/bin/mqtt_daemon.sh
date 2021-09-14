@@ -45,7 +45,7 @@ while true; do
         status="$status, \"available_${disk,,}\":\"${fsd[3]}\""
         status="$status, \"use_${disk,,}\":\"${fsd[4]%?}\""
     done    
-    if [ -z "$moredisks" ]; then 
+    if [ ! -z "$moredisks" ]; then 
         for disk in $moredisks
         do
             #bashio::log.info "Inspecting /media/${disk}"
