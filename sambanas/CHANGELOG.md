@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.5.1-nas 2
+## 9.5.1-nas2
 
 ### 🩹 BugFix
 
