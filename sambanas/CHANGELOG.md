@@ -1,5 +1,11 @@
 # Changelog
 
+## 9.5.1-nas2
+
+### 🩹 BugFix
+
+- Fixed Bug #54 ( MQTT Available missing for some disks )
+
 ## 9.5.1-nas1
 
 ### ✨ Features 
