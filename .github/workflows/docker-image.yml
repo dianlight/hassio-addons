@@ -21,10 +21,24 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build the Docker image Plex
-        run: sudo ./build.sh addon-plex/plex 
-      - name: Build the Docker image Samba
-        run: sudo ./build.sh sambanas   
+#      - name: Build the Docker image Plex
+#        run: sudo ./build.sh addon-plex/plex 
+#      - name: Build the Docker image Samba
+#        run: sudo ./build.sh sambanas   
+      - name: Publish Plex Addon
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --all \
+            --target addon-plex/plex \
+            --docker-hub dianlight     
+      - name: Publish SambaNAS Addon
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --all \
+            --target sambanas \
+            --docker-hub dianlight     
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:
