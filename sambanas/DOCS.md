@@ -46,6 +46,7 @@ allow_hosts:
 moredisks:
   - <DISKLABEL1>
   - <DISKLABEL2>
+  - <id:DISKID1>
 veto_files:
   - "._*"
   - ".DS_Store"
@@ -79,9 +80,10 @@ List of hosts/networks allowed to access the shared folders.
 ### Option: `moredisks` (optional)
 
 ***Protection Mode must be disabled to allow this function***
-List of disks or partitions label to search and share. 
+List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:` (WARN: write id prefix in lowercase only!)
 ***NOTE: partitions label with spaces are NOT SUPPORTED***
 The following Fs are supported:
+
 - [X] ext3/4
 - [X] fat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 

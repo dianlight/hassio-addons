@@ -1,3 +1,4 @@
+# Begin Config For %%DISKNAME%%
 [%%DISKNAME%%]
    browseable = yes
    writeable = yes
@@ -12,3 +13,4 @@
    vfs objects = catia fruit streams_xattr
    fruit:aapl = yes
    fruit:time machine = yes
+# End Config For %%DISKNAME%%

@@ -46,7 +46,7 @@ while true; do
         status="$status, \"use_${disk,,}\":\"${fsd[4]%?}\""
     done    
     if [ ! -z "$moredisks" ]; then 
-        for disk in $moredisks
+        for disk in $(cat /tmp/local_mount)
         do
             #bashio::log.info "Inspecting /media/${disk}"
             mapfile -t fsdata < <(df /media/$disk)

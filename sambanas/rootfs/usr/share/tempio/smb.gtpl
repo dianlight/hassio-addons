@@ -84,6 +84,7 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+
 [media]
    browseable = yes
    writeable = yes
@@ -93,4 +94,5 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-   
+
+# MoreDisk Options
