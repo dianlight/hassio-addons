@@ -1,5 +1,16 @@
 # Changelog
 
+## 9.5.1-nas3
+
+### ✨ Features
+
+- List all available Labeled and Id disks on startup. Useful for configuration
+- Support mount by disk Id as label (Format `id:<diskid>`)
+
+### 🩹 BugFix
+
+- Fixed Bug #58 ( Latest update doesn't allow multiple mounts )
+
 ## 9.5.1-nas2
 
 ### 🩹 BugFix
@@ -8,21 +19,22 @@
 
 ## 9.5.1-nas1
 
-### ✨ Features 
+### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉 
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉
 
 ### 🏗 Chore
 
-- Remove Private Key from log 
+- Remove Private Key from log
 
 ## 9.5.1-nas
 
-### ✨ Features 
+### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉 
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉
 
 ### 📚 Documentation
+
 - Correct and update DOCS.md
 
 ### 🏗 Chore

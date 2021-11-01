@@ -30,5 +30,5 @@ for addon in "$@"; do
     fi
     echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
 #    docker run  --rm --privileged -v ~/.docker:/root/.docker -v $(pwd)/${addon}:/data homeassistant/amd64-builder --docker-hub-check --${arch} -t /data 
-    docker run  --rm --privileged -v ~/.docker:/root/.docker -v '/var/run/docker.sock:/var/run/docker.sock' -v $(pwd)/${addon}:/data homeassistant/${arch}-builder ${check} ${archs} -t /data 
+    docker run  --rm --privileged -v ~/.docker:/root/.docker -v '/var/run/docker.sock:/var/run/docker.sock' -v $(pwd)/${addon}:/data homeassistant/${arch}-builder ${check} ${archs} --docker-user dianlight --docker-password 04d61c58-98e2-40c8-9706-39e3d56d798c -t /data 
 done
