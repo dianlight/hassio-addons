@@ -1,6 +1,6 @@
 {
   "name": "Samba NAS",
-  "version": "9.5.1-nas3",
+  "version": "9.5.1-nas4",
   "slug": "sambanas",
   "description": "Expose Home Assistant disc with SMB/CIFS",
   "url": "https://github.com/dianlight/hassio-addons/tree/master/sambanas",
@@ -29,6 +29,7 @@
       "fe80::/10"
     ],
     "moredisks": ["<PARTITION LABEL>"],
+    "available_disks_log": false,
     "medialibrary": {
       "enable": false,
       "ssh_private_key": "<YOU SUPER SECRET PRIVATE KEY>"
@@ -42,6 +43,7 @@
     "username": "str",
     "password": "password",
     "moredisks": ["str"],
+    "available_disks_log": "bool?",
     "medialibrary": {
       "enable": "bool?",
       "ssh_private_key": "password?"

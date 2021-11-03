@@ -70,8 +70,10 @@ elif bashio::config.has_value 'moredisks'; then
      fi
 
      ## List available Disk with Labels and Id 
-     LABELS=$(ls /dev/disk/by-label | grep -v hassos )
-     bashio::log.info "Available Disk Labels:\n ${LABELS}"
+     if bashio::config.true 'available_disks_log' ; then
+          LABELS=$(ls /dev/disk/by-label | grep -v hassos || true )
+          bashio::log.info "Available Disk Labels:\n ${LABELS}"
+     fi
 
      MOREDISKS=$(bashio::config 'moredisks')
      bashio::log.info "More Disks mounting.. ${MOREDISKS}" && \

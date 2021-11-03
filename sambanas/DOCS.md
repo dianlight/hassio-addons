@@ -88,7 +88,13 @@ The following Fs are supported:
 - [X] fat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 
 Unsupported Fs:
+
 - All Fuse based FS like exFat, fat32, ntfs. Samba don't like fuse.
+
+### Oprion `available_disks_log` (optional)
+
+Enable the log of found labeled disk. Usefull for initial configuration.
+
 ### Option: `medialibrary` (optional) ***Exteprimental***
 
 Enables mounting of `moredisk` by the host and not by the container. The disk then becomes visible within the "Media Browser" and the /media directory of each addon.
