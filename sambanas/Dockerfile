@@ -28,6 +28,7 @@ RUN apk add --no-cache \
     curl \
     mosquitto-clients \
     openssh-client \
+    figlet \
     \
     && mkdir -p /var/lib/samba \
     && touch \

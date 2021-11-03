@@ -1,5 +1,16 @@
 # Changelog
 
+## 9.5.1-nas4
+
+### ✨ Features
+
+- Lovely initial Banner!
+- New Option `available_disks_log` to turn on/off the list of available Labeled disk in log
+
+### 🩹 BugFix
+
+- Fixed Bug #60 ( No access after update to Samba NAS 9.5.1-nas3 )
+
 ## 9.5.1-nas3
 
 ### ✨ Features
