@@ -28,6 +28,14 @@
       "192.168.0.0/16",
       "fe80::/10"
     ],
+    "folders": {
+      "config": false,
+      "addons": false,
+      "ssl": false,
+      "share": false,
+      "backup": false,
+      "media": true
+    },
     "moredisks": ["<PARTITION LABEL>"],
     "available_disks_log": false,
     "medialibrary": {
@@ -44,6 +52,14 @@
     "password": "password",
     "moredisks": ["str"],
     "available_disks_log": "bool?",
+    "folders": {
+      "config": "bool?",
+      "addons": "bool?",
+      "ssl": "bool?",
+      "share": "bool?",
+      "backup": "bool?",
+      "media": "bool?"
+    },
     "medialibrary": {
       "enable": "bool?",
       "ssh_private_key": "password?"
