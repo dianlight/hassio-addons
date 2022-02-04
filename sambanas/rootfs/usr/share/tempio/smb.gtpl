@@ -34,6 +34,7 @@
    server min protocol = NT1
    {{ end }}
 
+{{ if .folders.config }}
 [config]
    browseable = yes
    writeable = yes
@@ -44,6 +45,9 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+{{ end }}
+
+{{ if .folders.addons }}
 [addons]
    browseable = yes
    writeable = yes
@@ -53,7 +57,9 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+{{ end }}
 
+{{ if .folders.ssl }}
 [ssl]
    browseable = yes
    writeable = yes
@@ -64,6 +70,9 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+{{ end }}
+
+{{ if .folders.share }}
 [share]
    browseable = yes
    writeable = yes
@@ -73,7 +82,9 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+{{ end }}
 
+{{ if .folders.backup }}
 [backup]
    browseable = yes
    writeable = yes
@@ -84,7 +95,9 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+{{ end }}
 
+{{ if .folders.media }}
 [media]
    browseable = yes
    writeable = yes
@@ -94,5 +107,5 @@
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-
+{{ end }}
 # MoreDisk Options
