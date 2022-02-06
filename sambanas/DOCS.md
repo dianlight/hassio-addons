@@ -39,6 +39,13 @@ Fields between `<` and `>` indicate values that are omitted and need to be chang
 workgroup: WORKGROUP
 username: Hassio
 password: '<Your secret password>'
+folders:
+  config: false
+  addons: false
+  ssl: false
+  share: false
+  backup: false
+  media: true
 allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
@@ -72,6 +79,12 @@ The username you would like to use to authenticate with the Samba server.
 ### Option: `password` (required)
 
 The password that goes with the username configured for authentication.
+
+### Option: `folders` (optional)
+
+Defines with Home assistant folder should be exposed. By default, to avoid leaking your sensitive informations (like SSL certificates or secrets) only the media folder is shared.
+
+If the folders key is undefined, all folders are exposed.
 
 ### Option: `allow_hosts` (required)
 
