@@ -34,7 +34,7 @@
    server min protocol = NT1
    {{ end }}
 
-{{ if .folders.config }}
+{{ if (not .folder) or .folders.config }}
 [config]
    browseable = yes
    writeable = yes
@@ -47,7 +47,7 @@
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 {{ end }}
 
-{{ if .folders.addons }}
+{{ if (not .folder) or .folders.addons }}
 [addons]
    browseable = yes
    writeable = yes
@@ -59,7 +59,7 @@
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 {{ end }}
 
-{{ if .folders.ssl }}
+{{ if (not .folder) or .folders.ssl }}
 [ssl]
    browseable = yes
    writeable = yes
@@ -72,7 +72,7 @@
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 {{ end }}
 
-{{ if .folders.share }}
+{{ if (not .folder) or .folders.share }}
 [share]
    browseable = yes
    writeable = yes
@@ -84,7 +84,7 @@
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 {{ end }}
 
-{{ if .folders.backup }}
+{{ if (not .folder) or .folders.backup }}
 [backup]
    browseable = yes
    writeable = yes
@@ -97,7 +97,7 @@
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 {{ end }}
 
-{{ if .folders.media }}
+{{ if (not .folder) or .folders.media }}
 [media]
    browseable = yes
    writeable = yes
