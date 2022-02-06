@@ -82,7 +82,7 @@ The password that goes with the username configured for authentication.
 
 ### Option: `folders` (optional)
 
-Defines with Home assistant folder should be exposed. By default, to avoid leaking your sensitive informations (like SSL certificates or secrets) only the media folder is shared.
+Defines with Home assistant folder should be exposed. With the default configuration, to avoid leaking your sensitive informations (like SSL certificates or secrets), only the media folder is shared.
 
 If the folders key is undefined, all folders are exposed.
 
