@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     fuse \
     fuse-exfat \
     fuse-exfat-utils \
+    btrfs-progs \
     udev \
     hwids-udev \
     device-mapper-udev \
