@@ -41,7 +41,6 @@ jobs:
             --all \
             --target sambanas \
             --docker-hub dianlight 
-            --env-file "${{ runner.temp }}/env_file" \
 
       - name: pull-request
         uses: repo-sync/pull-request@v2
