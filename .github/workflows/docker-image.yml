@@ -47,4 +47,6 @@ jobs:
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:
+          pr_title: "Releasing ${{ github.ref }} into master"
+          pr_body: ":crown: *An automated PR*"           
           github_token: ${{ secrets.GITHUB_TOKEN }}       
