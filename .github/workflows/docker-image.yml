@@ -29,6 +29,7 @@ jobs:
         with:
           args: |
             --all \
+            --docker-hub-check \
             --target addon-plex/plex \
             --docker-hub dianlight     
 
@@ -39,6 +40,7 @@ jobs:
         with:
           args: |
             --all \
+            --docker-hub-check \
             --target sambanas \
             --docker-hub dianlight 
 
