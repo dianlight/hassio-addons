@@ -23,7 +23,7 @@
    log level = 1
 
    bind interfaces only = yes
-   interfaces = {{ .interface }}
+   interfaces = {{ .interfaces | join " " }}
    hosts allow = {{ .allow_hosts | join " " }}
 
    idmap config * : backend = tdb
