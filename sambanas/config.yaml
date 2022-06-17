@@ -11,7 +11,7 @@ arch:
 - aarch64
 - amd64
 - i386
-startup: services
+startup: system
 boot: auto
 init: false
 hassio_api: true
