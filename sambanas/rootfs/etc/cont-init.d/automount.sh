@@ -24,7 +24,7 @@ function mount_disk() {
      if [ "$remote_mount" = true ] ; then
        ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec" \
           && echo $disk >> /tmp/remote_mount
-     fi || bashio::log.warning "Host Mount Fail!"
+     fi || bashio::log.warning "Host Mount ${$disk} Fail!"
      mount -t auto $devpath/$disk /media/$disk -o nosuid,relatime,noexec \
        && echo $disk >> /tmp/local_mount
 }
