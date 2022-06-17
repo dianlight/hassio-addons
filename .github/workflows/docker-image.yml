@@ -6,6 +6,7 @@ on:
       - release/* 
   workflow_dispatch:  
 
+
 jobs:
 
   build:
@@ -23,14 +24,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - shell: bash
-        id: build
-        run: |
-          export CAS_API_KEY=${{ secrets.CAS_API_KEY }}
-          export SIGNER_ID=${{ secrets.SIGNER_ID }}
-          env > "${{ runner.temp }}/env_file"
-          sed -i "/\(HOME\|TERM\|PWD\|HOSTNAME\|PATH\|SHLVL\|USER\|GOROOT\)/d" "${{ runner.temp }}/env_file"
-
       - name: Publish Plex Addon
         uses: home-assistant/builder@master
         with:
@@ -41,6 +34,8 @@ jobs:
 
       - name: Publish SambaNAS Addon
         uses: home-assistant/builder@master
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
             --all \
