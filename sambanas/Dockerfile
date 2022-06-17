@@ -17,6 +17,7 @@ RUN apk add --no-cache \
     fuse-exfat-utils \
     btrfs-progs \
     udev \
+    eudev \
     hwids-udev \
     device-mapper-udev \
     attr \
@@ -41,14 +42,8 @@ RUN apk add --no-cache \
     && curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 
 
+
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
 
 # Copy data
 COPY rootfs /
-
-# Copy data
-#COPY data/run.sh /
-#COPY data/smb.conf /etc/
-#COPY data/moredisk.smb.conf /tmp/
-#
-#CMD [ "/run.sh" ]

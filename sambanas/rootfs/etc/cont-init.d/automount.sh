@@ -22,9 +22,9 @@ function mount_disk() {
      mkdir -p /media/$disk
 
      if [ "$remote_mount" = true ] ; then
-       ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec" \
+       ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec; fi" \
           && echo $disk >> /tmp/remote_mount
-     fi || bashio::log.warning "Host Mount ${$disk} Fail!"
+     fi || bashio::log.warning "Host Mount ${disk} Fail!"
      mount -t auto $devpath/$disk /media/$disk -o nosuid,relatime,noexec \
        && echo $disk >> /tmp/local_mount
 }

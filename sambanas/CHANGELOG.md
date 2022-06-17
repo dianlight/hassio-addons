@@ -1,5 +1,28 @@
 # Changelog
 
+## 9.7.0-nas
+
+### ✨ Features
+- Add btrfs support (PR #75 By @fAuernigg)
+
+### 🩹 BugFix
+- Change startup to system (PR #81 By @marciogranzotto)
+
+### 🏗 Chore
+- [Full Changelog from official addon 9.5.1][changelog_9.7.0]
+  - Upgrade Alpine Linux to 3.15
+  - Sign add-on with Codenotary Community Attestation Service (CAS)
+- [Full Changelog from official addon 9.5.0][changelog_9.6.1]
+  - Remove lo from interface list
+  - Exit with error if there are no supported interfaces to run Samba on
+- [Full Changelog from official addon 9.6.0][changelog_9.6.0]
+  - Run on all supported interfaces
+
+
+[changelog_9.7.0]: https://github.com/home-assistant/addons/pull/2070
+[changelog_9.6.1]: https://github.com/home-assistant/addons/pull/2031
+[changelog_9.6.0]: https://github.com/home-assistant/addons/pull/2023
+
 ## 9.5.1-nas4
 
 ### ✨ Features
