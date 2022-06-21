@@ -58,6 +58,21 @@ medialibrary:
     -----BEGIN RSA PRIVATE KEY-----
     <Your super secret private key in base64 form. As form .ssh/id_rsa file>
     -----END RSA PRIVATE KEY-----
+other_users:    
+  - username: backupuser
+    password: '<backupuser secret password>'
+  - username: secureuser
+    password: '<secureuser secret password>'    
+acl:
+  - share: config
+    disabled: true
+  - share: backup
+    disabled: false
+    users:
+      - backupuser
+  - share: ssl
+    users:
+      - secureuser
 
 ```
 
@@ -125,6 +140,55 @@ List of files that are neither visible nor accessible. Useful to stop clients
 from littering the share with temporary hidden files
 (e.g., macOS `.DS_Store` or Windows `Thumbs.db` files)
 
+### Option: `other_users` (optional) (**advanced users only**)
+
+The list of additional user for the addon. See  `acl` option for enable the access to the shares.
+
+#### Option: `username` (required)
+
+The username you would like to use to authenticate with.
+
+#### Option: `password` (required)
+
+The password that goes with the username configured for authentication.
+
+### Option: `acl` (optional) (**advanced users only**)
+
+The Access Control List for shares. This is an advanced parameter to control every single share.
+The format is an array of share object with this subparameters
+
+#### Option: `share` (required)
+
+The share name. 
+
+#### Option: `disabled` (optional)
+
+If the disabled flag is true the share is not exported
+
+Defaults to `false`
+
+#### Option: `users` (optional)
+
+The list of users with access to share. If omitted the main user is used. See `other_users` option
+
+Defaults to `master user`
+
+#### Option: `timemachine` (optional)
+
+If is true the share is exposed with timechine compatible setting.
+
+Defaults to `false` for internal share.
+
+### Option: `interfaces` (optional) (**advanced users only**)
+
+The network interfaces Samba should listen on for incoming connections.
+
+This option should only be used in advanced cases. In general, setting this option is not needed.
+
+If omitted Samba will listen on all supported interfaces of Home Assistant (see > ha network info), but if there are no supported interfaces, Samba will exit with an error.
+
+Note: Samba needs at least one non-loopback, non-ipv6, local interface to listen on and become browser on it. Without it, it works, but reloads it's interfaces in an infinite loop forever in each 10 seconds to check, whether a non-loopback, non-ipv6, local interface is added. This reload will fill the log file with infinite number of entries like added interface lo ip=::1 bcast= netmask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff.
+
 ### Option: `compatibility_mode` (optional)
 
 Setting this option to `true` will enable old legacy Samba protocols
@@ -184,6 +248,7 @@ Setting this option to `true` will disable the delete of MQTT discovery messages
 
 Defaults to `false`.
 
+
 ## Support
 
 ### Common problems
@@ -191,15 +256,6 @@ Defaults to `false`.
 * ***The disk does not mount*** : check that the Label of the partition of the disk you want to mount is case-sensitive with the label indicated in the `moredisk` parameter.
 
 * ***In the menu `Media Browser` the folder with the name of the disk is empty*** : it happens when the homeassistant server starts before the add-on. Restart HomeAssitant from menu `Configuration->Server Controls->Server management -> RESTART`
-<!--
-Got questions?
-
-You have several options to get them answered:
-
-- The [Home Assistant Discord Chat Server][discord].
-- The Home Assistant [Community Forum][forum].
-- Join the [Reddit subreddit][reddit] in [/r/homeassistant][reddit]
--->
 
 In case you've found a bug, please [open an issue on our GitHub][issue].
 

@@ -4,6 +4,8 @@
 # ==============================================================================
 if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
   bashio::log.warning "smbd crashed, halting add-on"
+  bashio::log.info "Dump SMB configuration:"
+  cat /etc/samba/smb.conf >&2
   exec /run/s6/basedir/bin/halt
 fi
 

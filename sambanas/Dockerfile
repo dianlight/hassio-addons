@@ -31,6 +31,11 @@ RUN apk add --no-cache \
     mosquitto-clients \
     openssh-client \
     figlet \
+    findmnt \
+    \
+    && apk add --no-cache \
+    wsdd \
+    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
     \
     && mkdir -p /var/lib/samba \
     && touch \

@@ -2,14 +2,10 @@
 # ==============================================================================
 # Start avahi service
 # ==============================================================================
-declare name
+declare SMB_HOST
 
-# Read hostname from API or setting default "hassio"
-name=$(bashio::info.hostname)
-if bashio::var.is_empty "name"; then
-    bashio::log.warning "Can't read hostname, using default."
-    name="homeassistant"
-fi
-bashio::log.info "Starting the AVAHI daemon for ${name}..."
+SMB_HOST=$(grep -i '^\s*netbios name\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
 
-exec avahi-publish-service -v -f -s $name _smb._tcp 445 
+bashio::log.info "Starting the AVAHI for ${SMB_HOST%.*}..."
+
+exec avahi-publish-service -v -f -s "${SMB_HOST%.*}" _smb._tcp 445

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Example For local Build use"
+echo "> check=no archs=--armv7  ./build.sh sambanas"
+
 # Check for arch
 arch=$(arch)
 # use aarch64 on Apple M1
