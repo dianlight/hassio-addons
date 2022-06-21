@@ -2,17 +2,20 @@
    min protocol = SMB2
    ea support = yes
    vfs objects = catia fruit streams_xattr  
-   fruit:metadata = stream
+   fruit:aapl = yes
    fruit:model = MacSamba
+
+   fruit:resource = file
    fruit:veto_appledouble = no
    fruit:posix_rename = yes 
+   fruit:wipe_intentionally_left_blank_rfork = yes
    fruit:zero_file_id = yes
-   fruit:wipe_intentionally_left_blank_rfork = yes 
    fruit:delete_empty_adfiles = yes
 
    netbios name = {{ env "HOSTNAME" }}
    workgroup = {{ .workgroup }}
    server string = Samba NAS HomeAssistant config
+   multicast dns register = no
 
    security = user
    ntlm auth = yes
@@ -34,65 +37,51 @@
    server min protocol = NT1
    {{ end }}
 
-[config]
+{{ define "SHT" }}
+[{{- .share}}]
    browseable = yes
    writeable = yes
-   path = /config
-
-   valid users = {{ .username }}
-   force user = root
-   force group = root
-   veto files = /{{ .veto_files | join "/" }}/
-   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-[addons]
-   browseable = yes
-   writeable = yes
-   path = /addons
-   valid users = {{ .username }}
-   force user = root
-   force group = root
-   veto files = /{{ .veto_files | join "/" }}/
-   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-
-[ssl]
-   browseable = yes
-   writeable = yes
-   path = /ssl
-
-   valid users = {{ .username }}
-   force user = root
-   force group = root
-   veto files = /{{ .veto_files | join "/" }}/
-   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-[share]
-   browseable = yes
-   writeable = yes
-   path = /share
-   valid users = {{ .username }}
+   }}
+{{ if regexMatch "[config|addons|ssl|share|backup|media]" .share }}
+   path = /{{- .share}}
+{{ else }}
+   path = /media/{{- .share}}
+{{ end}}   
+   valid users = {{ .users|default .username|join " " }}
    force user = root
    force group = root
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-[backup]
-   browseable = yes
-   writeable = yes
-   path = /backup
+   {{- if .timemachine|default false }}
+   vfs objects = catia fruit streams_xattr
 
-   valid users = {{ .username }}
-   force user = root
-   force group = root
-   veto files = /{{ .veto_files | join "/" }}/
-   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
+   # Time Machine Settings Ref: https://github.com/markthomas93/samba.apple.templates
+   fruit:time machine = yes
+   #fruit:time machine max size = SIZE [K|M|G|T|P]
+   fruit:metadata = stream
+   {{ end }}
+{{ end }}
 
-[media]
-   browseable = yes
-   writeable = yes
-   path = /media
-   valid users = {{ .username }}
-   force user = root
-   force group = root
-   veto files = /{{ .veto_files | join "/" }}/
-   delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
-
-# MoreDisk Options
+{{- $disks := concat (list "config" "addons" "ssl" "share" "backup" "media") (compact .moredisks|default list) -}}
+{{- $root := . -}}
+{{- range $disk := $disks -}}
+        {{- $acld := false -}}
+        {{- range $dd := $root.acl -}}
+                {{- if eq $dd.share $disk -}}
+                        {{- $acld = true -}}
+                        {{- if not $dd.disabled -}}
+                           {{- template "SHT" deepCopy $root |  mergeOverwrite $dd -}}
+                        {{- end -}}
+                {{- end -}}
+        {{- end -}}
+        {{- if not $acld -}}
+                {{- $dd := dict "share" $disk "timemachine" true -}}
+                {{- range $dnt := list "config" "addons" "ssl" "share" "backup" "media" -}}
+                        {{- if eq $dnt $disk -}}
+                                {{- $_ := set $dd "timemachine" false -}}
+                        {{- end -}}
+                {{- end -}}
+                {{- template "SHT" deepCopy $root | mergeOverwrite $dd -}}
+        {{- end -}}
+{{- end -}}

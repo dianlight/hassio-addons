@@ -17,16 +17,23 @@ function mount_disk() {
           bashio::log.info "Disk ${disk:3} is an ID"
           devpath=/dev/disk/by-id
           disk=${disk:3}
-     fi 
+     fi  
 
      mkdir -p /media/$disk
 
-     if [ "$remote_mount" = true ] ; then
-       ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec; fi" \
-          && echo $disk >> /tmp/remote_mount
-     fi || bashio::log.warning "Host Mount ${disk} Fail!"
-     mount -t auto $devpath/$disk /media/$disk -o nosuid,relatime,noexec \
-       && echo $disk >> /tmp/local_mount
+     # check with findmnt if the disk is already mounted
+     if findmnt -n -o TARGET /media/$disk >/dev/null 2>&1; then
+          bashio::log.info "Disk ${disk} is already mounted"
+          echo $disk >> /tmp/local_mount
+          return 0
+     else 
+          if [ "$remote_mount" = true ] ; then
+          ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec; fi" \
+               && echo $disk >> /tmp/remote_mount
+          fi || bashio::log.warning "Host Mount ${disk} Fail!" || :
+          mount -t auto $devpath/$disk /media/$disk -o nosuid,relatime,noexec \
+          && echo $disk >> /tmp/local_mount && bashio::log.info "Mount ${disk} Success!"
+     fi
 }
 
 # Mount external drive
@@ -79,11 +86,7 @@ elif bashio::config.has_value 'moredisks'; then
      bashio::log.info "More Disks mounting.. ${MOREDISKS}" && \
      for disk in $MOREDISKS 
      do
-         bashio::log.info "Mount ${disk}"
-         mount_disk && \
-             cat /tmp/moredisk.smb.gtpl >> "${CONF}" && \
-             sed -i "s|%%DISKNAME%%|${disk}|g" "${CONF}" && \
-             bashio::log.info "Success!"   
-     done || \
-     bashio::log.warning "Unable to mount external drivers!"
+         #bashio::log.info "Mount ${disk}"
+         mount_disk && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"   
+     done 
 fi

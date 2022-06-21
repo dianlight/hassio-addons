@@ -1,5 +1,19 @@
 # Changelog
 
+## 9.7.0-nas1
+
+### ✨ Features
+- Add wsdd for Windows10/11 autodiscovery
+- Support Enabline/Disabling Shares (based on PR#72 by @Uneo7 | Issue #24)
+- Support for different users on shares (Issue #19)
+- Interface options ( based on the idea of lmagyar/homeassistant-addon-samba-interface addon )
+
+### 🏗 Chore
+- Upgrade Alpine Linux to 3.16
+
+### 🩹 BugFix
+- AVAHI Support hostname with dot
+
 ## 9.7.0-nas
 
 ### ✨ Features
