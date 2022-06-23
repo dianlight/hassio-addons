@@ -42,7 +42,7 @@
    browseable = yes
    writeable = yes
    }}
-{{ if regexMatch "[config|addons|ssl|share|backup|media]" .share }}
+{{ if regexMatch "^(config|addons|ssl|share|backup|media)$" .share }}
    path = /{{- .share}}
 {{ else }}
    path = /media/{{- .share}}
