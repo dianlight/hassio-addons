@@ -1,5 +1,10 @@
 # Changelog
 
+## 9.7.0-nas2
+
+### 🩹 BugFix
+- Merged PR #85 by @grischard - Fix Bug [#84](https://github.com/dianlight/hassio-addons/issues/84)
+
 ## 9.7.0-nas1
 
 ### ✨ Features
