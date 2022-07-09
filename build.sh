@@ -41,7 +41,7 @@ for addon in "$@"; do
     if [[ "${check}x" == "x" ]];then
       check=--docker-hub-check
     else 
-      check=""   
+      check="--version latest --release latest --release-tag"   
     fi
 
     if [[ "${archs}x" == "x" ]];then
