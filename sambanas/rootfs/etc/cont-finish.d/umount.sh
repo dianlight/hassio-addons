@@ -12,7 +12,7 @@ if [[ -f /tmp/local_mount ]]; then
     bashio::log.info "Unmount drivers."
     while read -r line; do 
         bashio::log.info "Unmount ${line}"
-        umount /dev/disk/by-label/$line
+        umount $line
    done < /tmp/local_mount
 fi
 if [[ -f /tmp/remote_mount ]]; then  

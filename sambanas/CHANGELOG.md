@@ -1,5 +1,16 @@
 # Changelog
 
+## 9.7.1-nas3
+
+### 🏗 Chore
+- Migrate from WSDD to WSDD2 for better Windows 11 compatibility
+- Refactor all MQTT HA integration
+- Refactor root mount point selection ( no more pollution in /media if you don't use medialibrary )
+- Refactor Docker composition
+
+### 🩹 BugFix
+- Autodiscovery (WSDD2) interface respect configuration
+
 ## 9.7.0-nas2
 
 ### 🩹 BugFix

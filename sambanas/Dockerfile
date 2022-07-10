@@ -1,4 +1,10 @@
 ARG BUILD_FROM
+
+FROM ${BUILD_FROM} as wsdd2-builder
+
+RUN apk add --no-cache make gcc libc-dev linux-headers && wget -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
+    && cd wsdd2-master && make
+
 FROM $BUILD_FROM
 
 # Add env
@@ -31,20 +37,27 @@ RUN apk add --no-cache \
     mosquitto-clients \
     openssh-client \
     figlet \
-    findmnt \
-    \
-    && apk add --no-cache \
-    wsdd \
-    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
-    \
-    && mkdir -p /var/lib/samba \
+    findmnt 
+
+# WSDD2
+COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
+#RUN apk del make gcc libc-dev linux-headers   
+
+# WSDD
+#RUN  apk add --no-cache \
+#    wsdd \
+#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+
+# SAMBA Config
+RUN  mkdir -p /var/lib/samba \
     && touch \
     /etc/samba/lmhosts \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
-    /var/lib/samba/winbindd_idmap.tdb \
-    \    
-    && curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+    /var/lib/samba/winbindd_idmap.tdb 
+
+# HA API
+RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 
 
 
