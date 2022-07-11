@@ -52,6 +52,7 @@ veto_files:
   - ".DS_Store"
   - Thumbs.db
 compatibility_mode: false  
+wsdd2: false
 medialibrary:
   enable: true
   ssh_private_key: |
@@ -195,6 +196,12 @@ Setting this option to `true` will enable old legacy Samba protocols
 on the Samba add-on. This might solve issues with some clients that cannot
 handle the newer protocols, however, it lowers security. Only use this
 when you absolutely need it and understand the possible consequences.
+
+Defaults to `false`.
+
+### Option: `wsdd2` (optional) (**advanced users only**)
+
+Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to true if you have trouble to see the disk on Windows 11+
 
 Defaults to `false`.
 

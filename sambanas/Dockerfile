@@ -41,12 +41,11 @@ RUN apk add --no-cache \
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
-#RUN apk del make gcc libc-dev linux-headers   
 
 # WSDD
-#RUN  apk add --no-cache \
-#    wsdd \
-#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+RUN apk add --no-cache \
+    wsdd \
+    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
