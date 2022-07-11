@@ -2,6 +2,7 @@ ARG BUILD_FROM
 
 FROM $BUILD_FROM as wsdd2-builder
 
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
     && cd wsdd2-master && make
 
