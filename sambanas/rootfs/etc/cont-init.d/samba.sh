@@ -77,4 +77,4 @@ for user in $(bashio::config 'other_users'); do
 done
 
 # Log exposed mounted shares
-bashio::log.info "Exposed Disks Summary: $(cat /etc/samba/smb.conf | grep path | tr -d '\n')"
+bashio::log.info "Exposed Disks Summary: $(< /etc/samba/smb.conf grep path | tr -d '\n')"
