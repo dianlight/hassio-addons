@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 9.7.0-nas3
+version: 10.0.0-nas
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas

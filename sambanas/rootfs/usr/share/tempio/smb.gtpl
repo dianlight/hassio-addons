@@ -37,6 +37,10 @@
    server min protocol = NT1
    {{ end }}
 
+   mangled names = no
+   dos charset = CP850
+   unix charset = UTF-8   
+
 {{ define "SHT" }}
 [{{- .share | regexFind "[A-Za-z0-9_]+$"}}]
    browseable = yes
