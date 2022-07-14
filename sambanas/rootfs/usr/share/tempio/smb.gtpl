@@ -37,16 +37,16 @@
    server min protocol = NT1
    {{ end }}
 
+   mangled names = no
+   dos charset = CP850
+   unix charset = UTF-8   
+
 {{ define "SHT" }}
-[{{- .share}}]
+[{{- .share | regexFind "[A-Za-z0-9_]+$"}}]
    browseable = yes
    writeable = yes
-   }}
-{{ if regexMatch "^(config|addons|ssl|share|backup|media)$" .share }}
-   path = /{{- .share}}
-{{ else }}
-   path = /media/{{- .share}}
-{{ end}}   
+
+   path = /{{- .share }}
    valid users = {{ .users|default .username|join " " }}
    force user = root
    force group = root

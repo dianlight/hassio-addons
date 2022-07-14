@@ -41,12 +41,13 @@ for addon in "$@"; do
     if [[ "${check}x" == "x" ]];then
       check=--docker-hub-check
     else 
-      check=""   
+      check="--version latest --release latest --release-tag"   
     fi
 
     if [[ "${archs}x" == "x" ]];then
       archs=$(${qv} -r '.arch // ["armv7", "armhf", "amd64", "aarch64", "i386"] | [.[] | "--" + .] | join(" ")' ${config})
     fi
     echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
-    docker run  --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data 
+    hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile && \
+      docker run  --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data 
 done

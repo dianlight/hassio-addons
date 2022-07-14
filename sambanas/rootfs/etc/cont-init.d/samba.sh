@@ -42,9 +42,10 @@ if [ ${#interfaces[@]} -eq 0 ]; then
 fi
 bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 
+
 # Generate Samba configuration.
 touch /tmp/local_mount
-jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .moredisks = $(jq -R -s -c 'split("\n")' < /tmp/local_mount) " /data/options.json \
+jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' < /tmp/local_mount) " /data/options.json \
     | tempio \
       -template /usr/share/tempio/smb.gtpl \
       -out /etc/samba/smb.conf
@@ -74,3 +75,6 @@ for user in $(bashio::config 'other_users'); do
     echo -e "${password}\n${password}" \
         | smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
 done
+
+# Log exposed mounted shares
+bashio::log.info "Exposed Disks Summary: $(< /etc/samba/smb.conf grep path | tr -d '\n')"

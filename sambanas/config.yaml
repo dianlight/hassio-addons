@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 9.7.0-nas2
+version: 10.0.0-nas
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -45,6 +45,7 @@ options:
   - icon?
   - ".Trashes"
   compatibility_mode: false
+  wsdd2: false
   autodiscovery: {}
   other_users: []
   acl: []
@@ -64,6 +65,7 @@ schema:
   veto_files:
   - str
   compatibility_mode: bool?
+  wsdd2: bool?
   mqtt_enable: bool?
   mqtt_host: str?
   mqtt_username: str?

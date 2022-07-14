@@ -1,24 +1,48 @@
 #!/usr/bin/with-contenv bashio
 # ==============================================================================
-# Start avahi service
+# Start wsdd service
 # ==============================================================================
 declare SMB_GROUP
 declare SMB_HOST
+declare SMB_DOMAIN
+declare WSDD
 
+# Chose The WSDD implenetation
+WSDD=wsdd
+if bashio::config.true 'wsdd2' ; then
+    WSDD=wsdd2
+fi
 
 SMB_GROUP=$(grep -i '^\s*workgroup\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
 SMB_HOST=$(grep -i '^\s*netbios name\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
 
-bashio::log.info "Starting the WSDD daemon for ${SMB_GROUP}/${SMB_HOST}..."
+bashio::log.info "Starting the ${WSDD} daemon for ${SMB_GROUP}/${SMB_HOST}..."
 
-# Get supported interfaces
-for interface in $(bashio::network.interfaces); do
-    interfaces+=("-i ${interface}")
-done
+if bashio::config.has_value 'interfaces'; then
+    bashio::log.info "Interfaces from config: $(bashio::config 'interfaces')"
+    for interface in $(bashio::config 'interfaces'); do
+        if [ -d "/sys/class/net/${interface}" ]; then
+            interfaces+=("-i ${interface}")
+        else
+            bashio::log.warning "Interface ${interface} not found, skipping."
+        fi
+    done   
+else
+    # Get supported interfaces
+    for interface in $(bashio::network.interfaces); do
+        interfaces+=("-i ${interface}")
+    done
+fi
 
 if [ ${#interfaces[@]} -eq 0 ]; then
     bashio::exit.nok 'No supported interfaces found to bind on.'
 fi
 bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 
-exec wsdd -v $(printf '%s ' "${interfaces[@]}") -n ${SMB_HOST} -w ${SMB_GROUP}
+if bashio::config.true 'wsdd2' ; then
+    setcap CAP_NET_RAW+ep /usr/sbin/wsdd2
+    exec /usr/sbin/wsdd2 -t -u -w  $(printf '%s ' "${interfaces[@]}") -H ${SMB_HOST} -b vendor:homeassistant,model:sambanas    
+else
+    exec wsdd -v $(printf '%s ' "${interfaces[@]}") -n ${SMB_HOST} -w ${SMB_GROUP}
+fi    
+

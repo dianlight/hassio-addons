@@ -1,5 +1,27 @@
 # Changelog
 
+## 10.0.0-nas
+
+### 💥 BREAKING CHANGE
+- Don't mangle filenames: By default, Samba mangles filenames with special characters to ensure
+compatibility with really old versions of Windows which have a very limited charset for filenames. The add-on no longer does this as modern operating
+systems do not have these restrictions.
+
+### ✨ Features
+- Option to use WSDD2 over WSDD (see [DOCS.md][DOCS])
+
+### 🏗 Chore
+- Refactor all MQTT HA integration
+- Refactor root mount point selection ( no more pollution in /media if you don't use medialibrary )
+- Refactor Docker composition
+- [Full Changelog from official addon 10.0.0][changelog_10.0.0]
+  - Don't mangle filenames (fixes [#2541](https://github.com/home-assistant/addons/issues/2541))
+
+[changelog_10.0.0]: https://github.com/home-assistant/addons/pull/2545  
+
+### 🩹 BugFix
+- Autodiscovery (WSDD2) interface respect configuration
+
 ## 9.7.0-nas2
 
 ### 🩹 BugFix
@@ -74,7 +96,7 @@
 
 ### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
 
 ### 🏗 Chore
 
@@ -84,7 +106,7 @@
 
 ### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md](https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md)) 🎉 🎉 🎉
+- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md][DOCS]) 🎉 🎉 🎉
 
 ### 📚 Documentation
 
@@ -229,3 +251,5 @@
 ## 3.0
 
 - Update base image
+
+[DOCS]:https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md

@@ -11,7 +11,10 @@ declare remote_mount
 declare devpath
 
 # mount a disk from parameters
-function mount_disk() {
+function mount_disk() { # $1 disk $2 path $3 remote_mount
+     disk=$1
+     path=$2
+     remote_mount=$3
      devpath=/dev/disk/by-label
      if [[ $disk == id:* ]] ; then
           bashio::log.info "Disk ${disk:3} is an ID"
@@ -19,20 +22,21 @@ function mount_disk() {
           disk=${disk:3}
      fi  
 
-     mkdir -p /media/$disk
+     mkdir -p $path/$disk
+     chmod a+rwx $path/$disk
 
      # check with findmnt if the disk is already mounted
-     if findmnt -n -o TARGET /media/$disk >/dev/null 2>&1; then
+     if findmnt -n -o TARGET $path/$disk >/dev/null 2>&1; then
           bashio::log.info "Disk ${disk} is already mounted"
-          echo $disk >> /tmp/local_mount
+          echo $path/$disk >> /tmp/local_mount
           return 0
      else 
           if [ "$remote_mount" = true ] ; then
           ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t auto $devpath/$disk /mnt/data/supervisor/media/$disk -o nosuid,relatime,noexec; fi" \
-               && echo $disk >> /tmp/remote_mount
+               && echo $path/$disk >> /tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${disk} Fail!" || :
-          mount -t auto $devpath/$disk /media/$disk -o nosuid,relatime,noexec \
-          && echo $disk >> /tmp/local_mount && bashio::log.info "Mount ${disk} Success!"
+          mount -t auto $devpath/$disk $path/$disk -o nosuid,relatime,noexec \
+          && echo $path/$disk >> /tmp/local_mount && bashio::log.info "Mount ${disk} Success!"
      fi
 }
 
@@ -46,6 +50,7 @@ elif bashio::config.has_value 'moredisks'; then
 
      # Check Host Ssh config
      remote_mount=false
+     path=/mnt
     
      if bashio::config.true 'medialibrary.enable' ; then
           bashio::log.info "MediaLibrary option found!"
@@ -58,15 +63,13 @@ elif bashio::config.has_value 'moredisks'; then
                ipaddress=$(bashio::network.ipv4_address ${interface})
                ssh_private_key=$(bashio::config 'medialibrary.ssh_private_key')
                mkdir -p /root/.ssh
-
-               #bashio::log.info "SSH Key: ${ssh_private_key}"
                echo "${ssh_private_key}" > /root/.ssh/id_rsa
-               #cat /root/.ssh/id_rsa
                chmod ag-rw /root/.ssh/id_rsa
                ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "date"
                if [ $? -eq 0 ]; then
                     bashio::log.info "SSH connection to ${ipaddress%/*}:22222 OK"
                     remote_mount=true
+                    path=/media
                else
                     bashio::log.warning "SSH connection to ${ipaddress%/*}:22222 FAILED"
                     bashio::log.warning "MediaLibrary due error in config!"
@@ -87,6 +90,8 @@ elif bashio::config.has_value 'moredisks'; then
      for disk in $MOREDISKS 
      do
          #bashio::log.info "Mount ${disk}"
-         mount_disk && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"   
-     done 
+         mount_disk $disk $path $remote_mount && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"   
+     done
+
+     echo $path > /tmp/mountpath 
 fi
