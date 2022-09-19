@@ -45,8 +45,9 @@ COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin
 
 # WSDD
 RUN apk add --no-cache \
-    wsdd \
-    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ 
+    wsdd
+#    \
+#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
