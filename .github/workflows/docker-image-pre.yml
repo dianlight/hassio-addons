@@ -2,20 +2,19 @@ name: Docker Image CI - Build Pre-Release.
 
 on:
   push:
-    branches: 
-      - prerelease/* 
-  workflow_dispatch:  
-
+    branches:
+      - prerelease/*
+  workflow_dispatch:
 
 jobs:
 
   build:
 
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v2
-        with: 
+        with:
           submodules: true
 
       - name: Login to DockerHub
@@ -24,13 +23,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-#      - name: Publish Plex Addon
-#        uses: home-assistant/builder@master
-#        with:
-#          args: |
-#            --all \
-#            --target addon-plex/plex \
-#            --docker-hub dianlight     
       - name: Publish SambaNAS Addon
         uses: home-assistant/builder@master
         env:
@@ -39,10 +31,17 @@ jobs:
           args: |
             --all \
             --target sambanas \
-            --docker-hub dianlight 
+            --docker-hub dianlight
+            
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+        id: extract_branch
+        
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:
+          destination_branch: "release/${{ steps.extract_branch.outputs.branch }}"
           pr_title: "Releasing ${{ github.ref }} into master"
-          pr_body: ":crown: *An automated PR*"           
-          github_token: ${{ secrets.GITHUB_TOKEN }}       
+          pr_body: ":crown: *An automated PR*"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
