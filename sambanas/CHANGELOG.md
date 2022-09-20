@@ -1,5 +1,10 @@
 # Changelog
 
+## 10.0.0-nas1
+
+### 🩹 BugFix
+- Fix Host Unmountig Bug [#94](https://github.com/dianlight/hassio-addons/issues/94)
+
 ## 10.0.0-nas
 
 ### 💥 BREAKING CHANGE
