@@ -68,7 +68,8 @@
 {{- range $disk := $disks -}}
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- if eq $dd.share $disk -}}
+                {{- $nshare = $dd.share | regexFind "[A-Za-z0-9_]+$" -}} 
+                {{- if eq $nshare $disk -}}
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
                            {{- template "SHT" deepCopy $root |  mergeOverwrite $dd -}}
