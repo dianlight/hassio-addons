@@ -1,5 +1,10 @@
 # Changelog
 
+## 10.0.0-nas2
+
+### 🩹 BugFix
+- Fix ACL Bug [#98](https://github.com/dianlight/hassio-addons/issues/98)
+
 ## 10.0.0-nas1
 
 ### 🩹 BugFix
