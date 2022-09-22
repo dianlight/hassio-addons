@@ -69,7 +69,9 @@
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
                 {{- $nshare := $dd.share | regexFind "[A-Za-z0-9_]+$" -}} 
+# Debug Check disk='{{ $disk }}' share='{{ $dd.share }}' mshare='{{ $nshare }}'
                 {{- if eq $nshare $disk -}}
+# Debug Match disk='{{ $disk }}' share='{{ $dd.share }}' mshare='{{ $nshare }}'
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
                            {{- template "SHT" deepCopy $root |  mergeOverwrite $dd -}}
