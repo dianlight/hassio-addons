@@ -68,10 +68,10 @@
 {{- range $disk := $disks -}}
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- $nshare := $dd.share | regexFind "[A-Za-z0-9_]+$" -}} 
-# Debug Check disk='{{ $disk }}' share='{{ $dd.share }}' mshare='{{ $nshare }}'
-                {{- if eq $nshare $disk -}}
-# Debug Match disk='{{ $disk }}' share='{{ $dd.share }}' mshare='{{ $nshare }}'
+                {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}} 
+# Debug Check disk='{{ $disk }}' share='{{ $dd.share }}' ndisk='{{ $ndisk }}'
+                {{- if eq $dd.share $ndisk -}}
+# Debug Match disk='{{ $disk }}' share='{{ $dd.share }}' ndisk='{{ $ndisk }}'
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
                            {{- template "SHT" deepCopy $root |  mergeOverwrite $dd -}}
