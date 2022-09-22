@@ -1,5 +1,9 @@
 # Home Assistant Add-on: Samba NAS share
 
+## ![#f03c15](https://via.placeholder.com/15/f03c15/f03c15.png) Important Note ![#f03c15](https://via.placeholder.com/15/f03c15/f03c15.png)
+
+This addon has been designed, built and tested to work with HAOS (Homeassistant Operating System). The use in other types of installations is not recommended and useless as other solutions given by the host can be used.
+
 ## Installation
 
 Follow these steps to get the add-on installed on your system:

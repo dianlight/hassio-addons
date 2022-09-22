@@ -40,6 +40,7 @@ jobs:
         
       - name: pull-request
         uses: repo-sync/pull-request@v2
+        continue-on-error: true
         with:
           destination_branch: "release/${{ steps.extract_branch.outputs.branch }}"
           pr_title: "Releasing ${{ github.ref }} into master"
