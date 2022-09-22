@@ -68,7 +68,7 @@
 {{- range $disk := $disks -}}
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- $nshare = $dd.share | regexFind "[A-Za-z0-9_]+$" -}} 
+                {{- $nshare := $dd.share | regexFind "[A-Za-z0-9_]+$" -}} 
                 {{- if eq $nshare $disk -}}
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
