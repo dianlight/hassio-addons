@@ -74,6 +74,7 @@
 # Debug Match disk='{{ $disk }}' share='{{ $dd.share }}' ndisk='{{ $ndisk }}'
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
+                           {{- $_ := set $dd "share" $disk -}}
                            {{- template "SHT" deepCopy $root |  mergeOverwrite $dd -}}
                         {{- end -}}
                 {{- end -}}
