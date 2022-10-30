@@ -9,67 +9,57 @@
   "startup": "services",
   "boot": "auto",
   "options": {
-    "rebuild": false,  
-    "log_level": "debug",  
-    "channel":75,
-    "pa_level":"RF24_PA_MAX",
-    "ce_pin":22,
-    "cs_pin":24,
-    "use_irq":{
-        "rx_buffer":20,
-        "pin":18
+    "rebuild": false,
+    "log_level": "debug",
+    "channel": 75,
+    "pa_level": "RF24_PA_MAX",
+    "ce_pin": 22,
+    "cs_pin": 24,
+    "use_irq": {
+      "rx_buffer": 20,
+      "pin": 18
     },
-    "use_led":{
-        "err_pin": 12,
-        "rx_pin": 16,
-        "tx_pin": 11
+    "use_led": {
+      "err_pin": 12,
+      "rx_pin": 16,
+      "tx_pin": 11
     }
   },
   "schema": {
     "rebuild": "bool?",
     "log_level": "match(^(debug|info|notice|warn|err)$)?",
     "channel": "int(0,125)?",
-    "pa_level":"match(^(RF24_PA_MAX|RF24_PA_LOW)$)?",
-    "ce_pin":"int(1,26)?",
-    "cs_pin":"int(1,26)?",
+    "pa_level": "match(^(RF24_PA_MAX|RF24_PA_LOW)$)?",
+    "ce_pin": "int(1,26)?",
+    "cs_pin": "int(1,26)?",
     "use_irq": {
-        "rx_buffer":"int?",
-        "pin":"int(1,26)?"
+      "rx_buffer": "int?",
+      "pin": "int(1,26)?"
     },
     "use_led": {
-        "err_pin": "int(1,26)?",
-        "rx_pin": "int(1,26)?",
-        "tx_pin": "int(1,26)?"
+      "err_pin": "int(1,26)?",
+      "rx_pin": "int(1,26)?",
+      "tx_pin": "int(1,26)?"
     }
   },
   "ports": {
-      "5300/tcp": 5300
+    "5300/tcp": 5300
   },
   "ports_description": {
     "5300/tcp": "TCP communication port"
   },
-  "devices":[
-      "/dev/spidev0.0",
-      "/dev/mem"
-  ],
+  "devices": ["/dev/spidev0.0", "/dev/mem"],
   "udev": true,
   "uart": true,
-  "privileged": [
-      "SYS_RAWIO",
-      "SYS_RESOURCE",
-      "SYS_MODULE"
-  ],
-  "map": [
-    "config:rw",
-    "share:rw",
-    "ssl:rw"
-  ],
-  "services" : ["mqtt:want"],
-  "full_access": true,
+  "privileged": ["SYS_RAWIO", "SYS_RESOURCE", "SYS_MODULE"],
+  "map": ["config:rw", "share:rw", "ssl:rw"],
+  "services": ["mqtt:want"],
+  "full_access": false,
   "apparmor": false,
   "hassio_api": true,
   "gpio": true,
   "device-tree": true,
   "kernel_modules": true,
-  "homeassistant": "0.98"  
+  "homeassistant": "0.98",
+  "stage": "deprecated"
 }
