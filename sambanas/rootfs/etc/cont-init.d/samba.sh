@@ -51,9 +51,11 @@ jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | 
       -out /etc/samba/smb.conf
 
 # Only for Debug
-#bashio::log.info "Dump SMB configuration:"
-#cat /etc/samba/smb.conf >&2
-
+if [[ "${__BASHIO_LOG_LEVEL_TRACE}" -eq "${__BASHIO_LOG_LEVEL}" ]]; then
+    bashio::log.trace "Dump SMB configuration:"
+    cat /etc/samba/smb.conf >&2
+    cp /etc/samba/smb.conf /config/sambanas.conf.dump
+fi
 
 # Init user
 username=$(bashio::config 'username')
@@ -77,4 +79,10 @@ for user in $(bashio::config 'other_users'); do
 done
 
 # Log exposed mounted shares
-bashio::log.info "Exposed Disks Summary: $(< /etc/samba/smb.conf grep path | tr -d '\n')"
+
+bashio::log.info "Exposed Disks Summary:"
+while read line; do
+    [[ "$line" =~ ^\[ ]] && name="$line"
+    [[ "$line" =~ ^[[:space:]]*path ]] && bashio::log.info "$name\t$line"
+done </etc/samba/smb.conf || true
+
