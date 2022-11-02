@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Example For local Build use"
-echo "> check=no archs=--armv7  ./build.sh sambanas"
+echo "> check=no archs=--aarch64  ./build.sh sambanas"
 
 # Check for arch
 arch=$(arch)

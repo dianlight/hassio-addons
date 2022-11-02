@@ -1,5 +1,15 @@
 # Changelog
 
+## 10.0.0-nas3
+
+### ✨ Features
+- Add ```loglevel``` option.
+
+### 🩹 BugFix
+- Fix Share Name BUG [#106](https://github.com/dianlight/hassio-addons/issues/106)
+### 💥 BREAKING CHANGE
+There is a new algorithm for creating the SHARE name. Therefore the name of the exposed shares could change.
+
 ## 10.0.0-nas2
 
 ### 🩹 BugFix
