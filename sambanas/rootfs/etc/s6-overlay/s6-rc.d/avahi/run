@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start avahi service
+# ==============================================================================
+declare SMB_HOST
+
+SMB_HOST=$(grep -i '^\s*netbios name\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
+
+bashio::log.info "Starting the AVAHI for ${SMB_HOST%.*}..."
+
+exec avahi-publish-service -v -f -s "${SMB_HOST%.*}" _smb._tcp 445

@@ -1,4 +1,5 @@
-#!/usr/bin/with-contenv bashio
+#!/command/with-contenv bashio
+# shellcheck shell=bash
 # ==============================================================================
 # Prepare the MQTT config for running
 # ==============================================================================
@@ -11,7 +12,7 @@ declare port
 declare topic
 declare moredisks
 
-if [ bashio::config.false "mqtt_enable" ]; then
+if ! bashio::config.false "mqtt_enable"; then
 
     topic=$(bashio::config 'mqtt_topic')
     if [ "$topic" = "null" ]; then topic="sambanas"; fi
@@ -42,7 +43,6 @@ if [ bashio::config.false "mqtt_enable" ]; then
             echo "--port ${port}"
         } >"${CONF_SUB}"
     fi
-
 else
 
     bashio::log.info "MQTT support disabled in config"

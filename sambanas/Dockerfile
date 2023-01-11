@@ -1,4 +1,12 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:13.0.0
+# hadolint ignore=DL3006
+FROM ${BUILD_FROM}
+
+# Set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Add env
+ENV TERM="xterm-256color"
 
 FROM $BUILD_FROM as wsdd2-builder
 
@@ -37,8 +45,9 @@ RUN apk add --no-cache \
     curl \
     mosquitto-clients \
     openssh-client \
-    figlet \
-    findmnt 
+    findmnt \
+    ntfs-3g-progs \
+    sysstat
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
