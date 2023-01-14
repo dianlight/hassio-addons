@@ -26,10 +26,7 @@ RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
     dbus \
-    exfat-utils \
-    fuse \
-    fuse-exfat \
-    fuse-exfat-utils \
+    exfatprogs \
     btrfs-progs \
     udev \
     eudev \
@@ -47,15 +44,17 @@ RUN apk add --no-cache \
     openssh-client \
     findmnt \
     ntfs-3g-progs \
-    sysstat
+    sysstat \
+    hdparm \
+    wsdd
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
 
 # WSDD
-RUN apk add --no-cache \
-    wsdd \
-    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
+#RUN apk add --no-cache \
+#    wsdd \
+#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \

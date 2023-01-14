@@ -4,9 +4,10 @@
 
 ### ✨ Features
 - Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
-- Add support for fuse/exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
-- Add new MQTT report entity system based on device not on mount path ans iostat [DOCS.md][DOCS] 
+- Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
+- Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 
 - Add Automount support for all partition's with labels [DOCS.md][DOCS]
+- Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
 
 ### 🏗 Chore
 - Migrate to [Home Assistant Community Add-on: Base Images](https://github.com/hassio-addons/addon-base) 13.0.0
@@ -14,11 +15,10 @@
 
 ### 🩹 BugFix
 - Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
-- Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
 
 ### 💥 BREAKING CHANGE
 - The automount feature is enabled by default. See [DOCS.md][DOCS]
-- Remove FUSE ntfs3g support (was broken so no one will use!).
+- Remove FUSE ntfs3g and exFat support (was broken so no one will use!).
 - MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][DOCS]
 - New default config with automount and new mqtt entity system
 

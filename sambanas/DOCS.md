@@ -110,9 +110,7 @@ Defaults to `true`.
 ***Protection Mode must be disabled to allow this function***
 List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:` (WARN: write id prefix in lowercase only!)
 
-***NOTE: partitions label with spaces are NOT SUPPORTED***
 The following Fs are supported:
-
 
 - [x] ext3
 -	[x] ext2
@@ -121,8 +119,7 @@ The following Fs are supported:
 -	[x] vfat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 -	[x] msdos --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 -	[x] f2fs --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
--	[x] fuseblk --> ***NOTE: Experimental. Samba don't like FUSE based fs very much!***
-    - [x] exFat --> ***NOTE: Experimental with fuse and ACL are not supported so no TimeMachine compatibility***
+-	[x] exFat --> ***NOTE: Experimental with exFat kernel driver***
 -	[x] ntfs --> ***NOTE: Experimental with ntfs3 kernel driver***
 
 

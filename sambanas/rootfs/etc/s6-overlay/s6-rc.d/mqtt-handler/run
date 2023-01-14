@@ -12,15 +12,12 @@ if [ -f /root/.config/mosquitto_pub ]; then
         topic=$(bashio::config 'mqtt_topic')
         if [ "$topic" = "null" ]; then topic="sambanas"; fi
 
-        disks=$(awk 'BEGIN { ORS=""; print "["}  /^   path = .*/g {  printf "%s\"%s\"",separator,$3 ; separator=","  } END { print "]" } ' /etc/samba/smb.conf)
-        #bashio::log.info $disks
+        #        disks=$(awk 'BEGIN { ORS=""; print "["}  /^   path = .*/g {  printf "%s\"%s\"",separator,$3 ; separator=","  } END { print "]" } ' /etc/samba/smb.conf)
+        disks=$(grep path /etc/samba/smb.conf | sed 's/.*path\ =\ //' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
         blk=$(lsblk -b -no PARTUUID,NAME,LABEL,FSTYPE,MOUNTPOINTS -J -y)
-        #bashio::log.info $blk
-        jdisks=$(jq --argjson disks $disks 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.label // $i.name] = $i)' <<<${blk})
-        #bashio::log.info $jdisks
+        jdisks=$(jq --argjson disks "$disks" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i)' <<<${blk})
 
         # Send discovery messages.
-        #bashio::log.info "Pre discovery $topic $(smbd -V | sed s/Version\ //) $(bashio::addon.version)"
         if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
 
         #bashio::log.info $device
@@ -55,7 +52,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
                 case "$entity" in
                 name | label | fstype | mountpoints) #TEXT
-                    bashio::log.info "$topic Text entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
@@ -64,7 +60,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<$row)
                     ;;
                 fssize | fsused | fsavail) #DATA_SIZE (Byte)
-                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
@@ -73,7 +68,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<$row)
                     ;;
                 iostat.kB_read | iostat.kB_wrtn | iostat.kB_dscd) #DATA_SIZE (KB)
-                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
@@ -82,7 +76,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<$row)
                     ;;
                 iostat.kB_read/s | iostat.kB_wrtn/s | iostat.kB_dscd/s) #data_rate
-                    bashio::log.info "Sensor/data_transfer entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entityb "${entity%.*}" --arg entityd "${entity##*.}" -R '@base64d|fromjson|
                         {
@@ -93,7 +86,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<$row)
                     ;;
                 iostat.tps) #TPS
-                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
@@ -102,7 +94,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<$row)
                     ;;
                 fsuse_pct) # PERCENT
-                    bashio::log.info "Sensor/percent entity -> $entity"
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
@@ -115,7 +106,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     ;;
                 esac
                 msg=$(echo $base $device $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|del(.oth)')
-                bashio::log.info $msg
+                bashio::log.debug $msg
                 mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -R -r '@base64d|fromjson|.partuuid' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
             done
         done
