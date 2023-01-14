@@ -46,6 +46,7 @@ RUN apk add --no-cache \
     ntfs-3g-progs \
     sysstat \
     hdparm \
+    smartmontools \
     wsdd
 
 # WSDD2

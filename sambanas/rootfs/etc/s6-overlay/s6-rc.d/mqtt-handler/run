@@ -24,7 +24,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
         device=$(jq -r -c -n --arg topic $topic --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
         {device:{
             identifiers:[],
-            name: "Samba Nas Disk ",
+            name: "SambaNas Disk ",
             hw_version: $addon,
             sw_version: $smbv,
             model: "SambaNas",

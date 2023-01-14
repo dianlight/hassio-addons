@@ -105,7 +105,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
                     path=/media
                else
                     bashio::log.warning "SSH connection to ${ipaddress%/*}:22222 FAILED"
-                    bashio::log.warning "MediaLibrary due error in config!"
+                    bashio::log.warning "MediaLibrary disabled due error in config!"
                fi
           fi
      else
@@ -132,10 +132,10 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           tomountdisks=("${moredisks[@]}")
      fi
 
-     bashio::log.info "Mounting disks.. ${tomountdisks[@]}" &&
-          for disk in ${tomountdisks[@]}; do
-               mount_disk "$disk" "$path" "$remote_mount" && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"
-          done
+     IFS='\n' bashio::log.info "Mounting disks..\n${tomountdisks[*]}"
+     for disk in ${tomountdisks[@]}; do
+          mount_disk "$disk" "$path" "$remote_mount" && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"
+     done
 
      echo "$path" >/tmp/mountpath
 fi
