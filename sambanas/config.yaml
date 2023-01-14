@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 10.0.0-nas2
+version: 10.0.0-nas4
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -26,18 +26,16 @@ map:
 options:
   workgroup: WORKGROUP
   username: homeassistant
-  password:
   allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
   - 192.168.0.0/16
   - fe80::/10
-  moredisks:
-  - "<PARTITION LABEL>"
-  available_disks_log: false
+  automount: true
+  moredisks: []
+  available_disks_log: true
   medialibrary:
     enable: false
-    ssh_private_key: "<YOU SUPER SECRET PRIVATE KEY>"
   veto_files:
   - "._*"
   - ".DS_Store"
@@ -46,6 +44,7 @@ options:
   - ".Trashes"
   compatibility_mode: false
   wsdd2: false
+  mqtt_use_legacy_entities: false
   autodiscovery: {}
   other_users: []
   acl: []
@@ -54,6 +53,7 @@ schema:
   workgroup: str
   username: str
   password: password
+  automount: bool?
   moredisks:
   - str
   available_disks_log: bool?
@@ -66,6 +66,7 @@ schema:
   - str
   compatibility_mode: bool?
   wsdd2: bool?
+  mqtt_use_legacy_entities: bool?
   mqtt_enable: bool?
   mqtt_host: str?
   mqtt_username: str?

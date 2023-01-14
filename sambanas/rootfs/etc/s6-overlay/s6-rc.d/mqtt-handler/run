@@ -7,14 +7,14 @@ if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for disks info..."
 
     # Send autodiscovery entities
-    if bashio::config.true "mqtt_use_new_entities"; then
+    if ! bashio::config.true "mqtt_use_legacy_entities"; then
 
         topic=$(bashio::config 'mqtt_topic')
         if [ "$topic" = "null" ]; then topic="sambanas"; fi
 
         disks=$(awk 'BEGIN { ORS=""; print "["}  /^   path = .*/g {  printf "%s\"%s\"",separator,$3 ; separator=","  } END { print "]" } ' /etc/samba/smb.conf)
         #bashio::log.info $disks
-        blk=$(lsblk -b -no PARTUUID,NAME,LABEL,FSTYPE,MOUNTPOINTS -J)
+        blk=$(lsblk -b -no PARTUUID,NAME,LABEL,FSTYPE,MOUNTPOINTS -J -y)
         #bashio::log.info $blk
         jdisks=$(jq --argjson disks $disks 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.label // $i.name] = $i)' <<<${blk})
         #bashio::log.info $jdisks
@@ -22,116 +22,116 @@ if [ -f /root/.config/mosquitto_pub ]; then
         # Send discovery messages.
         #bashio::log.info "Pre discovery $topic $(smbd -V | sed s/Version\ //) $(bashio::addon.version)"
         if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
-        device=$(jq -c -n --arg topic $topic --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
-        {
-            identifiers:[$topic],
-            name: "Samba Nas Sensors",
+
+        #bashio::log.info $device
+        device=$(jq -r -c -n --arg topic $topic --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
+        {device:{
+            identifiers:[],
+            name: "Samba Nas Disk ",
             hw_version: $addon,
             sw_version: $smbv,
             model: "SambaNas",
-            manufacturer: "@Dianlight"
-        }')
-
-        #bashio::log.info $device
+            manufacturer: "@Dianlight",
+            via_device: $topic
+        }}')
 
         for row in $(jq -r '.|map(.|@base64)|.[]' <<<$jdisks); do
-            for entity in name label fssize fsused fsuse fsavail fstype iostat.tps iostat.kB_read/s iostat.kB_wrtn/s iostat.kB_dscd/s iostat.kB_read iostat.kB_wrtn iostat.kB_dscd; do
+            for entity in name label mountpoints fssize fsused fsuse_pct fsavail fstype iostat.tps iostat.kB_read/s iostat.kB_wrtn/s iostat.kB_dscd/s iostat.kB_read iostat.kB_wrtn iostat.kB_dscd; do
                 exmsg={}
                 etype=""
 
+                base=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            name:($topic+" "+$entity +" "+ .label), 
+                            unique_id:(.partuuid +"-"+ ($entity|explode|join(""))),
+                            value_template:("{{ value_json." + .name + "." +$entity+ "}}"),
+                            state_topic:($topic + "/state"),
+                            oth:{
+                                partuuid:.partuuid,
+                                name:.name,
+                                label:.label
+                            }
+                        }' <<<$row)
+
                 case "$entity" in
-                name | label | fstype) #TEXT
-                    bashio::log.info "Text entity $entity"
-                    etype="text"
-                    msg=$(jq --arg topic "$topic" --arg entity "$entity" --argjson device "$device" -R '@base64d|fromjson|
+                name | label | fstype | mountpoints) #TEXT
+                    bashio::log.info "$topic Text entity -> $entity"
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            name:($topic+" "+$entity +" "+ .label), 
-                            unique_id:(.partuuid +"-"+ $entity),
-                            value_template:("{{ value_json." + .label + "." +$entity+ "}}"),
-                            state_topic:("$topic + "/state"),
-                            icon:"mdi:harddisk",
-                            device: $device|fromjson
+                            mode: "text",
+                            icon:"mdi:harddisk"
                         }' <<<$row)
                     ;;
-                fssize | fsused | fsavail) #DATA_SIZE
-                    bashio::log.info "Sensor/data_size entity $entity"
+                fssize | fsused | fsavail) #DATA_SIZE (Byte)
+                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
-                    msg=$(jq --arg topic "$topic" --arg entity "$entity" --argjson device "$device" -R '@base64d|fromjson|
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            name:($topic+" "+$entity +" "+ .label), 
-                            unit_of_measurement: "b",
-                            device_class: "data_size"
-                            unique_id:(.partuuid +"-"+ $entity),
-                            value_template:("{{ value_json." + .label + "." +$entity+ "}}"),
-                            state_topic:("$topic + "/state"),
-                            _icon:"mdi:harddisk",
-                            device: $device|fromjson
+                            unit_of_measurement: "B",
+                            device_class: "data_size",
                         }' <<<$row)
                     ;;
-                iostat.kB_read/s | iostat.kB_wrtn/s | iostat.kB_dscd/s | iostat.kB_read | iostat.kB_wrtn | iostat.kB_dscd) #data_rate
-                    bashio::log.info "Sensor/data_transfer entity $entity"
+                iostat.kB_read | iostat.kB_wrtn | iostat.kB_dscd) #DATA_SIZE (KB)
+                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
-                    msg=$(jq --arg topic "$topic" --arg entity "$entity" --argjson device "$device" -R '@base64d|fromjson|
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            name:($topic+" "+$entity +" "+ .label), 
-                            unit_of_measurement: "kbit/s",
-                            device_class: "data_rate"
-                            unique_id:(.partuuid +"-"+ $entity),
-                            value_template:("{{ value_json." + .label + ".iostat." +$entity+ "}}"),
-                            state_topic:("$topic + "/state"),
-                            _icon:"mdi:harddisk",
-                            device: $device|fromjson
+                            unit_of_measurement: "kB",
+                            device_class: "data_size",
+                        }' <<<$row)
+                    ;;
+                iostat.kB_read/s | iostat.kB_wrtn/s | iostat.kB_dscd/s) #data_rate
+                    bashio::log.info "Sensor/data_transfer entity -> $entity"
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entityb "${entity%.*}" --arg entityd "${entity##*.}" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "kB/s",
+                            device_class: "data_rate",
+                            value_template:("{{ value_json." + .name + "." +$entityb+ "['"'"'" + $entityd + "'"'"']}}"),
+                            icon:"mdi:database-refresh"
                         }' <<<$row)
                     ;;
                 iostat.tps) #TPS
-                    bashio::log.info "Sensor/data_size entity $entity"
+                    bashio::log.info "Sensor/data_size entity -> $entity"
                     etype="sensor"
-                    msg=$(jq --arg topic "$topic" --arg entity "$entity" --argjson device "$device" -R '@base64d|fromjson|
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            name:($topic+" "+$entity +" "+ .label), 
                             unit_of_measurement: "tps",
-                            unique_id:(.partuuid +"-"+ $entity),
-                            value_template:("{{ value_json." + .label + ".iostat." +$entity+ "}}"),
-                            state_topic:("$topic + "/state"),
-                            _icon:"mdi:harddisk",
-                            device: $device|fromjson
+                            icon:"mdi:database-search"
                         }' <<<$row)
                     ;;
-                fsuse) # PERCENT
-                    bashio::log.info "Text entity $entity"
+                fsuse_pct) # PERCENT
+                    bashio::log.info "Sensor/percent entity -> $entity"
                     etype="sensor"
-                    msg=$(jq --arg topic "$topic" --arg entity "$entity" --argjson device "$device" -R '@base64d|fromjson|
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            name:($topic+" "+$entity +" "+ .label), 
-                            unit_of_measurement: "%",
-                            unique_id:(.partuuid +"-"+ $entity),
-                            value_template:("{{ value_json." + .label + "." +$entity+ "}}"),
-                            state_topic:($topic + "/state")
-                            icon:"mdi:harddisk",
-                            device: $device|fromjson
+                            _unit_of_measurement: "%",
+                            icon:"mdi:database-eye"
                         }' <<<$row)
                     ;;
                 *)
                     bashio::log.waring "Autodiscovery for $entity missing!"
                     ;;
                 esac
-                bashio::log.info $msg $row
-                mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -R '@base64d|fromjson|.uuid' <<<$row)_${entity}/config" -m "$msg"
+                msg=$(echo $base $device $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|del(.oth)')
+                bashio::log.info $msg
+                mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -R -r '@base64d|fromjson|.partuuid' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
             done
         done
 
         while true; do
-            blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J)
-            liostat=$(/usr/bin/iostat $(jq -r '.|map(.name)|.[]' <<<$jdisks) -k -o JSON)
-            #            status=$(jq --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.label // $i.name] = $i)' <<<${blk})
-            status=$(jq --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.label // $i.name] = $i+{iostat:($iostat.sysstat.hosts[0].statistics[0].disk[] | select(.disk_device==$i.name))})' <<<${blk})
+            blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J -y)
+            liostat=$(/usr/bin/iostat $(jq -r '.|map(.name)|.[]' <<<$jdisks) -k -d -o JSON)
+            status=$(jq --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i+{iostat:($iostat.sysstat.hosts[0].statistics[0].disk[] | select(.disk_device==$i.name))})' <<<${blk})
             # Send status message
             mosquitto_pub -t "${topic}/state" -m "$status"
             # Sleep
-            sleep 5
+            sleep 2
         done
 
     else
+        bashio::log.info "Legacy MQTT integration"
         exec /usr/local/bin/mqtt_daemon.sh
     fi
 

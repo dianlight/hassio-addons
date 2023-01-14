@@ -26,17 +26,17 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           disk=${disk:3}
      fi
 
-     mkdir -p $path/$disk
-     chmod a+rwx $path/$disk
+     mkdir -p "$path/$disk"
+     chmod a+rwx "$path/$disk"
 
      # check with findmnt if the disk is already mounted
-     if findmnt -n -o TARGET $path/$disk >/dev/null 2>&1; then
+     if findmnt -n -o TARGET "$path/$disk" >/dev/null 2>&1; then
           bashio::log.info "Disk ${disk} is already mounted"
           echo $path/$disk >>/tmp/local_mount
           return 0
      else
           # Check FS type and set relative options
-          fstype=$(lsblk $devpath/$disk -no fstype)
+          fstype=$(lsblk "$devpath/$disk" -no fstype)
           options="nosuid,relatime,noexec"
           type="auto"
           case "$fstype" in
@@ -55,10 +55,10 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           esac
 
           if [ "$remote_mount" = true ]; then
-               ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t $type $devpath/$disk /mnt/data/supervisor/media/$disk -o $options; fi" &&
+               ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if grep -qs '/mnt/data/supervisor/media/$disk ' /proc/mounts; then echo 'Disk $disk already mounted on host' ; else  mount -t $type '$devpath/$disk' '/mnt/data/supervisor/media/$disk' -o $options; fi" &&
                     echo $devpath/$disk >>/tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${disk}[${fstype}] Fail!" || :
-          mount -t $type $devpath/$disk $path/$disk -o $options &&
+          mount -t $type "$devpath/$disk" "$path/$disk" -o $options &&
                echo $path/$disk >>/tmp/local_mount && bashio::log.info "Mount ${disk}[${fstype}] Success!"
      fi
 }
@@ -112,27 +112,28 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
 
      ## List available Disk with Labels and Id
      if bashio::config.true 'available_disks_log' || bashio::config.true 'automount'; then
-          autodisks=$(ls /dev/disk/by-label | grep -v hassos || true)
+          autodisks=($(ls /dev/disk/by-label | grep -v hassos))
           bashio::log.info "Available Disk Labels:"
-          for disk in $autodisks; do
+          for disk in ${autodisks[@]}; do
                bashio::log.info "\t${disk}[$(lsblk /dev/disk/by-label/$disk -no fstype)]"
           done
      fi
 
-     moredisks=$(bashio::config 'moredisks')
-     bashio::log.info "More Disks to mount: ${moredisks}"
+     moredisks=($(bashio::config 'moredisks'))
+     bashio::log.info "More Disks to mount: ${moredisks[@]}"
 
      if bashio::config.true 'automount'; then
           bashio::log.info "Automount is Enabled!"
-          tomountdisks=$(printf "$moredisks $autodisks" | tr " " "\n" | sort -u | tr "\n" " ")
+          tomountdisks=("${autodisks[@]}" "${moredisks[@]}")
+          tomountdisks=($(for ip in "${tomountdisks[@]}"; do echo "${ip}"; done | sort -u))
      else
-          tomountdisks=$moredisks
+          tomountdisks=("${moredisks[@]}")
      fi
 
-     bashio::log.info "Mounting disks.. ${tomountdisks}" &&
-          for disk in $tomountdisks; do
-               mount_disk $disk $path $remote_mount && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"
+     bashio::log.info "Mounting disks.. ${tomountdisks[@]}" &&
+          for disk in ${tomountdisks[@]}; do
+               mount_disk "$disk" "$path" "$remote_mount" && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"
           done
 
-     echo $path >/tmp/mountpath
+     echo "$path" >/tmp/mountpath
 fi

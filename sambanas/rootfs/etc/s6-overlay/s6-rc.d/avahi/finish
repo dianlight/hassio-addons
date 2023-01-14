@@ -8,4 +8,4 @@ if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
   exec /run/s6/basedir/bin/halt
 fi
 
-bashio::log.info "avahi stopped, restarting..."
+bashio::log.info "avahi stopped"
