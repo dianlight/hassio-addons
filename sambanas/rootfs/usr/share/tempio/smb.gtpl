@@ -23,7 +23,8 @@
    load printers = no
    disable spoolss = yes
 
-   log level = 1
+   {{ $log_level := dict "trace" "5" "debug" "4" "info" "3" "notice" "2" "warning" "1" "error" "1"  "fatal" "1" -}}
+   log level = {{ .log_level | default "warning" | get $log_level }}
 
    bind interfaces only = yes
    interfaces = {{ .interfaces | join " " }}
@@ -42,7 +43,7 @@
    unix charset = UTF-8   
 
 {{ define "SHT" }}
-[{{- .share | regexFind "[A-Za-z0-9_ ]+$"}}]
+[{{- regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_]+$"}}]
    browseable = yes
    writeable = yes
 
@@ -69,9 +70,7 @@
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
                 {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}} 
-# Debug Check disk='{{ $disk }}' share='{{ $dd.share }}' ndisk='{{ $ndisk }}'
                 {{- if eq $dd.share $ndisk -}}
-# Debug Match disk='{{ $disk }}' share='{{ $dd.share }}' ndisk='{{ $ndisk }}'
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
                            {{- $_ := set $dd "share" $disk -}}

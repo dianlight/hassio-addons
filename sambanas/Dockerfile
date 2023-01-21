@@ -1,4 +1,18 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:13.0.0
+ARG BUILD_FROM
+ARG BUILD_DATE
+ARG BUILD_DESCRIPTION
+ARG BUILD_NAME
+ARG BUILD_REF
+ARG BUILD_REPOSITORY
+ARG BUILD_VERSION
+
+# hadolint ignore=DL3006
+FROM $BUILD_FROM as wsdd2-builder
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
+    && cd wsdd2-master && make
+
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
@@ -8,16 +22,23 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Add env
 ENV TERM="xterm-256color"
 
-FROM $BUILD_FROM as wsdd2-builder
-
-SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
-    && cd wsdd2-master && make
-
-FROM $BUILD_FROM
-
-# Add env
-ENV LANG C.UTF-8
+# Environment variables
+ENV \
+    CARGO_NET_GIT_FETCH_WITH_CLI=true \
+    HOME="/root" \
+    LANG="C.UTF-8" \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_FIND_LINKS=https://wheels.home-assistant.io/musllinux/ \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_PREFER_BINARY=1 \
+    PS1="$(whoami)@$(hostname):$(pwd)$ " \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
+    S6_CMD_WAIT_FOR_SERVICES=1 \
+    YARN_HTTP_TIMEOUT=1000000 \
+    TERM="xterm-256color" 
 
 # Setup base
 ARG BUILD_ARCH
@@ -74,3 +95,23 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 
 # Copy data
 COPY rootfs /
+
+# Labels
+LABEL \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="addon" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="Lucio Tarantino <@dianlight>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Home Assistant Dianlight Add-ons" \
+    org.opencontainers.image.authors="Lucio Tarantino <@dianlight>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.url="https://github.com/dianlight/hassio-addons" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}

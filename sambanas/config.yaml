@@ -87,7 +87,8 @@ schema:
       - str?
       timemachine: bool?
   interfaces:
-  - str?      
+  - str?   
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?   
 
 
 image: dianlight/{arch}-addon-sambanas
