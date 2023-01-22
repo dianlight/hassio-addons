@@ -21,9 +21,16 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
      remote_mount=$3
      devpath=/dev/disk/by-label
      if [[ $disk == id:* ]]; then
-          bashio::log.info "Disk ${disk:3} is an ID"
+          bashio::log.debug "Disk ${disk:3} is an ID"
           devpath=/dev/disk/by-id
           disk=${disk:3}
+          label=$(lsblk -no label $devpath/$disk)
+          if [[ ! -z "$label" ]]; then
+               bashio::log.info "Disk with id ${disk} id labeled $label so $label is used."
+               disk="$label"
+          else
+               devpath=/dev/disk/by-id
+          fi
      fi
 
      mdisk=$(printf %b "$disk")
@@ -115,27 +122,34 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      ## List available Disk with Labels and Id
      if bashio::config.true 'available_disks_log' || bashio::config.true 'automount'; then
           autodisks=($(ls /dev/disk/by-label | grep -v hassos))
+          bashio::log.blue "---------------------------------------------------"
           bashio::log.info "Available Disk Labels:"
           for disk in ${autodisks[@]}; do
                bashio::log.info "\t${disk}[$(lsblk /dev/disk/by-label/$disk -no fstype)]"
           done
+          bashio::log.blue "---------------------------------------------------"
      fi
 
+     OIFS=$IFS
+     IFS=$'\n'
      moredisks=($(bashio::config 'moredisks'))
-     bashio::log.info "More Disks to mount: ${moredisks[@]}"
+     bashio::log.info "MoreDisks to mount:\n" $(printf "\t%s\n" "${moredisks[@]}")
 
      if bashio::config.true 'automount'; then
           bashio::log.info "Automount is Enabled!"
           tomountdisks=("${autodisks[@]}" "${moredisks[@]}")
-          tomountdisks=($(for ip in "${tomountdisks[@]}"; do echo "${ip}"; done | sort -u))
+          tomountdisks=($(sort -u <<<"${tomountdisks[*]}"))
      else
           tomountdisks=("${moredisks[@]}")
      fi
 
-     IFS='\n' bashio::log.info "Mounting disks..\n${tomountdisks[*]}"
+     bashio::log.magenta "---------------------------------------------------"
+     bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
+     bashio::log.magenta "---------------------------------------------------"
      for disk in ${tomountdisks[@]}; do
-          mount_disk "$disk" "$path" "$remote_mount" && bashio::log.info "Success!" || bashio::log.warning "Fail to mount ${disk}!"
+          mount_disk "$disk" "$path" "$remote_mount" || bashio::log.warning "Fail to mount ${disk}!"
      done
+     IFS=$OIFS
 
      echo "$path" >/tmp/mountpath
 fi

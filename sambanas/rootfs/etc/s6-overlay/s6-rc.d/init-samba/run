@@ -9,15 +9,13 @@ declare -a interfaces=()
 export HOSTNAME
 
 # Check Login data
-if ! bashio::config.has_value 'username' || ! bashio::config.has_value 'password'; then
-    bashio::exit.nok "Setting a username and password is required!"
-fi
+bashio::config.require 'username'
+bashio::config.require 'password'
 
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
 if bashio::var.is_empty "${HOSTNAME}"; then
     bashio::log.warning "Can't read hostname, using default."
-    name="hassio"
     HOSTNAME="hassio"
 fi
 bashio::log.info "Hostname: ${HOSTNAME}"
@@ -50,10 +48,6 @@ jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | 
         -template /usr/share/tempio/smb.gtpl \
         -out /etc/samba/smb.conf
 
-# Only for Debug
-#bashio::log.info "Dump SMB configuration:"
-#cat /etc/samba/smb.conf >&2
-
 # Init user
 username=$(bashio::config 'username')
 password=$(bashio::config 'password')
@@ -76,4 +70,6 @@ for user in $(bashio::config 'other_users'); do
 done
 
 # Log exposed mounted shares
-bashio::log.info "Exposed Disks Summary: $(grep </etc/samba/smb.conf path | cut -c 10- | tr -d '\n')"
+bashio::log.blue "---------------------------------------------------"
+bashio::log.info "Exposed Disks Summary:\n$(grep </etc/samba/smb.conf path | cut -c 10-)"
+bashio::log.blue "---------------------------------------------------"

@@ -7,7 +7,11 @@ if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for disks info..."
 
     # Send autodiscovery entities
-    if ! bashio::config.true "mqtt_use_legacy_entities"; then
+    if bashio::config.true "mqtt_use_legacy_entities"; then
+        bashio::log.info "Legacy MQTT integration"
+        exec /usr/local/bin/mqtt_daemon.sh
+    else
+        bashio::log.info "MQTT integration"
 
         topic=$(bashio::config 'mqtt_topic')
         if [ "$topic" = "null" ]; then topic="sambanas"; fi
@@ -120,10 +124,6 @@ if [ -f /root/.config/mosquitto_pub ]; then
             # Sleep
             sleep 2
         done
-
-    else
-        bashio::log.info "Legacy MQTT integration"
-        exec /usr/local/bin/mqtt_daemon.sh
     fi
 
 else

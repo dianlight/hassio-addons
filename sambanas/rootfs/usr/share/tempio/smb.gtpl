@@ -43,7 +43,7 @@
    unix charset = UTF-8   
 
 {{ define "SHT" }}
-[{{- regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_]+$"}}]
+[{{- regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$"}}]
    browseable = yes
    writeable = yes
 
