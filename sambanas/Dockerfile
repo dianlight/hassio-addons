@@ -68,7 +68,8 @@ RUN apk add --no-cache \
     sysstat \
     hdparm \
     smartmontools \
-    wsdd
+    wsdd \
+    udisks2
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 

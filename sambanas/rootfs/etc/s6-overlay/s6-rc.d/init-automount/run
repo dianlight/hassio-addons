@@ -14,6 +14,20 @@ declare remote_mount
 declare devpath
 declare fstypes
 
+function disk2label() { # $1 disk  return (label disk or id)
+     local disk=$1
+     if [[ $disk == id:* ]]; then
+          disk=${disk:3}
+          label=$(lsblk -no label /dev/disk/by-id/$disk)
+          if [[ ! -z "$label" && -L "/dev/disk/by-label/$label" ]]; then
+               bashio::log.info "Disk with id ${disk} is labeled $label so $label is used."
+               disk="$label"
+          fi
+     fi
+     echo $disk
+     return 0
+}
+
 # mount a disk from parameters
 function mount_disk() { # $1 disk $2 path $3 remote_mount
      disk=$1
@@ -24,13 +38,6 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           bashio::log.debug "Disk ${disk:3} is an ID"
           devpath=/dev/disk/by-id
           disk=${disk:3}
-          label=$(lsblk -no label $devpath/$disk)
-          if [[ ! -z "$label" ]]; then
-               bashio::log.info "Disk with id ${disk} id labeled $label so $label is used."
-               disk="$label"
-          else
-               devpath=/dev/disk/by-id
-          fi
      fi
 
      mdisk=$(printf %b "$disk")
@@ -133,7 +140,12 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      OIFS=$IFS
      IFS=$'\n'
      moredisks=($(bashio::config 'moredisks'))
+
      bashio::log.info "MoreDisks to mount:\n" $(printf "\t%s\n" "${moredisks[@]}")
+
+     for index in "${!moredisks[@]}"; do
+          moredisks[$index]=$(disk2label "${moredisks[$index]}")
+     done
 
      if bashio::config.true 'automount'; then
           bashio::log.info "Automount is Enabled!"

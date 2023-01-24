@@ -11,9 +11,9 @@
 
 ### ✨ Features
 
-- [ ] Disk and Partitions referenced by `id` now are mounted and shared by label name if exists **dedupl not work**
-- Disk labels with ::space:: are supported
-- [ ] Disk summary with share names
+- Disk and Partitions referenced by `id` now are mounted and shared by label name if exists **dedupl not work**
+- Disk labels with ::space:: are now supported
+- Disk summary with share names
 - Backport [nas4]: Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉 
 - Backport [nas4]: Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
 - Backport [nas4]: Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 

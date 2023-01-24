@@ -71,5 +71,5 @@ done
 
 # Log exposed mounted shares
 bashio::log.blue "---------------------------------------------------"
-bashio::log.info "Exposed Disks Summary:\n$(grep </etc/samba/smb.conf path | cut -c 10-)"
+bashio::log.info "Exposed Disks Summary:\n$(awk '/\[.*\]/{ DISK=$0; next } /.*path =(.*)/{ printf "%-20s %s\n",DISK,$0 }' /etc/samba/smb.conf)"
 bashio::log.blue "---------------------------------------------------"
