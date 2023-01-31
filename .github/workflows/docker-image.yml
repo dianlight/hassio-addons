@@ -14,24 +14,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3 
         with: 
           submodules: true
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2 
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish Plex Addon
-        uses: home-assistant/builder@master
-        with:
-          args: |
-            --all \
-            --docker-hub-check \
-            --target addon-plex/plex \
-            --docker-hub dianlight     
+#      - name: Publish Plex Addon
+#        uses: home-assistant/builder@master
+#        with:
+#          args: |
+#            --all \
+#            --docker-hub-check \
+#            --target addon-plex/plex \
+#            --docker-hub dianlight     
 
       - name: Publish SambaNAS Addon
         uses: home-assistant/builder@master

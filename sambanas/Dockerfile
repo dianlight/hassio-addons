@@ -6,13 +6,21 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
+# hadolint ignore=DL3006
 FROM $BUILD_FROM as wsdd2-builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
     && cd wsdd2-master && make
 
-FROM $BUILD_FROM
+# hadolint ignore=DL3006
+FROM ${BUILD_FROM}
+
+# Set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Add env
+ENV TERM="xterm-256color"
 
 # Environment variables
 ENV \
@@ -39,10 +47,7 @@ RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
     dbus \
-    exfat-utils \
-    fuse \
-    fuse-exfat \
-    fuse-exfat-utils \
+    exfatprogs \
     btrfs-progs \
     udev \
     eudev \
@@ -58,16 +63,21 @@ RUN apk add --no-cache \
     curl \
     mosquitto-clients \
     openssh-client \
-    figlet \
-    findmnt 
+    findmnt \
+    ntfs-3g-progs \
+    sysstat \
+    hdparm \
+    smartmontools \
+    wsdd \
+    udisks2
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
 
 # WSDD
-RUN apk add --no-cache \
-    wsdd \
-    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
+#RUN apk add --no-cache \
+#    wsdd \
+#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \

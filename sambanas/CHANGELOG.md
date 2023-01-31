@@ -1,5 +1,56 @@
 # Changelog
 
+## 10.0.0-nas5 [Unreleased]
+
+### 💥 BREAKING CHANGE 🆘
+- Disk referenced by `id` that have a valid label are mounted and shared with label name.
+- The automount feature is enabled by default. See [DOCS.md][DOCS]
+- Backport [nas4]: Remove FUSE ntfs3g and exFat support (was broken so no one will use!).
+- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][DOCS]
+- New default config with automount and new mqtt entity system
+
+### ✨ Features
+
+- Disk and Partitions referenced by `id` now are mounted and shared by label name if exists **dedupl not work**
+- Disk labels with ::space:: are now supported
+- Disk summary with share names
+- Backport [nas4]: Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉 
+- Backport [nas4]: Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
+- Backport [nas4]: Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 
+- Backport [nas4]: Add Automount support for all partition's with labels [DOCS.md][DOCS]
+- Backport [nas4]: Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
+
+### 🏗 Chore
+- Backport [nas4]: Migrate to [Home Assistant Community Add-on: Base Images](https://github.com/hassio-addons/addon-base) 13.0.0
+- Backport [nas4]: Migrate to new s6-rc system
+
+### 🩹 BugFix
+- Backport [nas4]: Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
+
+
+## 10.0.0-nas4 [Restricted release]
+
+### ✨ Features
+
+- Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉 
+- Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
+- Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 
+- Add Automount support for all partition's with labels [DOCS.md][DOCS]
+- Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
+
+### 🏗 Chore
+- Migrate to [Home Assistant Community Add-on: Base Images](https://github.com/hassio-addons/addon-base) 13.0.0
+- Migrate to new s6-rc system
+
+### 🩹 BugFix
+- Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
+
+### 💥 BREAKING CHANGE
+- The automount feature is enabled by default. See [DOCS.md][DOCS]
+- Remove FUSE ntfs3g and exFat support (was broken so no one will use!).
+- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][DOCS]
+- New default config with automount and new mqtt entity system
+
 ## 10.0.0-nas3
 
 ### ✨ Features

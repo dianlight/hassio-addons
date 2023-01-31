@@ -47,15 +47,16 @@ allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
   - 192.168.0.0/16
+  - fe80::/10
+automount: true
 moredisks:
-  - <DISKLABEL1>
-  - <DISKLABEL2>
-  - <id:DISKID1>
+  - "<Partition's Label>"
 veto_files:
   - "._*"
   - ".DS_Store"
   - Thumbs.db
 compatibility_mode: false  
+available_disks_log: true
 wsdd2: false
 medialibrary:
   enable: true
@@ -97,19 +98,30 @@ The password that goes with the username configured for authentication.
 
 List of hosts/networks allowed to access the shared folders.
 
+### Option `automount` (optional)
+
+***Protection Mode must be disabled to allow this function***
+Automatic mount and expose all labeled disk. 
+
+Defaults to `true`.
+
 ### Option: `moredisks` (optional)
 
 ***Protection Mode must be disabled to allow this function***
 List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:` (WARN: write id prefix in lowercase only!)
-***NOTE: partitions label with spaces are NOT SUPPORTED***
+
 The following Fs are supported:
 
-- [X] ext3/4
-- [X] fat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
+- [x] ext3
+-	[x] ext2
+-	[x] ext4
+-	[x] squashfs
+-	[x] vfat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
+-	[x] msdos --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
+-	[x] f2fs --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
+-	[x] exFat --> ***NOTE: Experimental with exFat kernel driver***
+-	[x] ntfs --> ***NOTE: Experimental with ntfs3 kernel driver***
 
-Unsupported Fs:
-
-- All Fuse based FS like exFat, fat32, ntfs. Samba don't like fuse.
 
 ### Option `available_disks_log` (optional)
 
@@ -228,6 +240,11 @@ Setting this option to `true` will enable the use of mqtt to send disks status d
 
 Defaults to `true`.
 
+### Option: `mqtt_use_legacy_entities` (optional) (**deprecated**)
+
+Setting this option to `true` will expose mqtt old entities based on mountpoints. This will be removed in future releases.
+
+Defaults to `false`.
 ### Option: `mqtt_host` (optional)
 
 If using an external mqtt broker, the hostname/URL of the broker. See [MQTT Status Notifications](https://github.com/thomasmauerer/hassio-addons/blob/master/samba-backup/DOCS.md#mqtt-status-notifications) for additional infos.
