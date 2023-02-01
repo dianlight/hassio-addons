@@ -1,6 +1,16 @@
 # Changelog
 
-## 10.0.0-nas5 [Unreleased]
+## 10.0.0-nas6
+
+### 🩹 BugFix
+- Fix issue about missing ntfs3 module on amd64 architecture [#121](https://github.com/dianlight/hassio-addons/issues/121) 
+- Fix missing libcap for wsdd2
+
+### ✨ Features
+- Add support for btrfs fs 
+- Add support for xfs fs 
+
+## 10.0.0-nas5 
 
 ### 💥 BREAKING CHANGE 🆘
 - Disk referenced by `id` that have a valid label are mounted and shared with label name.

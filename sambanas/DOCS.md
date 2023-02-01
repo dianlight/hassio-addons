@@ -120,8 +120,9 @@ The following Fs are supported:
 -	[x] msdos --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 -	[x] f2fs --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
 -	[x] exFat --> ***NOTE: Experimental with exFat kernel driver***
--	[x] ntfs --> ***NOTE: Experimental with ntfs3 kernel driver***
-
+-	[x] ntfs --> ***NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures***
+-	[x] brtfs
+-	[x] xfs 
 
 ### Option `available_disks_log` (optional)
 
