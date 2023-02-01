@@ -49,6 +49,7 @@ RUN apk add --no-cache \
     dbus \
     exfatprogs \
     btrfs-progs \
+    xfsprogs \
     udev \
     eudev \
     hwids-udev \
@@ -69,7 +70,8 @@ RUN apk add --no-cache \
     hdparm \
     smartmontools \
     wsdd \
-    udisks2
+    udisks2 \
+    libcap 
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 

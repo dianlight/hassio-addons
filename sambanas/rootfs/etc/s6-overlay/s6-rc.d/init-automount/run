@@ -57,11 +57,11 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           type="auto"
           case "$fstype" in
           exfat | vfat | msdos)
-               bashio::log.warning "Your ${mdisk} as ${fstype} exFat. Permissions and ACL don't works and This is an EXPERIMENTAL feature"
+               bashio::log.warning "Your ${mdisk} is ${fstype}. Permissions and ACL don't works and this is an EXPERIMENTAL support"
                options="${options},umask=000"
                ;;
           ntfs)
-               bashio::log.warning "Your ${mdisk} as fstype NTFS. This is an EXPERIMENTAL feature"
+               bashio::log.warning "Your ${mdisk} is ${fstype}. This is an EXPERIMENTAL support"
                options="${options},umask=000"
                type="ntfs3"
                ;;
@@ -88,7 +88,9 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      bashio::log.info "MoreDisk or Automount option found!"
 
      # Check supported FS
-     modprobe ntfs3 exfat
+     for mfs in ntfs3 exfat btrfs xfs; do
+          modprobe $mfs || bashio::log.warning "$mfs module not available!"
+     done
      fstypes=$(IFS=$'\n' echo $(cat /proc/filesystems | grep -v nodev))
      bashio::log.blue "---------------------------------------------------"
      bashio::log.green "Supported fs: ${fstypes}"
