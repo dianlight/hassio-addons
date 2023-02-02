@@ -22,6 +22,8 @@ function disk2label() { # $1 disk  return (label disk or id)
           if [[ ! -z "$label" && -L "/dev/disk/by-label/$label" ]]; then
                bashio::log.info "Disk with id ${disk} is labeled $label so $label is used."
                disk="$label"
+          else
+               disk=$1
           fi
      fi
      echo $disk
@@ -130,26 +132,32 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
 
      ## List available Disk with Labels and Id
      if bashio::config.true 'available_disks_log' || bashio::config.true 'automount'; then
-          autodisks=($(ls /dev/disk/by-label | grep -v hassos))
           bashio::log.blue "---------------------------------------------------"
-          bashio::log.info "Available Disk Labels:"
-          for disk in ${autodisks[@]}; do
-               bashio::log.info "\t${disk}[$(lsblk /dev/disk/by-label/$disk -no fstype)]"
-          done
+          autodisks=($(ls /dev/disk/by-label | grep -v hassos))
+          if [ ${#autodisks[@]} -eq 0 ]; then
+               bashio::log.info "No Disk with labels."
+          else
+               bashio::log.info "Available Disk Labels:"
+               for disk in ${autodisks[@]}; do
+                    bashio::log.info "\t${disk}[$(lsblk /dev/disk/by-label/$disk -no fstype)]"
+               done
+          fi
           bashio::log.blue "---------------------------------------------------"
      fi
 
      OIFS=$IFS
      IFS=$'\n'
      moredisks=($(bashio::config 'moredisks'))
+     if [ ${#moredisks[@]} -eq 0 ]; then
+          bashio::log.info "No MoreDisks to mount"
+     else
+          bashio::log.info "MoreDisks to mount:\n" $(printf "\t%s\n" "${moredisks[@]}")
+          for index in "${!moredisks[@]}"; do
+               moredisks[$index]=$(disk2label "${moredisks[$index]}")
+          done
+     fi
 
-     bashio::log.info "MoreDisks to mount:\n" $(printf "\t%s\n" "${moredisks[@]}")
-
-     for index in "${!moredisks[@]}"; do
-          moredisks[$index]=$(disk2label "${moredisks[$index]}")
-     done
-
-     if bashio::config.true 'automount'; then
+     if bashio::config.true 'automount' && [ ${#autodisks[@]} -gt 0 ]; then
           bashio::log.info "Automount is Enabled!"
           tomountdisks=("${autodisks[@]}" "${moredisks[@]}")
           tomountdisks=($(sort -u <<<"${tomountdisks[*]}"))
@@ -157,12 +165,14 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           tomountdisks=("${moredisks[@]}")
      fi
 
-     bashio::log.magenta "---------------------------------------------------"
-     bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
-     bashio::log.magenta "---------------------------------------------------"
-     for disk in ${tomountdisks[@]}; do
-          mount_disk "$disk" "$path" "$remote_mount" || bashio::log.warning "Fail to mount ${disk}!"
-     done
+     if [ ${#moredisks[@]} -gt 0 ]; then
+          bashio::log.magenta "---------------------------------------------------"
+          bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
+          bashio::log.magenta "---------------------------------------------------"
+          for disk in ${tomountdisks[@]}; do
+               mount_disk "$disk" "$path" "$remote_mount" || bashio::log.warning "Fail to mount ${disk}!"
+          done
+     fi
      IFS=$OIFS
 
      echo "$path" >/tmp/mountpath
