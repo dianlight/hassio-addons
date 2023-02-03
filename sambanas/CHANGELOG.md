@@ -1,5 +1,12 @@
 # Changelog
 
+## 10.0.0-nas7
+
+### 🩹 BugFix
+- Fix issue about mount by id [#123](https://github.com/dianlight/hassio-addons/issues/123) 
+- Fix issue about automount without external scripts [#124](https://github.com/dianlight/hassio-addons/issues/124)
+- Fix issue about mount hassos internal disks [#124](https://github.com/dianlight/hassio-addons/issues/124)
+
 ## 10.0.0-nas6
 
 ### 🩹 BugFix
