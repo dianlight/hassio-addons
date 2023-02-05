@@ -235,6 +235,18 @@ Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to tru
 
 Defaults to `false`.
 
+### Option: `hdd_idle_seconds` (optional) (**Use only if your disks never spind down**)
+
+Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
+
+Defaults to hd-idle demons is used at all.
+
+### Option: `enable_smart` (optional)
+
+Enable SMART on all disks, enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
+
+Defaults to `true`.
+
 ### Option: `mqtt_enable` (optional)
 
 Setting this option to `true` will enable the use of mqtt to send disks status data.

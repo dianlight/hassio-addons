@@ -6,11 +6,21 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
+ARG HDDTEMP_VERSION="0.3-beta15"
+
 # hadolint ignore=DL3006
-FROM $BUILD_FROM as wsdd2-builder
+FROM $BUILD_FROM as builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
+RUN apk add --no-cache make gcc libc-dev linux-headers build-base autoconf automake
+
+ARG BUILD_ARCH
+ARG HDDTEMP_VERSION
+
+RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
+    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
+
+RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master && make
 
 # hadolint ignore=DL3006
@@ -38,7 +48,8 @@ ENV \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_CMD_WAIT_FOR_SERVICES=1 \
     YARN_HTTP_TIMEOUT=1000000 \
-    TERM="xterm-256color" 
+    TERM="xterm-256color"   
+
 
 # Setup base
 ARG BUILD_ARCH
@@ -72,17 +83,16 @@ RUN apk add --no-cache \
     wsdd \
     udisks2 \
     libcap \
-    hd-idle \
-    util-linux \
-    fstrim
+    hd-idle 
+
+# HDDTEMP
+ARG HDDTEMP_VERSION
+COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
+RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
-COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
+COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin 
 
-# WSDD
-#RUN apk add --no-cache \
-#    wsdd \
-#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \

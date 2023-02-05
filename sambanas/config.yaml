@@ -66,6 +66,8 @@ schema:
   - str
   compatibility_mode: bool?
   wsdd2: bool?
+  hdd_idle_seconds: int(0,)?
+  enable_smart: bool?
   mqtt_use_legacy_entities: bool?
   mqtt_enable: bool?
   mqtt_host: str?
