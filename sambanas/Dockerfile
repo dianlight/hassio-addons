@@ -71,7 +71,10 @@ RUN apk add --no-cache \
     smartmontools \
     wsdd \
     udisks2 \
-    libcap 
+    libcap \
+    hd-idle \
+    util-linux \
+    fstrim
 
 # WSDD2
 COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 

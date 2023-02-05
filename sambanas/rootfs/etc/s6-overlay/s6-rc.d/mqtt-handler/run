@@ -101,7 +101,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     etype="sensor"
                     exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
                         {
-                            _unit_of_measurement: "%",
+                            unit_of_measurement: "%",
                             icon:"mdi:database-eye"
                         }' <<<$row)
                     ;;
@@ -116,7 +116,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
         done
 
         while true; do
-            blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J -y)
+            blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J -y | jq 'walk(if type == "object"  and .fsuse_pct != null  then .fsuse_pct|=(rtrimstr("%")|tonumber) else . end)')
             liostat=$(/usr/bin/iostat $(jq -r '.|map(.name)|.[]' <<<$jdisks) -k -d -o JSON)
             status=$(jq --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i+{iostat:($iostat.sysstat.hosts[0].statistics[0].disk[] | select(.disk_device==$i.name))})' <<<${blk})
             # Send status message
