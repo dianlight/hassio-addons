@@ -4,7 +4,7 @@
 # Start mqtt service
 # ==============================================================================
 if [ -f /root/.config/mosquitto_pub ]; then
-    bashio::log.info "Starting the MQTT daemon for disks info..."
+    bashio::log.info "Starting the MQTT daemon for partitions info..."
 
     # Send autodiscovery entities
     if bashio::config.true "mqtt_use_legacy_entities"; then
@@ -50,7 +50,8 @@ if [ -f /root/.config/mosquitto_pub ]; then
                             oth:{
                                 partuuid:.partuuid,
                                 name:.name,
-                                label:.label
+                                label:.label,
+                                root:("/dev/" + .name[:-1])
                             }
                         }' <<<$row)
 
@@ -109,7 +110,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     bashio::log.waring "Autodiscovery for $entity missing!"
                     ;;
                 esac
-                msg=$(echo $base $device $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|del(.oth)')
+                msg=$(echo $base $device $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|.device.via_device=(.oth.root | explode | join(""))|del(.oth)')
                 bashio::log.debug $msg
                 mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -R -r '@base64d|fromjson|.partuuid' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
             done

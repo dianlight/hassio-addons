@@ -1,0 +1,114 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Start mqtt service for disk only
+# ==============================================================================
+if [ -f /root/.config/mosquitto_pub ]; then
+    bashio::log.info "Starting the MQTT daemon for disks info..."
+
+    # Send autodiscovery entities
+    topic=$(bashio::config 'mqtt_topic')
+    if [ "$topic" = "null" ]; then topic="sambanas"; fi
+
+    # Send discovery messages.
+    if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
+
+    jdevice=$(jq -r -c -n --arg topic $topic --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
+    {device:{
+        identifiers:[],
+        name: "SambaNas Physical Disk ",
+        hw_version: $addon,
+        sw_version: $smbv,
+        model: "SambaNas",
+        manufacturer: "@Dianlight",
+        via_device: $topic
+    }}')
+
+    smartctl --scan-open | while read -a device; do
+        #bashio::log.info "2.1 ${device[0]}"
+
+        row=$(smartctl -A ${device[0]} -j)
+        #bashio::log.info "2.2 ${row}"
+        for entity in device.name device.type device.protocol power_on_time.hours power_cycle_count temperature.current; do
+
+            if [[ -z $(jq ".$entity // empty" <<<$row) ]]; then
+                #      bashio::log.info "2.2 Missing ${entity} in ${row}"
+                continue
+            fi
+
+            exmsg={}
+            etype=""
+
+            base=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        name:($topic+" "+$entity +" "+.device.info_name), 
+                        unique_id:((.device.name | explode | join("")) + "-" + ($entity|explode|join(""))),
+                        value_template:("{{ value_json." +$entity+ "}}"),
+                        state_topic:($topic + "/" + (.device.name | gsub("[^A-z]";"")) + "/state" ),
+                        oth:{
+                                uuid:.device.name | explode | join(""),
+                                label:.device.name
+                            }
+                    }' <<<$row)
+
+            case "$entity" in
+            device.name | device.type | device.protocol) #TEXT
+                etype="sensor"
+                exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        mode: "text",
+                        icon:"mdi:harddisk"
+                    }' <<<$row)
+                ;;
+            power_on_time.hours) #Time
+                etype="sensor"
+                exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        unit_of_measurement: "h",
+                        device_class: "duration"
+                    }' <<<$row)
+                ;;
+            power_cycle_count) #number
+                etype="sensor"
+                exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        _unit_of_measurement: "",
+                        icon:"mdi:power-cycle"
+                    }' <<<$row)
+                ;;
+            temperature.current) #temperature
+                etype="sensor"
+                exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        unit_of_measurement: "°C",
+                        device_class: "temperature",
+                        _icon:"mdi:thermometer"
+                    }' <<<$row)
+                ;;
+            *)
+                bashio::log.waring "Autodiscovery for $entity missing!"
+                ;;
+            esac
+            #bashio::log.info "2.4 $base $exmsg"
+            msg=$(echo $base $jdevice $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.uuid|.device.name=(.device.name + .oth.label)|del(.oth)')
+            bashio::log.debug $msg
+            mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -r '.device.name | explode | join("")' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
+        done
+
+        #  bashio::log.info "2.3"
+
+    done
+
+    while true; do
+        smartctl --scan-open | while read -a device; do
+            status=$(smartctl -A ${device[0]} -j)
+            # Send status message
+            mosquitto_pub -t "${topic}/$(sed "s/[^A-z]//g" <<<${device[0]})/state" -m "$status"
+            # Sleep
+            sleep 2
+        done
+    done
+else
+    ! bashio::config.false "mqtt_enable" && bashio::log.warning "No MQTT config with mqtt_enable option!"
+    exec sleep infinity
+fi
