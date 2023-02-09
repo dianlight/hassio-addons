@@ -29,9 +29,6 @@ FROM ${BUILD_FROM}
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Add env
-ENV TERM="xterm-256color"
-
 # Environment variables
 ENV \
     CARGO_NET_GIT_FETCH_WITH_CLI=true \
