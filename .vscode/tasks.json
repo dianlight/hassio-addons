@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Home Assistant",
+      "type": "shell",
+      "command": "supervisor_run",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "options": {
+        "shell": {
+          "executable": "/usr/bin/sudo",
+          "args": ["/bin/bash"]
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
