@@ -8,5 +8,5 @@ build_from:
 codenotary:
   signer: lucio.tarantino@gmail.com
   base_image: codenotary@frenck.dev
-
-
+args:
+  HDDTEMP_VERSION: "0.3-beta15"
