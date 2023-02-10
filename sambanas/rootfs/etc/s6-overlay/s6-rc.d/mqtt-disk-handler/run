@@ -27,9 +27,10 @@ if [ -f /root/.config/mosquitto_pub ]; then
     smartctl --scan-open | while read -a device; do
         #bashio::log.info "2.1 ${device[0]}"
 
-        row=$(smartctl -A ${device[0]} -j)
+        row=$(smartctl -A ${device[0]} -j | jq '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table)')
         #bashio::log.info "2.2 ${row}"
-        for entity in device.name device.type device.protocol power_on_time.hours power_cycle_count temperature.current; do
+        for entity in device.name device.type device.protocol power_on_time.hours power_cycle_count temperature.current \
+            Raw_Read_Error_Rate.raw.value Reallocated_Sector_Ct.raw.value Wear_Leveling_Count.raw.value UDMA_CRC_Error_Count.raw.value; do
 
             if [[ -z $(jq ".$entity // empty" <<<$row) ]]; then
                 #      bashio::log.info "2.2 Missing ${entity} in ${row}"
@@ -76,6 +77,14 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         icon:"mdi:power-cycle"
                     }' <<<$row)
                 ;;
+            Raw_Read_Error_Rate.raw.value | Reallocated_Sector_Ct.raw.value | Wear_Leveling_Count.raw.value | UDMA_CRC_Error_Count.raw.value) #number
+                etype="sensor"
+                exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
+                    {
+                        _unit_of_measurement: "",
+                        icon:"mdi:chart-box-outline"
+                    }' <<<$row)
+                ;;
             temperature.current) #temperature
                 etype="sensor"
                 exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
@@ -101,7 +110,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
     while true; do
         smartctl --scan-open | while read -a device; do
-            status=$(smartctl -A ${device[0]} -j)
+            status=$(smartctl -A ${device[0]} -j | jq '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table)')
             # Send status message
             mosquitto_pub -t "${topic}/$(sed "s/[^A-z]//g" <<<${device[0]})/state" -m "$status"
             # Sleep
