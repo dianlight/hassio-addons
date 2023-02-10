@@ -240,7 +240,7 @@ Defaults to `false`.
 
 Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
 
-Defaults to hd-idle demons is used at all.
+Defaults to hd-idle demons not being used at all.
 
 ### Option: `enable_smart` (optional)
 
