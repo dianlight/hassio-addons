@@ -1,29 +1,56 @@
 # Changelog
 
+## 10.0.0-nas8
+
+### ✨ Features
+
+- Not OperatinSystem Allert (force EXIT)
+- Better support for "No Potection Mode"
+  - [MQTT] support protected mode
+- [MQTT] Add Disk device
+  - [MQTT] Add HD Temperature information
+  - [MQTT] Report SMART Status (Read Error Rate, Reallocate Sectorer.... )
+  - [MQTT] Corret Device->Partition "via_device"
+  - Update documentation
+- Add option to enable SMART on supported drivers See [DOCS.md][docs]
+- Add [hd-idle](https://github.com/adelolmo/hd-idle) support FR [#34](https://github.com/dianlight/hassio-addons/issues/34)
+
+### 🩹 BugFix
+
+- [MQTT] Fix issue about % in fsuse_pct [#126](https://github.com/dianlight/hassio-addons/issues/126)]
+
+### 💥 BREAKING CHANGE
+
+- The addon now go in error if no `Home Assistant OS` is found on host. See [DOCS.md][docs]
+
 ## 10.0.0-nas7
 
 ### 🩹 BugFix
-- Fix issue about mount by id [#123](https://github.com/dianlight/hassio-addons/issues/123) 
+
+- Fix issue about mount by id [#123](https://github.com/dianlight/hassio-addons/issues/123)
 - Fix issue about automount without external scripts [#124](https://github.com/dianlight/hassio-addons/issues/124)
 - Fix issue about mount hassos internal disks [#124](https://github.com/dianlight/hassio-addons/issues/124)
 
 ## 10.0.0-nas6
 
 ### 🩹 BugFix
-- Fix issue about missing ntfs3 module on amd64 architecture [#121](https://github.com/dianlight/hassio-addons/issues/121) 
+
+- Fix issue about missing ntfs3 module on amd64 architecture [#121](https://github.com/dianlight/hassio-addons/issues/121)
 - Fix missing libcap for wsdd2
 
 ### ✨ Features
-- Add support for btrfs fs 
-- Add support for xfs fs 
 
-## 10.0.0-nas5 
+- Add support for btrfs fs
+- Add support for xfs fs
+
+## 10.0.0-nas5
 
 ### 💥 BREAKING CHANGE 🆘
+
 - Disk referenced by `id` that have a valid label are mounted and shared with label name.
-- The automount feature is enabled by default. See [DOCS.md][DOCS]
+- The automount feature is enabled by default. See [DOCS.md][docs]
 - Backport [nas4]: Remove FUSE ntfs3g and exFat support (was broken so no one will use!).
-- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][DOCS]
+- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][docs]
 - New default config with automount and new mqtt entity system
 
 ### ✨ Features
@@ -31,113 +58,134 @@
 - Disk and Partitions referenced by `id` now are mounted and shared by label name if exists **dedupl not work**
 - Disk labels with ::space:: are now supported
 - Disk summary with share names
-- Backport [nas4]: Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉 
-- Backport [nas4]: Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
-- Backport [nas4]: Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 
-- Backport [nas4]: Add Automount support for all partition's with labels [DOCS.md][DOCS]
+- Backport [nas4]: Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][docs])) 🎉 🎉 🎉
+- Backport [nas4]: Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][docs])) 🎉 🎉 🎉
+- Backport [nas4]: Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][docs]
+- Backport [nas4]: Add Automount support for all partition's with labels [DOCS.md][docs]
 - Backport [nas4]: Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
 
 ### 🏗 Chore
+
 - Backport [nas4]: Migrate to [Home Assistant Community Add-on: Base Images](https://github.com/hassio-addons/addon-base) 13.0.0
 - Backport [nas4]: Migrate to new s6-rc system
 
 ### 🩹 BugFix
-- Backport [nas4]: Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
 
+- Backport [nas4]: Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
 
 ## 10.0.0-nas4 [Restricted release]
 
 ### ✨ Features
 
-- Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉 
-- Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
-- Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][DOCS] 
-- Add Automount support for all partition's with labels [DOCS.md][DOCS]
+- Add support for NTFS3 fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][docs])) 🎉 🎉 🎉
+- Add support for exFat fs 🎉 🎉 🚨🎉 🎉 (EXPERIMENTAL [DOCS.md][docs])) 🎉 🎉 🎉
+- Add new MQTT report entity system based on device not on mount path and iostat [DOCS.md][docs]
+- Add Automount support for all partition's with labels [DOCS.md][docs]
 - Support Partition with spaces ISSUE [#118](https://github.com/dianlight/hassio-addons/issues/118)
 
 ### 🏗 Chore
+
 - Migrate to [Home Assistant Community Add-on: Base Images](https://github.com/hassio-addons/addon-base) 13.0.0
 - Migrate to new s6-rc system
 
 ### 🩹 BugFix
+
 - Fix error without MQTT server BUG [#116](https://github.com/dianlight/hassio-addons/issues/116)
 
 ### 💥 BREAKING CHANGE
-- The automount feature is enabled by default. See [DOCS.md][DOCS]
+
+- The automount feature is enabled by default. See [DOCS.md][docs]
 - Remove FUSE ntfs3g and exFat support (was broken so no one will use!).
-- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][DOCS]
+- MQTT status message was refactored and report also fstype and disk iostat. If you need the old system use `mqtt_use_legacy_entities` option [DOCS.md][docs]
 - New default config with automount and new mqtt entity system
 
 ## 10.0.0-nas3
 
 ### ✨ Features
-- Add ```loglevel``` option.
+
+- Add `loglevel` option.
 
 ### 🩹 BugFix
+
 - Fix Share Name BUG [#106](https://github.com/dianlight/hassio-addons/issues/106)
+
 ### 💥 BREAKING CHANGE
+
 There is a new algorithm for creating the SHARE name. Therefore the name of the exposed shares could change.
 
 ## 10.0.0-nas2
 
 ### 🩹 BugFix
+
 - Fix ACL Bug [#98](https://github.com/dianlight/hassio-addons/issues/98)
 
 ## 10.0.0-nas1
 
 ### 🩹 BugFix
+
 - Fix Host Unmountig Bug [#94](https://github.com/dianlight/hassio-addons/issues/94)
 
 ## 10.0.0-nas
 
 ### 💥 BREAKING CHANGE
+
 - Don't mangle filenames: By default, Samba mangles filenames with special characters to ensure
-compatibility with really old versions of Windows which have a very limited charset for filenames. The add-on no longer does this as modern operating
-systems do not have these restrictions.
+  compatibility with really old versions of Windows which have a very limited charset for filenames. The add-on no longer does this as modern operating
+  systems do not have these restrictions.
 
 ### ✨ Features
-- Option to use WSDD2 over WSDD (see [DOCS.md][DOCS])
+
+- Option to use WSDD2 over WSDD (see [DOCS.md][docs])
 
 ### 🏗 Chore
+
 - Refactor all MQTT HA integration
 - Refactor root mount point selection ( no more pollution in /media if you don't use medialibrary )
 - Refactor Docker composition
 - [Full Changelog from official addon 10.0.0][changelog_10.0.0]
   - Don't mangle filenames (fixes [#2541](https://github.com/home-assistant/addons/issues/2541))
 
-[changelog_10.0.0]: https://github.com/home-assistant/addons/pull/2545  
+[changelog_10.0.0]: https://github.com/home-assistant/addons/pull/2545
 
 ### 🩹 BugFix
+
 - Autodiscovery (WSDD2) interface respect configuration
 
 ## 9.7.0-nas2
 
 ### 🩹 BugFix
+
 - Merged PR #85 by @grischard - Fix Bug [#84](https://github.com/dianlight/hassio-addons/issues/84)
 
 ## 9.7.0-nas1
 
 ### ✨ Features
+
 - Add wsdd for Windows10/11 autodiscovery
 - Support Enabline/Disabling Shares (based on PR#72 by @Uneo7 | Issue #24)
 - Support for different users on shares (Issue #19)
 - Interface options ( based on the idea of lmagyar/homeassistant-addon-samba-interface addon )
 
 ### 🏗 Chore
+
 - Upgrade Alpine Linux to 3.16
 
 ### 🩹 BugFix
+
 - AVAHI Support hostname with dot
 
 ## 9.7.0-nas
 
 ### ✨ Features
+
 - Add btrfs support (PR #75 By @fAuernigg)
 
 ### 🩹 BugFix
+
 - Change startup to system (PR #81 By @marciogranzotto)
 
 ### 🏗 Chore
+
 - [Full Changelog from official addon 9.5.1][changelog_9.7.0]
   - Upgrade Alpine Linux to 3.15
   - Sign add-on with Codenotary Community Attestation Service (CAS)
@@ -146,7 +194,6 @@ systems do not have these restrictions.
   - Exit with error if there are no supported interfaces to run Samba on
 - [Full Changelog from official addon 9.6.0][changelog_9.6.0]
   - Run on all supported interfaces
-
 
 [changelog_9.7.0]: https://github.com/home-assistant/addons/pull/2070
 [changelog_9.6.1]: https://github.com/home-assistant/addons/pull/2031
@@ -184,7 +231,7 @@ systems do not have these restrictions.
 
 ### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md][DOCS])) 🎉 🎉 🎉
+- 🎉 🎉 🚨🎉 🎉 Support to Host Mount (EXPERIMENTAL [DOCS.md][docs])) 🎉 🎉 🎉
 
 ### 🏗 Chore
 
@@ -194,7 +241,7 @@ systems do not have these restrictions.
 
 ### ✨ Features
 
-- 🎉 🎉 🚨🎉 🎉  Support to Host Mount (EXPERIMENTAL [DOCS.md][DOCS]) 🎉 🎉 🎉
+- 🎉 🎉 🚨🎉 🎉 Support to Host Mount (EXPERIMENTAL [DOCS.md][docs]) 🎉 🎉 🎉
 
 ### 📚 Documentation
 
@@ -214,7 +261,7 @@ systems do not have these restrictions.
 
 ## 9.3.0-nas8
 
-- chore: Support new Supervisor/Hardware ( remov dev_ trick )
+- chore: Support new Supervisor/Hardware ( remov dev\_ trick )
 - chore: Apparmor config optimization for broadcast.
 - fix: remove double % sign on HA report. (Bug #38)
 
@@ -340,4 +387,4 @@ systems do not have these restrictions.
 
 - Update base image
 
-[DOCS]:https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md
+[docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas/DOCS.md
