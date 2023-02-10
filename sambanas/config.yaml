@@ -6,42 +6,42 @@ description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
 codenotary: lucio.tarantino@gmail.com
 arch:
-- armhf
-- armv7
-- aarch64
-- amd64
-- i386
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
 startup: system
 boot: auto
 init: false
 hassio_api: true
 host_network: true
 map:
-- config:rw
-- ssl:rw
-- addons:rw
-- share:rw
-- backup:rw
-- media:rw
+  - config:rw
+  - ssl:rw
+  - addons:rw
+  - share:rw
+  - backup:rw
+  - media:rw
 options:
   workgroup: WORKGROUP
   username: homeassistant
   allow_hosts:
-  - 10.0.0.0/8
-  - 172.16.0.0/12
-  - 192.168.0.0/16
-  - fe80::/10
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+    - fe80::/10
   automount: true
   moredisks: []
   available_disks_log: true
   medialibrary:
     enable: false
   veto_files:
-  - "._*"
-  - ".DS_Store"
-  - Thumbs.db
-  - icon?
-  - ".Trashes"
+    - "._*"
+    - ".DS_Store"
+    - Thumbs.db
+    - icon?
+    - ".Trashes"
   compatibility_mode: false
   wsdd2: false
   mqtt_use_legacy_entities: false
@@ -55,15 +55,15 @@ schema:
   password: password
   automount: bool?
   moredisks:
-  - str
+    - str
   available_disks_log: bool?
   medialibrary:
     enable: bool?
     ssh_private_key: password?
   allow_hosts:
-  - str
+    - str
   veto_files:
-  - str
+    - str
   compatibility_mode: bool?
   wsdd2: bool?
   hdd_idle_seconds: int(0,)?
@@ -85,32 +85,30 @@ schema:
   acl:
     - share: str
       disabled: bool?
-      users: 
-      - str?
+      users:
+        - str?
       timemachine: bool?
   interfaces:
-  - str?   
-  log_level: list(trace|debug|info|notice|warning|error|fatal)?   
-
+    - str?
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
+  meaning_of_life: int?
 
 image: dianlight/{arch}-addon-sambanas
 services:
-- mqtt:want
+  - mqtt:want
 udev: true
-usb: true
+#usb: true
 host_dbus: true
 kernel_modules: true
 privileged:
-- SYS_ADMIN
-- SYS_RAWIO
-- SYS_RESOURCE
-- SYS_MODULE
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - SYS_RESOURCE
+  - SYS_MODULE
 full_access: true
 devicetree: false
 apparmor: true
 host_ipc: true
 #advanced: true
 homeassistant: 2023.01.1
-backup: hot 
-
-
+backup: hot

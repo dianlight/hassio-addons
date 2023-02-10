@@ -6,7 +6,7 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
-ARG HDDTEMP_VERSION="0.3-beta15"
+ARG HDDTEMP_VERSION
 
 # hadolint ignore=DL3006
 FROM $BUILD_FROM as builder
@@ -45,7 +45,7 @@ ENV \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_CMD_WAIT_FOR_SERVICES=1 \
     YARN_HTTP_TIMEOUT=1000000 \
-    TERM="xterm-256color"   
+    TERM="xterm-256color"
 
 
 # Setup base
@@ -80,7 +80,7 @@ RUN apk add --no-cache \
     wsdd \
     udisks2 \
     libcap \
-    hd-idle 
+    hd-idle
 
 # HDDTEMP
 ARG HDDTEMP_VERSION
@@ -88,7 +88,7 @@ COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
 RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
-COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin 
+COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
 
 # SAMBA Config
@@ -97,11 +97,11 @@ RUN  mkdir -p /var/lib/samba \
     /etc/samba/lmhosts \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
-    /var/lib/samba/winbindd_idmap.tdb 
+    /var/lib/samba/winbindd_idmap.tdb
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
+    && chmod a+x /usr/bin/ha
 
 
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab

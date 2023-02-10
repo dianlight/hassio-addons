@@ -103,7 +103,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
 
 # Error for Operating System
 if ! [[ "$(bashio::info.operating_system)" =~ ^Home\ Assistant\ OS.* ]]; then
-     bashio::log.warning "Your operating system don't match supported one! "
+     bashio::log.warning "Your operating system $(bashio::info.operating_system) is not supported! "
      bashio::log.red "+------------------------------------------------------------------+"
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
@@ -111,8 +111,11 @@ if ! [[ "$(bashio::info.operating_system)" =~ ^Home\ Assistant\ OS.* ]]; then
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "+------------------------------------------------------------------+"
-     bashio::log.warning "Read the documentation!"
-     exit 1
+     if [[ $(bashio::config 'meaning_of_life') -ne 42 ]]; then
+       bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
+     else
+       bashio::log.green "Deep Thought permission accepted!"
+     fi
 fi
 
 # Mount external drive
