@@ -1,0 +1,22 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Take down the S6 supervision tree based on service exit code
+# ==============================================================================
+declare topic
+
+if ! bashio::config.true "autodiscovery.disable_autoremove"; then
+  bashio::log.info "MQTT disk cleanup."
+  topic=$(bashio::config 'mqtt_topic')
+  if [ "$topic" = "null" ]; then topic="sambanas"; fi
+  mosquitto_sub -t "homeassistant/+/${topic}/+/config" --remove-retained -W 3 >/dev/null || true
+  mosquitto_sub -t "${topic}/state" --remove-retained -W 3 >/dev/null || true
+  bashio::log.info "MQTT disk cleanup Done."
+fi
+
+if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
+  bashio::log.warning "mqtt-handler crashed, halting add-on"
+  exec /run/s6/basedir/bin/halt
+fi
+
+bashio::log.info "mqtt-handler stopped"

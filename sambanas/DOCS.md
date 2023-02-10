@@ -4,6 +4,8 @@
 
 This addon has been designed, built and tested to work with HAOS (Homeassistant Operating System). The use in other types of installations is not recommended and useless as other solutions given by the host can be used.
 
+### Using it on a different operating system leads to the error at startup. I apologize to all the advanced users who are using it on different OSes but I manage the addon in my spare time and instead of doing something useful lately I'm only replying to people who don't read the documentation. "This is the meaning of life"
+
 ## Installation
 
 Follow these steps to get the add-on installed on your system:
@@ -25,24 +27,24 @@ If you are on Windows you use `\\<IP_ADDRESS>\`, if you are on MacOS you use `sm
 
 This addon exposes the following directories over smb (samba):
 
-Directory | Description
--- | --
-`addons` | This is for your local add-ons.
-`backup` | This is for your snapshots.
-`config` | This is for your Home Assistant configuration.
-`media` | This is for local media files.
-`share` | This is for your data that is shared between add-ons and Home Assistant.
-`ssl` | This is for your SSL certificates.
+| Directory | Description                                                              |
+| --------- | ------------------------------------------------------------------------ |
+| `addons`  | This is for your local add-ons.                                          |
+| `backup`  | This is for your snapshots.                                              |
+| `config`  | This is for your Home Assistant configuration.                           |
+| `media`   | This is for local media files.                                           |
+| `share`   | This is for your data that is shared between add-ons and Home Assistant. |
+| `ssl`     | This is for your SSL certificates.                                       |
 
 ## Configuration
 
-This is an example of a configuration. ***DO NOT USE*** without making the necessary changes especially for the username, password, secret and moredisk part.
+This is an example of a configuration. **_DO NOT USE_** without making the necessary changes especially for the username, password, secret and moredisk part.
 Fields between `<` and `>` indicate values that are omitted and need to be changed.
 
 ```yaml
 workgroup: WORKGROUP
 username: Hassio
-password: '<Your secret password>'
+password: "<Your secret password>"
 allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
@@ -55,7 +57,7 @@ veto_files:
   - "._*"
   - ".DS_Store"
   - Thumbs.db
-compatibility_mode: false  
+compatibility_mode: false
 available_disks_log: true
 wsdd2: false
 medialibrary:
@@ -64,11 +66,11 @@ medialibrary:
     -----BEGIN RSA PRIVATE KEY-----
     <Your super secret private key in base64 form. As form .ssh/id_rsa file>
     -----END RSA PRIVATE KEY-----
-other_users:    
+other_users:
   - username: backupuser
-    password: '<backupuser secret password>'
+    password: "<backupuser secret password>"
   - username: secureuser
-    password: '<secureuser secret password>'    
+    password: "<secureuser secret password>"
 acl:
   - share: config
     disabled: true
@@ -79,7 +81,6 @@ acl:
   - share: ssl
     users:
       - secureuser
-
 ```
 
 ### Option: `workgroup` (required)
@@ -100,59 +101,59 @@ List of hosts/networks allowed to access the shared folders.
 
 ### Option `automount` (optional)
 
-***Protection Mode must be disabled to allow this function***
-Automatic mount and expose all labeled disk. 
+**_Protection Mode must be disabled to allow this function_**
+Automatic mount and expose all labeled disk.
 
 Defaults to `true`.
 
 ### Option: `moredisks` (optional)
 
-***Protection Mode must be disabled to allow this function***
+**_Protection Mode must be disabled to allow this function_**
 List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:` (WARN: write id prefix in lowercase only!)
 
 The following Fs are supported:
 
 - [x] ext3
--	[x] ext2
--	[x] ext4
--	[x] squashfs
--	[x] vfat --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
--	[x] msdos --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
--	[x] f2fs --> ***NOTE: ACL are not supported so no TimeMachine compatibility***
--	[x] exFat --> ***NOTE: Experimental with exFat kernel driver***
--	[x] ntfs --> ***NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures***
--	[x] brtfs
--	[x] xfs 
+- [x] ext2
+- [x] ext4
+- [x] squashfs
+- [x] vfat --> **_NOTE: ACL are not supported so no TimeMachine compatibility_**
+- [x] msdos --> **_NOTE: ACL are not supported so no TimeMachine compatibility_**
+- [x] f2fs --> **_NOTE: ACL are not supported so no TimeMachine compatibility_**
+- [x] exFat --> **_NOTE: Experimental with exFat kernel driver_**
+- [x] ntfs --> **_NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures_**
+- [x] brtfs
+- [x] xfs
 
 ### Option `available_disks_log` (optional)
 
 Enable the log of found labeled disk. Usefull for initial configuration.
 
-### Option: `log_level`  (optional)
+### Option: `log_level` (optional)
 
 The log_level option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
-  - trace: Show every detail, like all called internal functions.
-  - debug: Shows detailed debug information.
-  - info: Normal (usually) interesting events.
-  - warning: Exceptional occurrences that are not errors.
-  - error: Runtime errors that do not require immediate action.
-  - fatal: Something went terribly wrong. Add-on becomes unusable.
+- trace: Show every detail, like all called internal functions.
+- debug: Shows detailed debug information.
+- info: Normal (usually) interesting events.
+- warning: Exceptional occurrences that are not errors.
+- error: Runtime errors that do not require immediate action.
+- fatal: Something went terribly wrong. Add-on becomes unusable.
 
 Please note that each level automatically includes log messages from a more severe level, e.g., debug also shows info messages. By default, the log_level is set to info, which is the recommended setting unless you are troubleshooting.
 
-### Option: `medialibrary` (optional) ***Exteprimental***
+### Option: `medialibrary` (optional) **_Exteprimental_**
 
 Enables mounting of `moredisk` by the host and not by the container. The disk then becomes visible within the "Media Browser" and the /media directory of each addon.
 
 NOTE<sup>1</sup>: It works only and only on HassOS on other hosts it is not tested and most likely it does not work.
 
-NOTE<sup>2</sup>: It is necessary to enable the access to the SSH port 22222 of the host.   Read the HassOS [Developers Documentation](https://developers.home-assistant.io/docs/operating-system/debugging/#home-assistant-operating-system) or use the [Configutarion Addon](https://community.home-assistant.io/t/add-on-hassos-ssh-port-22222-configurator/264109).
+NOTE<sup>2</sup>: It is necessary to enable the access to the SSH port 22222 of the host. Read the HassOS [Developers Documentation](https://developers.home-assistant.io/docs/operating-system/debugging/#home-assistant-operating-system) or use the [Configutarion Addon](https://community.home-assistant.io/t/add-on-hassos-ssh-port-22222-configurator/264109).
 
-NOTE<sup>3</sup>: It is necessary to pass the SSH private key for root access to the host. Be sure to use secrets files to protect the key from people who don't have access to it. 
+NOTE<sup>3</sup>: It is necessary to pass the SSH private key for root access to the host. Be sure to use secrets files to protect the key from people who don't have access to it.
 
 NOTE<sup>4</sup>: If the disk in the "Media Browser" is seen empty try restarting Homeassitant.
- 
+
 **WARNING: The feature is considered experimental and may cause problems or data loss.**
 
 #### Option: `enable` (optional)
@@ -163,7 +164,7 @@ Defaults to `false`.
 
 #### Option: `ssh_private_key` (optional)
 
-The ***PRIVATE*** key for SSH access to the host on port 22222.
+The **_PRIVATE_** key for SSH access to the host on port 22222.
 
 ### Option: `veto_files` (optional)
 
@@ -173,7 +174,7 @@ from littering the share with temporary hidden files
 
 ### Option: `other_users` (optional) (**advanced users only**)
 
-The list of additional user for the addon. See  `acl` option for enable the access to the shares.
+The list of additional user for the addon. See `acl` option for enable the access to the shares.
 
 #### Option: `username` (required)
 
@@ -190,7 +191,7 @@ The format is an array of share object with this subparameters
 
 #### Option: `share` (required)
 
-The share name. 
+The share name.
 
 #### Option: `disabled` (optional)
 
@@ -235,6 +236,18 @@ Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to tru
 
 Defaults to `false`.
 
+### Option: `hdd_idle_seconds` (optional) (**Use only if your disks never spind down**)
+
+Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
+
+Defaults to hd-idle demons is used at all.
+
+### Option: `enable_smart` (optional)
+
+Enable SMART on all disks, enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
+
+Defaults to `true`.
+
 ### Option: `mqtt_enable` (optional)
 
 Setting this option to `true` will enable the use of mqtt to send disks status data.
@@ -246,6 +259,7 @@ Defaults to `true`.
 Setting this option to `true` will expose mqtt old entities based on mountpoints. This will be removed in future releases.
 
 Defaults to `false`.
+
 ### Option: `mqtt_host` (optional)
 
 If using an external mqtt broker, the hostname/URL of the broker. See [MQTT Status Notifications](https://github.com/thomasmauerer/hassio-addons/blob/master/samba-backup/DOCS.md#mqtt-status-notifications) for additional infos.
@@ -286,18 +300,17 @@ Defaults to `false`.
 
 #### Option: `disable_autoremove` (optional)
 
-Setting this option to `true` will disable the delete of MQTT discovery messages when addon stop.  
+Setting this option to `true` will disable the delete of MQTT discovery messages when addon stop.
 
 Defaults to `false`.
-
 
 ## Support
 
 ### Common problems
 
-* ***The disk does not mount*** : check that the Label of the partition of the disk you want to mount is case-sensitive with the label indicated in the `moredisk` parameter.
+- **_The disk does not mount_** : check that the Label of the partition of the disk you want to mount is case-sensitive with the label indicated in the `moredisk` parameter.
 
-* ***In the menu `Media Browser` the folder with the name of the disk is empty*** : it happens when the homeassistant server starts before the add-on. Restart HomeAssitant from menu `Configuration->Server Controls->Server management -> RESTART`
+- **_In the menu `Media Browser` the folder with the name of the disk is empty_** : it happens when the homeassistant server starts before the add-on. Restart HomeAssitant from menu `Configuration->Server Controls->Server management -> RESTART`
 
 In case you've found a bug, please [open an issue on our GitHub][issue].
 

@@ -6,11 +6,21 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
+ARG HDDTEMP_VERSION
+
 # hadolint ignore=DL3006
-FROM $BUILD_FROM as wsdd2-builder
+FROM $BUILD_FROM as builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make gcc libc-dev linux-headers && wget -q -O - https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz | tar zxvf - \
+RUN apk add --no-cache make gcc libc-dev linux-headers build-base autoconf automake
+
+ARG BUILD_ARCH
+ARG HDDTEMP_VERSION
+
+RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
+    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
+
+RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master && make
 
 # hadolint ignore=DL3006
@@ -18,9 +28,6 @@ FROM ${BUILD_FROM}
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# Add env
-ENV TERM="xterm-256color"
 
 # Environment variables
 ENV \
@@ -38,7 +45,8 @@ ENV \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_CMD_WAIT_FOR_SERVICES=1 \
     YARN_HTTP_TIMEOUT=1000000 \
-    TERM="xterm-256color" 
+    TERM="xterm-256color"
+
 
 # Setup base
 ARG BUILD_ARCH
@@ -71,15 +79,17 @@ RUN apk add --no-cache \
     smartmontools \
     wsdd \
     udisks2 \
-    libcap 
+    libcap \
+    hd-idle
+
+# HDDTEMP
+ARG HDDTEMP_VERSION
+COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
+RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
-COPY --from=wsdd2-builder /wsdd2-master/wsdd2 /usr/sbin 
+COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
-# WSDD
-#RUN apk add --no-cache \
-#    wsdd \
-#    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
@@ -87,11 +97,11 @@ RUN  mkdir -p /var/lib/samba \
     /etc/samba/lmhosts \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
-    /var/lib/samba/winbindd_idmap.tdb 
+    /var/lib/samba/winbindd_idmap.tdb
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
+    && chmod a+x /usr/bin/ha
 
 
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab

@@ -101,10 +101,27 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
      fi
 }
 
+# Error for Operating System
+if ! [[ "$(bashio::info.operating_system)" =~ ^Home\ Assistant\ OS.* ]]; then
+     bashio::log.warning "Your operating system $(bashio::info.operating_system) is not supported! "
+     bashio::log.red "+------------------------------------------------------------------+"
+     bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
+     bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
+     bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
+     bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
+     bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
+     bashio::log.red "+------------------------------------------------------------------+"
+     if [[ $(bashio::config 'meaning_of_life') -ne 42 ]]; then
+       bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
+     else
+       bashio::log.green "Deep Thought permission accepted!"
+     fi
+fi
+
 # Mount external drive
 bashio::log.info "Protection Mode is $(bashio::addon.protected)"
-if $(bashio::addon.protected) && bashio::config.has_value 'moredisks'; then
-     bashio::log.warning "MoreDisk ignored because ADDON in Protected Mode!"
+if $(bashio::addon.protected) && (bashio::config.has_value 'moredisks' || bashio::config.true 'automount'); then
+     bashio::log.warning "MoreDisk and Automount ignored because ADDON in Protected Mode!"
      bashio::config.suggest "protected" "moredisk only work when Protection mode is disabled"
 elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; then
      bashio::log.info "MoreDisk or Automount option found!"

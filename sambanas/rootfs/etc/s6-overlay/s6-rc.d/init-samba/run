@@ -14,9 +14,9 @@ bashio::config.require 'password'
 
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
-if bashio::var.is_empty "${HOSTNAME}"; then
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
     bashio::log.warning "Can't read hostname, using default."
-    HOSTNAME="hassio"
+    HOSTNAME="homeassistant"
 fi
 bashio::log.info "Hostname: ${HOSTNAME}"
 

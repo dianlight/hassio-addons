@@ -1,0 +1,14 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Prepare the SMART config for disks
+# ==============================================================================
+
+if ! bashio::config.false "enable_smart"; then
+    smartctl --scan-open | while read -a device; do
+        bashio::log.info "Enabling S.M.A.R.T for ${device[0]}"
+        smartctl --smart=on --offlineauto=on --saveauto=on ${device[0]} || true
+    done
+else
+    bashio::log.info "SMART support disabled in config"
+fi
