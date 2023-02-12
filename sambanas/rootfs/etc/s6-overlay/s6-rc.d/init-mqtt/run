@@ -10,7 +10,6 @@ declare username
 declare password
 declare port
 declare topic
-declare moredisks
 
 if ! bashio::config.false "mqtt_enable"; then
 

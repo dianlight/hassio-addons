@@ -1,5 +1,11 @@
 # Changelog
 
+## 10.0.0-nas9 [Prerelease]
+
+### 🩹 BugFix
+
+- Fix issue about cpu usage [#134](https://github.com/dianlight/hassio-addons/issues/134)
+
 ## 10.0.0-nas8
 
 ### ✨ Features

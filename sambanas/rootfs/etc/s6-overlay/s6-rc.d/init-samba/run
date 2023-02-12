@@ -59,8 +59,8 @@ echo -e "${password}\n${password}" |
 
 # Create other users
 for user in $(bashio::config 'other_users'); do
-    username=$(echo ${user} | jq -r '.username')
-    password=$(echo ${user} | jq -r '.password')
+    username=$(echo "${user}" | jq -r '.username')
+    password=$(echo "${user}" | jq -r '.password')
     # bashio::log.info "Creating user ${username}"
     addgroup "${username}"
     adduser -D -H -G "${username}" -s /bin/false "${username}"
