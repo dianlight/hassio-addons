@@ -13,7 +13,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
     # Send discovery messages.
     if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
 
-    jdevice=$(jq -r -c -n --arg topic $topic --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
+    jdevice=$(jq -r -c -n --arg topic "$topic" --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
     {device:{
         identifiers:[],
         name: "SambaNas Physical Disk ",
@@ -24,15 +24,22 @@ if [ -f /root/.config/mosquitto_pub ]; then
         via_device: $topic
     }}')
 
-    smartctl --scan-open | while read -a device; do
-        #bashio::log.info "2.1 ${device[0]}"
+    device_scan=$(smartctl --scan-open)
 
-        row=$(smartctl -A ${device[0]} -j | jq '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table)')
+    if [ -z "$device_scan" ]; then
+        bashio::log.warning "No disk with S.M.A.R.T support found. Disable sensor report"
+        exec sleep infinity
+    fi
+
+    while read -r -a device; do
+
+        row=$(smartctl -A -l error -l selftest "${device[0]}" -j | jq '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table)')
         #bashio::log.info "2.2 ${row}"
         for entity in device.name device.type device.protocol power_on_time.hours power_cycle_count temperature.current \
-            Raw_Read_Error_Rate.raw.value Reallocated_Sector_Ct.raw.value Wear_Leveling_Count.raw.value UDMA_CRC_Error_Count.raw.value; do
+            Raw_Read_Error_Rate.raw.value Reallocated_Sector_Ct.raw.value Wear_Leveling_Count.raw.value UDMA_CRC_Error_Count.raw.value \
+            ata_smart_error_log.summary.count ata_smart_self_test_log.standard.count; do
 
-            if [[ -z $(jq ".$entity // empty" <<<$row) ]]; then
+            if [[ -z $(jq ".$entity // empty" <<<"$row") ]]; then
                 #      bashio::log.info "2.2 Missing ${entity} in ${row}"
                 continue
             fi
@@ -42,7 +49,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
             base=$(jq --arg topic "$topic" --arg entity "$entity" '
                     {
-                        name:($topic+" "+$entity +" "+.device.info_name), 
+                        name:($topic+" "+$entity +" "+.device.info_name),
                         unique_id:((.device.name | explode | join("")) + "-" + ($entity|explode|join(""))),
                         value_template:("{{ value_json." +$entity+ "}}"),
                         state_topic:($topic + "/" + (.device.name | gsub("[^A-z]";"")) + "/state" ),
@@ -50,7 +57,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                                 uuid:.device.name | explode | join(""),
                                 label:.device.name
                             }
-                    }' <<<$row)
+                    }' <<<"$row")
 
             case "$entity" in
             device.name | device.type | device.protocol) #TEXT
@@ -59,7 +66,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     {
                         mode: "text",
                         icon:"mdi:harddisk"
-                    }' <<<$row)
+                    }' <<<"$row")
                 ;;
             power_on_time.hours) #Time
                 etype="sensor"
@@ -67,7 +74,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     {
                         unit_of_measurement: "h",
                         device_class: "duration"
-                    }' <<<$row)
+                    }' <<<"$row")
                 ;;
             power_cycle_count) #number
                 etype="sensor"
@@ -75,15 +82,15 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     {
                         _unit_of_measurement: "",
                         icon:"mdi:power-cycle"
-                    }' <<<$row)
+                    }' <<<"$row")
                 ;;
-            Raw_Read_Error_Rate.raw.value | Reallocated_Sector_Ct.raw.value | Wear_Leveling_Count.raw.value | UDMA_CRC_Error_Count.raw.value) #number
+            Raw_Read_Error_Rate.raw.value | Reallocated_Sector_Ct.raw.value | Wear_Leveling_Count.raw.value | UDMA_CRC_Error_Count.raw.value | ata_smart_error_log.summary.count | ata_smart_self_test_log.standard.count) #number
                 etype="sensor"
                 exmsg=$(jq --arg topic "$topic" --arg entity "$entity" '
                     {
                         _unit_of_measurement: "",
                         icon:"mdi:chart-box-outline"
-                    }' <<<$row)
+                    }' <<<"$row")
                 ;;
             temperature.current) #temperature
                 etype="sensor"
@@ -92,31 +99,62 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         unit_of_measurement: "°C",
                         device_class: "temperature",
                         _icon:"mdi:thermometer"
-                    }' <<<$row)
+                    }' <<<"$row")
                 ;;
             *)
                 bashio::log.waring "Autodiscovery for $entity missing!"
                 ;;
             esac
             #bashio::log.info "2.4 $base $exmsg"
-            msg=$(echo $base $jdevice $exmsg | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.uuid|.device.name=(.device.name + .oth.label)|del(.oth)')
-            bashio::log.debug $msg
-            mosquitto_pub ${prs} -t "homeassistant/${etype}/${topic}/$(jq -r '.device.name | explode | join("")' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
+            msg=$(echo "$base" "$jdevice" "$exmsg" | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.uuid|.device.name=(.device.name + .oth.label)|del(.oth)')
+            #bashio::log.debug "$msg"
+            mosquitto_pub "${prs}" -t "homeassistant/${etype}/${topic}/$(jq -r '.device.name | explode | join("")' <<<$row)-${entity//[\.\/]/-}/config" -m "$msg"
         done
 
         #  bashio::log.info "2.3"
 
-    done
+    done <<<"${device_scan}"
 
-    while true; do
-        smartctl --scan-open | while read -a device; do
-            status=$(smartctl -A ${device[0]} -j | jq '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table)')
-            # Send status message
-            mosquitto_pub -t "${topic}/$(sed "s/[^A-z]//g" <<<${device[0]})/state" -m "$status"
+    #declare -A sleepTimes
+
+    while read -r -a device; do
+        mkfifo /tmp/mqtt-hanlder-${device[0]//\//}
+        # Send status message process
+        tail -F /tmp/mqtt-hanlder-${device[0]//\//} | mosquitto_pub -l -t "${topic}/${device[0]//\//}/state" &
+        #  sleepTimes[${device[0]//\//}]=10
+    done <<<"${device_scan}"
+
+    #declare -A shaMessages
+
+    while read -r -a device; do
+        cdevice=${device[0]//\//}
+        shaOldMessage="-"
+        sleepTime=10
+        while true; do
+            bashio::log.info "[$cdevice] ${shaOldMessage} $sleepTime"
+            status=$(smartctl -A -l error -l selftest "${device[0]}" -j | jq -c '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table) | del(.local_time) | del(.smartctl) | del (.json_format_version)')
+            # Debug
+            shaMessage=$(sha1sum <<<"$status")
+            #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
+            if [ "${shaOldMessage}" = "$shaMessage" ]; then
+                #sleepTimes[$cdevice]=$((sleepTimes[$cdevice] * 2))
+                sleepTime=$(($sleepTime * 2))
+                [ ${sleepTime} -gt 60 ] && sleepTime=60
+            else
+                # Send status message
+                echo "$status" >/tmp/mqtt-hanlder-$cdevice
+                #sleepTimes[$cdevice]=$((sleepTimes[$cdevice] / 3))
+                sleepTime=$(($sleepTime / 2))
+                shaOldMessage=$shaMessage
+                [ $sleepTime -le 5 ] && sleepTime=5
+            fi
+            #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
             # Sleep
-            sleep 2
-        done
-    done
+            sleep ${sleepTime}
+        done &
+        sleep 1
+    done <<<"${device_scan}"
+    wait
 else
     ! bashio::config.false "mqtt_enable" && bashio::log.warning "No MQTT config with mqtt_enable option!"
     exec sleep infinity
