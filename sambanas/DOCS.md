@@ -252,7 +252,7 @@ Defaults to `true`.
 
 Setting this option to `true` will enable the use of mqtt to send disks status data.
 
-Defaults to `true`.
+Defaults to `false`.
 
 ### Option: `mqtt_use_legacy_entities` (optional) (**deprecated**)
 

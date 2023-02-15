@@ -2,9 +2,18 @@
 
 ## 10.0.0-nas9 [Prerelease]
 
+### ✨ Features
+
+- Dynamic frequency for updating disk sensor data. Minimizes CPU usage when disks are not in use.
+
 ### 🩹 BugFix
 
-- Fix issue about cpu usage [#134](https://github.com/dianlight/hassio-addons/issues/134)
+- Partial Fix about MQTT cpu usage [#134](https://github.com/dianlight/hassio-addons/issues/134)
+
+### 💥 BREAKING CHANGE
+
+- The default behavior has been changed. Now the disk sensor integration is no longer turned on by default but turned off. See [DOCS.md][docs]
+
 
 ## 10.0.0-nas8
 

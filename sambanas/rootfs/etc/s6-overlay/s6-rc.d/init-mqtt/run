@@ -11,7 +11,7 @@ declare password
 declare port
 declare topic
 
-if ! bashio::config.false "mqtt_enable"; then
+if bashio::config.true "mqtt_enable"; then
 
     topic=$(bashio::config 'mqtt_topic')
     if [ "$topic" = "null" ]; then topic="sambanas"; fi
@@ -44,6 +44,6 @@ if ! bashio::config.false "mqtt_enable"; then
     fi
 else
 
-    bashio::log.info "MQTT support disabled in config"
+    bashio::log.info "MQTT support not enabled in config"
 
 fi

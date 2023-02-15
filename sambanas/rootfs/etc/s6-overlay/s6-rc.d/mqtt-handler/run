@@ -135,8 +135,15 @@ if [ -f /root/.config/mosquitto_pub ]; then
                 [ $sleepTime -gt 60 ] && sleepTime=60
             else
                 # Send status message
-                echo "$status" >/tmp/mqtt-hanlder
+                #echo "$status" >/tmp/mqtt-hanlder
                 sleepTime=$((sleepTime / 2))
+                jq -c --arg st "$sleepTime" --arg sh "$shaMessage" '. +
+                    {
+                        ref: {
+                            mws: $st,
+                            sha: $sh
+                        }
+                    }' <<<"$status" >/tmp/mqtt-hanlder
                 shaOldMessage=$shaMessage
                 [ $sleepTime -le 5 ] && sleepTime=5
             fi
@@ -147,7 +154,5 @@ if [ -f /root/.config/mosquitto_pub ]; then
     fi
 
 else
-
-    ! bashio::config.false "mqtt_enable" && bashio::log.warning "No MQTT config with mqtt_enable option!"
     exec sleep infinity
 fi
