@@ -131,31 +131,34 @@ if [ -f /root/.config/mosquitto_pub ]; then
         shaOldMessage="-"
         sleepTime=10
         while true; do
-            bashio::log.info "[$cdevice] ${shaOldMessage} $sleepTime"
+            #bashio::log.info "[$cdevice] ${shaOldMessage} $sleepTime"
             status=$(smartctl -A -l error -l selftest "${device[0]}" -j | jq -c '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table) | del(.local_time) | del(.smartctl) | del (.json_format_version)')
             # Debug
             shaMessage=$(sha1sum <<<"$status")
             #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
             if [ "${shaOldMessage}" = "$shaMessage" ]; then
-                #sleepTimes[$cdevice]=$((sleepTimes[$cdevice] * 2))
                 sleepTime=$(($sleepTime * 2))
-                [ ${sleepTime} -gt 60 ] && sleepTime=60
+                [ ${sleepTime} -gt 120 ] && sleepTime=120
             else
                 # Send status message
-                echo "$status" >/tmp/mqtt-hanlder-$cdevice
-                #sleepTimes[$cdevice]=$((sleepTimes[$cdevice] / 3))
                 sleepTime=$(($sleepTime / 2))
+                jq -c --arg st "$sleepTime" --arg sh "$shaMessage" '. +
+                    {
+                        ref: {
+                            mws: $st,
+                            sha: $sh
+                        }
+                    }' <<<"$status" >/tmp/mqtt-hanlder-$cdevice
                 shaOldMessage=$shaMessage
-                [ $sleepTime -le 5 ] && sleepTime=5
+                [ $sleepTime -le 10 ] && sleepTime=10
             fi
             #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
             # Sleep
             sleep ${sleepTime}
         done &
-        sleep 1
+        sleep $((10 / $(wc -l <<<"$device_scan")))
     done <<<"${device_scan}"
     wait
 else
-    ! bashio::config.false "mqtt_enable" && bashio::log.warning "No MQTT config with mqtt_enable option!"
     exec sleep infinity
 fi
