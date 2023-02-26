@@ -3,6 +3,11 @@
 # ==============================================================================
 # Start mqtt service for disk only
 # ==============================================================================
+
+readonly MAX_TIMEFRAME=120
+readonly MIN_TIMEFRAME=10
+readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
+
 if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for disks info..."
 
@@ -115,21 +120,16 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
     done <<<"${device_scan}"
 
-    #declare -A sleepTimes
-
     while read -r -a device; do
         mkfifo /tmp/mqtt-hanlder-${device[0]//\//}
         # Send status message process
         tail -F /tmp/mqtt-hanlder-${device[0]//\//} | mosquitto_pub -l -t "${topic}/${device[0]//\//}/state" &
-        #  sleepTimes[${device[0]//\//}]=10
     done <<<"${device_scan}"
-
-    #declare -A shaMessages
 
     while read -r -a device; do
         cdevice=${device[0]//\//}
         shaOldMessage="-"
-        sleepTime=10
+        sleepTime=$AVG_TIMEFRAME
         while true; do
             #bashio::log.info "[$cdevice] ${shaOldMessage} $sleepTime"
             status=$(smartctl -A -l error -l selftest "${device[0]}" -j | jq -c '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table) | del(.local_time) | del(.smartctl) | del (.json_format_version)')
@@ -137,22 +137,25 @@ if [ -f /root/.config/mosquitto_pub ]; then
             shaMessage=$(sha1sum <<<"$status")
             #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
             if [ "${shaOldMessage}" = "$shaMessage" ]; then
-                sleepTime=$(($sleepTime * 2))
-                [ ${sleepTime} -gt 120 ] && sleepTime=120
+                sleepTime=$((sleepTime * 2))
+                [ ${sleepTime} -gt $MAX_TIMEFRAME ] && sleepTime=$MAX_TIMEFRAME
             else
                 # Send status message
-                sleepTime=$(($sleepTime / 2))
-                jq -c --arg st "$sleepTime" --arg sh "$shaMessage" '. +
-                    {
-                        ref: {
-                            mws: $st,
-                            sha: $sh
-                        }
-                    }' <<<"$status" >/tmp/mqtt-hanlder-$cdevice
-                shaOldMessage=$shaMessage
-                [ $sleepTime -le 10 ] && sleepTime=10
+                if [ $sleep -gt $AVG_TIMEFRAME]; then
+                    sleepTime=$((sleepTime / 1.5))
+                else
+                    sleepTime=$((sleepTime - MIN_TIMEFRAME))
+                fi
+                [ $sleepTime -le $MIN_TIMEFRAME ] && sleepTime=$MIN_TIMEFRAME
             fi
-            #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
+            jq -c --arg st "$sleepTime" --arg sh "$shaMessage" '. +
+                {
+                    ref: {
+                        mws: $st,
+                        sha: $sh
+                    }
+                }' <<<"$status" >/tmp/mqtt-hanlder-$cdevice
+            shaOldMessage=$shaMessage
             # Sleep
             sleep ${sleepTime}
         done &
