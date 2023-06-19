@@ -10,6 +10,7 @@ declare interface
 declare ipaddress
 declare ssh_private_key
 declare remote_mount
+declare network_mount
 declare fstypes
 declare dev
 
@@ -111,9 +112,9 @@ if ! [[ "$(bashio::info.operating_system)" =~ ^Home\ Assistant\ OS.* ]]; then
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "+------------------------------------------------------------------+"
      if bashio::config.exists 'meaning_of_life' && [[ $(bashio::config 'meaning_of_life') -eq 42 ]]; then
-       bashio::log.green "Deep Thought permission accepted!"
+          bashio::log.green "Deep Thought permission accepted!"
      else
-       bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
+          bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
      fi
 fi
 
@@ -130,23 +131,36 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      for mfs in ntfs3 exfat btrfs xfs; do
           modprobe $mfs || bashio::log.warning "$mfs module not available!"
      done
-     fstypes=$(grep -v nodev < /proc/filesystems | tr -d '\n')
+     fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
      bashio::log.blue "---------------------------------------------------"
      bashio::log.green "Supported fs: ${fstypes}"
-     if grep -q fuseblk < /proc/filesystems; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
+     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
      bashio::log.blue "---------------------------------------------------"
 
      # Check Host Ssh config
      remote_mount=false
+     network_mount=false
      path=/mnt
 
      if bashio::config.true 'medialibrary.enable'; then
           bashio::log.info "MediaLibrary option found!"
           if bashio::config.is_empty 'medialibrary.ssh_private_key'; then
-               bashio::log.warning "SSH Private Key Host not found!"
-               bashio::config.suggest "ssh_private_key" "SSH Private Key is required for enable medialibrary"
-               bashio::log.waring "MediaLibrary due error in config!"
+               # Check OS Capability
+               features=$(bashio::info 'supervisor.info.features' '.features')
+               #bashio::log "Features ${features}"
+               if grep \"mount\" <<<"${features}" >/dev/null; then
+                    touch "/tmp/cifs_network"
+               else
+                    bashio::log.warning "Unsupported Mount Feature by system!"
+                    bashio::config.suggest "ssh_private_key" "Your host system don't upport mount feature\nSSH Private Key is required for enable medialibrary deprected feature."
+               fi
           else
+
+               bashio::log.red "+-------------------------------------------------------------------------------------+"
+               bashio::log.warning "|SSH Private Key *DEPRECATED WARNING* The use of old experimental system is deprecated|"
+               bashio::log.warning "|Remove the key and try the new system to mound /media and /share data disks          |"
+               bashio::log.red "+-------------------------------------------------------------------------------------+"
+
                interface=$(bashio::network.name)
                ipaddress=$(bashio::network.ipv4_address "${interface}")
                ssh_private_key=$(bashio::config 'medialibrary.ssh_private_key')

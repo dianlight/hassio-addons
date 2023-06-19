@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 10.0.0-nas9
+version: 10.0.2-nas
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -15,6 +15,7 @@ startup: system
 boot: auto
 init: false
 hassio_api: true
+hassio_role: admin
 host_network: true
 map:
   - config:rw
@@ -30,7 +31,9 @@ options:
     - 10.0.0.0/8
     - 172.16.0.0/12
     - 192.168.0.0/16
+    - 169.254.0.0/16
     - fe80::/10
+    - fc00::/7
   automount: true
   moredisks: []
   available_disks_log: true
@@ -110,5 +113,5 @@ devicetree: false
 apparmor: true
 host_ipc: true
 #advanced: true
-homeassistant: 2023.01.1
+homeassistant: 2023.06.0
 backup: hot

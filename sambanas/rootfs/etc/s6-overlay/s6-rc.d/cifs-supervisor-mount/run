@@ -1,0 +1,33 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Amoutomount Shares with new system!
+# ==============================================================================
+
+if [ -f /tmp/cifs_network ]; then
+    #bashio::log.level all
+
+    bashio::log.info "Automount Shares..."
+
+    interface=$(bashio::network.name)
+    ipaddress=$(bashio::network.ipv4_address "${interface}")
+
+    username=$(bashio::config 'username')
+    password=$(bashio::config 'password')
+
+    available_shares=$(awk '/\[(.*)\]/{ DISK=substr($1,2,length($1)-2); next } /.*path =(.*)/{ printf "%s\n",DISK,$0 }' /etc/samba/smb.conf)
+
+    #info=$(bashio::api.supervisor GET /host/info false)
+    #bashio::log "Info: ${info}"
+
+    #mounts=$(bashio::api.supervisor GET /mounts false)
+    #bashio::log "Mounts: ${mounts}"
+
+    while read -r -a device; do
+        [[ "share config addons ssl backup media" =~ $device ]] && continue
+        cmdshare=$(jq -nrc --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage="media"|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
+        #bashio::log.info "${cmdshare}"
+        status=$(bashio::api.supervisor POST /mounts "${cmdshare}")
+        bashio::log.info "Return from Mount: ${status}"
+    done <<<"${available_shares}"
+fi

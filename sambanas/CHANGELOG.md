@@ -1,10 +1,13 @@
 # Changelog
 
-## 10.0.0-nas9 [Prerelease]
+## 10.0.2-nas
 
 ### ✨ Features
 
+- Suport new network disk mount to allow share to be visible by other addons ([DOCS.md][docs])
 - Dynamic frequency for updating disk sensor data. Minimizes CPU usage when disks are not in use.
+- Based Image 14.0.1 (Alpine 3.18)
+- Enable IPv6 ULA and IPv4 link-local addresses by default (from Samba Addon 10.0.2) [3062](https://github.com/home-assistant/addons/pull/3062)
 
 ### 🩹 BugFix
 
@@ -12,8 +15,9 @@
 
 ### 💥 BREAKING CHANGE
 
+- Host Mount was **DEPRECATED** (DEPRECATED [DOCS.md][docs])
+- Minimal Homeassitant core supported version is now **2023.06.0**
 - The default behavior has been changed. Now the disk sensor integration is no longer turned on by default but turned off. See [DOCS.md][docs]
-
 
 ## 10.0.0-nas8
 

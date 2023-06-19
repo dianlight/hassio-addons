@@ -1,0 +1,17 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Take down the S6 supervision tree based on service exit code
+# ==============================================================================
+
+if [ -f /tmp/cifs_network ]; then
+  bashio::log.info "Umount Network Automount Shares..."
+
+  available_shares=$(awk '/\[(.*)\]/{ DISK=substr($1,2,length($1)-2); next } /.*path =(.*)/{ printf "%s\n",DISK,$0 }' /etc/samba/smb.conf)
+
+  while read -r -a device; do
+    [[ "share config addons ssl backup media" =~ $device ]] && continue
+    status=$(bashio::api.supervisor DELETE /mounts/${device})
+    bashio::log.info "Return from Umount ${status}"
+  done <<<"${available_shares}"
+fi
