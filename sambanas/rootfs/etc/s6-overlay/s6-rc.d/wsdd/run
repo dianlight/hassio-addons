@@ -1,10 +1,10 @@
 #!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
 # ==============================================================================
 # Start wsdd service
 # ==============================================================================
 declare SMB_GROUP
 declare SMB_HOST
-declare SMB_DOMAIN
 declare WSDD
 
 # Chose The WSDD implenetation
@@ -26,7 +26,7 @@ if bashio::config.has_value 'interfaces'; then
         else
             bashio::log.warning "Interface ${interface} not found, skipping."
         fi
-    done   
+    done
 else
     # Get supported interfaces
     for interface in $(bashio::network.interfaces); do
@@ -41,8 +41,10 @@ bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 
 if bashio::config.true 'wsdd2' ; then
     setcap CAP_NET_RAW+ep /usr/sbin/wsdd2
-    exec /usr/sbin/wsdd2 -t -u -w  $(printf '%s ' "${interfaces[@]}") -H ${SMB_HOST} -b vendor:homeassistant,model:sambanas    
+    # shellcheck disable=SC2046
+    exec /usr/sbin/wsdd2 -t -u -w  $(printf '%s ' "${interfaces[@]}") -H "${SMB_HOST}" -b vendor:homeassistant,model:sambanas
 else
-    exec wsdd -v $(printf '%s ' "${interfaces[@]}") -n ${SMB_HOST} -w ${SMB_GROUP}
-fi    
+    # shellcheck disable=SC2046
+    exec wsdd -v $(printf '%s ' "${interfaces[@]}") -n "${SMB_HOST}" -w "${SMB_GROUP}"
+fi
 

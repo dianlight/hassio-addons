@@ -3,7 +3,6 @@
 # ==============================================================================
 # Mounting external HD and modify the smb.conf
 # ==============================================================================
-readonly CONF="/usr/share/tempio/smb.gtpl"
 declare moredisks
 declare autodisks
 declare tomountdisks
@@ -11,6 +10,7 @@ declare interface
 declare ipaddress
 declare ssh_private_key
 declare remote_mount
+declare network_mount
 declare fstypes
 declare dev
 
@@ -18,9 +18,9 @@ function disk2label() { # $1 disk  return (label disk or id)
      local disk=$1
      if [[ $disk == id:* ]]; then
           disk=${disk:3}
-          if [ -L /dev/disk/by-id/$disk ]; then
-               label=$(lsblk -no label /dev/disk/by-id/$disk)
-               if [[ ! -z "$label" && -L "/dev/disk/by-label/$label" ]]; then
+          if [ -L /dev/disk/by-id/"$disk" ]; then
+               label=$(lsblk -no label /dev/disk/by-id/"$disk")
+               if [[ -n "$label" && -L "/dev/disk/by-label/$label" ]]; then
                     bashio::log.info "Disk with id ${disk} is labeled $label so $label is used."
                     disk="$label"
                else
@@ -36,7 +36,7 @@ function disk2label() { # $1 disk  return (label disk or id)
                return 1
           }
      fi
-     echo $disk
+     echo "$disk"
      return 0
 }
 
@@ -48,7 +48,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
      if [[ $disk == id:* ]]; then
           bashio::log.debug "Disk ${disk:3} is an ID"
           dev=/dev/disk/by-id/${disk:3}
-          if [ -L $dev ]; then
+          if [ -L "$dev" ]; then
                disk=${disk:3}
           else
                unset dev
@@ -57,7 +57,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           dev=$(blkid -L "$disk")
      fi
 
-     if [ -z $dev ]; then
+     if [ -z "$dev" ]; then
           bashio::log.info "Disk ${disk} not found! <SKIP>"
           return 0
      fi
@@ -70,11 +70,11 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
      # check with findmnt if the disk is already mounted
      if findmnt -n -o TARGET "$path/$mdisk" >/dev/null 2>&1; then
           bashio::log.info "Disk ${mdisk} is already mounted"
-          echo $path/$mdisk >>/tmp/local_mount
+          echo "$path"/"$mdisk" >>/tmp/local_mount
           return 0
      else
           # Check FS type and set relative options
-          fstype=$(lsblk $dev -no fstype)
+          fstype=$(lsblk "$dev" -no fstype)
           options="nosuid,relatime,noexec"
           type="auto"
           case "$fstype" in
@@ -93,11 +93,11 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
           esac
 
           if [ "$remote_mount" = true ]; then
-               ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "if findmnt '/mnt/data/supervisor/media/$mdisk ' >/dev/null; then echo 'Disk $mdisk already mounted on host' ; else  mount -t $type '$dev' '/mnt/data/supervisor/media/$mdisk' -o $options; fi" &&
-                    echo $dev >>/tmp/remote_mount
+               ssh root@"${ipaddress%/*}" -p 22222 -o "StrictHostKeyChecking no" "if findmnt '/mnt/data/supervisor/media/$mdisk ' >/dev/null; then echo 'Disk $mdisk already mounted on host' ; else  mount -t $type '$dev' '/mnt/data/supervisor/media/$mdisk' -o $options; fi" &&
+                    echo "$dev" >>/tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${mdisk}[${fstype}] Fail!" || :
           mount -t $type "$dev" "$path/$mdisk" -o $options &&
-               echo $path/$mdisk >>/tmp/local_mount && bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
+               echo "$path"/"$mdisk" >>/tmp/local_mount && bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
      fi
 }
 
@@ -111,15 +111,16 @@ if ! [[ "$(bashio::info.operating_system)" =~ ^Home\ Assistant\ OS.* ]]; then
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "| THIS ADDON IS DESIGNED FOR HOME ASSISTANT OPERATING SYSTEM ONLY! |"
      bashio::log.red "+------------------------------------------------------------------+"
-     if [[ $(bashio::config 'meaning_of_life') -ne 42 ]]; then
-       bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
+     if bashio::config.exists 'meaning_of_life' && [[ $(bashio::config 'meaning_of_life') -eq 42 ]]; then
+          bashio::log.green "Deep Thought permission accepted!"
      else
-       bashio::log.green "Deep Thought permission accepted!"
+          bashio::exit.nok "You can force this addon to run only if you known the meaning of life!"
      fi
 fi
 
 # Mount external drive
 bashio::log.info "Protection Mode is $(bashio::addon.protected)"
+# shellcheck disable=SC2091
 if $(bashio::addon.protected) && (bashio::config.has_value 'moredisks' || bashio::config.true 'automount'); then
      bashio::log.warning "MoreDisk and Automount ignored because ADDON in Protected Mode!"
      bashio::config.suggest "protected" "moredisk only work when Protection mode is disabled"
@@ -130,31 +131,44 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      for mfs in ntfs3 exfat btrfs xfs; do
           modprobe $mfs || bashio::log.warning "$mfs module not available!"
      done
-     fstypes=$(IFS=$'\n' echo $(cat /proc/filesystems | grep -v nodev))
+     fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
      bashio::log.blue "---------------------------------------------------"
      bashio::log.green "Supported fs: ${fstypes}"
-     if cat /proc/filesystems | grep -q fuseblk; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
+     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
      bashio::log.blue "---------------------------------------------------"
 
      # Check Host Ssh config
      remote_mount=false
+     network_mount=false
      path=/mnt
 
      if bashio::config.true 'medialibrary.enable'; then
           bashio::log.info "MediaLibrary option found!"
           if bashio::config.is_empty 'medialibrary.ssh_private_key'; then
-               bashio::log.warning "SSH Private Key Host not found!"
-               bashio::config.suggest "ssh_private_key" "SSH Private Key is required for enable medialibrary"
-               bashio::log.waring "MediaLibrary due error in config!"
+               # Check OS Capability
+               features=$(bashio::info 'supervisor.info.features' '.features')
+               #bashio::log "Features ${features}"
+               if grep \"mount\" <<<"${features}" >/dev/null; then
+                    touch "/tmp/cifs_network"
+               else
+                    bashio::log.warning "Unsupported Mount Feature by system!"
+                    bashio::config.suggest "ssh_private_key" "Your host system don't upport mount feature\nSSH Private Key is required for enable medialibrary deprected feature."
+               fi
           else
+
+               bashio::log.red "+-------------------------------------------------------------------------------------+"
+               bashio::log.warning "|SSH Private Key *DEPRECATED WARNING* The use of old experimental system is deprecated|"
+               bashio::log.warning "|Remove the key and try the new system to mound /media and /share data disks          |"
+               bashio::log.red "+-------------------------------------------------------------------------------------+"
+
                interface=$(bashio::network.name)
-               ipaddress=$(bashio::network.ipv4_address ${interface})
+               ipaddress=$(bashio::network.ipv4_address "${interface}")
                ssh_private_key=$(bashio::config 'medialibrary.ssh_private_key')
                mkdir -p /root/.ssh
                echo "${ssh_private_key}" >/root/.ssh/id_rsa
                chmod ag-rw /root/.ssh/id_rsa
-               ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "date"
-               if [ $? -eq 0 ]; then
+
+               if ssh root@"${ipaddress%/*}" -p 22222 -o "StrictHostKeyChecking no" "date"; then
                     bashio::log.info "SSH connection to ${ipaddress%/*}:22222 OK"
                     remote_mount=true
                     path=/media
@@ -179,7 +193,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
                bashio::log.info "No Disk with labels."
           else
                bashio::log.info "Available Disk Labels:"
-               for disk in ${autodisks[@]}; do
+               for disk in "${autodisks[@]}"; do
                     bashio::log.info "\t${disk}[$(lsblk $(blkid -L "$disk") -no fstype)]"
                done
           fi
@@ -213,7 +227,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           bashio::log.magenta "---------------------------------------------------"
           bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
           bashio::log.magenta "---------------------------------------------------"
-          for disk in ${tomountdisks[@]}; do
+          for disk in "${tomountdisks[@]}"; do
                mount_disk "$disk" "$path" "$remote_mount" || bashio::log.warning "Fail to mount ${disk}!"
           done
      fi

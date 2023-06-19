@@ -49,7 +49,9 @@ allow_hosts:
   - 10.0.0.0/8
   - 172.16.0.0/12
   - 192.168.0.0/16
+  - 169.254.0.0/16
   - fe80::/10
+  - fc00::/7
 automount: true
 moredisks:
   - "<Partition's Label>"
@@ -62,10 +64,6 @@ available_disks_log: true
 wsdd2: false
 medialibrary:
   enable: true
-  ssh_private_key: |
-    -----BEGIN RSA PRIVATE KEY-----
-    <Your super secret private key in base64 form. As form .ssh/id_rsa file>
-    -----END RSA PRIVATE KEY-----
 other_users:
   - username: backupuser
     password: "<backupuser secret password>"
@@ -144,7 +142,22 @@ Please note that each level automatically includes log messages from a more seve
 
 ### Option: `medialibrary` (optional) **_Exteprimental_**
 
-Enables mounting of `moredisk` by the host and not by the container. The disk then becomes visible within the "Media Browser" and the /media directory of each addon.
+Enable the visibility of `moredisk` on /media path.
+
+_Starting from Homeassistant 2023.6.0 the addon use the 'mount' supervisor feature. So you don't need the ssh key anymore._
+
+**WARNING: The feature is considered experimental and may cause problems or data loss.**
+#### Option: `enable` (optional)
+
+Enable/Disable host mounting option.
+
+Defaults to `false`.
+
+#### Option: `ssh_private_key` (optional) **_Deprecated_**
+
+The **_PRIVATE_** key for SSH access to the host on port 22222.
+
+Enables mounting of `moredisk` by the host and not by the container. 
 
 NOTE<sup>1</sup>: It works only and only on HassOS on other hosts it is not tested and most likely it does not work.
 
@@ -154,17 +167,9 @@ NOTE<sup>3</sup>: It is necessary to pass the SSH private key for root access to
 
 NOTE<sup>4</sup>: If the disk in the "Media Browser" is seen empty try restarting Homeassitant.
 
-**WARNING: The feature is considered experimental and may cause problems or data loss.**
 
-#### Option: `enable` (optional)
 
-Enable/Disable host mounting option.
 
-Defaults to `false`.
-
-#### Option: `ssh_private_key` (optional)
-
-The **_PRIVATE_** key for SSH access to the host on port 22222.
 
 ### Option: `veto_files` (optional)
 
@@ -252,7 +257,7 @@ Defaults to `true`.
 
 Setting this option to `true` will enable the use of mqtt to send disks status data.
 
-Defaults to `true`.
+Defaults to `false`.
 
 ### Option: `mqtt_use_legacy_entities` (optional) (**deprecated**)
 

@@ -1,5 +1,13 @@
 [global]
-   min protocol = SMB2
+   {{ if .compatibility_mode }}
+   client min protocol = NT1
+   server min protocol = NT1
+   {{ else }}
+   server min protocol = SMB2_10
+   client min protocol = SMB2_10
+   {{ end }}
+
+
    ea support = yes
    vfs objects = catia fruit streams_xattr  
    fruit:aapl = yes
@@ -33,10 +41,6 @@
    idmap config * : backend = tdb
    idmap config * : range = 3000-7999
 
-   {{ if .compatibility_mode }}
-   client min protocol = NT1
-   server min protocol = NT1
-   {{ end }}
 
    mangled names = no
    dos charset = CP850
