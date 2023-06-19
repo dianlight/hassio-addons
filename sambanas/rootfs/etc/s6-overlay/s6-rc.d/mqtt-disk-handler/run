@@ -135,13 +135,13 @@ if [ -f /root/.config/mosquitto_pub ]; then
             status=$(smartctl -A -l error -l selftest "${device[0]}" -j | jq -c '. * (.ata_smart_attributes.table // [] | INDEX(.name)) | del(.ata_smart_attributes.table) | del(.local_time) | del(.smartctl) | del (.json_format_version)')
             # Debug
             shaMessage=$(sha1sum <<<"$status")
-            #bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage]"
+            # bashio::log.green "[$cdevice] SleepTimes: $sleepTime $shaOldMessage] ${status}"
             if [ "${shaOldMessage}" = "$shaMessage" ]; then
                 sleepTime=$((sleepTime * 2))
                 [ ${sleepTime} -gt $MAX_TIMEFRAME ] && sleepTime=$MAX_TIMEFRAME
             else
                 # Send status message
-                if [ $sleep -gt $AVG_TIMEFRAME]; then
+                if [ $sleepTime -gt $AVG_TIMEFRAME ]; then
                     sleepTime=$((sleepTime / 1.5))
                 else
                     sleepTime=$((sleepTime - MIN_TIMEFRAME))
@@ -154,7 +154,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         mws: $st,
                         sha: $sh
                     }
-                }' <<<"$status" >/tmp/mqtt-hanlder-$cdevice
+                }' <<<"${status}" >/tmp/mqtt-hanlder-$cdevice
             shaOldMessage=$shaMessage
             # Sleep
             sleep ${sleepTime}

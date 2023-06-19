@@ -1,5 +1,11 @@
 # Changelog
 
+## 10.0.2-nas1
+
+### 🩹 BugFix
+
+- Fix a regression on MQTT status publish [#151](https://github.com/dianlight/hassio-addons/issues/151)
+
 ## 10.0.2-nas
 
 ### ✨ Features
