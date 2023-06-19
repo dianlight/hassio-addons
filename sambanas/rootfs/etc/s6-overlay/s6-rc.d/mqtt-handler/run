@@ -130,7 +130,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
         while true; do
             blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J -y | jq 'walk(if type == "object"  and .fsuse_pct != null  then .fsuse_pct|=(rtrimstr("%")|tonumber) else . end)')
-            liostat=$(/usr/bin/iostat "$(jq -r '.|map(.name)|.[]' <<< """$jdisks""")" -k -d -o JSON)
+            liostat=$(/usr/bin/iostat "$(jq -r '.|map(.name)|.[]' <<<"""$jdisks""")" -k -d -p -o JSON)
             status=$(jq -c --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i+{iostat:($iostat.sysstat.hosts[0].statistics[0].disk[] | select(.disk_device==$i.name))})' <<<"${blk}")
             # Send status message
             shaMessage=$(sha1sum <<<"$status")
@@ -152,7 +152,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         mws: $st,
                         sha: $sh
                     }
-                }' <<<"$status" >/tmp/mqtt-hanlder
+                }' <<<"${status}" >/tmp/mqtt-hanlder
             shaOldMessage=$shaMessage
             # Sleep
             sleep $sleepTime
