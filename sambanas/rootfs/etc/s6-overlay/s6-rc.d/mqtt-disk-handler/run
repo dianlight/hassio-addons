@@ -4,7 +4,7 @@
 # Start mqtt service for disk only
 # ==============================================================================
 
-readonly MAX_TIMEFRAME=120
+readonly MAX_TIMEFRAME=60
 readonly MIN_TIMEFRAME=10
 readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
 

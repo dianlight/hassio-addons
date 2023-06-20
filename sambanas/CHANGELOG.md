@@ -3,12 +3,12 @@
 ## 10.0.2-nas2 [Prerelease]
 
 ### 🚧  WorkList
-- Bug? [[#155](https://github.com/dianlight/hassio-addons/issues/155)]
 - FR [[#138](https://github.com/dianlight/hassio-addons/issues/138)]
 - FR [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
 
 ### 🩹 BugFix
 - Fix Bug [[#154](https://github.com/dianlight/hassio-addons/issues/154)]
+- Fix Bug [[#155](https://github.com/dianlight/hassio-addons/issues/155)]
 
 ## 10.0.2-nas1
 
