@@ -1,5 +1,12 @@
 # Changelog
 
+## 10.0.2-nas2
+### ✨ Features
+- Read only users [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
+### 🩹 BugFix
+- Fix Bug [[#154](https://github.com/dianlight/hassio-addons/issues/154)]
+- Fix Bug [[#155](https://github.com/dianlight/hassio-addons/issues/155)]
+
 ## 10.0.2-nas1
 
 ### 🩹 BugFix

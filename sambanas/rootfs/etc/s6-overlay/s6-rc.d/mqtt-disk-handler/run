@@ -4,7 +4,7 @@
 # Start mqtt service for disk only
 # ==============================================================================
 
-readonly MAX_TIMEFRAME=120
+readonly MAX_TIMEFRAME=60
 readonly MIN_TIMEFRAME=10
 readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
 
@@ -142,7 +142,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
             else
                 # Send status message
                 if [ $sleepTime -gt $AVG_TIMEFRAME ]; then
-                    sleepTime=$((sleepTime / 1.5))
+                    sleepTime=$((sleepTime / 2))
                 else
                     sleepTime=$((sleepTime - MIN_TIMEFRAME))
                 fi

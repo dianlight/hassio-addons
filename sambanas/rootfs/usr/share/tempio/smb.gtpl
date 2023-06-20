@@ -52,7 +52,8 @@
    writeable = yes
 
    path = /{{- .share }}
-   valid users = {{ .users|default .username|join " " }}
+   valid users = {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   read list = {{ .ro_users|join " " }}
    force user = root
    force group = root
    veto files = /{{ .veto_files | join "/" }}/

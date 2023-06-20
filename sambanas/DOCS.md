@@ -210,6 +210,12 @@ The list of users with access to share. If omitted the main user is used. See `o
 
 Defaults to `master user`
 
+#### Option: `ro_users` (optional)
+
+The list of users with readonly access to share.
+
+Defaults to none
+
 #### Option: `timemachine` (optional)
 
 If is true the share is exposed with timechine compatible setting.
