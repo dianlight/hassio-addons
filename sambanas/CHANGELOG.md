@@ -1,11 +1,8 @@
 # Changelog
 
-## 10.0.2-nas2 [Prerelease]
-
-### 🚧  WorkList
-- FR [[#138](https://github.com/dianlight/hassio-addons/issues/138)]
-- FR [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
-
+## 10.0.2-nas2
+### ✨ Features
+- Read only users [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
 ### 🩹 BugFix
 - Fix Bug [[#154](https://github.com/dianlight/hassio-addons/issues/154)]
 - Fix Bug [[#155](https://github.com/dianlight/hassio-addons/issues/155)]

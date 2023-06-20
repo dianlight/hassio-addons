@@ -90,6 +90,8 @@ schema:
       disabled: bool?
       users:
         - str?
+      ro_users:
+        - str?
       timemachine: bool?
   interfaces:
     - str?
