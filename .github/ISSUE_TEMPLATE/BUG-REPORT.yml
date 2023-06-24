@@ -1,0 +1,80 @@
+---
+name: "🐛 Bug Report"
+description: Create a new ticket for a bug.
+title: "🐛 [Addon name] <title>"
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: addon
+    attributes:
+      label: "Addon"
+      description: What os the addon ?
+      multiple: true
+      options:
+        - SambaNAS
+        - Plex
+        - RPiMySensor
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: Please enter an explicit description of your issue
+      placeholder: Short and explicit description of your incident...
+    validations:
+      required: true
+  - type: textarea
+    id: reprod
+    attributes:
+      label: "Reproduction steps"
+      description: Please enter an explicit description of your issue
+      value: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Addon Logs"
+      description: Please paste the full log that appears when starting the addon (including banner). This will be automatically formatted into code, so no need for backticks.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Addon Config"
+      description: Please paste the full (remove only password and ssh keys) addon config. This will be automatically formatted into code, so no need for backticks.
+      render: bash
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: "Architecture"
+      description: What architecture are you on ?
+      multiple: true
+      options:
+        - aarch64
+        - amd64
+        - armv7
+        - other
+    validations:
+      required: false
+  - type: dropdown
+    id: os
+    attributes:
+      label: "OS"
+      description: What is the impacted environment ?
+      multiple: true
+      options:
+        - HAos
+        - Virtual Machine
+        - Other
+    validations:
+      required: false

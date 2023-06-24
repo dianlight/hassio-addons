@@ -4,6 +4,12 @@ Share your disks over the network using Windows file sharing.
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] ![Supports armhf Architecture][armhf-shield] ![Supports armv7 Architecture][armv7-shield] ![Supports i386 Architecture][i386-shield]
 
+<!--
+[![Stargazers repo roster for @dianlight/hassio-addons](https://raw.githubusercontent.com/dianlight/hassio-addons/master/.github/stars2.svg)](https://github.com/dianlight/hassio-addons/stargazers)
+
+![downloads evolution](https://raw.githubusercontent.com/dianlight/hassio-addons/master/sambanas/stats.png)
+-->
+
 ## About
 
 This Add-on allows you to enable file sharing across different operating systems over a network.
