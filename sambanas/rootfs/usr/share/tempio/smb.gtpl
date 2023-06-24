@@ -35,8 +35,8 @@
    log level = {{ .log_level | default "warning" | get $log_level }}
 
    bind interfaces only = yes
-   interfaces = {{ .interfaces | join " " }}
-   hosts allow = {{ .allow_hosts | join " " }}
+   interfaces = {{ .interfaces | join " " }} {{ .docker_interface | default " "}}
+   hosts allow = {{ .allow_hosts | join " " }} {{ .docker_net | default " " }}
 
    idmap config * : backend = tdb
    idmap config * : range = 3000-7999

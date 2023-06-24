@@ -1,5 +1,13 @@
 # Changelog
 
+## 10.0.2-nas3 [Unrelesed]
+
+###  🩹 BugFix
+- Always add dicker network to whitelist - May FIX [#157](https://github.com/dianlight/hassio-addons/issues/157)
+
+
+### Planned
+- Disk Type - Media / Backup etc etc
 ## 10.0.2-nas2
 ### ✨ Features
 - Read only users [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
