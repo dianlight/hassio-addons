@@ -23,7 +23,7 @@ jobs:
           # Make sure file exists
           file=Stats
           touch "$file"
-          rm "$file"2
+          rm "$file"
           if ! grep -q "Date" "$file"; then
             sed -i "1i Date" "$file"
           fi
