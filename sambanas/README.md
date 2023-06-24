@@ -10,6 +10,8 @@ Share your disks over the network using Windows file sharing.
 ![downloads evolution](https://raw.githubusercontent.com/dianlight/hassio-addons/master/sambanas/stats.png)
 -->
 
+<a href="https://www.buymeacoffee.com/ypKZ2I0"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ypKZ2I0&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+
 ## About
 
 This Add-on allows you to enable file sharing across different operating systems over a network.
