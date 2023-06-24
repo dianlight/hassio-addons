@@ -15,7 +15,7 @@ body:
         - Plex
         - RPiMySensor
     validations:
-      required: true  
+      required: true 
   - type: textarea
     id: description
     attributes:

@@ -16,7 +16,7 @@ body:
         - RPiMySensor
         - Other
     validations:
-      required: false   
+      required: false
   - type: textarea
     id: allbody
     attributes:
