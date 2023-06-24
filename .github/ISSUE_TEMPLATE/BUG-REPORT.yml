@@ -46,7 +46,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: config
     attributes:
       label: "Addon Config"
       description: Please paste the full (remove only password and ssh keys) addon config. This will be automatically formatted into code, so no need for backticks.
