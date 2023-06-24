@@ -1,0 +1,25 @@
+---
+name: "\u2753 Any other question"
+about: Other questions or remarks not related to bugs or features
+title: "\u2753 [addon] title"
+labels: ['prevent stale']
+body:
+  - type: dropdown
+    id: addon
+    attributes:
+      label: "Addon"
+      description: What os the addon ?
+      multiple: true
+      options:
+        - SambaNAS
+        - Plex
+        - RPiMySensor
+        - Other
+    validations:
+      required: false   
+  - type: textarea
+    id: allbody
+    attributes:
+      label: "Your request"
+    validations:
+      required: true
