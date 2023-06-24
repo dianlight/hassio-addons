@@ -3,7 +3,7 @@
 ## 10.0.2-nas3 [Unrelesed]
 
 ###  🩹 BugFix
-- Always add dicker network to whitelist - May FIX [#157](https://github.com/dianlight/hassio-addons/issues/157)
+- Always add docker network to whitelist - May FIX [#157](https://github.com/dianlight/hassio-addons/issues/157)
 
 
 ### Planned
