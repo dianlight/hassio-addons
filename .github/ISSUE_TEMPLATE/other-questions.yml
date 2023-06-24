@@ -1,5 +1,6 @@
 ---
 name: "\u2753 Any other question"
+description: Other questions or remarks not related to bugs or features
 title: "\u2753 [addon] title"
 labels: ['prevent stale']
 body:
