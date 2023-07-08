@@ -9,8 +9,13 @@ if [ -f /tmp/cifs_network ]; then
 
     bashio::log.info "Automount Shares..."
 
-    interface=$(bashio::network.name)
-    ipaddress=$(bashio::network.ipv4_address "${interface}")
+    #interface=$(bashio::network.name)
+    #ipaddress=$(bashio::network.ipv4_address "${interface}")
+    #interface=$(bashio::network 'network.info.docker.inerface' '.docker.interface')
+    #ipaddress=$(bashio::network 'network.info.docker.network' '.docker.address')
+    #hostname=$(bashio::addon.hostname)
+    ipaddress=$(bashio::addon.ip_address)
+    #bashio::log "Addon IP: ${hostname}/${ipaddress}"
 
     username=$(bashio::config 'username')
     password=$(bashio::config 'password')
@@ -23,11 +28,16 @@ if [ -f /tmp/cifs_network ]; then
     #mounts=$(bashio::api.supervisor GET /mounts false)
     #bashio::log "Mounts: ${mounts}"
 
+    #status=$(smbcontrol smbd ping)
+    #bashio::log "Samba Ready: ${status}"
+    #bashio::log "Children: $(smbcontrol smbd num-children)"
+
     while read -r -a device; do
         [[ "share config addons ssl backup media" =~ $device ]] && continue
-        cmdshare=$(jq -nrc --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage="media"|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
+        usage=$(jq -r --arg xshare "$device" '.acl[] | select(.share==$xshare) | .usage // "media"' <<<"$(bashio::addon.config)")
+        cmdshare=$(jq -nrc --arg usage "$usage" --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage=$usage|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
         #bashio::log.info "${cmdshare}"
         status=$(bashio::api.supervisor POST /mounts "${cmdshare}")
-        bashio::log.info "Return from Mount: ${status}"
+        #bashio::log.info "Return from Mount: ${status}"
     done <<<"${available_shares}"
 fi

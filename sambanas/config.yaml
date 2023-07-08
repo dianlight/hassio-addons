@@ -93,6 +93,7 @@ schema:
       ro_users:
         - str?
       timemachine: bool?
+      usage: list(media|backup|share)?
   interfaces:
     - str?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
