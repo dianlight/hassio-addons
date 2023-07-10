@@ -1,5 +1,17 @@
 # Changelog
 
+## 10.0.2-nas3
+
+### ✨ Features
+- Add support of `acl.usage` to specify what scope of disk is, usefull for network storage mount in ha ([DOCS.md][docs])
+
+###  🩹 BugFix
+- Always add docker network to whitelist - Try fix  [#157](https://github.com/dianlight/hassio-addons/issues/157)
+- Correct cifs mount precedence. Try fix [[#159](https://github.com/dianlight/hassio-addons/issues/159)]
+
+### 💥 BREAKING CHANGE
+- Default `acl.timemachine` option now is set to `true`
+
 ## 10.0.2-nas2
 ### ✨ Features
 - Read only users [[#141](https://github.com/dianlight/hassio-addons/issues/141)]

@@ -220,7 +220,14 @@ Defaults to none
 
 If is true the share is exposed with timechine compatible setting.
 
-Defaults to `false` for internal share.
+Defaults to `false` for internal share, `true` forn extra disks.
+ 
+### Option: `usage` (optional) (**valid only for external disks**)
+
+Set the scope of the disk, usefull for ha network storage mount. Valid values are `media`,`backup`,`share` 
+
+Defaults to `media` for external disks if `medialibray` is enabled.
+
 
 ### Option: `interfaces` (optional) (**advanced users only**)
 

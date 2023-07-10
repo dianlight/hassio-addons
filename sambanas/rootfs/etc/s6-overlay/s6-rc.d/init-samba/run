@@ -40,10 +40,11 @@ if [ ${#interfaces[@]} -eq 0 ]; then
     bashio::exit.nok 'No supported interfaces found to bind on.'
 fi
 bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
+bashio::log.info "Docker Interface: $(bashio::network 'network.info.docker.inerface' '.docker.interface') $(bashio::network 'network.info.docker.network' '.docker.address')"
 
 # Generate Samba configuration.
 touch /tmp/local_mount
-jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
+jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
     tempio \
         -template /usr/share/tempio/smb.gtpl \
         -out /etc/samba/smb.conf
@@ -71,5 +72,5 @@ done
 
 # Log exposed mounted shares
 bashio::log.blue "---------------------------------------------------"
-bashio::log.info "Exposed Disks Summary:\n$(awk '/\[.*\]/{ DISK=$0; next } /.*path =(.*)/{ printf "%-20s %s\n",DISK,$0 }' /etc/samba/smb.conf)"
+bashio::log.info "Exposed Disks Summary:\n$(awk '/\[.*\]/{ DISK=$0; next } /.*path =(.*)/{ PATH=$0; next} /.*TM:(.*)/{ printf "%-20s %s %s#\n",DISK,PATH,$0 }' /etc/samba/smb.conf)"
 bashio::log.blue "---------------------------------------------------"
