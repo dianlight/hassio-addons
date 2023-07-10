@@ -14,6 +14,8 @@ comparison to installing any other Hass.io add-on.
 
 ## Sponsor
 
+<a href="https://github.com/sponsors/dianlight"><img src="https://img.shields.io/github/sponsors/dianlight?style=flat-square&logo=githubsponsors&logoColor=%23EA4AAA&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fdianlight"></a>
+
 <a href="https://www.buymeacoffee.com/ypKZ2I0"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ypKZ2I0&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 
