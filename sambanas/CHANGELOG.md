@@ -1,5 +1,9 @@
 # Changelog
 
+## 10.0.2-nas4
+###  🩹 BugFix
+- Fix mount bug for ha 2023.7.x without acl config.
+
 ## 10.0.2-nas3
 
 ### ✨ Features
