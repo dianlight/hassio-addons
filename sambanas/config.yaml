@@ -36,7 +36,10 @@ options:
     - fc00::/7
   automount: true
   moredisks: []
-  mountoptions: "nosuid,relatime,noexec"
+  mountoptions:
+    - nosuid
+    - relatime
+    - noexec
   available_disks_log: true
   medialibrary:
     enable: false
