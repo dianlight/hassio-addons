@@ -12,7 +12,7 @@ if [ -f /root/.config/mosquitto_pub ] && ! bashio::config.true "autodiscovery.di
     a=({a..z})
     if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
     bashio::log.info "Sending MQTT autodiscovery..."
-    device="\"device\":{\"identifiers\":[\"${topic}\"],\"name\": \"Samba Nas Sensors\", \"model\": \"Samba $(smbd -V)\", \"manufacturer\": \"@Dianlight\"},\"icon\":\"mdi:harddisk\""
+    device="\"device\":{\"identifiers\":[\"${topic}\"],\"name\": \"Samba Nas Sensors\", \"model\": \"Samba $(smbd -V)\", \"manufacturer\": \"danveitch76\"},\"icon\":\"mdi:harddisk\""
     for disk in $(awk '/^   path = .*/g { print $3 }' /etc/samba/smb.conf); do
         ldisk=${disk##*/}
         mosquitto_pub ${prs} -t "homeassistant/sensor/${topic}/${a}_size/config" -m \

@@ -48,5 +48,5 @@ for addon in "$@"; do
   fi
   echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
   hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile &&
-    docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
+    docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub danveitch76 --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
 done
