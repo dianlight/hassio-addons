@@ -1,10 +1,10 @@
 ---
 name: Samba NAS
-version: 10.0.2-nas4
+version: 10.0.2-nas4b
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
-url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
-codenotary: lucio.tarantino@gmail.com
+url: https://github.com/danveitch76/hassio-addons/tree/master/sambanas
+codenotary: dan.veitch@gmail.com
 arch:
   - armhf
   - armv7
@@ -12,7 +12,6 @@ arch:
   - amd64
   - i386
 startup: system
-boot: auto
 init: false
 hassio_api: true
 hassio_role: admin
@@ -27,6 +26,7 @@ map:
 options:
   workgroup: WORKGROUP
   username: homeassistant
+  admin_username: homeassistant
   allow_hosts:
     - 10.0.0.0/8
     - 172.16.0.0/12
@@ -36,17 +36,16 @@ options:
     - fc00::/7
   automount: true
   moredisks: []
+  mountoptions: "nosuid,relatime,noexec"
   available_disks_log: true
   medialibrary:
     enable: false
   veto_files:
-    - "._*"
     - ".DS_Store"
     - Thumbs.db
-    - icon?
-    - ".Trashes"
   compatibility_mode: false
-  wsdd2: false
+  recyle_bin_enabled: false
+  wsdd2: true
   mqtt_use_legacy_entities: false
   autodiscovery: {}
   other_users: []
@@ -55,9 +54,12 @@ options:
 schema:
   workgroup: str
   username: str
+  admin_username: str
   password: password
   automount: bool?
   moredisks:
+    - str
+  mountoptions:
     - str
   available_disks_log: bool?
   medialibrary:
@@ -68,6 +70,7 @@ schema:
   veto_files:
     - str
   compatibility_mode: bool?
+  recyle_bin_enabled: bool?
   wsdd2: bool?
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
@@ -99,7 +102,7 @@ schema:
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   meaning_of_life: int?
 
-image: dianlight/{arch}-addon-sambanas
+image: ghcr.io/danveitch76/{arch}-addon-sambanas
 services:
   - mqtt:want
 udev: true
@@ -112,12 +115,13 @@ privileged:
   - SYS_RESOURCE
   - SYS_MODULE
 full_access: true
-devicetree: false
-apparmor: true
 host_ipc: true
 #advanced: true
 homeassistant: 2023.06.0
-backup: hot
 # Get Points!!!
 auth_api: true
-
+# Removed as DEFAULT
+# backup: hot
+# devicetree: false
+# apparmor: true
+# boot: auto
