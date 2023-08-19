@@ -65,7 +65,7 @@ body:
         - armv7
         - other
     validations:
-      required: true
+      required: false
   - type: dropdown
     id: os
     attributes:
@@ -73,9 +73,8 @@ body:
       description: What is the impacted environment ?
       multiple: true
       options:
-        - HaOS
+        - HAos
         - Virtual Machine
-        - Docker
         - Other
     validations:
-      required: true
+      required: false
