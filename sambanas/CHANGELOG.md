@@ -1,5 +1,15 @@
 # Changelog
 
+## 10.0.2-nas4b
+###  ✨ Features
+- Added recycle bin option option is set to 'false'
+- Added mount options default is set to 'nosuid,relatime,noexec'
+- Added filter for reserved sharenames (config addons ssl share backup media)
+- Added admin user option default is set to 'homeassistant'
+
+### 💥 BREAKING CHANGE
+- Default `wdd2` option now is set to `true`
+
 ## 10.0.2-nas4
 ###  🩹 BugFix
 - Fix mount bug for ha 2023.7.x without acl config.

@@ -1,9 +1,9 @@
 {
-    "workgroup": "WORKGROUP",
-    "username": "homeassistant",
-    "password": "test",
+    "workgroup": "lan",
+    "username": "dan",
+    "password": "M1cr05ft",
     "interface": "",
     "moredisks": ["TIMEMACHINE", "LIBRARY"],
     "allow_hosts": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
-    "veto_files": ["._*", ".DS_Store", "Thumbs.db", "icon?", ".Trashes"]
+    "veto_files": [".DS_Store", "Thumbs.db", "icon?"]
 }
