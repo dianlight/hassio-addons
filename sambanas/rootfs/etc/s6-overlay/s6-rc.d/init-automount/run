@@ -250,7 +250,6 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           for disk in "${tomountdisks[@]}"; do
                reserved_mount_name "$disk" "${cleanmountdisks[@]}" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
           done
-		  tomountdisks="${cleanmountdisks[@]}"
      fi
 
      if [ ${#tomountdisks[@]} -gt 0 ]; then
