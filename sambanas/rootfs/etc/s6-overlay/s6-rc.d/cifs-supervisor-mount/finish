@@ -10,7 +10,7 @@ if [ -f /tmp/cifs_network ]; then
   available_shares=$(awk '/\[(.*)\]/{ DISK=substr($1,2,length($1)-2); next } /.*path =(.*)/{ printf "%s\n",DISK,$0 }' /etc/samba/smb.conf)
 
   while read -r -a device; do
-    [[ "share config addons ssl backup media" =~ $device ]] && continue
+    [[ "share config addons ssl backup media all_addon_configs homeassistant" =~ $device ]] && continue
     status=$(bashio::api.supervisor DELETE /mounts/${device})
     bashio::log.info "Return from Umount ${status}"
   done <<<"${available_shares}"
