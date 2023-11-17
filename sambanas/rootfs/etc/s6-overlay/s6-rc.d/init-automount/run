@@ -13,6 +13,9 @@ declare remote_mount
 declare network_mount
 declare fstypes
 declare dev
+declare mntops
+declare reserved_names
+declare cleanmountdisks
 
 function disk2label() { # $1 disk  return (label disk or id)
      local disk=$1
@@ -40,11 +43,25 @@ function disk2label() { # $1 disk  return (label disk or id)
      return 0
 }
 
+# Check for reserved mount name
+function reserved_mount_name() { # $1 disk $2 cleanmountdisks
+     disk=$1
+     cleanmountdisks=$2
+     reserved_names=(config addons ssl share backup media)
+     for disk in "${reserved_names[@]}"; do
+          if [[ ${cleanmountdisks[@]} =~ $disk ]]; then
+               tomountdisks=("${cleanmountdisks[@]/$disk/}")
+               return 0
+          fi
+     done
+}
+
 # mount a disk from parameters
-function mount_disk() { # $1 disk $2 path $3 remote_mount
+function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
      disk=$1
      path=$2
      remote_mount=$3
+     mntops=$4
      if [[ $disk == id:* ]]; then
           bashio::log.debug "Disk ${disk:3} is an ID"
           dev=/dev/disk/by-id/${disk:3}
@@ -75,7 +92,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
      else
           # Check FS type and set relative options
           fstype=$(lsblk "$dev" -no fstype)
-          options="nosuid,relatime,noexec"
+          options=$mntops
           type="auto"
           case "$fstype" in
           exfat | vfat | msdos)
@@ -88,7 +105,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount
                type="ntfs3"
                ;;
           *)
-               bashio::log.info "Mounting ${mdisk} of type ${fstype}"
+               bashio::log.info "Mounting ${mdisk} of type ${fstype} with options ${mntops}"
                ;;
           esac
 
@@ -200,6 +217,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           bashio::log.blue "---------------------------------------------------"
      fi
 
+     mnt_ops=($(bashio::config 'mountoptions'))
      moredisks=($(bashio::config 'moredisks'))
      if [ ${#moredisks[@]} -eq 0 ]; then
           bashio::log.info "No MoreDisks to mount"
@@ -225,10 +243,20 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
 
      if [ ${#tomountdisks[@]} -gt 0 ]; then
           bashio::log.magenta "---------------------------------------------------"
+          bashio::log.info "Checking Mounting disks for reserved names:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
+          bashio::log.magenta "---------------------------------------------------"
+          cleanmountdisks="${tomountdisks[@]}"
+          for disk in "${tomountdisks[@]}"; do
+               reserved_mount_name "$disk" "${cleanmountdisks[@]}" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
+          done
+     fi
+
+     if [ ${#tomountdisks[@]} -gt 0 ]; then
+          bashio::log.magenta "---------------------------------------------------"
           bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
           bashio::log.magenta "---------------------------------------------------"
           for disk in "${tomountdisks[@]}"; do
-               mount_disk "$disk" "$path" "$remote_mount" || bashio::log.warning "Fail to mount ${disk}!"
+               mount_disk "$disk" "$path" "$remote_mount" "$mnt_ops" || bashio::log.warning "Fail to mount ${disk}!"
           done
      fi
      IFS=$OIFS

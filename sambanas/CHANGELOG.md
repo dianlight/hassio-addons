@@ -1,5 +1,38 @@
 # Changelog
 
+## 12.1.0-nas (Unrelesed)
+
+### 🏗 Chore
+
+- [Full Changelog from official addon 12.1.0][changelog_12.1.0]
+  - Use the new Home Assistant folder for the config share
+  - Add support for accessing public add-on configurations
+- [Full Changelog from official addon 12.0.0][changelog_12.0.0]
+  - Adjust location of Home Assistant config to match latest dev/beta Supervisor
+- [Full Changelog from official addon 11.0.0][changelog_11.0.0]
+  - Add support for accessing public add-on configurations
+  - Update Based Image to 14.3.2 (Alpine 3.18.4)
+  - Adds HEALTCHECK support
+- [Full Changelog from official addon 10.0.2][changelog_10.0.2]
+  - Already Implemented: Enable IPv6 ULA and IPv4 link-local addresses by default
+
+[changelog_12.1.0]: https://github.com/home-assistant/addons/pull/3312
+[changelog_12.0.0]: https://github.com/home-assistant/addons/pull/3311
+[changelog_11.1.0]: https://github.com/home-assistant/addons/pull/3001
+[changelog_11.0.0]: https://github.com/home-assistant/addons/pull/3297
+[changelog_10.0.2]: https://github.com/home-assistant/addons/pull/3062
+[changelog_10.0.1]: https://github.com/home-assistant/addons/pull/2997
+
+###  🩹 BugFix
+- Fix mount concurrency. Solve some issue on addon-restart. (try to resolve [#159](https://github.com/dianlight/hassio-addons/issues/159))
+
+###  ✨ Features
+- Based Image 14.1.0 (Alpine 3.18.3)
+- Added recycle bin option option default is set to 'false' [cherry pick from PR#167] -- TODO: Correct veto files
+- Added mount options default is set to 'nosuid,relatime,noexec' [cherry pick from PR#167]
+- Added filter for reserved sharenames (config addons ssl share backup media) [cherry pick from PR#167]
+
+
 ## 10.0.2-nas4
 ###  🩹 BugFix
 - Fix mount bug for ha 2023.7.x without acl config.
