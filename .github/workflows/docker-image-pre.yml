@@ -7,11 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -29,15 +27,15 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
-            --all \
+            --aarch64 \
             --target sambanas \
             --docker-hub dianlight
-            
+
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
         id: extract_branch
-        
+
       - name: pull-request
         uses: repo-sync/pull-request@v2
         continue-on-error: true
