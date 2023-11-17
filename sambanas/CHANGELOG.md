@@ -1,6 +1,6 @@
 # Changelog
 
-## 12.1.0-nas (Unrelesed)
+## 12.1.0-nas
 
 ### 🏗 Chore
 
@@ -28,9 +28,9 @@
 
 ###  ✨ Features
 - Based Image 14.1.0 (Alpine 3.18.3)
-- Added recycle bin option option default is set to 'false' [cherry pick from PR#167] -- TODO: Correct veto files
-- Added mount options default is set to 'nosuid,relatime,noexec' [cherry pick from PR#167]
-- Added filter for reserved sharenames (config addons ssl share backup media) [cherry pick from PR#167]
+- Added recycle bin option option default is set to 'false' [cherry pick from PR#167] ([DOCS.md][docs])
+- Added mount options default is set to 'nosuid,relatime,noexec' [cherry pick from PR#167] ([DOCS.md][docs])
+- Added filter for reserved sharenames (config addons ssl share backup media) [cherry pick from PR#167] 
 
 
 ## 10.0.2-nas4
