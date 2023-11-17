@@ -7,9 +7,10 @@
    client min protocol = SMB2_10
    {{ end }}
 
+   dns proxy = yes 
 
    ea support = yes
-   vfs objects = catia fruit streams_xattr  
+   vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}  
    fruit:aapl = yes
    fruit:model = MacSamba
 
@@ -19,6 +20,18 @@
    fruit:wipe_intentionally_left_blank_rfork = yes
    fruit:zero_file_id = yes
    fruit:delete_empty_adfiles = yes
+
+   # cherry pick from PR#167 to Test
+   fruit:copyfile = yes
+   fruit:nfs_aces = no
+
+   # Performance Enhancements for network
+   socket options = TCP_NODELAY IPTOS_LOWDELAY
+   min receivefile size = 16384
+   getwd cache = yes
+   aio read size = 1
+   aio write size = 1  
+   # End PR#167
 
    netbios name = {{ env "HOSTNAME" }}
    workgroup = {{ .workgroup }}
@@ -35,8 +48,8 @@
    log level = {{ .log_level | default "warning" | get $log_level }}
 
    bind interfaces only = yes
-   interfaces = {{ .interfaces | join " " }} {{ .docker_interface | default " "}}
-   hosts allow = {{ .allow_hosts | join " " }} {{ .docker_net | default " " }}
+   interfaces = 127.0.0.1 {{ .interfaces | join " " }} {{ .docker_interface | default " "}}
+   hosts allow = 127.0.0.1 {{ .allow_hosts | join " " }} {{ .docker_net | default " " }}
 
    idmap config * : backend = tdb
    idmap config * : range = 3000-7999
@@ -51,7 +64,14 @@
    browseable = yes
    writeable = yes
 
-   path = /{{- .share }}
+   # cherry pick from PR#167 to Test
+   create mask = 0664
+   force create mode = 0664
+   directory mask = 0775
+   force directory mode = 0775
+   # End PR#167
+
+   path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
    valid users = {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
@@ -61,9 +81,21 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
+# RECYCLE:{{if .recyle_bin_enabled }}
+   recycle:repository = .recycle/%U
+   recycle:keeptree = yes
+   recycle:versions = yes
+   recycle:touch = yes
+   recycle:touch_mtime = no
+   recycle:directory_mode = 0777
+   #recycle:subdir_mode = 0700
+   #recycle:exclude =
+   #recycle:exclude_dir =
+   #recycle:maxsize = 0{{ end }}   
+
 # TM:{{ .timemachine }} {{- if .medialibrary.enable }} USAGE:{{ .usage | default "" }} {{ end }}
    {{- if .timemachine }}
-   vfs objects = catia fruit streams_xattr
+   vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
 
    # Time Machine Settings Ref: https://github.com/markthomas93/samba.apple.templates
    fruit:time machine = yes
@@ -72,7 +104,7 @@
    {{ end }}
 {{ end }}
 
-{{- $dfdisk := list "config" "addons" "ssl" "share" "backup" "media" }}
+{{- $dfdisk := list "config" "addons" "ssl" "share" "backup" "media" "addon_configs" }}
 {{- $disks := concat $dfdisk (compact .moredisks|default list) -}}
 {{- $root := . -}}
 {{- range $disk := $disks -}}

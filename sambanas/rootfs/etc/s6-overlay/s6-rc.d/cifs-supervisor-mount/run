@@ -32,15 +32,24 @@ if [ -f /tmp/cifs_network ]; then
     #bashio::log "Samba Ready: ${status}"
     #bashio::log "Children: $(smbcontrol smbd num-children)"
 
-    bashio::log "Wait Samba Server to going up..(max 30s)"
+    bashio::log.info "Wait Samba Server to going up..(max 30s)"
     timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
 
     while read -r -a device; do
-        [[ "share config addons ssl backup media" =~ $device ]] && continue
+        [[ "share config addons ssl backup media all_addon_configs homeassistant" =~ $device ]] && continue
         usage=$(jq -r --arg xshare "$device" '.acl[] | select(.share==$xshare) | .usage // "media"' <<<"$(bashio::addon.config)")
         cmdshare=$(jq -nrc --arg usage "${usage:-media}" --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage=$usage|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
         #bashio::log.info "${cmdshare}"
-        status=$(bashio::api.supervisor POST /mounts "${cmdshare}")
+
+        #bashio::log.info $(bashio::api.supervisor GET /mounts)
+        #bashio::log.info $(bashio::api.supervisor GET /mounts | jq -r --arg xshare "$device" '.mounts[] | select(.name == $xshare ) // empty')
+
+        if [[ ! -z $(bashio::api.supervisor GET /mounts | jq -r --arg xshare "$device" '.mounts[] | select(.name == $xshare ) // empty') ]]; then
+            bashio::log.info "Share Already Found ${device} - Remount and correct!"
+            bashio::api.supervisor DELETE /mounts/${device} || true
+        fi
+
+        status=$(bashio::api.supervisor POST /mounts "${cmdshare}") || bashio::log.warning "Error Automount ${device} - Mount Manually!"
         #bashio::log.info "Return from Mount: ${status}"
     done <<<"${available_shares}"
 fi

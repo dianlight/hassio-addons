@@ -32,6 +32,7 @@ This addon exposes the following directories over smb (samba):
 | `addons`  | This is for your local add-ons.                                          |
 | `backup`  | This is for your snapshots.                                              |
 | `config`  | This is for your Home Assistant configuration.                           |
+| `addon_configs`  | This is for your Addons base configuration directory                           |
 | `media`   | This is for local media files.                                           |
 | `share`   | This is for your data that is shared between add-ons and Home Assistant. |
 | `ssl`     | This is for your SSL certificates.                                       |
@@ -55,11 +56,13 @@ allow_hosts:
 automount: true
 moredisks:
   - "<Partition's Label>"
+mountoptions: "nosuid,relatime,noexec"
 veto_files:
   - "._*"
   - ".DS_Store"
   - Thumbs.db
 compatibility_mode: false
+recyle_bin_enabled: false
 available_disks_log: true
 wsdd2: false
 medialibrary:
@@ -123,6 +126,12 @@ The following Fs are supported:
 - [x] brtfs
 - [x] xfs
 
+### Option `mountoptions` (required)
+Allows setting of mount options.
+
+**_Protection Mode must be disabled to allow this function_**
+Defaults to 'nosuid,relatime,noexec'
+
 ### Option `available_disks_log` (optional)
 
 Enable the log of found labeled disk. Usefull for initial configuration.
@@ -150,6 +159,13 @@ _Starting from Homeassistant 2023.6.0 the addon use the 'mount' supervisor featu
 #### Option: `enable` (optional)
 
 Enable/Disable host mounting option.
+
+Defaults to `false`.
+
+### Option: `recyle_bin_enabled` (optional)
+
+Setting this option to `true` will enable recycle bin functions
+on the Samba add-on. ***Check 'veto_files' as could be blocked by '._*'.***
 
 Defaults to `false`.
 

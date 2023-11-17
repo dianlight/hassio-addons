@@ -54,6 +54,7 @@ ARG CLI_VERSION
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
+    samba-client \
     dbus \
     exfatprogs \
     btrfs-progs \
@@ -108,6 +109,9 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 
 # Copy data
 COPY rootfs /
+
+HEALTHCHECK \
+    CMD smbclient -L '\\localhost' -U '%' -m SMB3
 
 # Labels
 LABEL \

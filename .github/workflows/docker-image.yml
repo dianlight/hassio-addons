@@ -2,36 +2,33 @@ name: Docker Image CI - Build Release.
 
 on:
   push:
-    branches: 
-      - release/* 
-  workflow_dispatch:  
-
+    branches:
+      - release/*
+  workflow_dispatch:
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3 
-        with: 
+      - uses: actions/checkout@v3
+        with:
           submodules: true
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-#      - name: Publish Plex Addon
-#        uses: home-assistant/builder@master
-#        with:
-#          args: |
-#            --all \
-#            --docker-hub-check \
-#            --target addon-plex/plex \
-#            --docker-hub dianlight     
+      #      - name: Publish Plex Addon
+      #        uses: home-assistant/builder@master
+      #        with:
+      #          args: |
+      #            --all \
+      #            --docker-hub-check \
+      #            --target addon-plex/plex \
+      #            --docker-hub dianlight
 
       - name: Publish SambaNAS Addon
         uses: home-assistant/builder@master
@@ -42,11 +39,11 @@ jobs:
             --all \
             --docker-hub-check \
             --target sambanas \
-            --docker-hub dianlight 
+            --docker-hub dianlight
 
       - name: pull-request
         uses: repo-sync/pull-request@v2
         with:
           pr_title: "Releasing ${{ github.ref }} into master"
-          pr_body: ":crown: *An automated PR*"           
-          github_token: ${{ secrets.GITHUB_TOKEN }}       
+          pr_body: ":crown: *An automated PR*"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
