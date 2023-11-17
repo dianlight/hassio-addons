@@ -165,7 +165,7 @@ Defaults to `false`.
 ### Option: `recyle_bin_enabled` (optional)
 
 Setting this option to `true` will enable recycle bin functions
-on the Samba add-on. Check 'veto_files' as could be blocked by '._*'.
+on the Samba add-on. ***Check 'veto_files' as could be blocked by '._*'.***
 
 Defaults to `false`.
 

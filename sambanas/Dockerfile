@@ -54,6 +54,7 @@ ARG CLI_VERSION
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
+    samba-client \
     dbus \
     exfatprogs \
     btrfs-progs \

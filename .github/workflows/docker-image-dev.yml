@@ -3,7 +3,7 @@ name: Docker Image CI - Build Pre-Release.
 on:
   push:
     branches:
-      - prerelease/*
+      - devrelease/*
   workflow_dispatch:
 
 jobs:
@@ -27,20 +27,6 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
-            --all \
+            --aarch64 \
             --target sambanas \
             --docker-hub dianlight
-
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
-        id: extract_branch
-
-      - name: pull-request
-        uses: repo-sync/pull-request@v2
-        continue-on-error: true
-        with:
-          destination_branch: "release/${{ steps.extract_branch.outputs.branch }}"
-          pr_title: "Releasing ${{ github.ref }} into master"
-          pr_body: ":crown: *An automated PR*"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
