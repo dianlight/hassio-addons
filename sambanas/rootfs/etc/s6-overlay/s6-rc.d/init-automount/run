@@ -15,7 +15,6 @@ declare fstypes
 declare dev
 declare mntops
 declare reserved_names
-declare cleanmountdisks
 
 function disk2label() { # $1 disk  return (label disk or id)
      local disk=$1
@@ -44,13 +43,12 @@ function disk2label() { # $1 disk  return (label disk or id)
 }
 
 # Check for reserved mount name
-function reserved_mount_name() { # $1 disk $2 cleanmountdisks
+function reserved_mount_name() { # $1 disk
      disk=$1
-     cleanmountdisks=$2
      reserved_names=(config addons ssl share backup media all_addon_configs homeassistant)
-     for disk in "${reserved_names[@]}"; do
-          if [[ ${cleanmountdisks[@]} =~ $disk ]]; then
-               tomountdisks=("${cleanmountdisks[@]/$disk/}")
+     for rdisk in "${reserved_names[@]}"; do
+          if [[ ${rdisk,,} = ${disk,,} ]]; then
+               tomountdisks=("${tomountdisks[@]/$disk/}")
                return 0
           fi
      done
@@ -245,9 +243,8 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           bashio::log.magenta "---------------------------------------------------"
           bashio::log.info "Checking Mounting disks for reserved names:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
           bashio::log.magenta "---------------------------------------------------"
-          cleanmountdisks="${tomountdisks[@]}"
           for disk in "${tomountdisks[@]}"; do
-               reserved_mount_name "$disk" "${cleanmountdisks[@]}" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
+               reserved_mount_name "$disk" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
           done
      fi
 

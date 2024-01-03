@@ -81,6 +81,8 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
+# FS: {{ .fs }}   
+
 # RECYCLE:{{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
    recycle:keeptree = yes
@@ -91,7 +93,7 @@
    #recycle:subdir_mode = 0700
    #recycle:exclude =
    #recycle:exclude_dir =
-   #recycle:maxsize = 0{{ end }}   
+   #recycle:maxsize = 0{{ end }}  
 
 # TM:{{ .timemachine }} {{- if .medialibrary.enable }} USAGE:{{ .usage | default "" }} {{ end }}
    {{- if .timemachine }}
