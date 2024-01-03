@@ -44,7 +44,7 @@ bashio::log.info "Docker Interface: $(bashio::network 'network.info.docker.inerf
 
 # Generate Samba configuration.
 touch /tmp/local_mount
-jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
+jq ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
     tempio \
         -template /usr/share/tempio/smb.gtpl \
         -out /etc/samba/smb.conf

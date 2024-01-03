@@ -60,7 +60,10 @@
    unix charset = UTF-8   
 
 {{ define "SHT" }}
-[{{- regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$"}}]
+{{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
+{{- $name := regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
+{{- $dinfo := get .shares $name | default dict -}}
+[{{- $name -}}]
    browseable = yes
    writeable = yes
 
@@ -81,9 +84,9 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-# FS: {{ .fs }}   
+# DEBUG: {{ toJson $dinfo  }}
 
-# RECYCLE:{{if .recyle_bin_enabled }}
+{{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
    recycle:keeptree = yes
    recycle:versions = yes
@@ -93,10 +96,11 @@
    #recycle:subdir_mode = 0700
    #recycle:exclude =
    #recycle:exclude_dir =
-   #recycle:maxsize = 0{{ end }}  
+   #recycle:maxsize = 0
+{{ end }}  
 
-# TM:{{ .timemachine }} {{- if .medialibrary.enable }} USAGE:{{ .usage | default "" }} {{ end }}
-   {{- if .timemachine }}
+# TM:{{ if has $dinfo.fs $unsupported }}unsupported{{else}}{{ .timemachine }}{{ end }} {{- if .medialibrary.enable }} {{ if .usage }}USAGE:{{ .usage }} {{ end }} FS:{{ $dinfo.fs | default "native" }} {{ if .recyle_bin_enabled }} RECYCLEBIN {{ end }} {{ end }}
+{{- if and .timemachine (has $dinfo.fs $unsupported | not ) }}
    vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
 
    # Time Machine Settings Ref: https://github.com/markthomas93/samba.apple.templates

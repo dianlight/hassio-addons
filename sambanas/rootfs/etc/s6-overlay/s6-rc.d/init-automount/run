@@ -112,7 +112,11 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
                     echo "$dev" >>/tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${mdisk}[${fstype}] Fail!" || :
           mount -t $type "$dev" "$path/$mdisk" -o $options &&
-               echo "$path"/"$mdisk" >>/tmp/local_mount && bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
+               echo "$path"/"$mdisk" >>/tmp/local_mount &&
+               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
+               mv /tmp/local_mount.json.tmp /tmp/local_mount.json &&
+               bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
+
      fi
 }
 
@@ -247,6 +251,8 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
                reserved_mount_name "$disk" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
           done
      fi
+
+     echo "{}" >/tmp/local_mount.json
 
      if [ ${#tomountdisks[@]} -gt 0 ]; then
           bashio::log.magenta "---------------------------------------------------"

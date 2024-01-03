@@ -8,19 +8,22 @@
 
 ###  🩹 BugFix
 - 🐛 [SambaNAS] Can't mount moredisks with label that contains a reserved word as substring [#188](https://github.com/dianlight/hassio-addons/issues/188)
-- 🐛 [Samba NAS 12.1.0-nas] TimeMachine on HA 11.3rc1 and Raspberry PI5 [#187](https://github.com/dianlight/hassio-addons/issues/187) TODO:
-- 🐛 [sambanas] 0x80070032 The request is not supported [#182](https://github.com/dianlight/hassio-addons/issues/182) TODO:
+- 🐛 [sambanas] 0x80070032 The request is not supported [#182](https://github.com/dianlight/hassio-addons/issues/182)
 - 🐛 [SAMBA NAS] Unable to upload or rename files in external usb  [#171](https://github.com/dianlight/hassio-addons/issues/171)
 - 🐛 [SAMBA NAS] Getting error 100093 when trying to add a file via SMB on an external exFat disk attached to the pi [#175](https://github.com/dianlight/hassio-addons/issues/175)
 
 
+- 🐛 [Samba NAS 12.1.0-nas] TimeMachine on HA 11.3rc1 and Raspberry PI5 [#187](https://github.com/dianlight/hassio-addons/issues/187) TODO:
+
 ### 💥 BREAKING CHANGE
-- Default `acl.timemachine` option now is set to `true` only for `ext2` ans `ext3` filesystem.  TODO: Implementare
+- "vfat" "msdos"	"f2fs" "fuseblk" and "exfat" are now marked unsupported for timemachine.
 
 ### 🏗 Chore
 - Rework on all MQTT client implementation. TODO:
 - [Full Changelog from official addon 12.2.0][changelog_12.2.0]
   - Decrease Samba log level (Skipped. Loglevel is configurable)
+- Update Based Image to 15.0.3 (Alpine 3.19.0)
+
 
 [changelog_12.2.0]: https://github.com/home-assistant/addons/pull/3002
 
