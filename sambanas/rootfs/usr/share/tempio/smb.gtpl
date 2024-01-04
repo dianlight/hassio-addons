@@ -75,7 +75,7 @@
    # End PR#167
 
    path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
-   valid users = _ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   valid users ={{ if (empty $dinfo | not) }}_ha_mount_user_{{ end }} {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
    {{ end }}
@@ -109,7 +109,7 @@
    fruit:metadata = stream
 {{ end }}
 {{- if has $dinfo.fs $unsupported }}
-   vfs objects = catia streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
+   vfs objects = catia{{ if .recyle_bin_enabled }} recycle{{ end }}
 {{ end }}
 
 {{ end }}
