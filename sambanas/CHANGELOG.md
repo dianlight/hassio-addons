@@ -5,7 +5,7 @@
 ###  ✨ Features
 - Move addon config in `addons_config`
 - Homeassitant Automount also with different user in acl
-- ✨ [REQUEST] Support for APFS formatted hard drives [#184](https://github.com/dianlight/hassio-addons/issues/184) TODO:
+- ✨ [REQUEST] Support for APFS formatted hard drives [#184](https://github.com/dianlight/hassio-addons/issues/184) - Only ReadOnly for now
 
 ###  🩹 BugFix
 - 🐛 [SambaNAS] Can't mount moredisks with label that contains a reserved word as substring [#188](https://github.com/dianlight/hassio-addons/issues/188)

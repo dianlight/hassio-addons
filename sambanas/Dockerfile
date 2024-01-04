@@ -12,7 +12,7 @@ ARG HDDTEMP_VERSION
 FROM $BUILD_FROM as builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make gcc libc-dev linux-headers build-base autoconf automake
+RUN apk add --no-cache make gcc libc-dev linux-headers build-base autoconf automake git
 
 ARG BUILD_ARCH
 ARG HDDTEMP_VERSION
@@ -22,6 +22,9 @@ RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/h
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master && make
+
+#RUN cd / && git clone https://github.com/linux-apfs/linux-apfs-rw.git \ 
+#    && cd linux-apfs-rw && make
 
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
@@ -81,7 +84,9 @@ RUN apk add --no-cache \
     wsdd \
     udisks2 \
     libcap \
-    hd-idle
+    hd-idle \
+    fuse3 \
+    apfs-fuse
 
 # HDDTEMP
 ARG HDDTEMP_VERSION
@@ -106,6 +111,9 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 
 
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
+
+# ENABLE FUSE APFS
+RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
 # Copy data
 COPY rootfs /

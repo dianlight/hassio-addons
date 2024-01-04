@@ -153,7 +153,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
      bashio::log.blue "---------------------------------------------------"
      bashio::log.green "Supported fs: ${fstypes}"
-     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
+     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
      bashio::log.blue "---------------------------------------------------"
 
      # Check Host Ssh config
