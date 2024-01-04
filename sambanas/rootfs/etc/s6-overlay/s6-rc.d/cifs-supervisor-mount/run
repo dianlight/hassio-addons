@@ -9,16 +9,13 @@ if [ -f /tmp/cifs_network ]; then
 
     bashio::log.info "Automount Shares..."
 
-    #interface=$(bashio::network.name)
-    #ipaddress=$(bashio::network.ipv4_address "${interface}")
-    #interface=$(bashio::network 'network.info.docker.inerface' '.docker.interface')
-    #ipaddress=$(bashio::network 'network.info.docker.network' '.docker.address')
-    #hostname=$(bashio::addon.hostname)
     ipaddress=$(bashio::addon.ip_address)
-    #bashio::log "Addon IP: ${hostname}/${ipaddress}"
 
-    username=$(bashio::config 'username')
-    password=$(bashio::config 'password')
+    #username=$(bashio::config 'username')
+    #password=$(bashio::config 'password')
+
+    username=$(jq -r '.username' </tmp/auth.json)
+    password=$(jq -r '.password' </tmp/auth.json)
 
     available_shares=$(awk '/\[(.*)\]/{ DISK=substr($1,2,length($1)-2); next } /.*path =(.*)/{ printf "%s\n",DISK,$0 }' /etc/samba/smb.conf)
 

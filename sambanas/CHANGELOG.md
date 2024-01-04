@@ -3,7 +3,8 @@
 ## 12.2.0-nas [Proposed] TODO:
 
 ###  ✨ Features
-- Move addon config in `addons_config` TODO:
+- Move addon config in `addons_config`
+- Homeassitant Automount also with different user in acl
 - ✨ [REQUEST] Support for APFS formatted hard drives [#184](https://github.com/dianlight/hassio-addons/issues/184) TODO:
 
 ###  🩹 BugFix
@@ -17,6 +18,7 @@
 
 ### 💥 BREAKING CHANGE
 - "vfat" "msdos"	"f2fs" "fuseblk" and "exfat" are now marked unsupported for timemachine.
+- Internal HA Storage Mount is done with a generated superuser
 
 ### 🏗 Chore
 - Rework on all MQTT client implementation. TODO:
