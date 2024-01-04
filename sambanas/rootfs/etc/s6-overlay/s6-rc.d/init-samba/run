@@ -65,10 +65,12 @@ password=$(bashio::config 'password')
 addSambaUser "${username}" "${password}"
 
 # Init superuser
-username="_ha_mount_user_"
-password=$(cat /proc/sys/kernel/random/uuid | sed 's/[-]//g' | head -c 20)
-addSambaUser "${username}" "${password}"
-jq -n --arg username "${username}" --arg password "${password}" '{username:$username, password:$password}' >/tmp/auth.json
+if [ -f /tmp/cifs_network ]; then
+    username="_ha_mount_user_"
+    password=$(cat /proc/sys/kernel/random/uuid | sed 's/[-]//g' | head -c 20)
+    addSambaUser "${username}" "${password}"
+    jq -n --arg username "${username}" --arg password "${password}" '{username:$username, password:$password}' >/tmp/auth.json
+fi
 
 # Create other users
 for user in $(bashio::config 'other_users'); do
