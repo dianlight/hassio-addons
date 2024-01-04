@@ -107,7 +107,11 @@
    fruit:time machine = yes
    #fruit:time machine max size = SIZE [K|M|G|T|P]
    fruit:metadata = stream
-   {{ end }}
+{{ end }}
+{{- if has $dinfo.fs $unsupported }}
+   vfs objects = catia streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
+{{ end }}
+
 {{ end }}
 
 {{- $dfdisk := list "config" "addons" "ssl" "share" "backup" "media" "addon_configs" }}
