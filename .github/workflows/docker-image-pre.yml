@@ -40,17 +40,26 @@ jobs:
         run: echo "BR_VERSION=${GITHUB_REF##*/}"
         id: extract_branch
 
-      - name: pull-request
+      - name: create-branch
         shell: bash
+        continue-on-error: true
         run: |
           echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
           git --version
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git branch -c "release/${GITHUB_REF##*/}" 
-          git push
-          # gh_pr_up() { gh pr create $* || gh pr edit $* }
-          # gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+          git branch -c "release/${GITHUB_REF##*/}"
+
+      - name: Commit & Push changes
+        uses: Andro999b/push@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: pull-request
+        shell: bash
+        run: |
+          gh_pr_up() { gh pr create $* || gh pr edit $* }
+          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
 #        uses: repo-sync/pull-request@v2
 #        continue-on-error: true
