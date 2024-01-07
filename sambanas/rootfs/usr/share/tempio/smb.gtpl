@@ -60,9 +60,13 @@
    unix charset = UTF-8   
 
 {{ define "SHT" }}
-[{{- regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$"}}]
+{{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
+{{- $rosupported := list "apfs"}}
+{{- $name := regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
+{{- $dinfo := get .shares $name | default dict -}}
+[{{- $name -}}]
    browseable = yes
-   writeable = yes
+   writeable = {{ has $dinfo.fs $rosupported | ternary "no" "yes" }}
 
    # cherry pick from PR#167 to Test
    create mask = 0664
@@ -72,7 +76,7 @@
    # End PR#167
 
    path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
-   valid users = {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   valid users ={{ if (empty $dinfo | not) }}_ha_mount_user_{{ end }} {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
    {{ end }}
@@ -81,7 +85,9 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-# RECYCLE:{{if .recyle_bin_enabled }}
+# DEBUG: {{ toJson $dinfo  }}
+
+{{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
    recycle:keeptree = yes
    recycle:versions = yes
@@ -91,17 +97,22 @@
    #recycle:subdir_mode = 0700
    #recycle:exclude =
    #recycle:exclude_dir =
-   #recycle:maxsize = 0{{ end }}   
+   #recycle:maxsize = 0
+{{ end }}  
 
-# TM:{{ .timemachine }} {{- if .medialibrary.enable }} USAGE:{{ .usage | default "" }} {{ end }}
-   {{- if .timemachine }}
+# TM:{{ if has $dinfo.fs $unsupported }}unsupported{{else}}{{ .timemachine }}{{ end }} {{- if .medialibrary.enable }} {{ if .usage }}USAGE:{{ .usage }} {{ end }} FS:{{ $dinfo.fs | default "native" }} {{ if .recyle_bin_enabled }} RECYCLEBIN {{ end }} {{ end }}
+{{- if and .timemachine (has $dinfo.fs $unsupported | not ) }}
    vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
 
    # Time Machine Settings Ref: https://github.com/markthomas93/samba.apple.templates
    fruit:time machine = yes
    #fruit:time machine max size = SIZE [K|M|G|T|P]
    fruit:metadata = stream
-   {{ end }}
+{{ end }}
+{{- if has $dinfo.fs $unsupported }}
+   vfs objects = catia{{ if .recyle_bin_enabled }} recycle{{ end }}
+{{ end }}
+
 {{ end }}
 
 {{- $dfdisk := list "config" "addons" "ssl" "share" "backup" "media" "addon_configs" }}

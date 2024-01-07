@@ -9,16 +9,13 @@ if [ -f /tmp/cifs_network ]; then
 
     bashio::log.info "Automount Shares..."
 
-    #interface=$(bashio::network.name)
-    #ipaddress=$(bashio::network.ipv4_address "${interface}")
-    #interface=$(bashio::network 'network.info.docker.inerface' '.docker.interface')
-    #ipaddress=$(bashio::network 'network.info.docker.network' '.docker.address')
-    #hostname=$(bashio::addon.hostname)
     ipaddress=$(bashio::addon.ip_address)
-    #bashio::log "Addon IP: ${hostname}/${ipaddress}"
 
-    username=$(bashio::config 'username')
-    password=$(bashio::config 'password')
+    #username=$(bashio::config 'username')
+    #password=$(bashio::config 'password')
+
+    username=$(jq -r '.username' </tmp/auth.json)
+    password=$(jq -r '.password' </tmp/auth.json)
 
     available_shares=$(awk '/\[(.*)\]/{ DISK=substr($1,2,length($1)-2); next } /.*path =(.*)/{ printf "%s\n",DISK,$0 }' /etc/samba/smb.conf)
 
@@ -36,7 +33,7 @@ if [ -f /tmp/cifs_network ]; then
     timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
 
     while read -r -a device; do
-        [[ "share config addons ssl backup media all_addon_configs homeassistant" =~ $device ]] && continue
+        [[ ${device,,} == @(share|config|addons|ssl|backup|media|addon_configs|homeassistant) ]] && continue
         usage=$(jq -r --arg xshare "$device" '.acl[] | select(.share==$xshare) | .usage // "media"' <<<"$(bashio::addon.config)")
         cmdshare=$(jq -nrc --arg usage "${usage:-media}" --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage=$usage|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
         #bashio::log.info "${cmdshare}"

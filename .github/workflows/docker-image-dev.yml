@@ -1,10 +1,13 @@
-name: Docker Image CI - Build Pre-Release.
+name: Docker Image CI - Build Dev
 
 on:
   push:
     branches:
       - devrelease/*
   workflow_dispatch:
+
+permissions:
+  pull-requests: write
 
 jobs:
   build:
@@ -30,3 +33,16 @@ jobs:
             --aarch64 \
             --target sambanas \
             --docker-hub dianlight
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+        id: extract_branch
+
+      - name: pull-request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"

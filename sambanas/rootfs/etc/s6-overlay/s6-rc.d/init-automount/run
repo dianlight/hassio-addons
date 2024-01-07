@@ -15,7 +15,6 @@ declare fstypes
 declare dev
 declare mntops
 declare reserved_names
-declare cleanmountdisks
 
 function disk2label() { # $1 disk  return (label disk or id)
      local disk=$1
@@ -44,13 +43,12 @@ function disk2label() { # $1 disk  return (label disk or id)
 }
 
 # Check for reserved mount name
-function reserved_mount_name() { # $1 disk $2 cleanmountdisks
+function reserved_mount_name() { # $1 disk
      disk=$1
-     cleanmountdisks=$2
      reserved_names=(config addons ssl share backup media all_addon_configs homeassistant)
-     for disk in "${reserved_names[@]}"; do
-          if [[ ${cleanmountdisks[@]} =~ $disk ]]; then
-               tomountdisks=("${cleanmountdisks[@]/$disk/}")
+     for rdisk in "${reserved_names[@]}"; do
+          if [[ ${rdisk,,} = ${disk,,} ]]; then
+               tomountdisks=("${tomountdisks[@]/$disk/}")
                return 0
           fi
      done
@@ -114,7 +112,11 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
                     echo "$dev" >>/tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${mdisk}[${fstype}] Fail!" || :
           mount -t $type "$dev" "$path/$mdisk" -o $options &&
-               echo "$path"/"$mdisk" >>/tmp/local_mount && bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
+               echo "$path"/"$mdisk" >>/tmp/local_mount &&
+               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
+               mv /tmp/local_mount.json.tmp /tmp/local_mount.json &&
+               bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
+
      fi
 }
 
@@ -151,7 +153,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
      bashio::log.blue "---------------------------------------------------"
      bashio::log.green "Supported fs: ${fstypes}"
-     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /sbin -name "mount*fuse" | cut -c 13- | tr "\n" " " | sed s/fuse//g)"; fi
+     if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
      bashio::log.blue "---------------------------------------------------"
 
      # Check Host Ssh config
@@ -245,11 +247,12 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           bashio::log.magenta "---------------------------------------------------"
           bashio::log.info "Checking Mounting disks for reserved names:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
           bashio::log.magenta "---------------------------------------------------"
-          cleanmountdisks="${tomountdisks[@]}"
           for disk in "${tomountdisks[@]}"; do
-               reserved_mount_name "$disk" "${cleanmountdisks[@]}" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
+               reserved_mount_name "$disk" || bashio::log.warning "Fail to mount ${disk} due to reserved name!"
           done
      fi
+
+     echo "{}" >/tmp/local_mount.json
 
      if [ ${#tomountdisks[@]} -gt 0 ]; then
           bashio::log.magenta "---------------------------------------------------"

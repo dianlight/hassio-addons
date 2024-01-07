@@ -1,5 +1,35 @@
 # Changelog
 
+## 12.2.0-nas
+
+###  ✨ Features
+- Move addon config in `addons_config`
+- Homeassitant Automount also with different user in acl
+- ✨ [REQUEST] Support for APFS formatted hard drives [#184](https://github.com/dianlight/hassio-addons/issues/184) - Only ReadOnly for now
+
+###  🩹 BugFix
+- 🐛 [SambaNAS] Can't mount moredisks with label that contains a reserved word as substring [#188](https://github.com/dianlight/hassio-addons/issues/188)
+- 🐛 [sambanas] 0x80070032 The request is not supported [#182](https://github.com/dianlight/hassio-addons/issues/182)
+- 🐛 [SAMBA NAS] Unable to upload or rename files in external usb  [#171](https://github.com/dianlight/hassio-addons/issues/171)
+- 🐛 [SAMBA NAS] Getting error 100093 when trying to add a file via SMB on an external exFat disk attached to the pi [#175](https://github.com/dianlight/hassio-addons/issues/175)
+
+### 💥 BREAKING CHANGE
+- **This is the last version with** `mqtt_use_legacy_entities`. Legacy implementation will be removed in next version.
+- "vfat" "msdos"	"f2fs" "fuseblk" and "exfat" are now marked unsupported for timemachine.
+- Internal HA Storage Mount is done with a generated superuser
+
+### 🏗 Chore
+- [Full Changelog from official addon 12.2.0][changelog_12.2.0]
+  - Decrease Samba log level (Skipped. Loglevel is configurable)
+- Update Based Image to 15.0.3 (Alpine 3.19.0)
+
+### 🧪 Experimental
+- Rework on all MQTT client implementation. [In Progress]
+
+
+
+[changelog_12.2.0]: https://github.com/home-assistant/addons/pull/3002
+
 ## 12.1.0-nas
 
 ### 🏗 Chore
