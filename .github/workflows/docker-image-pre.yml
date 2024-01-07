@@ -43,11 +43,11 @@ jobs:
       - name: pull-request
         run: |
           env
-          echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
           git branch -c "release/${GITHUB_REF##*/}" || true 
           gh_pr_up() { gh pr create $* || gh pr edit $* }
           gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
+#          echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
 #        uses: repo-sync/pull-request@v2
 #        continue-on-error: true
 #        with:
