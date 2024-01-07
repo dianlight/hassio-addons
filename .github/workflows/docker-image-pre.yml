@@ -41,12 +41,16 @@ jobs:
         id: extract_branch
 
       - name: pull-request
+        shell: bash
         run: |
+          echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
+          git --version
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
           git branch -c "release/${GITHUB_REF##*/}" 
-          gh_pr_up() { gh pr create $* || gh pr edit $* }
-          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+          # gh_pr_up() { gh pr create $* || gh pr edit $* }
+          # gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
-#          echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
 #        uses: repo-sync/pull-request@v2
 #        continue-on-error: true
 #        with:
