@@ -49,6 +49,9 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git checkout -b  "release/${GITHUB_REF##*/}"
+          git branch -a
+          git branch -u "origin/release/${GITHUB_REF##*/}"
+          git branch -a
 
       - name: Commit & Push changes
         uses: Andro999b/push@v1.3
@@ -60,4 +63,4 @@ jobs:
         shell: bash
         run: |
           gh_pr_up() { gh pr create $* || gh pr edit $* }
-          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+          gh_pr_up --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
