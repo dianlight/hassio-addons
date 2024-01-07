@@ -7,6 +7,7 @@
 
 ### 💥 BREAKING CHANGE
 - Removed `mqtt_use_legacy_entities` option and scripts.
+- Drop support for armhf and i386
 
 ## 12.2.0-nas
 
