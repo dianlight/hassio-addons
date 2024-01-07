@@ -48,6 +48,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git branch -c "release/${GITHUB_REF##*/}" 
+          git push
           # gh_pr_up() { gh pr create $* || gh pr edit $* }
           # gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
