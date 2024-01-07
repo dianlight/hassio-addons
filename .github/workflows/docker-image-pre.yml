@@ -35,15 +35,27 @@ jobs:
             --target sambanas \
             --docker-hub dianlight
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "BR_VERSION=${GITHUB_REF##*/}"
+        id: extract_branch
+
+      - name: create release branch
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: "/ref/heads/release/${{ steps.extract_branch.outputs.BR_VERSION }}"
+
       - name: pull-request
-        env: 
-          BR_VERSION: ${GITHUB_REF##*/}
         run: |
           env
-          gh auth login -s codespace
+          echo "${{ steps.extract_branch.outputs.BR_VERSION }}"
           gh codespace create -b "release/${GITHUB_REF##*/}" 
           gh_pr_up() { gh pr create $* || gh pr edit $* }
-          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"          
+          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+
 #        uses: repo-sync/pull-request@v2
 #        continue-on-error: true
 #        with:
