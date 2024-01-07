@@ -44,30 +44,39 @@ bashio::log.info "Docker Interface: $(bashio::network 'network.info.docker.inerf
 
 # Generate Samba configuration.
 touch /tmp/local_mount
-jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
+jq ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
     tempio \
         -template /usr/share/tempio/smb.gtpl \
         -out /etc/samba/smb.conf
 
-# Init user
-username=$(bashio::config 'username')
-password=$(bashio::config 'password')
-addgroup "${username}"
-adduser -D -H -G "${username}" -s /bin/false "${username}"
-# shellcheck disable=SC1117
-echo -e "${password}\n${password}" |
-    smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
-
-# Create other users
-for user in $(bashio::config 'other_users'); do
-    username=$(echo "${user}" | jq -r '.username')
-    password=$(echo "${user}" | jq -r '.password')
-    # bashio::log.info "Creating user ${username}"
+function addSambaUser() { # $1 username $2 password
+    username=$1
+    password=$2
     addgroup "${username}"
     adduser -D -H -G "${username}" -s /bin/false "${username}"
     # shellcheck disable=SC1117
     echo -e "${password}\n${password}" |
         smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
+}
+
+# Init user
+username=$(bashio::config 'username')
+password=$(bashio::config 'password')
+addSambaUser "${username}" "${password}"
+
+# Init superuser
+if [ -f /tmp/cifs_network ]; then
+    username="_ha_mount_user_"
+    password=$(cat /proc/sys/kernel/random/uuid | sed 's/[-]//g' | head -c 20)
+    addSambaUser "${username}" "${password}"
+    jq -n --arg username "${username}" --arg password "${password}" '{username:$username, password:$password}' >/tmp/auth.json
+fi
+
+# Create other users
+for user in $(bashio::config 'other_users'); do
+    username=$(echo "${user}" | jq -r '.username')
+    password=$(echo "${user}" | jq -r '.password')
+    addSambaUser "${username}" "${password}"
 done
 
 # Log exposed mounted shares

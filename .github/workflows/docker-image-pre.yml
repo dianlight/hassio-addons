@@ -25,7 +25,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Publish SambaNAS Addon
-        if: ${{ false }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
@@ -35,19 +34,15 @@ jobs:
             --target sambanas \
             --docker-hub dianlight
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+        id: extract_branch
+
       - name: pull-request
-        env: 
-          BR_VERSION: ${GITHUB_REF##*/}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        shell: bash
         run: |
-          env
-          gh auth login -s codespace
-          gh codespace create -b "release/${GITHUB_REF##*/}" 
-          gh_pr_up() { gh pr create $* || gh pr edit $* }
-          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"          
-#        uses: repo-sync/pull-request@v2
-#        continue-on-error: true
-#        with:
-#          destination_branch: "release/${{ steps.extract_branch.outputs.branch }}"
-#          pr_title: "Releasing ${{ github.ref }} into master"
-#          pr_body: ":crown: *An automated PR*"
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
