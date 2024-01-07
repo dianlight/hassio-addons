@@ -86,7 +86,8 @@ RUN apk add --no-cache \
     libcap \
     hd-idle \
     fuse3 \
-    apfs-fuse
+    apfs-fuse \
+    py3-pip
 
 # HDDTEMP
 ARG HDDTEMP_VERSION
@@ -114,6 +115,9 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
+
+# PYTHON ADDONS
+RUN pip install pySMART psutil ha-mqtt-discoverable humanize
 
 # Copy data
 COPY rootfs /
