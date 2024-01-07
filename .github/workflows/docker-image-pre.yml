@@ -40,9 +40,10 @@ jobs:
           BR_VERSION: ${GITHUB_REF##*/}
         run: |
           env
-          gh codespace create -b "release/${BR_VERSION}" 
+          gh auth login -s codespace
+          gh codespace create -b "release/${GITHUB_REF##*/}" 
           gh_pr_up() { gh pr create $* || gh pr edit $* }
-          gh_pr_up --base "release/${BR_VERSION}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"          
+          gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"          
 #        uses: repo-sync/pull-request@v2
 #        continue-on-error: true
 #        with:
