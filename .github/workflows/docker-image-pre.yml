@@ -42,8 +42,7 @@ jobs:
 
       - name: pull-request
         run: |
-          env
-          git branch -c "release/${GITHUB_REF##*/}" || true 
+          git branch -c "release/${GITHUB_REF##*/}" 
           gh_pr_up() { gh pr create $* || gh pr edit $* }
           gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
