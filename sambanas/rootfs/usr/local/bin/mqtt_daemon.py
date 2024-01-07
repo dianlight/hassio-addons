@@ -70,7 +70,7 @@ mqtt_settings = Settings.MQTT(host=args['broker'],
                               username=args['user'],
                               password=args['password'],
                               discovery_prefix="test",
-                              state_prefix='sambanas_test')
+                              state_prefix=args['topic'])
 
 # Global Sensors regitry
 class ConfigEntity:

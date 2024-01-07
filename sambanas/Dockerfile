@@ -117,7 +117,8 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
 # PYTHON ADDONS
-RUN pip install pySMART psutil ha-mqtt-discoverable humanize
+#RUN pip install pySMART psutil ha-mqtt-discoverable humanize
+RUN pip install pySMART psutil humanize https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip
 
 # Copy data
 COPY rootfs /

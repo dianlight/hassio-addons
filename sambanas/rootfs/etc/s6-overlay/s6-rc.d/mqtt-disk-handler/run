@@ -8,6 +8,10 @@ readonly MAX_TIMEFRAME=60
 readonly MIN_TIMEFRAME=10
 readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
 
+if bashio::config.true "mqtt_nexgen_entities"; then
+    exec sleep infinity
+fi
+
 if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for disks info..."
 

@@ -288,9 +288,9 @@ Setting this option to `true` will enable the use of mqtt to send disks status d
 
 Defaults to `false`.
 
-### Option: `mqtt_use_legacy_entities` (optional) (**deprecated**)
+### Option: `mqtt_nexgen_entities` (optional)
 
-Setting this option to `true` will expose mqtt old entities based on mountpoints. This will be removed in future releases.
+Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
 
 Defaults to `false`.
 

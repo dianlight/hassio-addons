@@ -1,5 +1,13 @@
 # Changelog
 
+## 12.2.0-nas1 [TODO:]
+
+###  ✨ Features
+- New `mqtt_nexgen_entities` option and scripts to enable new MQTT integration. This will be the default system for future integration is more efficent and use less resources.
+
+### 💥 BREAKING CHANGE
+- Removed `mqtt_use_legacy_entities` option and scripts.
+
 ## 12.2.0-nas
 
 ###  ✨ Features
