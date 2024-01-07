@@ -37,7 +37,7 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "BR_VERSION=${GITHUB_REF##*/}"
+        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
       - name: create-branch
@@ -48,23 +48,16 @@ jobs:
           git --version
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git branch -c "release/${GITHUB_REF##*/}"
+          git checkout -b  "release/${GITHUB_REF##*/}"
 
       - name: Commit & Push changes
         uses: Andro999b/push@v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release/${{ steps.extract_branch.outputs.BR_VERSION }}
 
       - name: pull-request
         shell: bash
         run: |
           gh_pr_up() { gh pr create $* || gh pr edit $* }
           gh_pr_up --base "release/${GITHUB_REF##*/}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
-
-#        uses: repo-sync/pull-request@v2
-#        continue-on-error: true
-#        with:
-#          destination_branch: "release/${{ steps.extract_branch.outputs.branch }}"
-#          pr_title: "Releasing ${{ github.ref }} into master"
-#          pr_body: ":crown: *An automated PR*"
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
