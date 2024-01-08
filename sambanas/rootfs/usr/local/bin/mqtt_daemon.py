@@ -5,8 +5,9 @@ from copy import deepcopy
 import subprocess
 import time
 import argparse
-import configparser
+#import configparser
 import collections
+import asyncio
 import json
 import os
 import uuid
@@ -20,11 +21,11 @@ import signal
 from typing import Any, Callable,List, Self, Tuple, Union
 import re
 import humanize
+import asyncio
+from abc import ABC, abstractmethod 
 
-#from paho.mqtt import client as mqtt_client
-
-config = configparser.ConfigParser( strict=False )
-config.read("/etc/samba/smb.conf")
+#config = configparser.ConfigParser( strict=False )
+#config.read("/etc/samba/smb.conf")
 
 # Get the arguments from the command-line except the filename
 ap = argparse.ArgumentParser()
@@ -73,35 +74,15 @@ mqtt_settings = Settings.MQTT(host=args['broker'],
                               state_prefix=args['topic'])
 
 # Global Sensors regitry
-class ConfigEntity:
-
+class ConfigEntity(ABC):
     def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
                   state_function: Callable[[Self],Any], 
-                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
-                  device:Device = None,
-                  iostat_device:str = None):
+                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None
+                  ):
         self.sensorInfo = sensorInfo
         self.state_function = state_function
         self.attributes_function = attributes_function
-        self.device = device
-        self.samba = {
-            "users":0,
-            "users_json":dict(),
-            "connections":0,
-            "open_files":0,
-        }
-        self.iostat_device = iostat_device
         self.sensor:Union[Sensor,BinarySensor] = None
-        self._iostat:List[Tuple[int,dict[str,sdiskio]]] = collections.deque([(0,None),(0,None)],maxlen=2)
-
-
-    @property
-    def iostat(self) -> Tuple[int,dict[str,sdiskio]]:
-        return self._iostat[1]
-
-    @property
-    def h_iostat(self) ->Tuple[int,dict[str,sdiskio]]:
-        return self._iostat[0]
     
     def createSensor(self) -> Self:
         if self.sensor != None: return self.sensor
@@ -112,21 +93,83 @@ class ConfigEntity:
             self.sensor = Sensor(settings)
         logging.debug("Sensor '%s' created",self.sensor.generate_config()['name'])    
         return self   
+    
+    @abstractmethod
+    def detstroy(self):
+        pass
+
+class ConfigEntityAutonomous(ConfigEntity):
+    def detstroy(self):
+        self.sensor.delete()
+
+class ConfigEntityFromDevice(ConfigEntity):
+    def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
+                  device:Device,
+                  state_function: Callable[[Self],Any], 
+                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                  ):
+        super().__init__(sensorInfo,state_function,attributes_function)
+        self.device = device
+
+    def detstroy(self):
+        self.sensor.delete()
+
+class ConfigEntityFromIoStat(ConfigEntity):
+    def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
+                  iostat_device:str,
+                  state_function: Callable[[Self],Any], 
+                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                  ):
+        super().__init__(sensorInfo,state_function,attributes_function)
+        self.iostat_device = iostat_device
+        self._iostat:List[Tuple[int,dict[str,sdiskio]]] = collections.deque([(0,None),(0,None)],maxlen=2)
+
+    @property
+    def iostat(self) -> Tuple[int,dict[str,sdiskio]]:
+        return self._iostat[1]
+
+    @property
+    def h_iostat(self) ->Tuple[int,dict[str,sdiskio]]:
+        return self._iostat[0]
 
     def addIostat(self,iostat:dict):
         self._iostat.append((time.time_ns(),iostat.copy()))
+
+    def detstroy(self):
+        self.sensor.delete()
+
+class ConfigEntityFromSamba(ConfigEntity):
+    def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
+                  samba:dict,
+                  state_function: Callable[[Self],Any], 
+                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                ):
+        super().__init__(sensorInfo,state_function,attributes_function)
+        self.samba = samba
+
+    def detstroy(self):
+        self.sensor.delete()
+
 
 def sambaMetricCollector():
     data={}
     
 ##smbstatus gets report of current samba server connections
-    p = subprocess.Popen(['smbstatus','-jf'], stdout=subprocess.PIPE)
-    output, err = p.communicate()
-    jsondata = json.loads(output.decode())
+    try:
+        p = subprocess.Popen(['smbstatus','-jf'], stdout=subprocess.PIPE)
+        output, err = p.communicate()
+        jsondata = json.loads(output.decode())
 
-    logging.debug("SmbClient: %s",jsondata)
+        logging.debug("SmbClient: %s",jsondata)
+    except:
+        logging.warning("Exception on smbstat comunication!")
+        jsondata = {}
 
-    data['samba_version']=jsondata['version']
+    if 'samba_version' in jsondata:
+        data['samba_version']=jsondata['version']
+    else:
+        data['samba_version']='Unknown'
+
     if 'sessions' in jsondata:
         data['users']=len(jsondata['sessions'])
         data['users_json']=jsondata['sessions']
@@ -144,6 +187,7 @@ def sambaMetricCollector():
     else:
         data['open_files']=0
     
+    logging.debug(data)
     return data
 
              
@@ -155,17 +199,17 @@ samba = sambaMetricCollector()
 sambanas_device_info = DeviceInfo(name="SambaNas",
                                   model="Addon",
                                   manufacturer="@Dianlight",
-#                                  sw_version=os.popen('smbd -V').read().strip(),
                                   sw_version=samba['samba_version'],
                                   hw_version=args['addon_version'],
-                                  identifiers=[os.getenv('HOSTNAME')])
+                                  identifiers=[os.getenv('HOSTNAME',default="local_test")])
 
-sambaUsers = ConfigEntity(sensorInfo = SensorInfo(name="SambaNas Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
-                               state_function= lambda ce: ce.samba["users"])                               
+sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+                               state_function= lambda ce: ce.samba["users"], samba=samba)                               
 sensorList.append(('samba_users',sambaUsers.createSensor()))
-sambaConnections = ConfigEntity(sensorInfo = SensorInfo(name="SambaNas Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
                                state_function= lambda ce: ce.samba["connections"],
-                               attributes_function= lambda ce: ('open_files',ce.samba['open_files'])
+                               attributes_function= lambda ce: ('open_files',ce.samba['open_files']),
+                               samba=samba
                                )                               
 sensorList.append(('samba_connections',sambaConnections.createSensor()))
 
@@ -182,7 +226,7 @@ for dev_name in psdata.keys():
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=os.getenv('HOSTNAME'))
     
-    def smartAssesmentAttribute(ce:ConfigEntity) -> List[Tuple[str,Any]]:
+    def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> List[Tuple[str,Any]]:
         attributes:List[Tuple[str,str]] = []
         attributes.append(('messages',ce.device.messages))
         attributes.append(('rotation_rate',ce.device.rotation_rate))
@@ -204,7 +248,7 @@ for dev_name in psdata.keys():
         return attributes
 
     
-    smartAssessment = ConfigEntity(sensorInfo = SensorInfo(name=f"SambaNas S.M.A.R.T {dev.name}",
+    smartAssessment = ConfigEntityFromDevice(sensorInfo = SensorInfo(name=f"SambaNas S.M.A.R.T {dev.name}",
                                                            unique_id=str(uuid.uuid4()),
                                                            device=disk_device_info,
                                                            device_class='problem'),
@@ -214,7 +258,7 @@ for dev_name in psdata.keys():
     sensorList.append((f'smart_{dev.name}',smartAssessment.createSensor()))    
 
 
-    def totalDiskRate(ce:ConfigEntity):
+    def totalDiskRate(ce:ConfigEntityFromIoStat):
 
         if ce.h_iostat[0] == 0 or ce.h_iostat[0] == ce.iostat[0]: return 0
         t_read = int(ce.iostat[1][ce.iostat_device].read_bytes) - int(ce.h_iostat[1][ce.iostat_device].read_bytes)
@@ -224,14 +268,14 @@ for dev_name in psdata.keys():
         return round(((t_read+t_write)*1000000000/t_ns_time)/1024,2) # kB/s
 
 
-    def iostatAttribute(ce:ConfigEntity) -> List[Tuple[str,str]]:
+    def iostatAttribute(ce:ConfigEntityFromIoStat) -> List[Tuple[str,str]]:
         attributes:List[Tuple[str,str]] = []
         for key in ce.iostat[1][ce.iostat_device]._fields:
             attributes.append((key,getattr(ce.iostat[1][ce.iostat_device],key)))
         return attributes
     
 
-    diskInfo = ConfigEntity(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {dev.name}",
+    diskInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {dev.name}",
                                                    unique_id=str(uuid.uuid4()),
                                                    device=disk_device_info,
                                                    unit_of_measurement='kB/s',
@@ -259,7 +303,7 @@ for dev_name in psdata.keys():
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
 
     for partition_device, partition in partitionDevices.items():
-        partitionInfo = ConfigEntity(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {partition_device}",
+        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {partition_device}",
                                                             unique_id=str(uuid.uuid4()),
                                                             device=partitionDevices[partition_device],
                                                             unit_of_measurement='kB/s',
@@ -270,7 +314,7 @@ for dev_name in psdata.keys():
         
         sensorList.append((f'iostat_{partition_device}',partitionInfo.createSensor()))
 
-        def usageAttribute(ce:ConfigEntity) -> List[Tuple[str,str]]:
+        def usageAttribute(ce:ConfigEntityAutonomous) -> List[Tuple[str,str]]:
             usage = psutil.disk_usage(ce.sensorInfo.device.identifiers[0])
             attributes:List[Tuple[str,str]] = [
                 ('used',humanize.naturalsize(usage.used)),
@@ -279,56 +323,92 @@ for dev_name in psdata.keys():
             ]
             return attributes
 
-        partitionInfo = ConfigEntity(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition_device}",
+        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition_device}",
                                                             unique_id=str(uuid.uuid4()),
                                                             device=partitionDevices[partition_device],
                                                             icon="mdi:harddisk",
                                                             unit_of_measurement='%',
                                                             device_class='power_factor'),
                                 state_function= lambda ce: psutil.disk_usage(ce.sensorInfo.device.identifiers[0]).percent,
-                                attributes_function= usageAttribute,
-                                iostat_device=partition_device)
+                                attributes_function= usageAttribute)
         
         sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
 
+
+tasks:list[asyncio.Task]=[]
+
 def handler(signum, frame):
     logging.warning("Signal %x. Unpublish %d sensors",signum, len(sensorList))
-    for sensor in sensorList:
-        logging.info("Unpublish sensor %s",sensor[0])
-        sensor[1].sensor.delete()
-    time.sleep(5)    
-    exit(0) 
+
+    for task in tasks:
+        task.cancel()
  
 signal.signal(signal.SIGINT, handler=handler)
-#signal.signal(signal.SIGKILL, handler=handler)
-#signal.signal(signal.SIGHUP, handler=handler)
+signal.signal(signal.SIGTERM, handler=handler)
+signal.signal(signal.SIGHUP, handler=handler)
 
 
+async def publish_states():
+  while True:
+    for sensor in sensorList:
+      if isinstance(sensor[1],ConfigEntityAutonomous):
+        logging.info("Updating sensor %s",sensor[0])
+        sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
+        if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))
+    await asyncio.sleep(5)
+        
+async def publish_device_states():
+  while True:
+    for sensor in sensorList:
+     if isinstance(sensor[1],ConfigEntityFromDevice):
+        logging.info("Updating Device sensor %s",sensor[0])
+        sensor[1].device.update()
+        sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
+        if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))        
+    await asyncio.sleep(5)
 
-
-def publish_states():
+async def publish_iostate_states():
+  while True:
     iostate = psutil.disk_io_counters(perdisk=True,nowrap=True)
+
+    for sensor in sensorList:
+        if isinstance(sensor[1],ConfigEntityFromIoStat):
+            logging.info("Updating Iostat sensor %s",sensor[0])
+            sensor[1].addIostat(iostate)
+            sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
+            if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))        
+    await asyncio.sleep(1)
+
+async def publish_samba_states():
+  while True:
     samba = sambaMetricCollector()
 
     for sensor in sensorList:
-        logging.info("Updating sensor %s",sensor[0])
-        sensor[1].addIostat(iostate)
+       if isinstance(sensor[1],ConfigEntityFromSamba):
+        logging.info("Updating Samba sensor %s",sensor[0])
         sensor[1].samba = samba
-        if sensor[1].device != None: 
-            logging.debug("->Updating Device %s",sensor[1].device)
-            sensor[1].device.update()
         sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
-        if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))
-        
+        if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))        
+    await asyncio.sleep(10)
 
-def run():    
-    logging.info("")
+async def run():    
 # Loop Status publish
-    while True:
-        time.sleep(1)
-        publish_states()
+    async with asyncio.TaskGroup() as tg:
+       tasks.append(tg.create_task(publish_states(),name="Publish States"))
+       tasks.append(tg.create_task(publish_device_states(),name="Publish Device States"))
+       tasks.append(tg.create_task(publish_iostate_states(),name="Publish IO States"))
+       tasks.append(tg.create_task(publish_samba_states(),name="Publish Samba States"))
 
+    for task in tasks:
+        try:
+            await task
+        except asyncio.CancelledError:
+            logging.info("Task %s cancelled!",task.get_name())
 
+    for sensor in sensorList:
+        logging.info("Unpublish sensor %s",sensor[0])
+        sensor[1].sensor.delete()
+        await asyncio.sleep(0.5)    
 
 if __name__ == '__main__':
-    run()
+    asyncio.run(run())

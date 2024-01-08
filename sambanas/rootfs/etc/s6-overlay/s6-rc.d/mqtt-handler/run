@@ -26,7 +26,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
         port=$(bashio::config 'mqtt_port')
         if [ "$port" = "null" ]; then port=$(bashio::services "mqtt" "port"); fi
 
-        exec /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version)
+        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version)
     else
         bashio::log.info "MQTT integration"
 
