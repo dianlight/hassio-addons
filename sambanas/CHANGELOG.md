@@ -4,10 +4,15 @@
 
 ###  ✨ Features
 - New `mqtt_nexgen_entities` option and scripts to enable new MQTT integration. This will be the default system for future integration is more efficent and use less resources.
+- `automount` now see also APFS drivers TODO:
 
 ### 💥 BREAKING CHANGE
 - Removed `mqtt_use_legacy_entities` option and scripts.
-- Drop support for armhf and i386
+- Drop support for `armhf` and `i386`
+
+###  🩹 BugFix
+- 🐛 [Samba NAS] Auto mount fails afterupgrade to 12.1.0-nas [#181](https://github.com/dianlight/hassio-addons/issues/181) TODO:
+- SambaNAS - error after update /etc/s6-overlay/s6-rc.d/init-samba/run: line 47: /tmp/local_mount.json: No such file or directory [#194](https://github.com/dianlight/hassio-addons/issues/194)
 
 ## 12.2.0-nas
 
