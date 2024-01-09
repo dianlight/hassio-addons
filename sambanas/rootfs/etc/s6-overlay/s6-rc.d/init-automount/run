@@ -22,9 +22,12 @@ function disk2label() { # $1 disk  return (label disk or id)
           disk=${disk:3}
           if [ -L /dev/disk/by-id/"$disk" ]; then
                label=$(lsblk -no label /dev/disk/by-id/"$disk")
+               #               fstype=$(lsblk -no fstype /dev/disk/by-id/"$disk")
                if [[ -n "$label" && -L "/dev/disk/by-label/$label" ]]; then
                     bashio::log.info "Disk with id ${disk} is labeled $label so $label is used."
                     disk="$label"
+                    #               elif [[ $fstype == apfs ]]; then
+                    #                    disk=$(apfsutil /dev/disk/by-id/"$disk" | awk -F "[, ]+" '/Name:/{print $2}')
                else
                     disk=$1
                fi
@@ -101,6 +104,9 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
                bashio::log.warning "Your ${mdisk} is ${fstype}. This is an EXPERIMENTAL support"
                options="${options},umask=000"
                type="ntfs3"
+               ;;
+          apfs)
+               bashio::log.warning "Your ${mdisk} is ${fstype}. This is an EXPERIMENTAL support and work only in RO"
                ;;
           *)
                bashio::log.info "Mounting ${mdisk} of type ${fstype} with options ${mntops}"
@@ -206,14 +212,19 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      ## List available Disk with Labels and Id
      if bashio::config.true 'available_disks_log' || bashio::config.true 'automount'; then
           bashio::log.blue "---------------------------------------------------"
-          #autodisks=($(lsblk -E label -n -o label | sed -r '/^\s*$/d' | grep -v hassos | grep pp))
-          readarray -t autodisks < <(lsblk -E label -n -o label -i | sed -r '/^\s*$/d' | grep -v hassos)
+          #readarray -t autodisks < <(lsblk -E label -n -o label -i | sed -r '/^\s*$/d' | grep -v hassos)
+          readarray -t autodisks < <(pyhton /usr/local/bin/disklist.py)
+
           if [ ${#autodisks[@]} -eq 0 ]; then
                bashio::log.info "No Disk with labels."
           else
                bashio::log.info "Available Disk Labels:"
                for disk in "${autodisks[@]}"; do
-                    bashio::log.info "\t${disk}[$(lsblk $(blkid -L "$disk") -no fstype)]"
+                    if [[ $disk == id:* ]]; then
+                         bashio::log.info "\t${disk}[$(lsblk $(blkid -U "${disk:3}") -no fstype)]"
+                    else
+                         bashio::log.info "\t${disk}[$(lsblk $(blkid -L "$disk") -no fstype)]"
+                    fi
                done
           fi
           bashio::log.blue "---------------------------------------------------"

@@ -56,6 +56,7 @@ allow_hosts:
 automount: true
 moredisks:
   - "<Partition's Label>"
+  - "id:<Partition uuid>"
 mountoptions: "nosuid,relatime,noexec"
 veto_files:
   - "._*"
@@ -125,6 +126,7 @@ The following Fs are supported:
 - [x] ntfs --> **_NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures_**
 - [x] brtfs
 - [x] xfs
+- [x] apfs --> **_NODE: Very Experimental. ReadOnly and referenziable only by id not label_**
 
 ### Option `mountoptions` (required)
 Allows setting of mount options.
