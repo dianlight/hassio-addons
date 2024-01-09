@@ -36,7 +36,7 @@ if [ -f /tmp/cifs_network ]; then
         [[ ${device,,} == @(share|config|addons|ssl|backup|media|addon_configs|homeassistant) ]] && continue
         usage=$(jq -r --arg xshare "$device" '.acl[] | select(.share==$xshare) | .usage // "media"' <<<"$(bashio::addon.config)")
         cmdshare=$(jq -nrc --arg usage "${usage:-media}" --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage=$usage|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
-        #bashio::log.info "${cmdshare}"
+        bashio::log.info $(jq '.password="********"' <<<${cmdshare})
 
         #bashio::log.info $(bashio::api.supervisor GET /mounts)
         #bashio::log.info $(bashio::api.supervisor GET /mounts | jq -r --arg xshare "$device" '.mounts[] | select(.name == $xshare ) // empty')
