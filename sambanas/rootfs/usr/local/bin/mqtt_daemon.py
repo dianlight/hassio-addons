@@ -54,17 +54,19 @@ ap.add_argument("-l", "--logLevel", required= False, default='WARNING',choices=[
 args = vars(ap.parse_args())
 
 
-match args['logLevel']:
-    case 'DEBUG':
+match str(args['logLevel']).upper():
+    case 'DEBUG' | 'ALL' | 'TRACE':
         logging.basicConfig(level=logging.DEBUG)
-    case 'INFO':
+    case 'INFO' | 'NOTICE':
         logging.basicConfig(level=logging.INFO)
     case 'WARNING':
         logging.basicConfig(level=logging.WARNING)
     case 'ERROR':
         logging.basicConfig(level=logging.ERROR)
-    case 'CRITICAL':
+    case 'CRITICAL' | 'FATAL':
         logging.basicConfig(level=logging.CRITICAL)
+    case 'OFF' :
+        logging.basicConfig(level=logging.NOTSET)
     case '_':
         logging.basicConfig(level=logging.WARNING)
 
