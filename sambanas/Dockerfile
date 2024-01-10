@@ -108,7 +108,7 @@ RUN  mkdir -p /var/lib/samba \
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha
+    && chmod a+x /usr/bin/ha 
 
 
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
