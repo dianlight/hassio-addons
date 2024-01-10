@@ -105,10 +105,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
      else
           # Check FS type and set relative options
           fstype=$(lsblk "$dev" -no fstype)
-          options="-o $(
-               IFS=,
-               echo "${mntops[*]}"
-          )"
+          options="-o ${mntops}"
           type="-t auto"
           cmd="mount"
           case "$fstype" in
@@ -250,6 +247,11 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      fi
 
      mnt_ops=($(bashio::config 'mountoptions'))
+     mnt_ops="-o $(
+          IFS=,
+          echo "${mnt_ops[*]}"
+     )"
+
      moredisks=($(bashio::config 'moredisks'))
      if [ ${#moredisks[@]} -eq 0 ]; then
           bashio::log.info "No MoreDisks to mount"
