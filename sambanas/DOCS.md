@@ -126,7 +126,7 @@ The following Fs are supported:
 - [x] ntfs --> **_NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures_**
 - [x] brtfs
 - [x] xfs
-- [x] apfs --> **_NODE: Very Experimental. ReadOnly and referenziable only by id not label_**
+- [x] apfs --> **_NODE: Very Experimental. ReadOnly and referenced only by id not label. Mount options are not supported_**
 
 ### Option `mountoptions` (required)
 Allows setting of mount options.
