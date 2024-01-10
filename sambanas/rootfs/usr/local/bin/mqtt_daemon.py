@@ -93,9 +93,10 @@ class ConfigEntity(ABC):
         settings = Settings(mqtt=mqtt_settings,entity=self.sensorInfo)
         if isinstance(self.sensorInfo,BinarySensorInfo):
             self.sensor = BinarySensor(settings)
+            logging.debug("BinarySensor '%s' created",self.sensor.generate_config()['name'])    
         elif isinstance(self.sensorInfo,SensorInfo):
             self.sensor = Sensor(settings)
-        logging.debug("Sensor '%s' created",self.sensor.generate_config()['name'])    
+            logging.debug("Sensor '%s' created",self.sensor.generate_config()['name'])    
         return self   
     
     @abstractmethod
@@ -207,10 +208,10 @@ sambanas_device_info = DeviceInfo(name="SambaNas",
                                   hw_version=args['addon_version'],
                                   identifiers=[os.getenv('HOSTNAME',default="local_test")])
 
-sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Online Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
                                state_function= lambda ce: ce.samba["users"], samba=samba)                               
 sensorList.append(('samba_users',sambaUsers.createSensor()))
-sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Active Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
                                state_function= lambda ce: ce.samba["connections"],
                                attributes_function= lambda ce: {'open_files':ce.samba['open_files']},
                                samba=samba
@@ -252,7 +253,7 @@ for dev_name in psdata.keys():
         return attributes
 
     
-    smartAssessment = ConfigEntityFromDevice(sensorInfo = SensorInfo(name=f"SambaNas S.M.A.R.T {dev.name}",
+    smartAssessment = ConfigEntityFromDevice(sensorInfo = SensorInfo(name=f"S.M.A.R.T {dev.name}",
                                                            unique_id=str(uuid.uuid4()),
                                                            device=disk_device_info,
                                                            device_class='problem'),
@@ -279,7 +280,7 @@ for dev_name in psdata.keys():
         return attributes
     
 
-    diskInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {dev.name}",
+    diskInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {dev.name}",
                                                    unique_id=str(uuid.uuid4()),
                                                    device=disk_device_info,
                                                    unit_of_measurement='kB/s',
@@ -304,10 +305,10 @@ for dev_name in psdata.keys():
 
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
 
-    for partition_device, partition in partitionDevices.items():
-        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {partition.identifiers[0]}",
+    for partition_device, partitionDeviceInfo in partitionDevices.items():
+        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {partition.identifiers[0]}",
                                                             unique_id=str(uuid.uuid4()),
-                                                            device=partition,
+                                                            device=partitionDeviceInfo,
                                                             unit_of_measurement='kB/s',
                                                             device_class='data_rate'),
                                 state_function= totalDiskRate,
@@ -324,14 +325,18 @@ for dev_name in psdata.keys():
                 'free':humanize.naturalsize(usage.free),
             }
             return attributes
+        
+        def partitionUsage(ce:ConfigEntityAutonomous) -> Any:
+            logging.debug("Collecting Usage from %s [%s]",ce.sensorInfo.device.identifiers,ce.sensorInfo.device.identifiers[-1])
+            return  psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
-        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition.identifiers[0]}",
+        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.identifiers[0]}",
                                                             unique_id=str(uuid.uuid4()),
-                                                            device=partition,
+                                                            device=partitionDeviceInfo,
                                                             icon="mdi:harddisk",
                                                             unit_of_measurement='%',
                                                             device_class='power_factor'),
-                                state_function= lambda ce: psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent,
+                                state_function= partitionUsage,
                                 attributes_function= usageAttribute)
         
         sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
