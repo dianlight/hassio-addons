@@ -4,7 +4,8 @@
 
 ###  ✨ Features
 - New `mqtt_nexgen_entities` option and scripts to enable new MQTT integration. This will be the default system for future integration is more efficent and use less resources.
-- `automount` now see also APFS drivers TODO:
+- `automount` now see also APFS drivers
+- Support reuse reserved share names if are disable (for [#188](https://github.com/dianlight/hassio-addons/issues/188)) TODO:
 
 ### 💥 BREAKING CHANGE
 - Removed `mqtt_use_legacy_entities` option and scripts.

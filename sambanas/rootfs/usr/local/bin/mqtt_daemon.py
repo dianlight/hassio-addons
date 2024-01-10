@@ -80,7 +80,7 @@ mqtt_settings = Settings.MQTT(host=args['broker'],
 class ConfigEntity(ABC):
     def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
                   state_function: Callable[[Self],Any], 
-                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None
+                  attributes_function:Callable[[Self],dict[str,Any]] = None
                   ):
         self.sensorInfo = sensorInfo
         self.state_function = state_function
@@ -109,7 +109,7 @@ class ConfigEntityFromDevice(ConfigEntity):
     def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
                   device:Device,
                   state_function: Callable[[Self],Any], 
-                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                  attributes_function:Callable[[Self],dict[str,Any]] = None,
                   ):
         super().__init__(sensorInfo,state_function,attributes_function)
         self.device = device
@@ -121,7 +121,7 @@ class ConfigEntityFromIoStat(ConfigEntity):
     def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
                   iostat_device:str,
                   state_function: Callable[[Self],Any], 
-                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                  attributes_function:Callable[[Self],dict[str,Any]] = None,
                   ):
         super().__init__(sensorInfo,state_function,attributes_function)
         self.iostat_device = iostat_device
@@ -145,7 +145,7 @@ class ConfigEntityFromSamba(ConfigEntity):
     def __init__(self, sensorInfo:Union[SensorInfo,BinarySensorInfo],
                   samba:dict,
                   state_function: Callable[[Self],Any], 
-                  attributes_function:Callable[[Self],List[Tuple[str,Any]]] = None,
+                  attributes_function:Callable[[Self],dict[str,Any]] = None,
                 ):
         super().__init__(sensorInfo,state_function,attributes_function)
         self.samba = samba
@@ -168,7 +168,7 @@ def sambaMetricCollector():
         logging.warning("Exception on smbstat comunication!")
         jsondata = {}
 
-    if 'samba_version' in jsondata:
+    if 'version' in jsondata:
         data['samba_version']=jsondata['version']
     else:
         data['samba_version']='Unknown'
@@ -211,7 +211,7 @@ sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Users"
 sensorList.append(('samba_users',sambaUsers.createSensor()))
 sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="SambaNas Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
                                state_function= lambda ce: ce.samba["connections"],
-                               attributes_function= lambda ce: ('open_files',ce.samba['open_files']),
+                               attributes_function= lambda ce: {'open_files':ce.samba['open_files']},
                                samba=samba
                                )                               
 sensorList.append(('samba_connections',sambaConnections.createSensor()))
@@ -229,25 +229,25 @@ for dev_name in psdata.keys():
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=os.getenv('HOSTNAME'))
     
-    def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> List[Tuple[str,Any]]:
-        attributes:List[Tuple[str,str]] = []
-        attributes.append(('messages',ce.device.messages))
-        attributes.append(('rotation_rate',ce.device.rotation_rate))
-        attributes.append(('_test_running',ce.device._test_running))
-        attributes.append(('_test_progress_',ce.device._test_progress))
+    def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> dict[str,Any]:
+        attributes:dict[str,Any] = {}
+        attributes['messages']=ce.device.messages
+        attributes['rotation_rate']=ce.device.rotation_rate
+        attributes['_test_running']=ce.device._test_running
+        attributes['_test_progress_']=ce.device._test_progress
         if ce.device.if_attributes == None: return attributes
         if isinstance(ce.device.if_attributes,AtaAttributes):
             atattrs:AtaAttributes = ce.device.if_attributes
             for atattr in atattrs.legacyAttributes:
                 if atattr == None: continue
-                attributes.append((atattr.name,atattr.raw)) 
+                attributes[atattr.name]=atattr.raw
                 health_value = (atattr.worst > atattr.thresh) if "OK" else "FAIL"
-                attributes.append((atattr.name+"_Health",health_value))
+                attributes[atattr.name+"_Health"]=health_value
         elif isinstance(ce.device.if_attributes,NvmeAttributes):
             nwmattrs:NvmeAttributes = ce.device.if_attributes
             for nwmattr in nwmattrs.__dict__.keys():
                 if nwmattrs[nwmattr] == None: continue
-                attributes.append((nwmattr,nwmattrs[nwmattr]))
+                attributes[nwmattr]=nwmattrs[nwmattr]
         return attributes
 
     
@@ -271,10 +271,10 @@ for dev_name in psdata.keys():
         return round(((t_read+t_write)*1000000000/t_ns_time)/1024,2) # kB/s
 
 
-    def iostatAttribute(ce:ConfigEntityFromIoStat) -> List[Tuple[str,str]]:
-        attributes:List[Tuple[str,str]] = []
+    def iostatAttribute(ce:ConfigEntityFromIoStat) -> dict[str,str]:
+        attributes:dict[str,str] = {}
         for key in ce.iostat[1][ce.iostat_device]._fields:
-            attributes.append((key,getattr(ce.iostat[1][ce.iostat_device],key)))
+            attributes[key]=getattr(ce.iostat[1][ce.iostat_device],key)
         return attributes
     
 
@@ -317,13 +317,13 @@ for dev_name in psdata.keys():
         
         sensorList.append((f'iostat_{partition_device}',partitionInfo.createSensor()))
 
-        def usageAttribute(ce:ConfigEntityAutonomous) -> List[Tuple[str,str]]:
+        def usageAttribute(ce:ConfigEntityAutonomous) -> dict[str,str]:
             usage = psutil.disk_usage(ce.sensorInfo.device.identifiers[0])
-            attributes:List[Tuple[str,str]] = [
-                ('used',humanize.naturalsize(usage.used)),
-                ('total',humanize.naturalsize(usage.total)),
-                ('free',humanize.naturalsize(usage.free)),
-            ]
+            attributes:dict[str,str] = {
+                'used':humanize.naturalsize(usage.used),
+                'total':humanize.naturalsize(usage.total),
+                'free':humanize.naturalsize(usage.free),
+            }
             return attributes
 
         partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition_device}",
