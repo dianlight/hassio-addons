@@ -20,5 +20,5 @@ for d in disks:
         elif label != "":
             print(item.get_fs_label())
         elif item.get_fs_type() == "apfs":
-            print("id:{uuid}".format(uuid=item.get_part_uuid()))
+            print("id:{uuid}".format(uuid=item.get_fs_uuid()))
 #        print(item.get_fs_label()," ",item.get_fs_type()," ",item.get_part_uuid()," ",item.get_name())
