@@ -23,6 +23,7 @@ import re
 import humanize
 import asyncio
 from abc import ABC, abstractmethod 
+from diskinfo import Disk
 
 #config = configparser.ConfigParser( strict=False )
 #config.read("/etc/samba/smb.conf")
@@ -290,25 +291,23 @@ for dev_name in psdata.keys():
     sensorList.append((f'iostat_{dev.name}',diskInfo.createSensor()))
 
     partitionDevices:dict[str:DeviceInfo]={}
-    for partition in psutil.disk_partitions():
-        partition_device = os.path.basename(partition.device)
-        if not partition_device.startswith(dev.name): continue
-        if not partition_device in partitionDevices:
-            partitionDevices[partition_device] = DeviceInfo(name=f"SambaNas Partition {partition_device}",
+    for partition in Disk(dev_name).get_partition_list():
+#        if not partition_device.startswith(dev.name): continue
+        if not partition.get_name() in partitionDevices:
+            partitionDevices[partition.get_name()] = DeviceInfo(name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
                                         model=partition.fstype,
-                                        identifiers=[partition.mountpoint],
+                                        identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
                                         via_device=dev.serial
             )
-        else:
-            partitionDevices[partition_device].identifiers.append(partition.mountpoint)
+        partitionDevices[partition.get_name()].identifiers.append(partition.get_fs_mounting_point())
 
 
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
 
     for partition_device, partition in partitionDevices.items():
-        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {partition_device}",
+        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"Sambanas IOSTAT {partition.identifiers[0]}",
                                                             unique_id=str(uuid.uuid4()),
-                                                            device=partitionDevices[partition_device],
+                                                            device=partition,
                                                             unit_of_measurement='kB/s',
                                                             device_class='data_rate'),
                                 state_function= totalDiskRate,
@@ -326,9 +325,9 @@ for dev_name in psdata.keys():
             }
             return attributes
 
-        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition_device}",
+        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Sambanas Usage {partition.identifiers[0]}",
                                                             unique_id=str(uuid.uuid4()),
-                                                            device=partitionDevices[partition_device],
+                                                            device=partition,
                                                             icon="mdi:harddisk",
                                                             unit_of_measurement='%',
                                                             device_class='power_factor'),
