@@ -75,7 +75,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           dev=$(blkid -L "$disk")
      fi
 
-     if [[ -z "$dev" ]]; then
+     if [ ! ${dev:+1} ]; then
           bashio::log.info "Disk ${disk} not found! <SKIP>"
           return 0
      fi
