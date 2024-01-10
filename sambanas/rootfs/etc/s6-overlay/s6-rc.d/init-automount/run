@@ -106,7 +106,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           # Check FS type and set relative options
           fstype=$(lsblk "$dev" -no fstype)
           options="${mntops}"
-          type="-t auto"
+          type="-tauto"
           cmd="mount"
           case "$fstype" in
           exfat | vfat | msdos)
@@ -116,7 +116,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           ntfs)
                bashio::log.warning "Your ${mdisk} is ${fstype}. This is an EXPERIMENTAL support"
                options="${options},umask=000"
-               type="-t ntfs3"
+               type="-tntfs3"
                ;;
           apfs)
                bashio::log.warning "Your ${mdisk} is ${fstype}. This is an EXPERIMENTAL support and work only in RO. Mount options not supported!"
