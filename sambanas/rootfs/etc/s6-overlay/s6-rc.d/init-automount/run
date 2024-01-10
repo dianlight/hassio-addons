@@ -105,7 +105,10 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
      else
           # Check FS type and set relative options
           fstype=$(lsblk "$dev" -no fstype)
-          options="-o ${mntops}"
+          options="-o $(
+               IFS=,
+               echo "${mntops[*]}"
+          )"
           type="-t auto"
           cmd="mount"
           case "$fstype" in
@@ -124,10 +127,8 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
                options=""
                cmd="mount.apfs"
                ;;
-          *)
-               bashio::log.info "Mounting ${mdisk} of type ${fstype} with options ${mntops}"
-               ;;
           esac
+          bashio::log.info "Mounting ${mdisk} of type ${fstype} with options ${options}"
 
           if [ "$remote_mount" = true ]; then
                ssh root@"${ipaddress%/*}" -p 22222 -o "StrictHostKeyChecking no" "if findmnt '/mnt/data/supervisor/media/$mdisk ' >/dev/null; then echo 'Disk $mdisk already mounted on host' ; else  $cmd $type '$dev' '/mnt/data/supervisor/media/$mdisk' $options; fi" &&
