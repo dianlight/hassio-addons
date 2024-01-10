@@ -230,6 +230,7 @@ for dev_name in psdata.keys():
     disk_device_info = DeviceInfo(name=f"SambaNas Disk {dev_name}",
                                   model=dev.model,
                                   sw_version=dev.firmware,
+                                  connections=[['server',os.getenv('HOSTNAME')]],
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=os.getenv('HOSTNAME'))
     
@@ -255,7 +256,7 @@ for dev_name in psdata.keys():
         return attributes
 
     
-    smartAssessment = ConfigEntityFromDevice(sensorInfo = SensorInfo(name=f"S.M.A.R.T {dev.name}",
+    smartAssessment = ConfigEntityFromDevice(sensorInfo = BinarySensorInfo(name=f"S.M.A.R.T {dev.name}",
                                                            unique_id=str(uuid.uuid4()),
                                                            device=disk_device_info,
                                                            device_class='problem'),
@@ -328,20 +329,23 @@ for dev_name in psdata.keys():
             }
             return attributes
         
+
+        
         def partitionUsage(ce:ConfigEntityAutonomous) -> Any:
             logging.debug("Collecting Usage from %s [%s]",ce.sensorInfo.device.identifiers,ce.sensorInfo.device.identifiers[-1])
             return  psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
-        partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.identifiers[0]}",
-                                                            unique_id=str(uuid.uuid4()),
-                                                            device=partitionDeviceInfo,
-                                                            icon="mdi:harddisk",
-                                                            unit_of_measurement='%',
-                                                            device_class='power_factor'),
-                                state_function= partitionUsage,
-                                attributes_function= usageAttribute)
-        
-        sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
+        if partition.identifiers[-1] != "":
+            partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.identifiers[0]}",
+                                                                unique_id=str(uuid.uuid4()),
+                                                                device=partitionDeviceInfo,
+                                                                icon="mdi:harddisk",
+                                                                unit_of_measurement='%',
+                                                                device_class='power_factor'),
+                                    state_function= partitionUsage,
+                                    attributes_function= usageAttribute)
+            
+            sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
 
 
 tasks:list[asyncio.Task]=[]
