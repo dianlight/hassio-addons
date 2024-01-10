@@ -123,6 +123,8 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
                ssh root@"${ipaddress%/*}" -p 22222 -o "StrictHostKeyChecking no" "if findmnt '/mnt/data/supervisor/media/$mdisk ' >/dev/null; then echo 'Disk $mdisk already mounted on host' ; else  mount -t $type '$dev' '/mnt/data/supervisor/media/$mdisk' -o $options; fi" &&
                     echo "$dev" >>/tmp/remote_mount
           fi || bashio::log.warning "Host Mount ${mdisk}[${fstype}] Fail!" || :
+
+          bashio::log.info "Exec command: mount -t ${type} \"${dev}\" \"${path}/${mdisk}\" -o ${options}"
           mount -t $type "$dev" "$path/$mdisk" -o $options &&
                echo "$path"/"$mdisk" >>/tmp/local_mount &&
                jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
@@ -276,7 +278,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
           bashio::log.info "Mounting disks:\n" $(printf "\t%s\n" "${tomountdisks[@]}")
           bashio::log.magenta "---------------------------------------------------"
           for disk in "${tomountdisks[@]}"; do
-               mount_disk "$disk" "$path" "$remote_mount" "$mnt_ops" || bashio::log.warning "Fail to mount ${disk}!"
+               mount_disk "$disk" "$path" "$remote_mount" "$mnt_ops" || bashio::log.warning "Fail to mount ${disk}/${mount_ops} !"
           done
      fi
      IFS=$OIFS
