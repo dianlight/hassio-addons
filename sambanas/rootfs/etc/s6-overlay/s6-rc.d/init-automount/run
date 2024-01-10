@@ -65,8 +65,14 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
      mntops=$4
      if [[ $disk == id:* ]]; then
           bashio::log.debug "Disk ${disk:3} is an ID"
-          dev=/dev/disk/by-id/${disk:3}
-          if [ -L "$dev" ]; then
+          if [ -L "/dev/disk/by-uuid/${disk:3}" ]; then
+               dev=/dev/disk/by-uuid/${disk:3}
+               disk=${disk:3}
+          elif [ -L "/dev/disk/by-id/${disk:3}" ]; then
+               dev=/dev/disk/by-id/${disk:3}
+               disk=${disk:3}
+          elif [ -L "/dev/disk/by-partuuid/${disk:3}" ]; then
+               dev=/dev/disk/by-partuuid/${disk:3}
                disk=${disk:3}
           else
                unset dev
