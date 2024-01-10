@@ -309,7 +309,7 @@ for dev_name in psdata.keys():
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
 
     for partition_device, partitionDeviceInfo in partitionDevices.items():
-        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {partition.identifiers[0]}",
+        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {partition.get_fs_label() or partition.get_fs_uuid() }",
                                                             unique_id=str(uuid.uuid4()),
                                                             device=partitionDeviceInfo,
                                                             unit_of_measurement='kB/s',
