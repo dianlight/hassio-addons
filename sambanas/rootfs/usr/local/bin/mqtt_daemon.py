@@ -41,7 +41,7 @@ ap.add_argument("-P", "--password", required=True,
    help="Broker Password")
 ap.add_argument("-t", "--topic", required=False,
    help="Topic", default="sambanas")
-ap.add_argument("-T", "--discovery-topic", required=False,
+ap.add_argument("-T", "--discovery_topic", required=False,
    help="Topic", default="homeassistant")
 ap.add_argument("-d", "--persist_discovery", required=False,
    help="Topic", default=True, type=bool)
@@ -73,7 +73,7 @@ mqtt_settings = Settings.MQTT(host=args['broker'],
                               port=int(args["port"]),
                               username=args['user'],
                               password=args['password'],
-                              discovery_prefix=args['discovery-topic'],
+                              discovery_prefix=args['discovery_topic'],
                               state_prefix=args['topic'])
 
 # Global Sensors regitry
