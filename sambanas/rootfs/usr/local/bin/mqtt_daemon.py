@@ -331,7 +331,7 @@ for dev_name in psdata.keys():
                                                             icon="mdi:harddisk",
                                                             unit_of_measurement='%',
                                                             device_class='power_factor'),
-                                state_function= lambda ce: psutil.disk_usage(ce.sensorInfo.device.identifiers[0]).percent,
+                                state_function= lambda ce: psutil.disk_usage(ce.sensorInfo.device.identifiers[1]).percent,
                                 attributes_function= usageAttribute)
         
         sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
