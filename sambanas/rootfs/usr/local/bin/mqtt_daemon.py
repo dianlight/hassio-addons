@@ -321,7 +321,7 @@ for dev_name in psdata.keys():
         sensorList.append((f'iostat_{partition_device}',partitionInfo.createSensor()))
 
         def usageAttribute(ce:ConfigEntityAutonomous) -> dict[str,str]:
-            usage = psutil.disk_usage(ce.sensorInfo.device.identifiers[0])
+            usage = psutil.disk_usage(ce.sensorInfo.device.identifiers[-1])
             attributes:dict[str,str] = {
                 'used':humanize.naturalsize(usage.used),
                 'total':humanize.naturalsize(usage.total),
@@ -335,8 +335,8 @@ for dev_name in psdata.keys():
             logging.debug("Collecting Usage from %s [%s]",ce.sensorInfo.device.identifiers,ce.sensorInfo.device.identifiers[-1])
             return  psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
-        if partition.identifiers[-1] != "":
-            partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.identifiers[0]}",
+        if partition.get_fs_mounting_point() != "":
+            partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.get_fs_label() or partition.get_fs_uuid() }",
                                                                 unique_id=str(uuid.uuid4()),
                                                                 device=partitionDeviceInfo,
                                                                 icon="mdi:harddisk",
