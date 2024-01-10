@@ -28,7 +28,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
         log_level=$(bashio::string.lower "$(bashio::config log_level info)")
 
-        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version) -L ${log_level^^}
+        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version) -l ${log_level^^}
     else
         bashio::log.info "MQTT integration"
 

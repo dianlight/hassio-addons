@@ -48,7 +48,7 @@ ap.add_argument("-d", "--persist_discovery", required=False,
    help="Topic", default=True, type=bool)
 ap.add_argument("-v", "--addon_version", required=False,
    help="Addon Version", default="latest")
-ap.add_argument("-l", "--logLevel", required= False, default='WARNING',choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL'])
+ap.add_argument("-l", "--logLevel", required= False, default='WARNING',choices=['ALL','TRACE','DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL','FATAL','OFF'])
 
 
 args = vars(ap.parse_args())
