@@ -295,7 +295,7 @@ for dev_name in psdata.keys():
 #        if not partition_device.startswith(dev.name): continue
         if not partition.get_name() in partitionDevices:
             partitionDevices[partition.get_name()] = DeviceInfo(name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
-                                        model=partition.fstype,
+                                        model=partition.get_fs_type(),
                                         identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
                                         via_device=dev.serial
             )
