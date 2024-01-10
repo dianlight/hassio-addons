@@ -376,7 +376,10 @@ async def publish_device_states():
      if isinstance(sensor[1],ConfigEntityFromDevice):
         logging.info("Updating Device sensor %s",sensor[0])
         sensor[1].device.update()
-        sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
+        if isinstance(sensor[1].sensor,BinarySensor):
+            sensor[1].sensor._update_state(sensor[1].state_function(sensor[1]))
+        elif isinstance(sensor[1].sensor,Sensor):
+            sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
         if sensor[1].attributes_function != None: sensor[1].sensor.set_attributes(sensor[1].attributes_function(sensor[1]))        
     await asyncio.sleep(5)
 
