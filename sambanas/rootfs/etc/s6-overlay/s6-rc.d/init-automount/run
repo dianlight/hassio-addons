@@ -247,10 +247,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      fi
 
      mnt_ops=($(bashio::config 'mountoptions'))
-     mnt_ops="-o $(
-          IFS=,
-          echo "${mnt_ops[*]}"
-     )"
+     mnt_ops="-o$(IFS=, echo ${mnt_ops[*]})"
 
      moredisks=($(bashio::config 'moredisks'))
      if [ ${#moredisks[@]} -eq 0 ]; then
