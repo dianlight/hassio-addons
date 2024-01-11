@@ -31,6 +31,7 @@ if [ -f /tmp/cifs_network ]; then
 
     bashio::log.info "Wait Samba Server to going up..(max 30s)"
     timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
+    smbstatus
 
     while read -r -a device; do
         [[ ${device,,} == @(share|config|addons|ssl|backup|media|addon_configs|homeassistant) ]] && continue
@@ -42,11 +43,14 @@ if [ -f /tmp/cifs_network ]; then
         #bashio::log.info $(bashio::api.supervisor GET /mounts | jq -r --arg xshare "$device" '.mounts[] | select(.name == $xshare ) // empty')
 
         if [[ ! -z $(bashio::api.supervisor GET /mounts | jq -r --arg xshare "$device" '.mounts[] | select(.name == $xshare ) // empty') ]]; then
-            bashio::log.info "Share Already Found ${device} - Remount and correct!"
+            bashio::log.info "Share Already Found ${device} - Remove!"
             bashio::api.supervisor DELETE /mounts/${device} || true
         fi
 
-        status=$(bashio::api.supervisor POST /mounts "${cmdshare}") || bashio::log.warning "Error Automount ${device} Msg: $(jq '.password="********"' <<<${cmdshare}) - Mount Manually!"
-        #bashio::log.info "Return from Mount: ${status}"
+        for rt in {1..3}; do
+            status=$(bashio::api.supervisor POST /mounts "${cmdshare}") && break
+            bashio::log.warning "Retry ${rt}/3 Error Automount ${device} Msg: $(jq -c '.password="********"' <<<${cmdshare})"
+            sleep 1
+        done
     done <<<"${available_shares}"
 fi
