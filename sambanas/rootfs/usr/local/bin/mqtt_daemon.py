@@ -224,7 +224,7 @@ for dev_name in psdata.keys():
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=sambanas_device_info.identifiers[0])
     
-    sambanas_device_info.connections.append({dev_name,disk_device_info.identifiers[0]})
+    sambanas_device_info.connections.append([dev_name,disk_device_info.identifiers[0]])
     
     def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> dict[str,Any]:
         attributes:dict[str,Any] = {}
