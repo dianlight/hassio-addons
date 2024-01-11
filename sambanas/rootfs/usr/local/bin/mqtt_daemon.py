@@ -206,7 +206,6 @@ samba = sambaMetricCollector()
 sambanas_device_info = DeviceInfo(name="SambaNas",
                                   model="Addon",
                                   manufacturer="@Dianlight",
-                                  connections=[],
                                   sw_version=samba['samba_version'],
                                   hw_version=args['addon_version'],
                                   identifiers=[os.getenv('HOSTNAME',default="local_test")])
@@ -220,11 +219,11 @@ for dev_name in psdata.keys():
     disk_device_info = DeviceInfo(name=f"SambaNas Disk {dev_name}",
                                   model=dev.model,
                                   sw_version=dev.firmware,
-                                  # connections=[['server',os.getenv('HOSTNAME')]],
+                                  connections=[[dev_name,sambanas_device_info.identifiers[0]]],
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=sambanas_device_info.identifiers[0])
     
-    sambanas_device_info.connections.append([dev_name,disk_device_info.identifiers[0]])
+    #sambanas_device_info.connections.append([dev_name,disk_device_info.identifiers[0]])
     
     def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> dict[str,Any]:
         attributes:dict[str,Any] = {}
@@ -250,16 +249,17 @@ for dev_name in psdata.keys():
                 attributes[nwmattr]=nwmattrs[nwmattr]
         return attributes
 
-    
-    smartAssessment = ConfigEntityFromDevice(sensorInfo = BinarySensorInfo(name=f"S.M.A.R.T {dev.name}",
-                                                           unique_id=str(uuid.uuid4()),
-                                                           device=disk_device_info,
-                                                           #enabled_by_default= dev.smart_capable
-                                                           device_class='problem'),
-                               state_function= lambda ce: ce.device.assessment != 'PASS',
-                               attributes_function=smartAssesmentAttribute,
-                               device=dev)
-    sensorList.append((f'smart_{dev.name}',smartAssessment.createSensor()))    
+
+    if dev.smart_capable:
+        smartAssessment = ConfigEntityFromDevice(sensorInfo = BinarySensorInfo(name=f"S.M.A.R.T {dev.name}",
+                                                            unique_id=str(uuid.uuid4()),
+                                                            device=disk_device_info,
+                                                            #enabled_by_default= dev.smart_capable
+                                                            device_class='problem'),
+                                state_function= lambda ce: ce.device.assessment != 'PASS',
+                                attributes_function=smartAssesmentAttribute,
+                                device=dev)
+        sensorList.append((f'smart_{dev.name}',smartAssessment.createSensor()))    
 
 
     def totalDiskRate(ce:ConfigEntityFromIoStat):
@@ -292,7 +292,7 @@ for dev_name in psdata.keys():
 
     partitionDevices:dict[str:DeviceInfo]={}
     for partition in Disk(dev_name).get_partition_list():
-        if partition.get_fs_type() == "": continue
+        if (partition.get_fs_label() or partition.get_fs_uuid())== "": continue
         if not partition.get_name() in partitionDevices:
             partitionDevices[partition.get_name()] = DeviceInfo(name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
                                         model=partition.get_fs_label() or partition.get_fs_uuid(),
