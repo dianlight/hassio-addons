@@ -210,17 +210,6 @@ sambanas_device_info = DeviceInfo(name="SambaNas",
                                   hw_version=args['addon_version'],
                                   identifiers=[os.getenv('HOSTNAME',default="local_test")])
 
-sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Online Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
-                               state_function= lambda ce: ce.samba["users"], samba=samba)                               
-sensorList.append(('samba_users',sambaUsers.createSensor()))
-sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Active Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
-                               state_function= lambda ce: ce.samba["connections"],
-                               attributes_function= lambda ce: {'open_files':ce.samba['open_files']},
-                               samba=samba
-                               )                               
-sensorList.append(('samba_connections',sambaConnections.createSensor()))
-
-
 devlist = DeviceList()
 psdata = psutil.disk_io_counters(perdisk=True,nowrap=True)
 
@@ -232,14 +221,19 @@ for dev_name in psdata.keys():
                                   sw_version=dev.firmware,
                                   # connections=[['server',os.getenv('HOSTNAME')]],
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
-                                  via_device=os.getenv('HOSTNAME'))
+                                  via_device=sambanas_device_info.identifiers[0])
+    
+    sambanas_device_info.connections.append({dev_name,disk_device_info.identifiers[0]})
     
     def smartAssesmentAttribute(ce:ConfigEntityFromDevice) -> dict[str,Any]:
         attributes:dict[str,Any] = {}
+        attributes['smart_capable']=ce.device.smart_capable
+        attributes['smart_enabled']=ce.device.smart_enabled
+        attributes['assessment']=ce.device.assessment
         attributes['messages']=ce.device.messages
         attributes['rotation_rate']=ce.device.rotation_rate
         attributes['_test_running']=ce.device._test_running
-        attributes['_test_progress_']=ce.device._test_progress
+        attributes['_test_progress']=ce.device._test_progress
         if ce.device.if_attributes == None: return attributes
         if isinstance(ce.device.if_attributes,AtaAttributes):
             atattrs:AtaAttributes = ce.device.if_attributes
@@ -259,6 +253,7 @@ for dev_name in psdata.keys():
     smartAssessment = ConfigEntityFromDevice(sensorInfo = BinarySensorInfo(name=f"S.M.A.R.T {dev.name}",
                                                            unique_id=str(uuid.uuid4()),
                                                            device=disk_device_info,
+                                                           #enabled_by_default= dev.smart_capable
                                                            device_class='problem'),
                                state_function= lambda ce: ce.device.assessment != 'PASS',
                                attributes_function=smartAssesmentAttribute,
@@ -348,6 +343,15 @@ for dev_name in psdata.keys():
             
             sensorList.append((f'usage_{partition_device}',partitionInfo.createSensor()))
 
+sambaUsers = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Online Users",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+                               state_function= lambda ce: ce.samba["users"], samba=samba)                               
+sensorList.append(('samba_users',sambaUsers.createSensor()))
+sambaConnections = ConfigEntityFromSamba(sensorInfo = SensorInfo(name="Active Connections",device=sambanas_device_info,unique_id=str(uuid.uuid4())),
+                               state_function= lambda ce: ce.samba["connections"],
+                               attributes_function= lambda ce: {'open_files':ce.samba['open_files']},
+                               samba=samba
+                               )                               
+sensorList.append(('samba_connections',sambaConnections.createSensor()))
 
 tasks:list[asyncio.Task]=[]
 
