@@ -206,6 +206,7 @@ samba = sambaMetricCollector()
 sambanas_device_info = DeviceInfo(name="SambaNas",
                                   model="Addon",
                                   manufacturer="@Dianlight",
+                                  connections=[],
                                   sw_version=samba['samba_version'],
                                   hw_version=args['addon_version'],
                                   identifiers=[os.getenv('HOSTNAME',default="local_test")])
