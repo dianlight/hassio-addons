@@ -63,7 +63,7 @@
 {{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
 {{- $rosupported := list "apfs"}}
 {{- $name := regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
-{{- $dinfo := get .shares .share | default dict -}}
+{{- $dinfo := get .shares $name | default dict -}}
 [{{- $name -}}]
    browseable = yes
    writeable = {{ has $dinfo.fs $rosupported | ternary "no" "yes" }}
@@ -85,7 +85,7 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-# DEBUG: {{ toJson $dinfo  }}
+# DEBUG: {{ toJson $dinfo  }}|{{ .share }}|{{ .shares }}
 
 {{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
