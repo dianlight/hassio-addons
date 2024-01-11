@@ -230,7 +230,7 @@ for dev_name in psdata.keys():
     disk_device_info = DeviceInfo(name=f"SambaNas Disk {dev_name}",
                                   model=dev.model,
                                   sw_version=dev.firmware,
-                                  connections=[['server',os.getenv('HOSTNAME')]],
+                                  # connections=[['server',os.getenv('HOSTNAME')]],
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=os.getenv('HOSTNAME'))
     
@@ -296,14 +296,14 @@ for dev_name in psdata.keys():
 
     partitionDevices:dict[str:DeviceInfo]={}
     for partition in Disk(dev_name).get_partition_list():
-#        if not partition_device.startswith(dev.name): continue
+        if partition.get_fs_type() == "": continue
         if not partition.get_name() in partitionDevices:
             partitionDevices[partition.get_name()] = DeviceInfo(name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
                                         model=partition.get_fs_type(),
                                         identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
                                         via_device=dev.serial
             )
-        partitionDevices[partition.get_name()].identifiers.append(partition.get_fs_mounting_point())
+        if partition.get_fs_mounting_point() != "": partitionDevices[partition.get_name()].identifiers.append(partition.get_fs_mounting_point())
 
 
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
