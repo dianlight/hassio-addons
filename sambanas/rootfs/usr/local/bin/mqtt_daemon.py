@@ -299,7 +299,8 @@ for dev_name in psdata.keys():
         if partition.get_fs_type() == "": continue
         if not partition.get_name() in partitionDevices:
             partitionDevices[partition.get_name()] = DeviceInfo(name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
-                                        model=partition.get_fs_type(),
+                                        model=partition.get_fs_label() or partition.get_fs_uuid(),
+                                        manufacturer=partition.get_fs_type(),
                                         identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
                                         via_device=dev.serial
             )
@@ -309,7 +310,7 @@ for dev_name in psdata.keys():
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
 
     for partition_device, partitionDeviceInfo in partitionDevices.items():
-        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {partition.get_fs_label() or partition.get_fs_uuid() }",
+        partitionInfo = ConfigEntityFromIoStat(sensorInfo= SensorInfo(name=f"IOSTAT {partitionDeviceInfo.model}",
                                                             unique_id=str(uuid.uuid4()),
                                                             device=partitionDeviceInfo,
                                                             unit_of_measurement='kB/s',
@@ -336,7 +337,7 @@ for dev_name in psdata.keys():
             return  psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
         if partition.get_fs_mounting_point() != "":
-            partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partition.get_fs_label() or partition.get_fs_uuid() }",
+            partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partitionDeviceInfo.model}",
                                                                 unique_id=str(uuid.uuid4()),
                                                                 device=partitionDeviceInfo,
                                                                 icon="mdi:harddisk",
