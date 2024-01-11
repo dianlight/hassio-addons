@@ -136,7 +136,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           fi
           m_args+=("${dev}")
 
-          bashio::log.info "Mounting ${mdisk} of type ${fstype} with ${m_args[@]}"
+          bashio::log.debug "Mounting ${mdisk} of type ${fstype} with ${m_args[@]}"
 
           if [ "$remote_mount" = true ]; then
                ssh root@"${ipaddress%/*}" -p 22222 -o "StrictHostKeyChecking no" "if findmnt '/mnt/data/supervisor/media/$mdisk ' >/dev/null; then echo 'Disk $mdisk already mounted on host' ; else  $cmd ${m_args[@]} '/mnt/data/supervisor/media/$mdisk'; fi" &&
@@ -146,7 +146,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           bashio::log.debug "Exec command: ${cmd} ${m_args[@]} \"${path}/${mdisk}\""
           $cmd ${m_args[@]} "$path/$mdisk" &&
                echo "$path"/"$mdisk" >>/tmp/local_mount &&
-               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
+               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname | gsub( "-"; "_") | ascii_upcase ):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
                mv /tmp/local_mount.json.tmp /tmp/local_mount.json &&
                bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
 

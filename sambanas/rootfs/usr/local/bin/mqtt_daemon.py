@@ -55,11 +55,11 @@ args = vars(ap.parse_args())
 
 
 match str(args['logLevel']).upper():
-    case 'DEBUG' | 'ALL' | 'TRACE':
+    case 'DEBUG' | 'ALL' | 'TRACE' :
         logging.basicConfig(level=logging.DEBUG)
-    case 'INFO' | 'NOTICE':
+    case 'NOTICE':
         logging.basicConfig(level=logging.INFO)
-    case 'WARNING':
+    case 'WARNING' | 'INFO':
         logging.basicConfig(level=logging.WARNING)
     case 'ERROR':
         logging.basicConfig(level=logging.ERROR)
@@ -219,7 +219,7 @@ for dev_name in psdata.keys():
     disk_device_info = DeviceInfo(name=f"SambaNas Disk {dev_name}",
                                   model=dev.model,
                                   sw_version=dev.firmware,
-                                  connections=[[dev_name,sambanas_device_info.identifiers[0]]],
+                                  #connections=[[dev_name,sambanas_device_info.identifiers[0]]],
                                   identifiers=[dev.serial or "Unknown(%s)" % dev_name],
                                   via_device=sambanas_device_info.identifiers[0])
     
@@ -291,6 +291,7 @@ for dev_name in psdata.keys():
     sensorList.append((f'iostat_{dev.name}',diskInfo.createSensor()))
 
     partitionDevices:dict[str:DeviceInfo]={}
+   
     for partition in Disk(dev_name).get_partition_list():
         if (partition.get_fs_label() or partition.get_fs_uuid())== "": continue
         if not partition.get_name() in partitionDevices:
@@ -298,9 +299,14 @@ for dev_name in psdata.keys():
                                         model=partition.get_fs_label() or partition.get_fs_uuid(),
                                         manufacturer=partition.get_fs_type(),
                                         identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
-                                        via_device=dev.serial
+                                        via_device=disk_device_info.identifiers[0]
             )
-        if partition.get_fs_mounting_point() != "": partitionDevices[partition.get_name()].identifiers.append(partition.get_fs_mounting_point())
+        try:    
+            sdiskparts = list(filter( lambda part: part.device.endswith(partition.get_name()), psutil.disk_partitions() ))
+            if sdiskparts and sdiskparts[0] and sdiskparts[0].mountpoint:    
+                 partitionDevices[partition.get_name()].identifiers.append(sdiskparts[0].mountpoint)
+        finally:
+            pass
 
 
     logging.debug("Generated %d Partitiond Device for %s",len(partitionDevices),dev.name)
@@ -332,7 +338,7 @@ for dev_name in psdata.keys():
             logging.debug("Collecting Usage from %s [%s]",ce.sensorInfo.device.identifiers,ce.sensorInfo.device.identifiers[-1])
             return  psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
-        if partition.get_fs_mounting_point() != "":
+        if len(partitionDeviceInfo.identifiers) > 1:
             partitionInfo = ConfigEntityAutonomous(sensorInfo= SensorInfo(name=f"Usage {partitionDeviceInfo.model}",
                                                                 unique_id=str(uuid.uuid4()),
                                                                 device=partitionDeviceInfo,

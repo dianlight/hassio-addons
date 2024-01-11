@@ -85,7 +85,7 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-# DEBUG: {{ toJson $dinfo  }}|{{ .share }}|{{ .shares }}
+# DEBUG: {{ toJson $dinfo  }}|.share={{ .share }}|$name={{ $name }}|.shares={{ .shares }}|
 
 {{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
