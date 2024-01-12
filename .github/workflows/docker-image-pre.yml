@@ -53,5 +53,5 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create -F dianlight/hassio-addons-beta --title "Releasing ${{ github.ref }} into beta channel" --body ":crown: *An automated PR*"
+          gh pr create -R dianlight/hassio-addons-beta --title "Releasing ${{ github.ref }} into beta channel" --body ":crown: *An automated PR*"
 
