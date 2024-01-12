@@ -108,7 +108,7 @@ RUN  mkdir -p /var/lib/samba \
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha
+    && chmod a+x /usr/bin/ha 
 
 
 #RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
@@ -117,7 +117,13 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
 # PYTHON ADDONS
-RUN pip install pySMART psutil ha-mqtt-discoverable humanize
+#RUN pip install pySMART psutil ha-mqtt-discoverable humanize
+RUN pip install \ 
+    pySMART==1.3.0 \
+    psutil==5.9.7 \
+    humanize==4.9.0 \
+    diskinfo==2.1.2 \
+    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip
 
 # Copy data
 COPY rootfs /

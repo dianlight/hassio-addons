@@ -5,8 +5,8 @@ build_from:
   armhf: ghcr.io/hassio-addons/base:15.0.3
   armv7: ghcr.io/hassio-addons/base:15.0.3
   i386: ghcr.io/hassio-addons/base:15.0.3
-#codenotary:
-#  signer: lucio.tarantino@gmail.com
-#  base_image: codenotary@frenck.dev
+codenotary:
+  signer: lucio.tarantino@gmail.com
+  base_image: codenotary@frenck.dev
 args:
   HDDTEMP_VERSION: "0.3-beta15"

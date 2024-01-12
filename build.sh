@@ -2,6 +2,7 @@
 
 echo "Example For local Build use"
 echo "> check=no archs=--aarch64  ./build.sh sambanas"
+echo "> if lock remove codenaotary from build.yaml"
 
 # Check for arch
 arch=$(arch)
@@ -47,6 +48,10 @@ for addon in "$@"; do
     archs=$(${qv} -r '.arch // ["armv7", "armhf", "amd64", "aarch64", "i386"] | [.[] | "--" + .] | join(" ")' ${config})
   fi
   echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
+
+  # Momentary fix because CAS service don't respose. So no sign in local.
+  unset CAS_API_KEY
+
   hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile &&
     docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
 done
