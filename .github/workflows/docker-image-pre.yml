@@ -46,3 +46,12 @@ jobs:
         shell: bash
         run: |
           gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+
+      - name: pull-request-beta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          gh pr create -F dianlight/hassio-addons-beta --title "Releasing ${{ github.ref }} into beta channel" --body ":crown: *An automated PR*"
+
