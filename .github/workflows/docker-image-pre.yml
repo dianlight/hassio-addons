@@ -47,11 +47,17 @@ jobs:
         run: |
           gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
-      - name: pull-request-beta
+      - name: Create pull request
+        uses: paygoc6/action-pull-request-another-repo@v1.0.1
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          gh pr create -R dianlight/hassio-addons-beta --title "Releasing ${{ github.ref }} into beta channel" --body ":crown: *An automated PR*"
-
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_folder: 'sambanas'
+          destination_repo: 'dianlight/hassio-addons-beta'
+          #destination_folder: 'sambanas'
+          #destination_base_branch: 'branch-name'
+          destination_head_branch: 'prerelease'
+          user_email: 'lucio.tarantino@gmail.com'
+          user_name: 'dianlight'
+          #pull_request_reviewers: 'reviewers'
+          
