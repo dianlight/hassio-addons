@@ -8,9 +8,13 @@ Dianlight Hassio.io repository.
 The installation of this add-on is pretty straightforward and not different in
 comparison to installing any other Hass.io add-on.
 
-1. [Add our Hass.io add-ons repository][repository] to your Hass.io instance.
+- [Add our Hass.io add-ons repository][repository] to your Hass.io instance.
+  
+or
+- [Add our Hass.io BETA add-ons repository][beta-repository] to your Hass.io instance.
 
 [repository]: https://github.com/dianlight/hassio-addons
+[beta-repository]: https://github.com/dianlight/hassio-addons-beta
 
 ## Sponsor
 
