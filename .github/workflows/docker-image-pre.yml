@@ -1,4 +1,4 @@
-name: Docker Image CI - Build Pre-Release.
+name: Docker Image CI - Build Pre-Release
 
 on:
   push:
