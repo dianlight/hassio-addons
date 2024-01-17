@@ -34,13 +34,6 @@ jobs:
           get: true
           append: true
           
-      - name: Add and commit config
-        shell: bash
-        run: |
-          git config --global user.email "workflow-bot@github.com"
-          git config --global user.name "Prerelease Bot"
-          git add ./sambanas/config.yaml
-          git commit -m "Tag Prerelease Version"
 
       - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
@@ -56,15 +49,6 @@ jobs:
 #        shell: bash
 #        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
 #        id: extract_branch
-
-      - name: pull-request ${{ steps.version_set.outputs.value_old }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
-#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
 #      - name: Create pull request for Beta Repository
 #        uses: 0xlino/action-pull-request-another-repo@main
@@ -92,12 +76,27 @@ jobs:
           target_repo: 'dianlight/hassio-addons-beta'
           source_dir: 'sambanas'
 #          source_dir_copy_glob: '!(*.yaml)'
-          target_dir: 'sambanas'
+          target_dir: ''
           pr_target_repo_base_branch: 'master'
 #          pr_target_repo_compare_branch: 'autobot/${{ steps.version_set.outputs.value_new }}'
 #          pr_title: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
 #          pr_description_text: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
 #          pr_label: 'autobot'
 
-
+      - name: Restoring original repository
+        shell: bash
+        run: |
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot"
+          git restore .
+          git clean -f
           
+      - name: pull-request ${{ steps.version_set.outputs.value_old }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
+
