@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           git add ./sambanas/config.yaml
-          gir commit -m "Tag Prerelease Version"
+          git commit -m "Tag Prerelease Version"
 
       - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
