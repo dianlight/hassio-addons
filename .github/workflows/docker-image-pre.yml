@@ -26,13 +26,19 @@ jobs:
 
       - name: ✍🏼 version SambaNAs
         id: version_set
-        uses: endaft/action-yamler@v1.0.5
+        uses: endaft/action-yamler@v1.1.1
         with:
           file: ./sambanas/config.yaml
           path: version
           set: .dev${{ github.run_number }}
           get: true
           append: true
+          
+      - name: Add and commit config
+        shell: bash
+        run: |
+          git add ./sambanas/config.yaml
+          gir commit -m "Tag Prerelease Version"
 
       - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
@@ -56,10 +62,9 @@ jobs:
         shell: bash
         run: |
           gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
-#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
-        
+#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
-      - name: Create pull request
+      - name: Create pull request for Beta Repository
         uses: 0xlino/action-pull-request-another-repo@main
         continue-on-error: true
         env:
