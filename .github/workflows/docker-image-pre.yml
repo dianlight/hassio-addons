@@ -24,7 +24,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish SambaNAS Addon
+      - name: ✍🏼 version SambaNAs
+        id: version_set
+        uses: endaft/action-yamler@v1.0.5
+        with:
+          file: ./sambanas/config.yaml
+          path: version
+          set: .dev${{ github.run_number }}
+          get: true
+          append: true
+
+      - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
@@ -39,7 +49,7 @@ jobs:
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
-      - name: pull-request
+      - name: pull-request ${{ steps.version_set.outputs.value_new }}/${{ steps.extract_branch.outputs.BR_VERSION }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
@@ -48,7 +58,7 @@ jobs:
           gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 
       - name: Create pull request
-        uses: paygoc6/action-pull-request-another-repo@v1.0.1
+        uses: paygoc6/action-pull-request-another-repo@v1.0.5
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
