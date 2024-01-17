@@ -37,6 +37,8 @@ jobs:
       - name: Add and commit config
         shell: bash
         run: |
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot"
           git add ./sambanas/config.yaml
           git commit -m "Tag Prerelease Version"
 
