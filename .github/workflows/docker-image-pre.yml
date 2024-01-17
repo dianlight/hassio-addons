@@ -66,18 +66,38 @@ jobs:
           gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
 #          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
+#      - name: Create pull request for Beta Repository
+#        uses: 0xlino/action-pull-request-another-repo@main
+#        continue-on-error: true
+#        env:
+#          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+#        with:
+#          source_folder: 'sambanas'
+#          destination_repo: 'dianlight/hassio-addons-beta'
+#          #destination_folder: 'sambanas'
+#          destination_base_branch: 'master'
+#          destination_head_branch: 'prerelease/${{ steps.version_set.outputs.value_new }}'
+#          user_email: 'lucio.tarantino@gmail.com'
+#          user_name: 'dianlight'
+#          #pull_request_reviewers: 'reviewers'
+
       - name: Create pull request for Beta Repository
-        uses: 0xlino/action-pull-request-another-repo@main
+        uses: thzois/autobot@v1.0.3
         continue-on-error: true
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          GH_ACCESS_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_folder: 'sambanas'
-          destination_repo: 'dianlight/hassio-addons-beta'
-          #destination_folder: 'sambanas'
-          destination_base_branch: 'master'
-          destination_head_branch: 'prerelease'
-          user_email: 'lucio.tarantino@gmail.com'
-          user_name: 'dianlight'
-          #pull_request_reviewers: 'reviewers'
+          git_config_user_email: 'ffp-bot@github.com'
+          git_config_user_name: 'ffp-bot'
+          target_repo: 'dianlight/hassio-addons-beta'
+          source_dir: 'sambanas'
+#          source_dir_copy_glob: '!(*.yaml)'
+          target_dir: 'sambanas'
+          pr_target_repo_base_branch: 'master'
+#          pr_target_repo_compare_branch: 'autobot/${{ steps.version_set.outputs.value_new }}'
+#          pr_title: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
+#          pr_description_text: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
+#          pr_label: 'autobot'
+
+
           
