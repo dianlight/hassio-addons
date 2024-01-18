@@ -56,6 +56,7 @@ allow_hosts:
 automount: true
 moredisks:
   - "<Partition's Label>"
+  - "id:<Partition uuid>"
 mountoptions: "nosuid,relatime,noexec"
 veto_files:
   - "._*"
@@ -125,6 +126,7 @@ The following Fs are supported:
 - [x] ntfs --> **_NOTE: Experimental with ntfs3 kernel driver. Not available on some architectures_**
 - [x] brtfs
 - [x] xfs
+- [x] apfs --> **_NODE: Very Experimental. ReadOnly and referenced only by id not label. Mount options are not supported_**
 
 ### Option `mountoptions` (required)
 Allows setting of mount options.
@@ -288,9 +290,9 @@ Setting this option to `true` will enable the use of mqtt to send disks status d
 
 Defaults to `false`.
 
-### Option: `mqtt_use_legacy_entities` (optional) (**deprecated**)
+### Option: `mqtt_nexgen_entities` (optional)
 
-Setting this option to `true` will expose mqtt old entities based on mountpoints. This will be removed in future releases.
+Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
 
 Defaults to `false`.
 

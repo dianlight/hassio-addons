@@ -76,7 +76,7 @@
    # End PR#167
 
    path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
-   valid users ={{ if (empty $dinfo | not) }}_ha_mount_user_{{ end }} {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   valid users =_ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
    {{ end }}
@@ -85,7 +85,7 @@
    veto files = /{{ .veto_files | join "/" }}/
    delete veto files = {{ eq (len .veto_files) 0 | ternary "no" "yes" }}
 
-# DEBUG: {{ toJson $dinfo  }}
+# DEBUG: {{ toJson $dinfo  }}|.share={{ .share }}|$name={{ $name }}|.shares={{ .shares }}|
 
 {{if .recyle_bin_enabled }}
    recycle:repository = .recycle/%U
