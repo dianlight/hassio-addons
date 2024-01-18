@@ -1,4 +1,4 @@
-name: Docker Image CI - Build Pre-Release.
+name: Docker Image CI - Build Pre-Release
 
 on:
   push:
@@ -24,7 +24,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish SambaNAS Addon
+      - name: ✍🏼 version SambaNAs
+        id: version_set
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./sambanas/config.yaml
+          path: version
+          set: .dev${{ github.run_number }}
+          get: true
+          append: true
+          
+
+      - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
@@ -34,15 +45,58 @@ jobs:
             --target sambanas \
             --docker-hub dianlight
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-        id: extract_branch
+#      - name: Extract branch name
+#        shell: bash
+#        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+#        id: extract_branch
 
-      - name: pull-request
+#      - name: Create pull request for Beta Repository
+#        uses: 0xlino/action-pull-request-another-repo@main
+#        continue-on-error: true
+#        env:
+#          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+#        with:
+#          source_folder: 'sambanas'
+#          destination_repo: 'dianlight/hassio-addons-beta'
+#          #destination_folder: 'sambanas'
+#          destination_base_branch: 'master'
+#          destination_head_branch: 'prerelease/${{ steps.version_set.outputs.value_new }}'
+#          user_email: 'lucio.tarantino@gmail.com'
+#          user_name: 'dianlight'
+#          #pull_request_reviewers: 'reviewers'
+
+      - name: Create pull request for Beta Repository
+        uses: thzois/autobot@v1.0.3
+        continue-on-error: true
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          git_config_user_email: 'ffp-bot@github.com'
+          git_config_user_name: 'ffp-bot'
+          target_repo: 'dianlight/hassio-addons-beta'
+          source_dir: 'sambanas'
+#          source_dir_copy_glob: '!(*.yaml)'
+          target_dir: ''
+          pr_target_repo_base_branch: 'master'
+#          pr_target_repo_compare_branch: 'autobot/${{ steps.version_set.outputs.value_new }}'
+#          pr_title: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
+#          pr_description_text: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
+#          pr_label: 'autobot'
+
+      - name: Restoring original repository
+        shell: bash
+        run: |
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot"
+          git restore .
+          git clean -f
+          
+      - name: pull-request ${{ steps.version_set.outputs.value_old }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+          gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
+

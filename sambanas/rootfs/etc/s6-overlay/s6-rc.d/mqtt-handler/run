@@ -12,9 +12,23 @@ if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for partitions info..."
 
     # Send autodiscovery entities
-    if bashio::config.true "mqtt_use_legacy_entities"; then
-        bashio::log.info "Legacy MQTT integration"
-        exec /usr/local/bin/mqtt_daemon.sh
+    if bashio::config.true "mqtt_nexgen_entities"; then
+        bashio::log.info "New MQTT integration"
+
+        topic=$(bashio::config 'mqtt_topic')
+        if [ "$topic" = "null" ]; then topic="sambanas"; fi
+        host=$(bashio::config 'mqtt_host')
+        if [ "$host" = "null" ]; then host=$(bashio::services "mqtt" "host"); fi
+        username=$(bashio::config 'mqtt_username')
+        if [ "$username" = "null" ]; then username=$(bashio::services "mqtt" "username"); fi
+        password=$(bashio::config 'mqtt_password')
+        if [ "$password" = "null" ]; then password=$(bashio::services "mqtt" "password"); fi
+        port=$(bashio::config 'mqtt_port')
+        if [ "$port" = "null" ]; then port=$(bashio::services "mqtt" "port"); fi
+
+        log_level=$(bashio::string.lower "$(bashio::config log_level info)")
+
+        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version) -l ${log_level^^}
     else
         bashio::log.info "MQTT integration"
 
