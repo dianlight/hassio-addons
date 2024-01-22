@@ -88,7 +88,7 @@ RUN apk add --no-cache \
     fuse3 \
     py3-pip
 
-RUN if [ "$BUILD_ARCH" != "armv7 ]; then apk add --no-cache apfs-fuse;fi
+RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
 # HDDTEMP
 ARG HDDTEMP_VERSION
