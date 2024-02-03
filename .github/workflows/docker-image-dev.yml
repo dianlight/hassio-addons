@@ -8,13 +8,14 @@ on:
 
 permissions:
   pull-requests: write
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -41,6 +42,7 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
+            --cosign
             --aarch64 \
             --target sambanas \
             --docker-hub dianlight
