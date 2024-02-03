@@ -56,7 +56,7 @@
 
 
    mangled names = no
-   dos charset = CP850
+   dos charset = CP1253
    unix charset = UTF-8   
 
 {{ define "SHT" }}

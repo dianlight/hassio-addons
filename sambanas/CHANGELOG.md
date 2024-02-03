@@ -3,8 +3,8 @@
 ## 12.2.0-nas2 [Unreleased]
 
 ###  🩹 BugFix
-- [#206](https://github.com/dianlight/hassio-addons/issues/206)
-- [#204](https://github.com/dianlight/hassio-addons/issues/204)
+- Pin Python packages version on all platform. [#206](https://github.com/dianlight/hassio-addons/issues/206)
+- Change DOS charset to CP1253. [#204](https://github.com/dianlight/hassio-addons/issues/204)
 
 ### 🏗 Chore
 - Update Based Image to 15.0.6 (Alpine 3.19.1)
