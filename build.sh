@@ -2,7 +2,7 @@
 
 echo "Example For local Build use"
 echo "> check=no archs=--aarch64  ./build.sh sambanas"
-echo "> if lock remove codenaotary from build.yaml"
+echo "> if lock remove codenaotary from build.yaml and unset CAS_API_KEY"
 
 # Check for arch
 arch=$(arch)
