@@ -42,7 +42,7 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
-            --cosign
+            --cosign \
             --aarch64 \
             --target sambanas \
             --docker-hub dianlight
