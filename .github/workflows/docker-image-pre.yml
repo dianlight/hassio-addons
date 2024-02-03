@@ -30,7 +30,7 @@ jobs:
         with:
           file: ./sambanas/config.yaml
           path: version
-          set: .dev${{ github.run_number }}
+          set: .beta${{ github.run_number }}
           get: true
           append: true
 
@@ -86,6 +86,6 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --base "release/${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+          gh pr create --title "Releasing ${{ github.ref }}" --body ":crown: *An automated PR*"
 #          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
