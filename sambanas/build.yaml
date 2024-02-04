@@ -6,5 +6,8 @@ build_from:
 codenotary:
   signer: lucio.tarantino@gmail.com
   base_image: codenotary@frenck.dev
+cosign:
+  cosign_base_identity: https://github.com/home-assistant/builder/.*
+  cosign_identity: https://github.com/dianlight/hassio-addons/.*
 args:
   HDDTEMP_VERSION: "0.3-beta15"
