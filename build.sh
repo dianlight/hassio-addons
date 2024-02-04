@@ -53,5 +53,7 @@ for addon in "$@"; do
   unset CAS_API_KEY
 
   hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile &&
-    docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" homeassistant/${arch}-builder --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
+    docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" ghcr.io/home-assistant/${arch}-builder:latest \
+    --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
+#    --cosign \
 done
