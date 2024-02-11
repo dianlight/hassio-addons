@@ -5,7 +5,7 @@
 # ==============================================================================
 if bashio::config.has_value 'hdd_idle_seconds'; then
     bashio::log.info "Enabling HDD IDLE after $(bashio::config 'hdd_idle_seconds')sec"
-    exec hd-idle -i "$(bashio::config 'hdd_idle_seconds')"
+    exec hd-idle -i "$(bashio::config 'hdd_idle_seconds')" -c ata
 else
     exec sleep infinity
 fi
