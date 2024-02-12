@@ -1,0 +1,14 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Perform an update of the git repository
+# ==============================================================================
+
+
+if bashio::config.true 'updateonboot'; then
+     bashio::log.warning "Performing update of BeSIM daemon"
+     cd /opt/BeSIM
+     unset PIP_EXTRA_INDEX_URL
+     unset PIP_FIND_LINKS 
+     git pull && /usr/bin/pip3 install --no-cache-dir -r requirements.txt
+fi
