@@ -7,25 +7,6 @@ ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
 # hadolint ignore=DL3006
-FROM ${BUILD_FROM} as builder
-
-# Set shell
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-RUN apk add --no-cache \
-    curl \
-    npm \
-    nodejs
-
-# Copy data
-COPY gui /tmp/gui
-
-RUN cd /tmp/gui && \
-    npm install && \
-    npm run clean && \
-    npm run build
-
-# hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
 # Set shell
@@ -57,8 +38,7 @@ ARG PYTHON_VERSION
 
 RUN apk add --no-cache \
     curl \
-    git \
-    nginx
+    git
 #    pkgconf \
 #    gcc \
 #    g++ \
@@ -98,10 +78,6 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 # Copy data
 COPY rootfs /
 
-COPY --from=builder /tmp/gui/dist/ /opt/static
-
-RUN chown -R nginx:nginx /opt/static
-
 # Python
 #COPY --from=PythonBuilder "/opt/Python-${PYTHON_VERSION}" "/opt/Python-${PYTHON_VERSION}"
 #RUN ls -al /opt && cd "/opt/Python-${PYTHON_VERSION}" \
@@ -124,6 +100,8 @@ RUN unset PIP_EXTRA_INDEX_URL \
     && git clone --no-hardlinks --no-checkout https://github.com/dianlight/BeSIM-MQTT.git a.tmp \
     && mv a.tmp/.git .\
     && rm -rf a.tmp
+
+
 
 
 
