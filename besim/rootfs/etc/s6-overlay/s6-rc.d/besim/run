@@ -7,5 +7,5 @@ args="-l ${log_level^^}"
 if bashio::config.true 'work_as_proxy'; then
     args="${args} -p $(bashio::config upstream_dns)"
 fi
-bashio::log.info ${args}
+bashio::log.debug ${args}
 exec python3 /opt/BeSIM/app.py ${args}
