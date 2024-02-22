@@ -1,6 +1,9 @@
 # Changelog
 
-## 12.2.0-nas2 [Unreleased]
+## 12.2.0-nas2
+
+###  ✨ Features
+- New `bind_all_interfaces` option to allow work with pseudo ethernet devices. Support Tailscale may work for [#176](https://github.com/dianlight/hassio-addons/issues/176) 
 
 ###  🩹 BugFix
 - Pin Python packages version on all platform. [#206](https://github.com/dianlight/hassio-addons/issues/206)

@@ -27,15 +27,15 @@ If you are on Windows you use `\\<IP_ADDRESS>\`, if you are on MacOS you use `sm
 
 This addon exposes the following directories over smb (samba):
 
-| Directory | Description                                                              |
-| --------- | ------------------------------------------------------------------------ |
-| `addons`  | This is for your local add-ons.                                          |
-| `backup`  | This is for your snapshots.                                              |
-| `config`  | This is for your Home Assistant configuration.                           |
-| `addon_configs`  | This is for your Addons base configuration directory                           |
-| `media`   | This is for local media files.                                           |
-| `share`   | This is for your data that is shared between add-ons and Home Assistant. |
-| `ssl`     | This is for your SSL certificates.                                       |
+| Directory       | Description                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| `addons`        | This is for your local add-ons.                                          |
+| `backup`        | This is for your snapshots.                                              |
+| `config`        | This is for your Home Assistant configuration.                           |
+| `addon_configs` | This is for your Addons base configuration directory                     |
+| `media`         | This is for local media files.                                           |
+| `share`         | This is for your data that is shared between add-ons and Home Assistant. |
+| `ssl`           | This is for your SSL certificates.                                       |
 
 ## Configuration
 
@@ -256,6 +256,13 @@ This option should only be used in advanced cases. In general, setting this opti
 If omitted Samba will listen on all supported interfaces of Home Assistant (see > ha network info), but if there are no supported interfaces, Samba will exit with an error.
 
 Note: Samba needs at least one non-loopback, non-ipv6, local interface to listen on and become browser on it. Without it, it works, but reloads it's interfaces in an infinite loop forever in each 10 seconds to check, whether a non-loopback, non-ipv6, local interface is added. This reload will fill the log file with infinite number of entries like added interface lo ip=::1 bcast= netmask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff.
+
+### Option: `bind_all_interfaces` (optional)
+
+Force Samba to bind on all network interface.
+This is usefull for pseudo-ethernet devices like TailScale
+
+Defaults to `false`.
 
 ### Option: `compatibility_mode` (optional)
 
