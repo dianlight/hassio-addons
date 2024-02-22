@@ -38,47 +38,50 @@ ARG PYTHON_VERSION
 
 RUN apk add --no-cache \
     curl \
-    git \
-    pkgconf \
-    gcc \
-    g++ \
-    make \
-    zlib-dev \
-    zlib \
-    libffi-dev \
-    libffi \
-    musl-dev \
-    musl \
-    openssl3-dev \
-    openssl3 \
-    sqlite-dev \
-    sqlite
+    git
+#    pkgconf \
+#    gcc \
+#    g++ \
+#    make \
+#    zlib-dev \
+#    zlib \
+#    libffi-dev \
+#    libffi \
+#    musl-dev \
+#    musl \
+#    openssl3-dev \
+#    openssl3 \
+#    sqlite-dev \
+#    sqlite
 
-# download and extract python sources build python and remove left-over sources
-RUN cd /opt \
-    && curl -s -L "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" | tar xzf - \
-    && cd "/opt/Python-${PYTHON_VERSION}" \ 
-    && ./configure --prefix=/usr --enable-optimizations --with-ensurepip=install \
-    && make install \
-    && apk del \
-        pkgconf \
-        gcc \
-        g++ \
-        make \
-        zlib-dev \
-        libffi-dev \
-        musl-dev \
-        openssl3-dev \
-    && rm -rf "/opt/Python-${PYTHON_VERSION}"
+## download and extract python sources build python and remove left-over sources
+#RUN cd /opt \
+#    && curl -s -L "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" | tar xzf - \
+#    && cd "/opt/Python-${PYTHON_VERSION}" \
+#    && ./configure --prefix=/usr --enable-optimizations --with-ensurepip=install \
+#    && make install \
+#    && apk del \
+#    pkgconf \
+#    gcc \
+#    g++ \
+#    make \
+#    zlib-dev \
+#    libffi-dev \
+#    musl-dev \
+#    openssl3-dev \
+#    && rm -rf "/opt/Python-${PYTHON_VERSION}"
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
+    && chmod a+x /usr/bin/ha
+
+# Copy data
+COPY rootfs /
 
 # Python
 #COPY --from=PythonBuilder "/opt/Python-${PYTHON_VERSION}" "/opt/Python-${PYTHON_VERSION}"
-#RUN ls -al /opt && cd "/opt/Python-${PYTHON_VERSION}" \ 
-#    && make install \ 
+#RUN ls -al /opt && cd "/opt/Python-${PYTHON_VERSION}" \
+#    && make install \
 #    && cd .. \
 #    && rm -rf "Python-${PYTHON_VERSION}"
 #COPY --from=PythonBuilder /usr/lib/python3.12 /usr/lib/python3.12
@@ -86,19 +89,21 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 #COPY --from=PythonBuilder /usr/share/man/man1/python* /usr/share/man/man1/
 #COPY --from=PythonBuilder /usr/bin/*  /usr/bin/
 
+
 # BESIM
-WORKDIR /opt
+WORKDIR /opt/BeSIM
 
-RUN git clone https://github.com/jimmyH/BeSIM.git \
-    && ls -al \
-    && pwd \
-    && cd BeSIM \
-    && unset PIP_EXTRA_INDEX_URL \
+RUN unset PIP_EXTRA_INDEX_URL \
     && unset PIP_FIND_LINKS \
-    && /usr/bin/pip3 install --no-cache-dir -r requirements.txt
+    && pip3 install --no-cache-dir -r requirements.txt \
+    && rm -rf .git \
+    && git clone --no-hardlinks --no-checkout https://github.com/dianlight/BeSIM-MQTT.git a.tmp \
+    && mv a.tmp/.git .\
+    && rm -rf a.tmp
 
-# Copy data
-COPY rootfs /
+
+
+
 
 #HEALTHCHECK \
 #    CMD smbclient -L '\\localhost' -U '%' -m SMB3

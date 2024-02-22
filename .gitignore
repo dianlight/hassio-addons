@@ -4,3 +4,4 @@ env_file
 .github/tmp/
 sambanas2/.imgenv
 .opencode/.modelselect-cache
+besim/Tracer.txt
