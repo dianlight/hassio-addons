@@ -1,6 +1,6 @@
 ---
 name: BeSim
-version: 0.0.3
+version: 0.0.2
 slug: besim
 description: A simulator for the cloud server the BeSMART thermostat/wifi box connects to.
 url: https://github.com/dianlight/hassio-addons/tree/master/besim
@@ -13,12 +13,11 @@ startup: system
 boot: auto
 init: false
 hassio_api: true
-homeassistant_api: true
 #hassio_role: admin
 #host_network: true
-map:
-  #  - homeassistant_config:rw
-  - addon_config:rw
+#map:
+#  - homeassistant_config:rw
+#  - addon_config:rw
 #  - ssl:rw
 #  - all_addon_configs:rw
 #  - addons:rw
@@ -34,7 +33,7 @@ schema:
   work_as_proxy: bool?
   upstream_dns: match(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$)
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
-  zone_entity: str?
+
 image: dianlight/{arch}-addon-besim
 ports:
   6199/udp: 6199
@@ -60,12 +59,3 @@ apparmor: true
 homeassistant: 2023.11.0
 backup: hot
 #auth_api: true
-ingress: true
-ingress_port: 8080
-ingress_entry: /
-panel_icon: mdi:thermostat
-panel_title: BeSIM Control
-panel_admin: true
-# network
-stage: experimental
-watchdog: http://[HOST]:[PORT:8080]/
