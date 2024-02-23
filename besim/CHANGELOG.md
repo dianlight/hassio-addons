@@ -1,6 +1,27 @@
 # Changelog
 
-## 0.0.2 
+## 0.0.3
+
+###  ✨ Features
+- New `zone_entity` options to pass latitude and LATITUDE e LONGITUDE.
+- Collect usage statistics for control API usage TODO:
+- WebPage to show connections status TODO:
+- WebPage to show statistics TODO:
+- WebPage to show OT status and values TODO:
+
+### 📚 Documentation
+- Integration diagram TODO:
+- DNS Configuration diagram TODO:
+  - AdGuard Home config example TODO:
+  - DNSMasq config example TODO:
+- Mobile APPS TODO:
+  - Changelog / Support TODO:
+  - Android App TODO:
+    - Unpin certificate TODO:
+    - Change from HTTPS to HTTP TODO:
+    - MegaDownload apk petched TODO:
+
+## 0.0.2 [Unreleased]
 
 <!--
 ### 💥 BREAKING CHANGE
