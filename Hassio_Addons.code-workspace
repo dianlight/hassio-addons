@@ -7,5 +7,32 @@
       "path": "../ha-mqtt-discoverable"
     }
   ],
-  "settings": {}
+  "settings": {
+    "flake8.interpreter": [
+      "/opt/homebrew/bin/python3"
+    ],
+    "vsintellicode.features.python.deepLearning": "enabled",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+    "python.globalModuleInstallation": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.languageServer": "Pylance",
+    "cSpell.words": [
+      "homeassistant",
+      "sambanas"
+    ],
+    "cSpell.enableFiletypes": [
+      "!csharp",
+      "log"
+    ],
+    "flake8.args": [
+      "--max-line-length=132",
+      "--ignore=E128"
+    ]
+  }
 }
