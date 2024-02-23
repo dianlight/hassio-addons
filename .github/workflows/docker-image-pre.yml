@@ -75,6 +75,11 @@ jobs:
             --target ${{ steps.extract_project.outputs.name }} \
             --docker-hub dianlight
 
+      - name: Update version in ${{ steps.extract_project.outputs.name }}/CHANGELOG.md
+        continue-on-error: true
+        shell: bash
+        run: sed -i '1,/## ${{ steps.version_set.outputs.value_old }}/{s//## ${{ steps.version_set.outputs.value_new }}/}' ${{ steps.extract_project.outputs.name }}/CHANGELOG.md 
+
       - name: Create pull request for Beta Repository
         uses: thzois/autobot@v1.0.3
         continue-on-error: true
