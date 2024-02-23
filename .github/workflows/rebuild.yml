@@ -1,4 +1,4 @@
-name: Rebuild Docker Image CI
+name: Rebuild Docker Image CI - Emergency Rebuild All
 
 on:
   workflow_dispatch:
@@ -26,4 +26,14 @@ jobs:
           args: |
             --all \
             --target sambanas \
+            --docker-hub dianlight
+
+      - name: Publish BeSIM Addon
+        uses: home-assistant/builder@master
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+        with:
+          args: |
+            --all \
+            --target besim \
             --docker-hub dianlight

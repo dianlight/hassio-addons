@@ -24,34 +24,55 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: ✍🏼 version SambaNAs
+      - name: 📽️ Extract dev branch project name
+        shell: bash
+        run: |
+           FULL_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/devrelease/}}"
+           echo "full_name=${FULL_NAME} >> $GITHUB_OUTPUT
+           echo "name=${FULL_NAME%%_*}" >> $GITHUB_OUTPUT
+        id: extract_project
+
+      - name: ✍🏼 version ${{ steps.extract_project.outputs.name }}
+        id: version_get
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./${{ steps.extract_project.outputs.name }}/config.yaml
+          path: version
+          get: true
+
+      - name: 📽️ Identify SemVer ${{ steps.version_get.outputs.value_old }} suffix
+        shell: bash
+        run: echo "suffix=${{ contains(steps.version_get.outputs.value_old,'-') && '.' || '-' }}" >> $GITHUB_OUTPUT
+        id: semver-suffix
+
+      - name: ✍🏼 version ${{ steps.extract_project.outputs.name }}
         id: version_set
         uses: endaft/action-yamler@v1.1.1
         with:
-          file: ./sambanas/config.yaml
+          file: ./${{ steps.extract_project.outputs.name }}/config.yaml
           path: version
-          set: .beta${{ github.run_number }}
+          set: ${{ steps.semver-suffix.outputs.suffix }}beta${{ github.run_number }}
           get: true
           append: true
 
-      - name: ✍🏼 BetaName SambaNAs
+      - name: ✍🏼 BetaName ${{ steps.extract_project.outputs.name }}
         id: betaname_set
         uses: endaft/action-yamler@v1.1.1
         with:
-          file: ./sambanas/config.yaml
+          file: ./${{ steps.extract_project.outputs.name }}/config.yaml
           path: name
           set: -β
           get: true
           append: true
             
-      - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_new }}
+      - name: Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
             --all \
-            --target sambanas \
+            --target ${{ steps.extract_project.outputs.name }} \
             --docker-hub dianlight
 
       - name: Create pull request for Beta Repository
@@ -63,7 +84,7 @@ jobs:
           git_config_user_email: 'ffp-bot@github.com'
           git_config_user_name: 'ffp-bot'
           target_repo: 'dianlight/hassio-addons-beta'
-          source_dir: 'sambanas'
+          source_dir: '${{ steps.extract_project.outputs.name }}'
 #          source_dir_copy_glob: '!(*.yaml)'
           target_dir: ''
           pr_target_repo_base_branch: 'master'
