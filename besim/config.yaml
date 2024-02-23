@@ -16,9 +16,9 @@ hassio_api: true
 homeassistant_api: true
 #hassio_role: admin
 #host_network: true
-#map:
-#  - homeassistant_config:rw
-#  - addon_config:rw
+map:
+  #  - homeassistant_config:rw
+  - addon_config:rw
 #  - ssl:rw
 #  - all_addon_configs:rw
 #  - addons:rw
