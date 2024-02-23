@@ -1,29 +1,6 @@
 # Changelog
 
-## 0.0.3
-
-###  ✨ Features
-- New `zone_entity` options to pass latitude and LATITUDE e LONGITUDE.
-- Collect usage statistics for control API usage
-- WebGui
-  - Ingress Mode
-  - Show statistics
-  - Control SmartBox and Thermostat TODO:
-  - Show OT status and values
-
-### 📚 Documentation
-- Integration diagram TODO:
-- DNS Configuration diagram TODO:
-  - AdGuard Home config example TODO:
-  - DNSMasq config example TODO:
-- Mobile APPS TODO:
-  - Changelog / Support TODO:
-  - Android App TODO:
-    - Unpin certificate TODO:
-    - Change from HTTPS to HTTP TODO:
-    - MegaDownload apk petched TODO:
-
-## 0.0.2 [Unreleased]
+## 0.0.2 
 
 <!--
 ### 💥 BREAKING CHANGE
