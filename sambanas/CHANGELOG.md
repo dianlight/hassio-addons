@@ -1,5 +1,18 @@
 # Changelog
 
+## 12.2.0-nas2
+
+###  ✨ Features
+- New `bind_all_interfaces` option to allow work with pseudo ethernet devices. Support Tailscale may work for [#176](https://github.com/dianlight/hassio-addons/issues/176) 
+
+###  🩹 BugFix
+- Pin Python packages version on all platform. [#206](https://github.com/dianlight/hassio-addons/issues/206)
+- Change DOS charset to CP1253. [#204](https://github.com/dianlight/hassio-addons/issues/204)
+
+### 🏗 Chore
+- Update Based Image to 15.0.6 (Alpine 3.19.1)
+
+
 ## 12.2.0-nas1
 
 ###  ✨ Features

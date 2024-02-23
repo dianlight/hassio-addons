@@ -25,6 +25,5 @@ jobs:
         with:
           args: |
             --all \
-            --docker-hub-check \
             --target sambanas \
             --docker-hub dianlight
