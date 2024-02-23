@@ -52,6 +52,10 @@ The upsream DNS to use for proxy activities
 
 Defaults to `1.1.1.1`.
 
+### Option: `zone_entity` (optional)
+
+The name of the entity to get geo position wor weather service
+
 <!--
 ### Option: `mqtt_enable` (optional)
 
