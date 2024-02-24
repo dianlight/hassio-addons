@@ -53,7 +53,7 @@ jobs:
           get: true
           append: true
 
-      - name: 📰 Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_old }}
+      - name: 📰 Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
