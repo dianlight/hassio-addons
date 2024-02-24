@@ -71,7 +71,7 @@ jobs:
         run: |
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          git branch -f "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" HEAD
+          git branch -f "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" master
           git push -u origin  "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" || :
           git restore .
           git clean -f
