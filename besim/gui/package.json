@@ -1,0 +1,80 @@
+{
+  "name": "besim-dashboard",
+  "version": "0.0.1",
+  "description": "Dashboard for BeSim",
+  "main": "epshome_dashboard/static/js/esphome/index.js",
+  "_repository": "https://github.com/esphome/dashboard",
+  "_author": "ESPHome maintainers",
+  "_license": "Apache-2.0",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "dev": "NODE_ENV=development rollup -c -w",
+    "build": "npm run clean && NODE_ENV=production rollup -c"
+  },
+  "_devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.0.1",
+    "_@rollup/plugin-node-resolve": "^15.2.3",
+    "_@rollup/plugin-terser": "^0.4.4",
+    "_@rollup/plugin-typescript": "^11.1.5",
+    "fs-extra": "^11.2.0",
+    "monaco-editor": "^0.34.1",
+    "nunjucks": "^3.2.4",
+    "postcss": "^8.4.35",
+    "postcss-url": "^10.1.3",
+    "prettier": "^3.2.4",
+    "_rollup": "^4.12.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-monaco-editor": "^0.2.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "_typescript": "^5.3.2"
+  },
+  "_dependencies": {
+    "@lit-labs/motion": "^1.0.6",
+    "@material/mwc-button": "^0.27.0",
+    "@material/mwc-circular-progress": "^0.27.0",
+    "@material/mwc-dialog": "^0.27.0",
+    "@material/mwc-fab": "^0.27.0",
+    "@material/mwc-formfield": "^0.27.0",
+    "@material/mwc-icon-button": "^0.27.0",
+    "@material/mwc-list": "^0.27.0",
+    "@material/mwc-menu": "^0.27.0",
+    "@material/mwc-radio": "^0.27.0",
+    "@material/mwc-snackbar": "^0.27.0",
+    "@material/mwc-textfield": "^0.27.0",
+    "@mdi/js": "^7.4.47",
+    "@polymer/paper-tooltip": "^3.0.1",
+    "@types/w3c-web-serial": "^1.0.6",
+    "esptool-js": "^0.4.1",
+    "improv-wifi-serial-sdk": "^2.5.0",
+    "_lit": "^2.8.0",
+    "tslib": "^2.6.2",
+    "yaml": "^2.3.4"
+  },
+  "_overrides": {
+    "@lit/reactive-element": "1.3.2",
+    "rollup-plugin-monaco-editor": {
+      "monaco-editor": "$monaco-editor",
+      "rollup": "$rollup"
+    }
+  },
+  "dependencies": {
+    "@lit/task": "^1.0.0",
+    "@material/web": "^1.3.0",
+    "lit": "^3.1.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-html": "^1.0.3",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.11.20",
+    "rollup": "^4.12.0",
+    "rollup-plugin-dev": "^2.0.4",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^1.1.1",
+    "typescript": "^5.3.3"
+  }
+}
