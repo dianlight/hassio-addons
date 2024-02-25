@@ -3,3 +3,6 @@ env_file
 .claude/
 sambanas2/.imgenv
 besim/Tracer.txt
+
+node_modules
+dist
