@@ -5,3 +5,6 @@ env_file
 sambanas2/.imgenv
 .opencode/.modelselect-cache
 besim/Tracer.txt
+
+node_modules
+dist
