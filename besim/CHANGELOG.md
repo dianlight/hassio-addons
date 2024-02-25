@@ -4,10 +4,12 @@
 
 ###  ✨ Features
 - New `zone_entity` options to pass latitude and LATITUDE e LONGITUDE.
-- Collect usage statistics for control API usage TODO:
-- WebPage to show connections status TODO:
-- WebPage to show statistics TODO:
-- WebPage to show OT status and values TODO:
+- Collect usage statistics for control API usage
+- WebGui
+  - Ingress Mode TODO:
+  - Show statistics TODO:
+  - Control SmartBox and Thermostat TODO:
+  - Show OT status and values TODO:
 
 ### 📚 Documentation
 - Integration diagram TODO:
