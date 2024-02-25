@@ -4,3 +4,6 @@ env_file
 .github/tmp/
 sambanas2/.imgenv
 besim/Tracer.txt
+
+node_modules
+dist
