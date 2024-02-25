@@ -7,6 +7,25 @@ ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
 # hadolint ignore=DL3006
+FROM ${BUILD_FROM} as builder
+
+# Set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apk add --no-cache \
+    curl \
+    npm \
+    nodejs
+
+# Copy data
+COPY gui /tmp/gui
+
+RUN cd /tmp/gui && \
+    ls -al && \
+    npm install && \
+    npm run build 
+
+# hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
 # Set shell
@@ -77,6 +96,8 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 
 # Copy data
 COPY rootfs /
+
+COPY --from=builder /tmp/gui/dist/ /opt/static
 
 # Python
 #COPY --from=PythonBuilder "/opt/Python-${PYTHON_VERSION}" "/opt/Python-${PYTHON_VERSION}"
