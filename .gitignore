@@ -1,3 +1,6 @@
 .DS_Store
 env_file
 besim/Tracer.txt
+
+node_modules
+dist
