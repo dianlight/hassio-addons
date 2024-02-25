@@ -3,19 +3,18 @@ import terser from "@rollup/plugin-terser";
 //import json from "@rollup/plugin-json";
 import typescript from "@rollup/plugin-typescript";
 //import manifest from "./build-scripts/rollup/manifest-plugin.mjs";
-import postcss from "rollup-plugin-postcss";
+//import postcss from "rollup-plugin-postcss";
 //import postcssUrl from "postcss-url";
 import commonjs from "@rollup/plugin-commonjs";
 //import monaco from "rollup-plugin-monaco-editor";
-import copy from "rollup-plugin-copy";
+//import copy from "rollup-plugin-copy";
 //import fs from "fs-extra";
 //import path from "path";
+import serve from 'rollup-plugin-serve'
+import html from "@rollup/plugin-html";
 import livereload from 'rollup-plugin-livereload'
 import replace from "@rollup/plugin-replace";
 import dev from 'rollup-plugin-dev'
-import { mdIcon, replaceSymbolsLink } from 'rollup-plugin-md-icon';
-import { rollupPluginHTML as html } from '@web/rollup-plugin-html';
-//import { compileLitTemplates } from '@lit-labs/compiler'
 
 const isProdBuild = process.env.NODE_ENV === "production";
 
@@ -30,31 +29,20 @@ const config = {
         //entryFileNames: isProdBuild ? "[name]-[hash].js" : "[name].js",
         //chunkFileNames: isProdBuild ? "c.[hash].js" : "[name].js",
         //assetFileNames: isProdBuild ? "a.[hash].js" : "[name].js",
-        sourcemap: !isProdBuild,
+        sourcemap: true,
     },
     preserveEntrySignatures: false,
     plugins: [
+        (!isProdBuild) && html(),
         replace({
             values: {
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-                'process.env.SERVER': process.env.SERVER ? JSON.stringify(process.env.SERVER) : JSON.stringify("")
                 //__buildDate__: () => JSON.stringify(new Date()),
                 //__buildVersion: 15
             },
             preventAssignment: true
         }),
-        postcss({
-            extract: true,
-            inject: { insertAt: "top" },
-        }),
-        typescript(
-            {
-                sourceMap: !isProdBuild,
-                inlineSources: !isProdBuild
-                //transformers: {
-                //    before: [compileLitTemplates()],
-                //},
-            }),
+        typescript(),
         /*
         postcss({
             plugins: [
@@ -74,13 +62,11 @@ const config = {
                 }),
             ],
         }),
-        */
         copy({
             targets: [
-                { src: "assets/*", dest: "dist/assets" },
+                { src: "schema/*.json", dest: "esphome_dashboard/static/schema" },
             ],
         }),
-        /*
         monaco({
             languages: ["yaml"],
             sourcemap: false,
@@ -93,39 +79,16 @@ const config = {
         commonjs(),
         //json(),
         //manifest(),
-        //mdIcon({ symbols: {} }),
-        html({
-            input: ['src/index.html'],
-            // publicPath: './static',
-            extractAssets: false,
-            /*
-            transformHtml: (html) =>
-                replaceSymbolsLink(
-                    html,
-                    '<link rel="stylesheet" href="/material-symbols.css">',
-                ),
-            */
-        }),
+        //(!isProdBuild) && serve('dist'),
         dev({
-            dirs: ['dist'/*, 'assets'*/],
-            // basePath: '/static',
+            dirs: ['dist'],
             proxy: [{
                 from: '/api',
                 to: 'http://127.0.0.1/api',
                 opts: {
                     logger: true,
                 }
-            },
-                /*
-                {
-                    from: '/static',
-                    to: 'http://127.0.0.1/static',
-                    opts: {
-                        logger: true,
-                    }
-                }
-                */
-            ]
+            }]
         }),
         (!isProdBuild) && livereload('dist'),
         isProdBuild &&
