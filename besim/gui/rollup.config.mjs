@@ -7,7 +7,7 @@ import typescript from "@rollup/plugin-typescript";
 //import postcssUrl from "postcss-url";
 import commonjs from "@rollup/plugin-commonjs";
 //import monaco from "rollup-plugin-monaco-editor";
-//import copy from "rollup-plugin-copy";
+import copy from "rollup-plugin-copy";
 //import fs from "fs-extra";
 //import path from "path";
 import serve from 'rollup-plugin-serve'
@@ -15,6 +15,7 @@ import html from "@rollup/plugin-html";
 import livereload from 'rollup-plugin-livereload'
 import replace from "@rollup/plugin-replace";
 import dev from 'rollup-plugin-dev'
+//import { compileLitTemplates } from '@lit-labs/compiler'
 
 const isProdBuild = process.env.NODE_ENV === "production";
 
@@ -42,7 +43,11 @@ const config = {
             },
             preventAssignment: true
         }),
-        typescript(),
+        typescript(/*{
+            transformers: {
+                before: [compileLitTemplates()],
+            },
+        }*/),
         /*
         postcss({
             plugins: [
@@ -62,11 +67,13 @@ const config = {
                 }),
             ],
         }),
+        */
         copy({
             targets: [
-                { src: "schema/*.json", dest: "esphome_dashboard/static/schema" },
+                { src: "assets/*", dest: "dist" },
             ],
         }),
+        /*
         monaco({
             languages: ["yaml"],
             sourcemap: false,
@@ -88,7 +95,15 @@ const config = {
                 opts: {
                     logger: true,
                 }
-            }]
+            },
+            {
+                from: '/static',
+                to: 'http://127.0.0.1/static',
+                opts: {
+                    logger: true,
+                }
+            }
+            ]
         }),
         (!isProdBuild) && livereload('dist'),
         isProdBuild &&
