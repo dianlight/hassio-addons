@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 @customElement("device-list")
 export class DeviceList extends LitElement {
-    @property() token?: string;
+    @property() accessor token: string | undefined;
 
     private _deviceTask = new Task(this, {
         task: async ([deviceIds], { signal }) => {

@@ -8,24 +8,25 @@ import './traffic/traffic-table'
 
 @customElement("besim-main")
 class BeSimMainView extends LitElement {
-  @property() version = "unknown";
+  @property() accessor version = "unknown";
 
-  @property() token?: string;
+  @property() accessor token!: string;
 
-  @property() docsLink = "";
+  @property() accessor docsLink = "";
 
-  @property() logoutUrl?: string;
+  @property() accessor logoutUrl!: string;
 
-  @state() private activeTabIndex?: string;
+  @state() accessor activeTabIndex!: string;
 
-  @property() deviceIds: string[] = [];
+  @property() accessor deviceIds: string[] = [];
 
-  @queryAll("div[id$='-panel'") _panels?: NodeListOf<HTMLDivElement>;
+  @queryAll("div[id$='-panel'")
+  accessor _panels!: NodeListOf<HTMLDivElement>;
 
   protected render() {
     return html`
       <header class="besim-header">
-        <img src="static/images/logo-text.svg" alt="BeSim Logo -${this.activeTabIndex ?? 0}"/>
+        <img src="/static/images/logo.png" alt="BeSim Logo -${this.activeTabIndex ?? 0}"/>
         <div class="flex"></div>
         <!--
         <esphome-header-menu .logoutUrl=${this.logoutUrl}></esphome-header-menu>
