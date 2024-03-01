@@ -6,15 +6,19 @@ import { customElement, property, queryAll, state } from "lit/decorators.js";
 import './device/device-list'
 import './traffic/traffic-table'
 
+
+
 @customElement("besim-main")
 class BeSimMainView extends LitElement {
   @property() accessor version = "unknown";
 
   @property() accessor token!: string;
 
+  /*
   @property() accessor docsLink = "";
 
   @property() accessor logoutUrl!: string;
+  */
 
   @state() accessor activeTabIndex!: string;
 
@@ -26,26 +30,29 @@ class BeSimMainView extends LitElement {
   protected render() {
     return html`
       <header class="besim-header">
-        <img src="/static/images/logo.png" alt="BeSim Logo -${this.activeTabIndex ?? 0}"/>
+        <img src="/static/assets/images/logo.png" alt="BeSim Logo -${this.activeTabIndex ?? 0}"/>
         <div class="flex"></div>
-        <!--
-        <esphome-header-menu .logoutUrl=${this.logoutUrl}></esphome-header-menu>
-        -->
         <md-tabs aria-label="Content to view" @change="${this._changeTab}" .activeTabIndex=${this.activeTabIndex ?? 0}>
           <md-primary-tab id="devices-tab" aria-controls="devices-panel">Devices</md-primary-tab>
-          <md-primary-tab id="traffic-tab" aria-controls="traffic-panel">Api</md-primary-tab>
-          <md-primary-tab id="status-tab" aria-controls="status-panel">Status</md-primary-tab>
+          <md-primary-tab id="traffic-tab" aria-controls="traffic-panel">Call Log</md-primary-tab>
+          <md-primary-tab id="missing-api-tab" aria-controls="missing-api-panel">Missing API</md-primary-tab>
         </md-tabs>
       </header>
 
       <main>
         <div id="devices-panel" role="tabpanel" aria-labelledby="devices-tab">
+          <h1>Devices</h1>
           <device-list/>
         </div>
         <div id="traffic-panel" role="tabpanel" aria-labelledby="traffic-tab" hidden>
+          <h1>Traffic</h1>
           <traffic-table/>
         </div>
-        <div id="status-panel" role="tabpanel" aria-labelledby="status-tab" hidden>
+        <div id="missing-api-panel" role="tabpanel" aria-labelledby="missing-api-tab" hidden>
+          <h1>Missing API</h1>
+          <h2>Missing REST API</h2>
+          ...
+          <h2>Missing UDP API</h2>
           ...
         </div>      
       </main>
@@ -57,11 +64,11 @@ class BeSimMainView extends LitElement {
       <footer class="page-footer">
         <div>
           BeSIM by @Dianlight |
-          <a href="https://esphome.io/guides/supporters.html" target="_blank"
+          <a href="url: https://github.com/dianlight/hassio-addons" target="_blank"
             >Fund development</a
           >
           |
-          <a href=${this.docsLink} target="_blank" rel="noreferrer"
+          <a href="url: https://github.com/dianlight/hassio-addons/tree/master/besim" target="_blank" rel="noreferrer"
             >${this.version} Documentation</a
           >
         </div>
