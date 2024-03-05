@@ -8,7 +8,7 @@ export class DeviceList extends LitElement {
 
     private _deviceTask = new Task(this, {
         task: async ([deviceIds], { signal }) => {
-            const response = await fetch(`/api/v1.0/devices`, { signal });
+            const response = await fetch(`./api/v1.0/devices`, { signal });
             if (!response.ok) {
                 throw new Error("API Response:" + response.status);
             }
