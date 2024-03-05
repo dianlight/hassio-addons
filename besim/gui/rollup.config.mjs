@@ -30,7 +30,7 @@ const config = {
         //entryFileNames: isProdBuild ? "[name]-[hash].js" : "[name].js",
         //chunkFileNames: isProdBuild ? "c.[hash].js" : "[name].js",
         //assetFileNames: isProdBuild ? "a.[hash].js" : "[name].js",
-        sourcemap: true,
+        sourcemap: !isProdBuild,
     },
     preserveEntrySignatures: false,
     plugins: [
@@ -42,11 +42,14 @@ const config = {
             },
             preventAssignment: true
         }),
-        typescript(/*{
-            transformers: {
-                before: [compileLitTemplates()],
-            },
-        }*/),
+        typescript(
+            {
+                sourceMap: !isProdBuild,
+                inlineSources: !isProdBuild
+                //transformers: {
+                //    before: [compileLitTemplates()],
+                //},
+            }),
         /*
         postcss({
             plugins: [
