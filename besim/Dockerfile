@@ -23,7 +23,8 @@ COPY gui /tmp/gui
 RUN cd /tmp/gui && \
     ls -al && \
     npm install && \
-    npm run build 
+    npm run clean && \
+    npm run build
 
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
