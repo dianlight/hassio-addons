@@ -28,7 +28,7 @@ export class UDPTable extends LitElement {
 
     private _udpTableTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
-            const response = await fetch(`/api/v1.0/call/unknown/udp?` + new URLSearchParams({
+            const response = await fetch(`./api/v1.0/call/unknown/udp?` + new URLSearchParams({
                 //sort: sort as string,
                 //filter: JSON.stringify(filter),
                 //offset: "" + (page_size as number) * (page as number),
@@ -47,7 +47,7 @@ export class UDPTable extends LitElement {
             <br/>
             <md-data-table aria-label="Dessert calories"
                 ${this._udpTableTask.status === TaskStatus.PENDING ? "in-progress" : ""}
-                paginated="${true}" 
+                paginated="${true}"
                 density=""
                 page-sizes="[5, 10, 25]"
                 page-sizes-label="Rows per page:"
