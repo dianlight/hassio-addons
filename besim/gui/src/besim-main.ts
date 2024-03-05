@@ -5,6 +5,8 @@ import { LitElement, html /*, PropertyValues*/ } from "lit";
 import { customElement, property, queryAll, state } from "lit/decorators.js";
 import './device/device-list'
 import './traffic/traffic-table'
+import './unknown/udp-table'
+import './unknown/api-table'
 
 
 
@@ -50,10 +52,12 @@ class BeSimMainView extends LitElement {
         </div>
         <div id="missing-api-panel" role="tabpanel" aria-labelledby="missing-api-tab" hidden>
           <h1>Missing API</h1>
+
           <h2>Missing REST API</h2>
-          ...
+          <api-unknown-table></api-unknown-table>
+
           <h2>Missing UDP API</h2>
-          ...
+          <udp-unknown-table></udp-unknown-table>
         </div>      
       </main>
 
