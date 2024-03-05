@@ -47,7 +47,7 @@ export class TrafficTable extends LitElement {
 
     private _hystoryTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
-            const response = await fetch(`/api/v1.0/call/history?` + new URLSearchParams({
+            const response = await fetch(`./api/v1.0/call/history?` + new URLSearchParams({
                 //sort: sort as string,
                 //filter: JSON.stringify(filter),
                 //offset: "" + (page_size as number) * (page as number),
@@ -128,7 +128,7 @@ export class TrafficTable extends LitElement {
             <br/>
             <md-data-table aria-label="Dessert calories"
                 ${this._hystoryTask.status === TaskStatus.PENDING ? "in-progress" : ""}
-                paginated="${true}" 
+                paginated="${true}"
                 density=""
                 page-sizes="[5, 10, 25]"
                 page-sizes-label="Rows per page:"
@@ -170,7 +170,7 @@ export class TrafficTable extends LitElement {
         /*
         return html`
             <md-outlined-button>Back</md-outlined-button>
-            <md-filled-button>Complete<md-icon slot="icon">edit</md-icon></md-filled-button>        
+            <md-filled-button>Complete<md-icon slot="icon">edit</md-icon></md-filled-button>
             ${this._hystoryTask.status === TaskStatus.PENDING ? html`<md-linear-progress indeterminate></md-linear-progress>` : ""}
             ${this._hystoryTask.status === TaskStatus.ERROR ? html`<p>Error: ${this._hystoryTask.error}</p>` : ""}
             <div class="content">
@@ -199,7 +199,7 @@ export class TrafficTable extends LitElement {
   <md-icon slot="icon">edit</md-icon>
 </md-fab>
 <md-fab variant="tertiary" aria-label="Edit">
-  
+
 </md-fab>
         `;
         */
