@@ -9,7 +9,7 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["timonwong.shellcheck", "esbenp.prettier-vscode"],
+      "extensions": ["timonwong.shellcheck", "esbenp.prettier-vscode","ms-python.flake8","donjayamanne.git-extension-pack","ms-python.python","demystifying-javascript.python-extensions-pack","rioukkevin.vscode-git-commit","github.vscode-github-actions"],
       "settings": {
         "terminal.integrated.profiles.linux": {
           "zsh": {
