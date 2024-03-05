@@ -160,9 +160,11 @@ export class TrafficTable extends LitElement {
 
                 <md-data-table-footer slot="footer" style="display: flex; align-items: center; justify-content: right; gap: 4px;">
                     Actions:
-                    <md-text-button>Action 1</md-text-button>
+                    <md-text-button @click="${() => this.refresh++}">Refresh</md-text-button>
+                    <!--
                     <md-text-button>Action 2</md-text-button>
                     <md-text-button>Action 3</md-text-button>
+                    -->
                 </md-data-table-footer>
             </md-data-table>`
         /*
