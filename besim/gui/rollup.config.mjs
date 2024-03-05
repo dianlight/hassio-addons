@@ -91,7 +91,7 @@ const config = {
         mdIcon({ symbols: {} }),
         html({
             input: ['src/index.html'],
-            publicPath: '/static',
+            publicPath: './static',
             //extractAssets: false,
             /*
             transformHtml: (html) =>
