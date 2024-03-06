@@ -1,10 +1,13 @@
 import { Task } from '@lit/task';
 import { LitElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement("device-list")
 export class DeviceList extends LitElement {
     @property() accessor token: string | undefined;
+    @state() accessor refresh = 0;
+
+    private intervalHandle?: NodeJS.Timeout;
 
     private _deviceTask = new Task(this, {
         task: async ([deviceIds], { signal }) => {
@@ -13,7 +16,7 @@ export class DeviceList extends LitElement {
                 throw new Error("API Response:" + response.status);
             }
             return response.json() as unknown as [string]
-        }, args: () => [this.token]
+        }, args: () => [this.token, this.refresh]
     })
 
     render() {
@@ -25,4 +28,18 @@ export class DeviceList extends LitElement {
             error: (e) => html`<p>Error: ${e}</p>`
         });
     }
+
+    connectedCallback() {
+        super.connectedCallback()
+        this.intervalHandle = setInterval(() => this.refresh++, 5000)
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        if (this.intervalHandle) {
+            clearInterval(this.intervalHandle)
+            delete this.intervalHandle
+        }
+    }
+
 }

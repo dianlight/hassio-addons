@@ -58,7 +58,8 @@ ARG PYTHON_VERSION
 
 RUN apk add --no-cache \
     curl \
-    git
+    git \
+    nginx
 #    pkgconf \
 #    gcc \
 #    g++ \
@@ -100,6 +101,8 @@ COPY rootfs /
 
 COPY --from=builder /tmp/gui/dist/ /opt/static
 
+RUN chown -R nginx:nginx /opt/static
+
 # Python
 #COPY --from=PythonBuilder "/opt/Python-${PYTHON_VERSION}" "/opt/Python-${PYTHON_VERSION}"
 #RUN ls -al /opt && cd "/opt/Python-${PYTHON_VERSION}" \
@@ -122,8 +125,6 @@ RUN unset PIP_EXTRA_INDEX_URL \
     && git clone --no-hardlinks --no-checkout https://github.com/dianlight/BeSIM-MQTT.git a.tmp \
     && mv a.tmp/.git .\
     && rm -rf a.tmp
-
-
 
 
 
