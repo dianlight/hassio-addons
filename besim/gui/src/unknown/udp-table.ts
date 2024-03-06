@@ -9,11 +9,14 @@ import '@maicol07/material-web-additions/data-table/data-table-footer.js';
 import '@maicol07/material-web-additions/data-table/data-table-cell.js';
 
 interface UDPData {
+    "count": number,
     "ts": string, // "2024-02-25T22:31:18.525725+01:00",
     "source": string,
     "type": string,
     "code": number,
     "payload": string,
+    "unparsed_payload": string,
+    "raw_data": string
 }
 
 @customElement("udp-unknown-table")
@@ -25,6 +28,8 @@ export class UDPTable extends LitElement {
     @state() accessor page_size = 10;
     @state() accessor row_position = 0;
     @state() accessor refresh = 0;
+
+    private intervalHandle?: NodeJS.Timeout;
 
     private _udpTableTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
@@ -57,17 +62,19 @@ export class UDPTable extends LitElement {
                 total-rows="${(this._udpTableTask.value?.length)}"
                 pagination-total-label=":firstRow-:lastRow of :totalRows">
 
+                    <md-data-table-column sortable="">Count</md-data-table-column>
                     <md-data-table-column filterable="" sortable="" sorted="">Date</md-data-table-column>
                     <md-data-table-column sortable="" filterable="">Source</md-data-table-column>
                     <md-data-table-column sortable="" filterable="">Type (Code)</md-data-table-column>
-                    <md-data-table-column >Payload</md-data-table-column>
+                    <md-data-table-column >Data</md-data-table-column>
 
                     ${this._udpTableTask.value?.map((row) => html`
                     <md-data-table-row>
+                        <md-data-table-cell>${row.count}</md-data-table-cell>
                         <md-data-table-cell>${row.ts}</md-data-table-cell>
                         <md-data-table-cell>${row.source}</md-data-table-cell>
                         <md-data-table-cell>${row.type} (${row.code.toString(16)})</md-data-table-cell>
-                        <md-data-table-cell>${row.payload}</md-data-table-cell>
+                        <md-data-table-cell>Payload: ${row.payload}<br/>Unparsed: ${row.unparsed_payload}<br/>Raw: ${row.raw_data}</md-data-table-cell>
                     </md-data-table-row>
                     `)}
 
@@ -78,4 +85,18 @@ export class UDPTable extends LitElement {
                 </md-data-table-footer>
             </md-data-table>`
     }
+
+    connectedCallback() {
+        super.connectedCallback()
+        this.intervalHandle = setInterval(() => this.refresh++, 2000)
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        if (this.intervalHandle) {
+            clearInterval(this.intervalHandle)
+            delete this.intervalHandle
+        }
+    }
+
 }
