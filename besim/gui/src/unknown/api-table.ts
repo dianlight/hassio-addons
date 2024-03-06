@@ -9,6 +9,7 @@ import '@maicol07/material-web-additions/data-table/data-table-footer.js';
 import '@maicol07/material-web-additions/data-table/data-table-cell.js';
 
 interface APIData {
+    "count": number,
     "ts": string, // "2024-02-25T22:31:18.525725+01:00",
     "source": string,
     "host": string,
@@ -29,6 +30,9 @@ export class APITable extends LitElement {
     @state() accessor page_size = 10;
     @state() accessor row_position = 0;
     @state() accessor refresh = 0;
+
+    private intervalHandle?: NodeJS.Timeout;
+
 
     private _apiTableTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
@@ -61,6 +65,7 @@ export class APITable extends LitElement {
                 total-rows="${(this._apiTableTask.value?.length)}"
                 pagination-total-label=":firstRow-:lastRow of :totalRows">
 
+                    <md-data-table-column sortable="">Count</md-data-table-column>
                     <md-data-table-column filterable="" sortable="" sorted="">Date</md-data-table-column>
                     <md-data-table-column sortable="" filterable="">Source</md-data-table-column>
                     <md-data-table-column sortable="" filterable="">Host</md-data-table-column>
@@ -72,6 +77,7 @@ export class APITable extends LitElement {
 
                     ${this._apiTableTask.value?.map((row) => html`
                     <md-data-table-row>
+                        <md-data-table-cell>${row.count}</md-data-table-cell>
                         <md-data-table-cell>${row.ts}</md-data-table-cell>
                         <md-data-table-cell>${row.source}</md-data-table-cell>
                         <md-data-table-cell>${row.host}</md-data-table-cell>
@@ -103,5 +109,19 @@ export class APITable extends LitElement {
             height:56px;
       }
     `;
+    }
+
+
+    connectedCallback() {
+        super.connectedCallback()
+        this.intervalHandle = setInterval(() => this.refresh++, 2000)
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        if (this.intervalHandle) {
+            clearInterval(this.intervalHandle)
+            delete this.intervalHandle
+        }
     }
 }
