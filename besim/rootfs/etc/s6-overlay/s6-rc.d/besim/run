@@ -3,7 +3,7 @@
 # Start besim service
 # ==============================================================================
 log_level=$(bashio::string.lower "$(bashio::config log_level info)")
-args="-l ${log_level^^} -c /config  -t /opt/static -s /opt/static"
+args="-l ${log_level^^} -c /config "
 if bashio::config.true 'work_as_proxy'; then
     args="${args} -p $(bashio::config upstream_dns)"
 fi
