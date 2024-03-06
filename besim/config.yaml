@@ -35,7 +35,6 @@ schema:
   upstream_dns: match(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$)
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   zone_entity: str?
-
 image: dianlight/{arch}-addon-besim
 ports:
   6199/udp: 6199
@@ -62,12 +61,11 @@ homeassistant: 2023.11.0
 backup: hot
 #auth_api: true
 ingress: true
-ingress_port: 80
+ingress_port: 8080
 ingress_entry: /
-panel_icon: mdi:puzzle
+panel_icon: mdi:thermostat
 panel_title: BeSIM Control
 panel_admin: true
 # network
 stage: experimental
-watchdog: http://[HOST]:[PORT:80]/
-
+watchdog: http://[HOST]:[PORT:8080]/
