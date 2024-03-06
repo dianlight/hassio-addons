@@ -32,7 +32,7 @@ class BeSimMainView extends LitElement {
   protected render() {
     return html`
       <header class="besim-header">
-        <img src="static/assets/images/logo.png" alt="BeSim Logo"/>
+        <img src="assets/images/logo.png" alt="BeSim Logo"/>
         <div class="flex"></div>
         <md-tabs aria-label="Content to view" @change="${this._changeTab}" .activeTabIndex=${this.activeTabIndex ?? 0}>
           <md-primary-tab id="devices-tab" aria-controls="devices-panel">Devices</md-primary-tab>
