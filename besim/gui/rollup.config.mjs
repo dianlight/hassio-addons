@@ -91,7 +91,7 @@ const config = {
         mdIcon({ symbols: {} }),
         html({
             input: ['src/index.html'],
-            publicPath: './static',
+            // publicPath: './static',
             //extractAssets: false,
             /*
             transformHtml: (html) =>
@@ -103,7 +103,7 @@ const config = {
         }),
         dev({
             dirs: ['dist'/*, 'assets'*/],
-            basePath: '/static',
+            // basePath: '/static',
             proxy: [{
                 from: '/api',
                 to: 'http://127.0.0.1/api',
