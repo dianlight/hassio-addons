@@ -45,6 +45,8 @@ export class TrafficTable extends LitElement {
     @state() accessor row_position = 0;
     @state() accessor refresh = 0;
 
+    private intervalHandle?: NodeJS.Timeout;
+
     private _hystoryTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
             const response = await fetch(`./api/v1.0/call/history?` + new URLSearchParams({
@@ -214,5 +216,18 @@ export class TrafficTable extends LitElement {
             error: (e) => html`<p>Error: ${e}</p>`
         });
         */
+    }
+
+    connectedCallback() {
+        super.connectedCallback()
+        this.intervalHandle = setInterval(() => this.refresh++, 2000)
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        if (this.intervalHandle) {
+            clearInterval(this.intervalHandle)
+            delete this.intervalHandle
+        }
     }
 }
