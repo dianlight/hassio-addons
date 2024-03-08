@@ -65,6 +65,21 @@ jobs:
             --target ${{ steps.extract_project.outputs.name }} \
             --docker-hub dianlight
 
+      - name: Get Master SHA
+        shell: bash
+        id: git_sha_master
+        run: |
+          echo "sha=$(git rev-parse origin/master)" >> $GITHUB_OUTPUT   
+
+      - name: Create prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }} if not exists
+        continue-on-error: true
+        uses: peterjgrainger/action-create-branch@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: 'refs/heads/prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}'
+          sha: '${{ steps.git_sha_master.outputs.sha }}'
+
       - name: 🧑🏽‍💻 pull-request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,8 +88,6 @@ jobs:
         run: |
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          git branch -f "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}"
-          git push -u origin  "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" || :
           git restore .
           git clean -f
           gh pr create --base "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"
