@@ -3,7 +3,7 @@ import terser from "@rollup/plugin-terser";
 //import json from "@rollup/plugin-json";
 import typescript from "@rollup/plugin-typescript";
 //import manifest from "./build-scripts/rollup/manifest-plugin.mjs";
-//import postcss from "rollup-plugin-postcss";
+import postcss from "rollup-plugin-postcss";
 //import postcssUrl from "postcss-url";
 import commonjs from "@rollup/plugin-commonjs";
 //import monaco from "rollup-plugin-monaco-editor";
@@ -41,6 +41,10 @@ const config = {
                 //__buildVersion: 15
             },
             preventAssignment: true
+        }),
+        postcss({
+            extract: true,
+            inject: { insertAt: "top" },
         }),
         typescript(
             {
@@ -88,11 +92,11 @@ const config = {
         commonjs(),
         //json(),
         //manifest(),
-        mdIcon({ symbols: {} }),
+        //mdIcon({ symbols: {} }),
         html({
             input: ['src/index.html'],
             // publicPath: './static',
-            //extractAssets: false,
+            extractAssets: false,
             /*
             transformHtml: (html) =>
                 replaceSymbolsLink(
