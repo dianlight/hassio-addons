@@ -1,12 +1,13 @@
 //import "./devices/devices-list";
 //import "./components/esphome-header-menu";
 //import "./components/esphome-fab";
-import { LitElement, html /*, PropertyValues*/ } from "lit";
+import { LitElement, html, css /*, PropertyValues*/ } from "lit";
 import { customElement, property, queryAll, state } from "lit/decorators.js";
 import './device/device-list'
 import './traffic/traffic-table'
 import './unknown/udp-table'
 import './unknown/api-table'
+import '@material/typography/dist/mdc.typography.css'
 
 
 
@@ -29,6 +30,12 @@ class BeSimMainView extends LitElement {
   @queryAll("div[id$='-panel'")
   accessor _panels!: NodeListOf<HTMLDivElement>;
 
+  static get styles() {
+    return css`
+      @use "@material/typography/mdc-typography";
+    `
+  }
+
   protected render() {
     return html`
       <header class="besim-header">
@@ -43,11 +50,11 @@ class BeSimMainView extends LitElement {
 
       <main>
         <div id="devices-panel" role="tabpanel" aria-labelledby="devices-tab">
-          <h1>Devices</h1>
+          <h1 class="mdc-typography--headline1">Devices</h1>
           <device-list/>
         </div>
         <div id="traffic-panel" role="tabpanel" aria-labelledby="traffic-tab" hidden>
-          <h1>Traffic</h1>
+          <h1 >Traffic</h1>
           <traffic-table/>
         </div>
         <div id="missing-api-panel" role="tabpanel" aria-labelledby="missing-api-tab" hidden>
@@ -60,10 +67,6 @@ class BeSimMainView extends LitElement {
           <udp-unknown-table></udp-unknown-table>
         </div>
       </main>
-
-      <!--
-      <esphome-fab></esphome-fab>
-      -->
 
       <footer class="page-footer">
         <div>
@@ -80,12 +83,6 @@ class BeSimMainView extends LitElement {
     `;
   }
 
-  /*
-  createRenderRoot() {
-    return this;
-  }
-  */
-
   _changeTab(e: Event) {
     this.activeTabIndex = e.target!['activeTabIndex'];
     //console.log(e, e.target!['activeTab']);
@@ -98,7 +95,6 @@ class BeSimMainView extends LitElement {
         panel.style.display = 'none'
       }
     });
-
   }
 
 

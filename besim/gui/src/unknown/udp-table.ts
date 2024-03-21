@@ -33,6 +33,9 @@ export class UDPTable extends LitElement {
 
     private _udpTableTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
+            if (!this.checkVisibility()) {
+                return []
+            }
             const response = await fetch(`./api/v1.0/call/unknown/udp?` + new URLSearchParams({
                 //sort: sort as string,
                 //filter: JSON.stringify(filter),

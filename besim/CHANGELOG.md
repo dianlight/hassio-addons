@@ -6,10 +6,10 @@
 - New `zone_entity` options to pass latitude and LATITUDE e LONGITUDE.
 - Collect usage statistics for control API usage
 - WebGui
-  - Ingress Mode TODO:
-  - Show statistics TODO:
+  - Ingress Mode
+  - Show statistics
   - Control SmartBox and Thermostat TODO:
-  - Show OT status and values TODO:
+  - Show OT status and values
 
 ### 📚 Documentation
 - Integration diagram TODO:
