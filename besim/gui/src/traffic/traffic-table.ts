@@ -49,6 +49,14 @@ export class TrafficTable extends LitElement {
 
     private _hystoryTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
+            if (!this.checkVisibility()) {
+                return {
+                    meta: {
+                        total: 0
+                    },
+                    data: []
+                }
+            }
             const response = await fetch(`./api/v1.0/call/history?` + new URLSearchParams({
                 //sort: sort as string,
                 //filter: JSON.stringify(filter),
@@ -89,30 +97,6 @@ export class TrafficTable extends LitElement {
     }
     */
 
-    /*
-    private async refreshTable() {
-        console.log("Refresh!")
-        this.time_handle && clearTimeout(this.time_handle);
-        this.time_handle && await this._hystoryTask.run();
-        this.time_handle = setTimeout(this.refreshTable, 1000);
-        console.log("<Refresh!")
-    }
-
-    connectedCallback() {
-        console.log("Connect")
-        super.connectedCallback();
-        this.time_handle = setInterval(() => this.refresh++, 1000)
-        //  this.time_handle = setTimeout(this.refreshTable, 1000);
-    }
-
-    disconnectedCallback() {
-        console.log("Disconnect")
-        super.disconnectedCallback();
-        this.time_handle && clearInterval(this.time_handle);
-        //    this.time_handle && clearTimeout(this.time_handle);
-    }
-    */
-
     render() {
         /*
         const conf = [
@@ -125,7 +109,7 @@ export class TrafficTable extends LitElement {
             { property: 'response_status', header: 'Response', hidden: false }
         ];
         */
-        console.log(this._hystoryTask.value)
+        // console.log(this._hystoryTask.value)
         return html`
             <br/>
             <md-data-table aria-label="Dessert calories"
