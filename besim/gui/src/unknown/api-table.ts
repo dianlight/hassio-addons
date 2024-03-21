@@ -36,6 +36,9 @@ export class APITable extends LitElement {
 
     private _apiTableTask = new Task(this, {
         task: async ([token, sort, filter, page = 0, page_size = 25], { signal }) => {
+            if (!this.checkVisibility()) {
+                return []
+            }
             const response = await fetch(`./api/v1.0/call/unknown/api?` + new URLSearchParams({
                 //sort: sort as string,
                 //filter: JSON.stringify(filter),
