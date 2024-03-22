@@ -27,7 +27,7 @@ jobs:
       - name: 📽️ Extract dev branch project name
         shell: bash
         run: |
-           FULL_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/devrelease/}}"
+           FULL_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/prerelease/}}"
            echo "full_name=${FULL_NAME} >> $GITHUB_OUTPUT
            echo "name=${FULL_NAME%%_*}" >> $GITHUB_OUTPUT
         id: extract_project
