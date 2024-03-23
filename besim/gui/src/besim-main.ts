@@ -70,6 +70,7 @@ class BeSimMainView extends LitElement {
 
       <footer class="page-footer">
         <div>
+          ${process.env.SERVER} |
           BeSIM by @Dianlight |
           <a href="url: https://github.com/dianlight/hassio-addons" target="_blank"
             >Fund development</a
