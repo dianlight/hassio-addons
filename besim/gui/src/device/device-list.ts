@@ -7,8 +7,6 @@ import Chart from 'chart.js/auto';
 //import * as Helpers from 'chart.js/helpers'
 import { MdSecondaryTab } from '@material/web/all';
 
-const BKB = ""; //"http://192.168.0.250/"
-
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 class BarColor {
@@ -78,7 +76,7 @@ export class DeviceList extends LitElement {
             if (!this.checkVisibility()) {
                 return []
             }
-            const response = await fetch(`${BKB}./api/v1.0/devices`, { signal });
+            const response = await fetch(`${process.env.SERVER}./api/v1.0/devices`, { signal });
             if (!response.ok) {
                 throw new Error("API Response:" + response.status);
             }
@@ -92,7 +90,7 @@ export class DeviceList extends LitElement {
                 return {} as Record<string, Device>
             }
             return await Promise.all(deviceIds?.map(async (deviceId) => {
-                const response = await fetch(`${BKB}./api/v1.0/devices/${deviceId}`, { signal });
+                const response = await fetch(`${process.env.SERVER}./api/v1.0/devices/${deviceId}`, { signal });
                 if (!response.ok) {
                     throw new Error("API Response:" + response.status);
                 }
@@ -188,6 +186,7 @@ export class DeviceList extends LitElement {
                             //console.log(curIndex, chart.data.datasets[0].data[curIndex]);
                             chart.update();
                             // TODO: Cal Set!
+                            // PUT /api/v1.0/devices/<int:deviceid>/rooms/<int:roomid>/days/<int:dayid>
                         }
                     }
                 },

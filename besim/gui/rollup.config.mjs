@@ -37,6 +37,7 @@ const config = {
         replace({
             values: {
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+                'process.env.SERVER': process.env.SERVER ? JSON.stringify(process.env.SERVER) : JSON.stringify("")
                 //__buildDate__: () => JSON.stringify(new Date()),
                 //__buildVersion: 15
             },
