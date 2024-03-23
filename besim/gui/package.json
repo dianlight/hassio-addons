@@ -9,6 +9,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "dev": "NODE_ENV=development rollup -c -w",
+    "dev_remote": "NODE_ENV=development SERVER='http://192.168.0.250/' rollup -c -w",
     "build": "npm run clean && NODE_ENV=production rollup -c"
   },
   "_devDependencies": {
