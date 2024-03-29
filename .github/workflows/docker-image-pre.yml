@@ -71,7 +71,7 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
-            --all \
+            --armv7 --amd64 --aarch64 \
             --target ${{ steps.extract_project.outputs.name }} \
             --docker-hub dianlight
 
