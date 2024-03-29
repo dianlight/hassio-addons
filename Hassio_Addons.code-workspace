@@ -29,10 +29,6 @@
     "cSpell.enableFiletypes": [
       "!csharp",
       "log"
-    ],
-    "flake8.args": [
-      "--max-line-length=132",
-      "--ignore=E128"
     ]
   }
 }
