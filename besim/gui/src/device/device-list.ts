@@ -1,13 +1,11 @@
 import { Task } from '@lit/task';
-import { LitElement, html } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import "@material/web/all"
 import Chart from 'chart.js/auto';
 //import { Chart as ChartType } from 'chart.js/dist/core'
 //import * as Helpers from 'chart.js/helpers'
 import { MdSecondaryTab } from '@material/web/all';
-
-const BKB = ""; //"http://192.168.0.250/"
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -28,29 +26,31 @@ interface ProgramDays {
     "6": number[],
 }
 
+interface Room {
+    "days": ProgramDays,
+    "heating": number,
+    "temp": number,
+    "settemp": number,
+    "t3": number,
+    "t2": number,
+    "t1": number,
+    "maxsetp": number,
+    "minsetp": number,
+    "mode": number,
+    "tempcurve": number,
+    "heatingsetp": number,
+    "sensorinfluence": number,
+    "units": number,
+    "advance": number,
+    "boost": number,
+    "cmdissued": number,
+    "winter": number,
+    "lastseen": number,
+    "fakeboost": number
+}
+
 interface Device {
-    "rooms": Record<string, {
-        "days": ProgramDays,
-        "heating": number,
-        "temp": number,
-        "settemp": number,
-        "t3": number,
-        "t2": number,
-        "t1": number,
-        "maxsetp": number,
-        "minsetp": number,
-        "mode": number,
-        "tempcurve": number,
-        "heatingsetp": number,
-        "sensorinfluence": number,
-        "units": number,
-        "advance": number,
-        "boost": number,
-        "cmdissued": number,
-        "winter": number,
-        "lastseen": number,
-        "fakeboost": number
-    }>,
+    "rooms": Record<string, Room>,
     "cseq": number,
     "results": {},
     "addr": [string, number]
@@ -76,7 +76,7 @@ export class DeviceList extends LitElement {
             if (!this.checkVisibility()) {
                 return []
             }
-            const response = await fetch(`${BKB}./api/v1.0/devices`, { signal });
+            const response = await fetch(`${process.env.SERVER}./api/v1.0/devices`, { signal });
             if (!response.ok) {
                 throw new Error("API Response:" + response.status);
             }
@@ -90,7 +90,7 @@ export class DeviceList extends LitElement {
                 return {} as Record<string, Device>
             }
             return await Promise.all(deviceIds?.map(async (deviceId) => {
-                const response = await fetch(`${BKB}./api/v1.0/devices/${deviceId}`, { signal });
+                const response = await fetch(`${process.env.SERVER}./api/v1.0/devices/${deviceId}`, { signal });
                 if (!response.ok) {
                     throw new Error("API Response:" + response.status);
                 }
@@ -186,6 +186,7 @@ export class DeviceList extends LitElement {
                             //console.log(curIndex, chart.data.datasets[0].data[curIndex]);
                             chart.update();
                             // TODO: Cal Set!
+                            // PUT /api/v1.0/devices/<int:deviceid>/rooms/<int:roomid>/days/<int:dayid>
                         }
                     }
                 },
@@ -215,80 +216,91 @@ export class DeviceList extends LitElement {
         });
     }
 
+    _render_property(name: string, value: unknown) {
+        if (name === "rooms" || name === 'days') {
+            return html``;
+        } else {
+            return html`
+                    <md-list-item>
+                        <div slot="headline">${name}</div>
+                        <div slot="supporting-text"></div>
+                        <div slot="trailing-supporting-text">${value instanceof Object ? JSON.stringify(value) : value}</div>
+                    </md-list-item>
+        `
+        }
+    }
+
+    _render_device(deviceId: string, device: Device) {
+        const props = Object.getOwnPropertyNames(device);
+        return html`
+            <h4>SmartBox: ${deviceId} </h4>
+            <div class="row">
+                <div class="column">
+                    <md-list>
+                    ${props.filter((v, i, a) => i <= a.length / 2).map(p => this._render_property(p, device[p]))}
+                    </md-list>
+                </div>
+                <div class="column">
+                    <md-list>
+                    ${props.filter((v, i, a) => i > a.length / 2).map(p => this._render_property(p, device[p]))}
+                    </md-list>
+                </div>
+            </div>
+         `
+    }
+
+    _render_room(roomId: string, room: Room) {
+        const props = Object.getOwnPropertyNames(room);
+        return html`
+            <h5>Room: ${roomId} </h5>
+            <div class="row">
+                <div class="column">
+                    <md-list>
+                    ${props.filter((v, i, a) => i <= a.length / 2).map(p => this._render_property(p, room[p]))}
+                    </md-list>
+                </div>
+                <div class="column">
+                    <md-list>
+                    ${props.filter((v, i, a) => i > a.length / 2).map(p => this._render_property(p, room[p]))}
+                    </md-list>
+                </div>
+            </div>
+            <md-list-item>
+                <md-tabs aria-label="Content to view" @change="${this._changeTab}">
+                    ${Array(7).fill(undefined).map((d, i) => html`
+                    <md-secondary-tab id="day-${roomId}-${i}" aria-controls="day-${roomId}-${i}-panel">
+                    ${days[i]}
+                    </md-secondary-tab>
+                    `)}
+                </md-tabs>
+
+                ${Array(7).fill(undefined).map((d, i) => html`
+                <div id="day-${roomId}-${i}-panel" role="tabpanel" aria-labelledby="day-${roomId}-${i}" style="position: relative; height:20vh; width:80vw;" ?hidden="${i > 0}">
+                        <canvas id="${roomId}-${i}" data="${JSON.stringify(room.days[i])}"></canvas>
+                </div>
+                `)}
+            </md-list-item>         `
+    }
+
 
     render() {
         let deviceLst: Record<string, Device> = this._devicesDetailTask.value || {};
         return html`
-            <!--
-            <p>SmartBox: ${this._devicesTask.value} </p>
-            -->
             ${Object.entries(deviceLst).map((devicer) => {
             const deviceId = devicer[0]
             const device = devicer[1]
             return html`
-                    <h4>SmartBox: ${deviceId} </h4>
-                    <ul>
-                    <li>cseq: ${device.cseq}</li>
-                    <li>results: ${JSON.stringify(device.results)}</li>
-                    <li>addr: ${JSON.stringify(device.addr)}</li>
-                    <li<boilerOn: ${device.boilerOn}</li>
-                    <li>dhwMode: ${device.dhwMode}</li>
-                    <li>tFLO: ${device.tFLO}</li>
-                    <li>tdH: ${device.tdH}</li>
-                    <li>tESt: ${device.tESt}</li>
-                    <li>version: ${device.version}</li>
-                    <li>wifisignal: ${device.wifisignal}</li>
-                    <li>lastseen: ${new Date(device.lastseen * 1000)}</li>
+                    ${this._render_device(deviceId, device)}
+                    <md-list>
                     ${Object.entries(device.rooms).filter((room) => room[1].lastseen).map((roomr) => {
                 const room = roomr[1]
                 return html`
-                    <li>
-                        <ul>
-                        <h5>Room: ${roomr[0]} </h5>
-
-                        <li>
-                            <md-tabs aria-label="Content to view" @change="${this._changeTab}">
-                                ${Array(7).fill(undefined).map((d, i) => html`
-                                <md-secondary-tab id="day-${roomr[0]}-${i}" aria-controls="day-${roomr[0]}-${i}-panel">
-                                ${days[i]}
-                                </md-secondary-tab>
-                                `)}
-                            </md-tabs>
-
-                        ${Array(7).fill(undefined).map((d, i) => html`
-                        <div id="day-${roomr[0]}-${i}-panel" role="tabpanel" aria-labelledby="day-${roomr[0]}-${i}" style="position: relative; height:20vh; width:80vw;" ?hidden="${i > 0}">
-                             <canvas id="${roomr[0]}-${i}" data="${JSON.stringify(room.days[i])}"></canvas>
-                        </div>
-                        `)}
-                        </li>
-
-                        <!--
-                        <li>Program: ${JSON.stringify(room.days)}</li>
-                        -->
-                        <li>heating:  ${room.heating}</li>
-                        <li>temp:  ${room.temp}</li>
-                        <li>settemp:  ${room.settemp}</li>
-                        <li>t3:  ${room.t3}</li>
-                        <li>t2:  ${room.t2}</li>
-                        <li>t1:  ${room.t1}</li>
-                        <li>maxsetp:  ${room.maxsetp}</li>
-                        <li>minsetp:  ${room.minsetp}</li>
-                        <li>mode:  ${room.mode}</li>
-                        <li>tempcurve:  ${room.tempcurve}</li>
-                        <li>heatingsetp:  ${room.heatingsetp}</li>
-                        <li>sensorinfluence:  ${room.sensorinfluence}</li>
-                        <li>units:  ${room.units}</li>
-                        <li>advance:  ${room.advance}</li>
-                        <li>boost:  ${room.boost}</li>
-                        <li>cmdissued:  ${room.cmdissued}</li>
-                        <li>winter:  ${room.winter}</li>
-                        <li>fakeboost:  ${room.fakeboost}</li>
-                        <li>lastseen: ${new Date(room.lastseen * 1000)}</li>
-                        </ul>
-                    </li>
+                    <md-list-item>
+                        ${this._render_room(roomr[0], room)}
+                    </md-list-item>
                     `
             })}
-                    </ul>
+                    </md-list>
                 `
         })}
             <!--
@@ -314,4 +326,23 @@ export class DeviceList extends LitElement {
         }
     }
 
+    static get styles() {
+        return css`
+.column {
+  float: left;
+  width: 50%;
 }
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+   `;
+    }
+
+}
+
+
+
