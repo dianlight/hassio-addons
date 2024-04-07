@@ -123,7 +123,7 @@ RUN pip install \
     pySMART==1.3.0 \
     psutil==5.9.7 \
     humanize==4.9.0 \
-    diskinfo==2.1.2 \
+    diskinfo==3.1.1 \
     https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip
 
 # Copy data
