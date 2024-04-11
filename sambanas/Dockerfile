@@ -121,10 +121,11 @@ RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 #RUN pip install pySMART psutil ha-mqtt-discoverable humanize
 RUN pip install \ 
     pySMART==1.3.0 \
-    psutil==5.9.7 \
+    psutil==5.9.8 \
     humanize==4.9.0 \
     diskinfo==3.1.1 \
-    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip
+    pydantic==1.10.14 \
+    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip#0.13.1
 
 # Copy data
 COPY rootfs /

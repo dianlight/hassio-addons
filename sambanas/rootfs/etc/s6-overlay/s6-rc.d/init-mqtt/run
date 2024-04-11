@@ -13,18 +13,16 @@ declare topic
 
 if bashio::config.true "mqtt_enable"; then
 
-    topic=$(bashio::config 'mqtt_topic')
-    if [ "$topic" = "null" ]; then topic="sambanas"; fi
-    host=$(bashio::config 'mqtt_host')
-    if [ "$host" = "null" ]; then host=$(bashio::services "mqtt" "host"); fi
-    username=$(bashio::config 'mqtt_username')
-    if [ "$username" = "null" ]; then username=$(bashio::services "mqtt" "username"); fi
-    password=$(bashio::config 'mqtt_password')
-    if [ "$password" = "null" ]; then password=$(bashio::services "mqtt" "password"); fi
-    port=$(bashio::config 'mqtt_port')
-    if [ "$port" = "null" ]; then port=$(bashio::services "mqtt" "port"); fi
 
-    #bashio::log.info "MQTT config ${host}:${port} ${username}:${password}"
+    topic=$(bashio::config 'mqtt_topic' "sambanas")
+    host=$(bashio::config 'mqtt_host' "$(bashio::services 'mqtt' 'host')")
+    username=$(bashio::config 'mqtt_username' "$(bashio::services 'mqtt' 'username')")
+    password=$(bashio::config 'mqtt_password' "$(bashio::services 'mqtt' 'password')")
+    port=$(bashio::config 'mqtt_port' "$(bashio::services 'mqtt' 'port')")
+
+    topic=$(bashio::config 'mqtt_topic')
+
+    #bashio::log.info "Init MQTT config ${host}:${port} ${username}:${password}"
 
     [ -z "$host" ] && bashio::log.warning "No MQTT Server found. Homeassistant integration can't work!"
 

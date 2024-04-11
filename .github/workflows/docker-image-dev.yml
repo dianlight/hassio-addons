@@ -8,13 +8,14 @@ on:
 
 permissions:
   pull-requests: write
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -24,7 +25,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish SambaNAS Addon
+      - name: ✍🏼 version SambaNAs
+        id: version_set
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./sambanas/config.yaml
+          path: version
+          set: .dev${{ github.run_number }}
+          get: true
+          append: true
+  
+
+      - name: Publish SambaNAS Addon ${{ steps.version_set.outputs.value_old }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
@@ -45,4 +57,10 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot"
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD
+          git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
+          git restore .
+          git clean -f
+          gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"
