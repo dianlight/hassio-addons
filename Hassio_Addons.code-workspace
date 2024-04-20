@@ -5,6 +5,9 @@
     },
     {
       "path": "../ha-mqtt-discoverable"
+    },
+    {
+      "path": "besim/rootfs/opt/BeSIM"
     }
   ],
   "settings": {
@@ -29,6 +32,8 @@
     "cSpell.enableFiletypes": [
       "!csharp",
       "log"
-    ]
+    ],
+    "pythonTestExplorer.testFramework": null,
+    "python.testing.pytestEnabled": true
   }
 }
