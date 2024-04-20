@@ -8,6 +8,9 @@ if bashio::config.true 'work_as_proxy'; then
     args="${args} -p $(bashio::config upstream_dns)"
 fi
 
+# FIXME: Add parameter or remove after data collection
+args="${args} --datalog-udp-path /config/upd.csv --datalog-tcp-path /config/tcp.csv"
+
 if bashio::config.has_value 'zone_entity'; then
     COORS=$(curl -s -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/states/$(bashio::config 'zone_entity') | jq --raw-output '[.attributes.latitude, .attributes.longitude]|join(" ")')
     if [ -z "${COORS//['\t\r\n ']/}" ]; then
