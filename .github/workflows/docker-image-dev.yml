@@ -67,7 +67,7 @@ jobs:
           args: |
             --aarch64 \
             --target ${{ steps.extract_project.outputs.name }} \
-            --docker-hub dianlight
+            --docker-hub dianlight \
             --cosign
 
       - name: Get Master SHA
