@@ -13,6 +13,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +68,8 @@ jobs:
           args: |
             --aarch64 \
             --target ${{ steps.extract_project.outputs.name }} \
-            --docker-hub dianlight
+            --docker-hub dianlight \
+            --cosign
 
       - name: Get Master SHA
         shell: bash
