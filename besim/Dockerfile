@@ -21,7 +21,6 @@ RUN apk add --no-cache \
 COPY gui /tmp/gui
 
 RUN cd /tmp/gui && \
-    ls -al && \
     npm install && \
     npm run clean && \
     npm run build
