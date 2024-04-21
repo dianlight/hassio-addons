@@ -12,6 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -65,15 +69,16 @@ jobs:
           get: true
           append: true
             
-      - name: Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_new }}
+      - name: 📰 Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
-            --armv7 --amd64 --aarch64 \
+            --all \
             --target ${{ steps.extract_project.outputs.name }} \
-            --docker-hub dianlight
+            --docker-hub dianlight 
+            --cosign           
 
       - name: Update version in ${{ steps.extract_project.outputs.name }}/CHANGELOG.md
         continue-on-error: true
@@ -112,6 +117,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --title "Releasing ${{ github.ref }}" --body ":crown: *An automated PR*"
+          gh pr create --base "release/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"
+#          gh pr create --title "Releasing ${{ github.ref }}" --body ":crown: *An automated PR*"
 #          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
