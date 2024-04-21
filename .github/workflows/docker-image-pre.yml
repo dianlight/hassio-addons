@@ -77,7 +77,8 @@ jobs:
           args: |
             --all \
             --target ${{ steps.extract_project.outputs.name }} \
-            --docker-hub dianlight 
+            --docker-hub dianlight \
+            --no-latest \
             --cosign           
 
       - name: Update version in ${{ steps.extract_project.outputs.name }}/CHANGELOG.md
