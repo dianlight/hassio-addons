@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 12.2.0-nas1
+version: 12.2.0-nas2
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -39,7 +39,7 @@ options:
   mountoptions:
     - nosuid
     - relatime
-    - noexec  
+    - noexec
   available_disks_log: true
   medialibrary:
     enable: false
@@ -104,6 +104,7 @@ schema:
       usage: list(media|backup|share)?
   interfaces:
     - str?
+  bind_all_interfaces: bool?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   meaning_of_life: int?
 

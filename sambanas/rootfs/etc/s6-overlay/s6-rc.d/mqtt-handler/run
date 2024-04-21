@@ -11,29 +11,23 @@ readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
 if [ -f /root/.config/mosquitto_pub ]; then
     bashio::log.info "Starting the MQTT daemon for partitions info..."
 
+    topic=$(bashio::config 'mqtt_topic' "sambanas")
+
     # Send autodiscovery entities
     if bashio::config.true "mqtt_nexgen_entities"; then
         bashio::log.info "New MQTT integration"
 
-        topic=$(bashio::config 'mqtt_topic')
-        if [ "$topic" = "null" ]; then topic="sambanas"; fi
-        host=$(bashio::config 'mqtt_host')
-        if [ "$host" = "null" ]; then host=$(bashio::services "mqtt" "host"); fi
-        username=$(bashio::config 'mqtt_username')
-        if [ "$username" = "null" ]; then username=$(bashio::services "mqtt" "username"); fi
-        password=$(bashio::config 'mqtt_password')
-        if [ "$password" = "null" ]; then password=$(bashio::services "mqtt" "password"); fi
-        port=$(bashio::config 'mqtt_port')
-        if [ "$port" = "null" ]; then port=$(bashio::services "mqtt" "port"); fi
-
+        host=$(bashio::config 'mqtt_host' "$(bashio::services 'mqtt' 'host')")
+        username=$(bashio::config 'mqtt_username' "$(bashio::services 'mqtt' 'username')")
+        password=$(bashio::config 'mqtt_password' "$(bashio::services 'mqtt' 'password')")
+        port=$(bashio::config 'mqtt_port' "$(bashio::services 'mqtt' 'port')")
         log_level=$(bashio::string.lower "$(bashio::config log_level info)")
 
-        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b $host -p $port -u $username -P $password -t $topic -v $(bashio::addon.version) -l ${log_level^^}
+        #bashio::log.info "New MQTT config ${host}:${port:-1883} ${username}:${password} ${topic}"
+
+        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b "${host}" -p "${port:-1883}" -u "${username}" -P "${password}" -t "${topic}" -v $(bashio::addon.version) -l ${log_level^^}
     else
         bashio::log.info "MQTT integration"
-
-        topic=$(bashio::config 'mqtt_topic')
-        if [ "$topic" = "null" ]; then topic="sambanas"; fi
 
         #        disks=$(awk 'BEGIN { ORS=""; print "["}  /^   path = .*/g {  printf "%s\"%s\"",separator,$3 ; separator=","  } END { print "]" } ' /etc/samba/smb.conf)
         disks=$(grep path /etc/samba/smb.conf | sed 's/.*path\ =\ //' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
