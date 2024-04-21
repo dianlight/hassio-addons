@@ -53,7 +53,7 @@ jobs:
             --all \
             --docker-hub-check \
             --target ${{ steps.extract_project.outputs.name }} \
-            --docker-hub dianlight    
+            --docker-hub dianlight \   
             --cosign        
 
       - name: pull-request
