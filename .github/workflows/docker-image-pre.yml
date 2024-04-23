@@ -112,7 +112,22 @@ jobs:
           git config --global user.name "Prerelease Bot"
           git restore .
           git clean -f
-          
+     
+      - name: Get Master SHA
+        shell: bash
+        id: git_sha_master
+        run: |
+          echo "sha=$(git rev-parse origin/master)" >> $GITHUB_OUTPUT   
+
+      - name: Create release/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }} if not exists
+        continue-on-error: true
+        uses: peterjgrainger/action-create-branch@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: 'refs/heads/release/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}'
+          sha: '${{ steps.git_sha_master.outputs.sha }}'
+
       - name: pull-request ${{ steps.version_set.outputs.value_old }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
