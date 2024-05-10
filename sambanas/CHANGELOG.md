@@ -1,5 +1,14 @@
 # Changelog
 
+## 12.2.0-nas3
+
+###  ✨ Features
+- Allow use of samba multicast dns register
+- New `wsdd` option to enable/disable wsdd
+
+###  🩹 BugFix
+- `bind_all_interfaces` option now act also on wsdd or wsdd2 daemon
+
 ## 12.2.0-nas2
 
 ###  ✨ Features

@@ -65,6 +65,7 @@ veto_files:
 compatibility_mode: false
 recyle_bin_enabled: false
 available_disks_log: true
+wsdd: true
 wsdd2: false
 medialibrary:
   enable: true
@@ -273,6 +274,12 @@ when you absolutely need it and understand the possible consequences.
 
 Defaults to `false`.
 
+### Option: `wsdd`
+
+Setting this option to `true` will enable the use of wsdd over internal samba system. 
+
+Defaults to `true`.
+
 ### Option: `wsdd2` (optional) (**advanced users only**)
 
 Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to true if you have trouble to see the disk on Windows 11+
@@ -283,7 +290,7 @@ Defaults to `false`.
 
 Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
 
-Defaults to hd-idle demons not being used at all.
+Defaults to hd-idle demon not being used at all.
 
 ### Option: `enable_smart` (optional)
 
