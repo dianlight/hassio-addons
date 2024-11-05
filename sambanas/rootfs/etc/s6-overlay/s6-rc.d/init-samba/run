@@ -53,13 +53,21 @@ jq ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.
         -template /usr/share/tempio/smb.gtpl \
         -out /etc/samba/smb.conf
 
+if [[ "${__BASHIO_LOG_LEVEL_TRACE}" -eq "${__BASHIO_LOG_LEVEL}" ]]; then
+    bashio::log.info "${__BASHIO_LOG_LEVEL_TRACE} ${__BASHIO_LOG_LEVEL}"
+    bashio::log.trace "Dump SMB.conf to ADDON_CONFIG/$(hostname) share"
+    cp /etc/samba/smb.conf /config/smb.conf.dump
+fi
+
 function addSambaUser() { # $1 username $2 password
     username=$1
     password=$2
     addgroup "${username}"
     adduser -D -H -G "${username}" -s /bin/false "${username}"
-    # shellcheck disable=SC1117
-    echo -e "${password}\n${password}" |
+    (
+        echo "$password"
+        echo "$password"
+    ) |
         smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
 }
 

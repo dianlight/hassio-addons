@@ -31,7 +31,7 @@ if [ -f /tmp/cifs_network ]; then
 
     bashio::log.info "Wait Samba Server to going up..(max 60s)"
     # timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
-    bashio::wait_for 445 ${ipaddress/\/*/} 60
+    bashio::net.wait_for 445 ${ipaddress/\/*/} 60
     # smbstatus
 
     while read -r -a device; do

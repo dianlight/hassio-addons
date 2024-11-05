@@ -1,5 +1,26 @@
 # Changelog
 
+## 12.3.2-nas
+
+###  🩹 BugFix
+- Fix for bug [#257](https://github.com/dianlight/hassio-addons/issues/257) - IN PROGRESS
+
+### 🏗 Chore
+- [Full Changelog from official addon 12.3.2][changelog_12.3.2]
+  - Suppress benign idmap logged error
+- [Full Changelog from official addon 12.3.1][changelog_12.3.1]
+  - Handle passwords with backslash correctly
+- [Full Changelog from official addon 12.3.0][changelog_12.3.0]
+  - Upgrade Alpine Linux to 3.19 (Skipped)
+- Update Based Image to 16.3.4 (Alpine 3.20.3, Samba 4.19.9)  
+- On trace log level the smb.conf and other datas are dumped in the ADDONS_CONFIG directory 
+- Reduced smartd output
+
+[changelog_12.3.0]: https://github.com/home-assistant/addons/pull/3456
+[changelog_12.3.1]: https://github.com/home-assistant/addons/pull/3508
+[changelog_12.3.2]: https://github.com/home-assistant/addons/pull/3704
+
+
 ## 12.2.0-nas3
 
 ###  ✨ Features
