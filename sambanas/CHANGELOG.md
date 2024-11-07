@@ -2,6 +2,9 @@
 
 ## 12.3.2-nas
 
+###  🩹 BugFix
+- Fix  ACL miss on mixed-case disk's labels [#257](https://github.com/dianlight/hassio-addons/issues/257)
+
 ### 🏗 Chore
 - [Full Changelog from official addon 12.3.2][changelog_12.3.2]
   - Suppress benign idmap logged error
