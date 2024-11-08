@@ -50,11 +50,13 @@ function reserved_mount_name() { # $1 disk
      disk=$1
      reserved_names=(config addons ssl share backup media all_addon_configs homeassistant)
 
+     # Clean reserved name with disaled
      for rdisk in "${reserved_names[@]}"; do
-          deleted=$(jq -r --arg share "${rdisk,,}" '.acl[] | select(.share == $share)  | select (.disabled) | .share' </data/options.json)
+          deleted=$(jq -r --arg share "${rdisk,,}" '.acl[] | select( (.share|ascii_upcase) == ($share|ascii_upcase) )  | select (.disabled) | .share' </data/options.json)
           reserved_names=("${reserved_names[@]/$deleted/}")
      done
 
+     # Clean tomountdisks
      for rdisk in "${reserved_names[@]}"; do
           if [[ ${rdisk,,} = ${disk,,} ]]; then
                tomountdisks=("${tomountdisks[@]/$disk/}")

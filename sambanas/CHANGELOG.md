@@ -2,8 +2,19 @@
 
 ## 12.3.2-nas
 
+###  ✨ Features
+- Allow use of samba multicast dns register
+- New `wsdd` option to enable/disable wsdd
+- TODO: [#252](https://github.com/dianlight/hassio-addons/issues/252)
+- TODO: [#208](https://github.com/dianlight/hassio-addons/issues/208)
+
 ###  🩹 BugFix
 - Fix  ACL miss on mixed-case disk's labels [#257](https://github.com/dianlight/hassio-addons/issues/257)
+- Fix [#251](https://github.com/dianlight/hassio-addons/issues/251)
+- `bind_all_interfaces` option now act also on wsdd or wsdd2 daemon
+- Fix [#250](https://github.com/dianlight/hassio-addons/issues/250)
+- TODO: [#240](https://github.com/dianlight/hassio-addons/issues/240)
+
 
 ### 🏗 Chore
 - [Full Changelog from official addon 12.3.2][changelog_12.3.2]
@@ -19,16 +30,6 @@
 [changelog_12.3.0]: https://github.com/home-assistant/addons/pull/3456
 [changelog_12.3.1]: https://github.com/home-assistant/addons/pull/3508
 [changelog_12.3.2]: https://github.com/home-assistant/addons/pull/3704
-
-
-## 12.2.0-nas3
-
-###  ✨ Features
-- Allow use of samba multicast dns register
-- New `wsdd` option to enable/disable wsdd
-
-###  🩹 BugFix
-- `bind_all_interfaces` option now act also on wsdd or wsdd2 daemon
 
 ## 12.2.0-nas2
 
