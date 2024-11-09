@@ -242,7 +242,7 @@ elif bashio::config.has_value 'moredisks' || bashio::config.true 'automount'; th
      if bashio::config.true 'available_disks_log' || bashio::config.true 'automount'; then
           bashio::log.blue "---------------------------------------------------"
           #readarray -t autodisks < <(lsblk -E label -n -o label -i | sed -r '/^\s*$/d' | grep -v hassos)
-          readarray -t autodisks < <(/usr/bin/python /usr/local/bin/disklist.py)
+          readarray -t autodisks < <(/usr/bin/poetry -C /usr/local/bin/ run python /usr/local/bin/disklist.py)
 
           if [ ${#autodisks[@]} -eq 0 ]; then
                bashio::log.info "No Disk with labels."

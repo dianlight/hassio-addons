@@ -256,7 +256,7 @@ This option should only be used in advanced cases. In general, setting this opti
 
 If omitted Samba will listen on all supported interfaces of Home Assistant (see > ha network info), but if there are no supported interfaces, Samba will exit with an error.
 
-Note: Samba needs at least one non-loopback, non-ipv6, local interface to listen on and become browser on it. Without it, it works, but reloads it's interfaces in an infinite loop forever in each 10 seconds to check, whether a non-loopback, non-ipv6, local interface is added. This reload will fill the log file with infinite number of entries like added interface lo ip=::1 bcast= netmask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff.
+**Note**: Samba needs at least one non-loopback, non-ipv6, local interface to listen on and become browser on it. Without it, it works, but reloads it's interfaces in an infinite loop forever in each 10 seconds to check, whether a non-loopback, non-ipv6, local interface is added. This reload will fill the log file with infinite number of entries like added interface lo ip=::1 bcast= netmask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff.
 
 ### Option: `bind_all_interfaces` (optional)
 
@@ -290,6 +290,10 @@ Defaults to `false`.
 
 Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
 
+**NOTE<sup>1</sup>**: Depending on your environment host system can take up to **10minutes** to unlock used file on disk so setting to a low number like 10 don't garantee that the disk go on sleep after 10s from last access. Sometime you need to wait 10 or 15 minutes. 
+**NOTE<sup>2</sup>**: If you use `mqtt_nexgen_entities` also enable a new sensor for power disk status. 
+
+
 Defaults to hd-idle demon not being used at all.
 
 ### Option: `enable_smart` (optional)
@@ -307,6 +311,9 @@ Defaults to `false`.
 ### Option: `mqtt_nexgen_entities` (optional)
 
 Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
+
+**NOTE<sup>1</sup>**: If your HDD newer spindown please set `hdd_idle_seconds`.  
+
 
 Defaults to `false`.
 

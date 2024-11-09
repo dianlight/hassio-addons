@@ -12,7 +12,9 @@ ARG HDDTEMP_VERSION
 FROM $BUILD_FROM as builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make gcc libc-dev linux-headers build-base autoconf automake git
+RUN apk add --no-cache make \
+    gcc libc-dev linux-headers build-base autoconf automake git \
+    python3-dev musl-dev poetry
 
 ARG BUILD_ARCH
 ARG HDDTEMP_VERSION
@@ -22,6 +24,10 @@ RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/h
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master && make
+
+COPY rootfs /
+RUN cd /usr/local/bin/ && \
+    poetry install 
 
 #RUN cd / && git clone https://github.com/linux-apfs/linux-apfs-rw.git \ 
 #    && cd linux-apfs-rw && make
@@ -50,6 +56,9 @@ ENV \
     YARN_HTTP_TIMEOUT=1000000 \
     TERM="xterm-256color"
 
+# Wait more time to allow gracefull shutdown
+ENV S6_KILL_GRACETIME=30000
+ENV S6_SYNC_DISKS=1
 
 # Setup base
 ARG BUILD_ARCH
@@ -86,7 +95,9 @@ RUN apk add --no-cache \
     libcap \
     hd-idle \
     fuse3 \
-    py3-pip
+    py3-pip \
+    pipx \
+    poetry
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
@@ -98,6 +109,8 @@ RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
+# SAMBANAS UTILS (POERTY VIRTUAL ENV)
+COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
@@ -118,17 +131,19 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
 # PYTHON ADDONS
-#RUN pip install pySMART psutil ha-mqtt-discoverable humanize
-RUN pip install \ 
-    pySMART==1.3.0 \
-    psutil==5.9.8 \
-    humanize==4.9.0 \
-    diskinfo==3.1.1 \
-    pydantic==1.10.14 \
-    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip#0.13.1
+#RUN pip install \ 
+#    pySMART==1.3.0 \
+#    psutil==5.9.8 \
+#    humanize==4.9.0 \
+#    diskinfo==3.1.1 \
+#    pydantic==1.10.14 \
+#    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip#0.13.1
 
 # Copy data
 COPY rootfs /
+
+#RUN cd /usr/local/bin/ && \
+#    poetry install 
 
 HEALTHCHECK \
     CMD smbclient -L '\\localhost' -U '%' -m SMB3
