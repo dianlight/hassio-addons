@@ -33,6 +33,18 @@ configuration:
   enable_smart:
     name: Enable SMART on all disks
     description: Enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
+  multi_channel:
+    name: Enable Samba Multichannel support
+    description:
+      Multi-Channel is an SMB3 protocol feature that allows the client
+      to bind multiple transport connections into one authenticated
+      SMB session. This allows for increased fault tolerance and
+      throughput. The client chooses transport connections as reported
+      by the server and also chooses over which of the bound transport
+      connections to send traffic. I/O operations for a given file
+      handle can span multiple network connections this way.
+      An SMB multi-channel session will be valid as long as at least
+      one of its channels are up.
   mqtt_nexgen_entities:
     name: Enable the use of nexgen MQTT implementation
     description: Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.

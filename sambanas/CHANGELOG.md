@@ -8,6 +8,7 @@
 - New Sensor `Power` if you enable `hdd_idle_seconds` option in config
 #### 🚧 Planned not yet release in Beta Version
 - TODO: [#208](https://github.com/dianlight/hassio-addons/issues/208) 🚧 Planned not yet release in Beta Version
+- New Option `multi_channel` to Enable multi-channel in smb.conf [#262](https://github.com/dianlight/hassio-addons/issues/262)
 
 ###  🩹 BugFix
 - Fix Startup/Shutdown sequence [#252](https://github.com/dianlight/hassio-addons/issues/252)

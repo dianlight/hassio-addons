@@ -159,6 +159,7 @@ Enable the visibility of `moredisk` on /media path.
 _Starting from Homeassistant 2023.6.0 the addon use the 'mount' supervisor feature. So you don't need the ssh key anymore._
 
 **WARNING: The feature is considered experimental and may cause problems or data loss.**
+
 #### Option: `enable` (optional)
 
 Enable/Disable host mounting option.
@@ -185,9 +186,6 @@ NOTE<sup>2</sup>: It is necessary to enable the access to the SSH port 22222 of 
 NOTE<sup>3</sup>: It is necessary to pass the SSH private key for root access to the host. Be sure to use secrets files to protect the key from people who don't have access to it.
 
 NOTE<sup>4</sup>: If the disk in the "Media Browser" is seen empty try restarting Homeassitant.
-
-
-
 
 
 ### Option: `veto_files` (optional)
@@ -293,7 +291,6 @@ Idle time in seconds for all disks. Setting this value to 0 will never spin down
 **NOTE<sup>1</sup>**: Depending on your environment host system can take up to **10minutes** to unlock used file on disk so setting to a low number like 10 don't garantee that the disk go on sleep after 10s from last access. Sometime you need to wait 10 or 15 minutes. 
 **NOTE<sup>2</sup>**: If you use `mqtt_nexgen_entities` also enable a new sensor for power disk status. 
 
-
 Defaults to hd-idle demon not being used at all.
 
 ### Option: `enable_smart` (optional)
@@ -301,6 +298,21 @@ Defaults to hd-idle demon not being used at all.
 Enable SMART on all disks, enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
 
 Defaults to `true`.
+
+### Option: `multi_channel` (optional) **_Exteprimental_**
+
+Samba 4.4.0 adds *experimental* support for SMB3 Multi-Channel.
+Multi-Channel is an SMB3 protocol feature that allows the client
+to bind multiple transport connections into one authenticated
+SMB session. This allows for increased fault tolerance and
+throughput. The client chooses transport connections as reported
+by the server and also chooses over which of the bound transport
+connections to send traffic. I/O operations for a given file
+handle can span multiple network connections this way.
+An SMB multi-channel session will be valid as long as at least
+one of its channels are up.
+
+Defaults to `false`
 
 ### Option: `mqtt_enable` (optional)
 
