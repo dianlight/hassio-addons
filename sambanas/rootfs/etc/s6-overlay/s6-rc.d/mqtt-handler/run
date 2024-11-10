@@ -25,7 +25,12 @@ if [ -f /root/.config/mosquitto_pub ]; then
 
         #bashio::log.info "New MQTT config ${host}:${port:-1883} ${username}:${password} ${topic}"
 
-        exec /usr/bin/python /usr/local/bin/mqtt_daemon.py -b "${host}" -p "${port:-1883}" -u "${username}" -P "${password}" -t "${topic}" -v $(bashio::addon.version) -l ${log_level^^}
+        idleparam=""
+        if [ -p /tmp/hdidle.events ]; then
+            idleparam="-i /tmp/hdidle.events"
+        fi
+
+        exec /usr/bin/poetry -C /usr/local/bin/ run python /usr/local/bin/mqtt_daemon.py -b "${host}" -p "${port:-1883}" -u "${username}" -P "${password}" -t "${topic}" -v $(bashio::addon.version) ${idleparam} -l ${log_level^^}
     else
         bashio::log.info "MQTT integration"
 
@@ -120,7 +125,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                         }' <<<"$row")
                     ;;
                 *)
-                    bashio::log.waring "Autodiscovery for $entity missing!"
+                    bashio::log.warning "Autodiscovery for $entity missing!"
                     ;;
                 esac
                 msg=$(echo "$base" "$device" "$exmsg" | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|.device.via_device=(.oth.root | explode | join(""))|del(.oth)')

@@ -9,7 +9,7 @@ arch:
   - armv7
   - aarch64
   - amd64
-startup: services
+startup: initialize
 boot: auto
 init: false
 hassio_api: true
