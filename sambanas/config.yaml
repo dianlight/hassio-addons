@@ -109,6 +109,7 @@ schema:
   bind_all_interfaces: bool?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   meaning_of_life: int?
+  multi_channel: bool?
 
 image: dianlight/{arch}-addon-sambanas
 services:

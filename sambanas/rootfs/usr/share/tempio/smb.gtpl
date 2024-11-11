@@ -7,6 +7,12 @@
    client min protocol = SMB2_10
    {{ end }}
 
+   {{if .multi_channel }}
+   server multi channel support = yes
+   aio read size = 1
+   aio write size = 1
+   {{ end }}  
+
    dns proxy = yes 
 
    ea support = yes
