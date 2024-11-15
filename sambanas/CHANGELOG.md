@@ -6,32 +6,31 @@
 - Allow use of samba multicast dns register
 - New `wsdd` option to enable/disable wsdd
 - New Sensor `Power` if you enable `hdd_idle_seconds` option in config
-#### 🚧 Planned not yet release in Beta Version
-- TODO: [#208](https://github.com/dianlight/hassio-addons/issues/208) 🚧 Planned not yet release in Beta Version
 - New Option `multi_channel` to Enable multi-channel in smb.conf [#262](https://github.com/dianlight/hassio-addons/issues/262)
 
 ###  🩹 BugFix
 - Fix Startup/Shutdown sequence [#252](https://github.com/dianlight/hassio-addons/issues/252)
-- Fix  ACL miss on mixed-case disk's labels [#257](https://github.com/dianlight/hassio-addons/issues/257)
-- Fix [#251](https://github.com/dianlight/hassio-addons/issues/251)
+- Fix ACL miss on mixed-case disk's labels [#257](https://github.com/dianlight/hassio-addons/issues/257)
+- Fix passwords with spaces [#251](https://github.com/dianlight/hassio-addons/issues/251)
 - `bind_all_interfaces` option now act also on wsdd or wsdd2 daemon
-- Fix [#250](https://github.com/dianlight/hassio-addons/issues/250)
+- Fix medialibrary can't use moredisks that contain a reserved word [#250](https://github.com/dianlight/hassio-addons/issues/250)
 - HD-Idle log monitoring. Fix [#240](https://github.com/dianlight/hassio-addons/issues/240)
 - Fix MQTT ID Changes Fix [#247](https://github.com/dianlight/hassio-addons/issues/247)
-#### 🚧 Planned not yet release in Beta Version
-- Fix MQTT Entities are not deleted on close
 
-### 🏗 Chore
+###  🏗 Chore
 - [Full Changelog from official addon 12.3.2][changelog_12.3.2]
   - Suppress benign idmap logged error
 - [Full Changelog from official addon 12.3.1][changelog_12.3.1]
   - Handle passwords with backslash correctly
 - [Full Changelog from official addon 12.3.0][changelog_12.3.0]
   - Upgrade Alpine Linux to 3.19 (Skipped)
-- Update Based Image to 16.3.4 (Alpine 3.20.3, Samba 4.19.9)  
+- Update Based Image to 16.3.6 (Alpine 3.20.3, Samba 4.19.9)  
 - On trace log level the smb.conf and other datas are dumped in the ADDONS_CONFIG directory 
 - Reduced smartd output
 - Update DOCS.md with more note on Power management use
+
+###  👁️ Known Issue
+- MQTT Entities sometime are not deleted on close
 
 [changelog_12.3.0]: https://github.com/home-assistant/addons/pull/3456
 [changelog_12.3.1]: https://github.com/home-assistant/addons/pull/3508
