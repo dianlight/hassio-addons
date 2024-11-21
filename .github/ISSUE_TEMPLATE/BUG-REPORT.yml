@@ -63,6 +63,7 @@ body:
         - aarch64
         - amd64
         - armv7
+        - i386
         - other
     validations:
       required: true

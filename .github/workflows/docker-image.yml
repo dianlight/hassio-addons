@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -50,4 +50,4 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --title "Releasing ${{ github.ref }} into master" --body ":crown: *An automated PR*"
+          gh pr create --title "Releasing ${{ github.ref }} into master" --body ":crown: *An automated PR*" --fill

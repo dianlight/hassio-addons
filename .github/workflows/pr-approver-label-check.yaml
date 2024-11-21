@@ -1,0 +1,19 @@
+name: Check the label existence for ok to merge
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches:
+      - master
+
+jobs:
+  is_ok_to_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check do_release label
+        uses: jesusvasquez333/verify-pr-label-action@v1.4.0
+        with:
+            github-token: '${{ secrets.GITHUB_TOKEN }}'
+            valid-labels: 'do_release'
+            invalid-labels: 'help wanted, invalid'
