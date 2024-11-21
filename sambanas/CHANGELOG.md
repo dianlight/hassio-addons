@@ -1,5 +1,22 @@
 # Changelog
 
+## 12.3.2-nas1 [ 🚧 Unreleased ]
+
+###  ✨ Features
+###### __🚧 Work in progess__
+- [ ] ACL For foleders [#208](https://github.com/dianlight/hassio-addons/issues/208) 
+
+###  🩹 BugFix
+##### __🚧 Work in progess__
+- [ ] MQTT Entities sometime are not deleted on close
+  
+###  🏗 Chore
+- [x] Better CI and Change scripts
+
+###### __🚧 Work in progess__
+- [ ]  Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
+  
+
 ## 12.3.2-nas
 
 ###  ✨ Features
