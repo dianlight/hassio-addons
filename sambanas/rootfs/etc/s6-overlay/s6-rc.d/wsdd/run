@@ -5,20 +5,13 @@
 # ==============================================================================
 declare SMB_GROUP
 declare SMB_HOST
-declare WSDD
-
-# Chose The WSDD implenetation
-WSDD=wsdd
-if bashio::config.true 'wsdd2' ; then
-    WSDD=wsdd2
-fi
 
 SMB_GROUP=$(grep -i '^\s*workgroup\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
 SMB_HOST=$(grep -i '^\s*netbios name\s*=' /etc/samba/smb.conf | cut -f2 -d= | tr -d '[:blank:]')
 
-bashio::log.info "Starting the ${WSDD} daemon for ${SMB_GROUP}/${SMB_HOST}..."
-
-if bashio::config.has_value 'interfaces'; then
+if bashio::config.true 'bind_all_interfaces'; then
+    interfaces+=" "
+elif bashio::config.has_value 'interfaces'; then
     bashio::log.info "Interfaces from config: $(bashio::config 'interfaces')"
     for interface in $(bashio::config 'interfaces'); do
         if [ -d "/sys/class/net/${interface}" ]; then
@@ -34,17 +27,20 @@ else
     done
 fi
 
-if [ ${#interfaces[@]} -eq 0 ]; then
-    bashio::exit.nok 'No supported interfaces found to bind on.'
-fi
-bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
+#if [ ${#interfaces[@]} -eq 0 ]; then
+#    bashio::exit.nok 'No supported interfaces found to bind on.'
+#fi
+#bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 
-if bashio::config.true 'wsdd2' ; then
+if bashio::config.true 'wsdd2'; then
+    bashio::log.info "Starting the WSDD2 daemon $(printf '%s ' "${interfaces[@]}") for ${SMB_GROUP}/${SMB_HOST}..."
     setcap CAP_NET_RAW+ep /usr/sbin/wsdd2
     # shellcheck disable=SC2046
-    exec /usr/sbin/wsdd2 -t -u -w  $(printf '%s ' "${interfaces[@]}") -H "${SMB_HOST}" -b vendor:homeassistant,model:sambanas
-else
+    exec /usr/sbin/wsdd2 -t -u -w $(printf '%s ' "${interfaces[@]}") -H "${SMB_HOST}" -b vendor:homeassistant,model:sambanas
+elif bashio::config.true 'wsdd'; then
+    bashio::log.info "Starting the WSDD daemon $(printf '%s ' "${interfaces[@]}") for ${SMB_GROUP}/${SMB_HOST}..."
     # shellcheck disable=SC2046
     exec wsdd -v $(printf '%s ' "${interfaces[@]}") -n "${SMB_HOST}" -w "${SMB_GROUP}"
+else
+    exec sleep infinity
 fi
-

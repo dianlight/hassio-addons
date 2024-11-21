@@ -11,13 +11,17 @@ ipaddress=$(bashio::network.ipv4_address ${interface})
 
 if [[ -f /tmp/local_mount ]]; then
     readarray -t umdev </tmp/local_mount
-    bashio::log.info "Unmount drivers:\n$(printf "%s\n" "${umdev[@]}")"
-    umount "${umdev[@]}" || true
+    if [ ${#umdev[@]} -gt 0 ]; then
+        bashio::log.info "Unmount drivers:\n$(printf "%s\n" "${umdev[@]}")"
+        umount "${umdev[@]}" 2>/dev/null || true
+    fi
 fi
 if [[ -f /tmp/remote_mount ]]; then
     readarray -t umdev </tmp/remote_mount
-    bashio::log.info "Unmount Host drivers:\n$(printf "%s\n" "${umdev[@]}")"
-    line=$(printf "\"%s\" " "${umdev[@]}")
-    ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "umount $line" || true
+    if [ ${#umdev[@]} -gt 0 ]; then
+        bashio::log.info "Unmount Host drivers:\n$(printf "%s\n" "${umdev[@]}")"
+        line=$(printf "\"%s\" " "${umdev[@]}")
+        ssh root@${ipaddress%/*} -p 22222 -o "StrictHostKeyChecking no" "umount $line" || true
+    fi
 fi
 bashio::log.info "Bye."

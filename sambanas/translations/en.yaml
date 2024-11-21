@@ -1,0 +1,69 @@
+configuration:
+  automount:
+    name: Enable Automatic Mount
+    description: Automatic mount and expose all labeled disk.
+  moredisks:
+    name: List of labeled disk to mount
+    description: List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:`
+  available_disks_log:
+    name: Enable discovered disk log
+    description: Enable the log of found labeled disk. Usefull for initial configuration.
+  medialibrary:
+    name: Configure the mount in media path
+    description: Enable the visibility of `moredisk` on /media path.
+  compatibility_mode:
+    name: Enable compatibility with old legacy clients
+    description: |-
+      Setting this option to `true` will enable old legacy Samba protocols
+      on the Samba add-on. This might solve issues with some clients that cannot
+      handle the newer protocols, however, it lowers security. Only use this
+      when you absolutely need it and understand the possible consequences.
+  recyle_bin_enabled:
+    name: Enable recyle_bin on share
+    description: Allow client SO to use Recycle Bin functionality on share
+  wsdd:
+    name: Enable the use of extreanl WSDD daemon
+    description: Setting this option to `true` will enable the use of wsdd over internal samba system.
+  wsdd2:
+    name: Enable the use of Netgear WSDD daemon
+    description: Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to true if you have trouble to see the disk on Windows 11+
+  hdd_idle_seconds:
+    name: Set the timeout for hd-idle demon
+    description: Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
+  enable_smart:
+    name: Enable SMART on all disks
+    description: Enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
+  multi_channel:
+    name: Enable Samba Multichannel support
+    description:
+      Multi-Channel is an SMB3 protocol feature that allows the client
+      to bind multiple transport connections into one authenticated
+      SMB session. This allows for increased fault tolerance and
+      throughput. The client chooses transport connections as reported
+      by the server and also chooses over which of the bound transport
+      connections to send traffic. I/O operations for a given file
+      handle can span multiple network connections this way.
+      An SMB multi-channel session will be valid as long as at least
+      one of its channels are up.
+  mqtt_nexgen_entities:
+    name: Enable the use of nexgen MQTT implementation
+    description: Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
+  mqtt_enable:
+    name: Enable the exposition of disk information via MQTT
+    description: Setting this option to `true` will enable the use of mqtt to send disks status data.
+  autodiscovery:
+    disable_discovery:
+      name: Enable the automatic MQTT messages
+      description: Setting this option to `true` will disable the sending of Auto Discovery MQTT messages. You need to configure MQTT sensors manually
+  other_users:
+    name: List of other user to create
+    description: Create more use for SMB/CIFS access
+  acl:
+    name: Access Lists
+    description: SMB/CIFS share access lists
+  interfaces:
+    name: network interfaces
+    description: List of network interface to bind
+  bind_all_interfaces:
+    name: Enable the use of all network interfaces
+    description: Force Samba to bind on all network interface. This is usefull for pseudo-ethernet devices like TailScale
