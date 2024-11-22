@@ -5,6 +5,9 @@
     },
     {
       "path": "../ha-mqtt-discoverable"
+    },
+    {
+      "path": "../srat"
     }
   ],
   "settings": {
