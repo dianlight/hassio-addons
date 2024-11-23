@@ -11,10 +11,10 @@
 - [ ] MQTT Entities sometime are not deleted on close
   
 ###  🏗 Chore
-- [x] Better CI and Change scripts
+- [X] Better CI and Change scripts
+- [X] Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
 
 ###### __🚧 Work in progess__
-- [ ]  Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
   
 
 ## 12.3.2-nas
