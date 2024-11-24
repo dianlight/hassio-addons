@@ -26,40 +26,42 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+        run: |
+           echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+           echo "BR_PROJECT=$(TMP=${GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
-      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_VERSION }}
+      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
         id: version_set
         uses: endaft/action-yamler@v1.1.1
         with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
           set: .beta${{ github.run_number }}
           get: true
           append: true
 
-      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_VERSION }}
+      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }}
         id: betaname_set
         uses: endaft/action-yamler@v1.1.1
         with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: name
           set: -β
           get: true
           append: true
             
-      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_new }}
+      - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
         uses: home-assistant/builder@master
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
             --all \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+            --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
             --docker-hub dianlight
 
-      - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_VERSION }}
+      - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         uses: thzois/autobot@v1.0.3
         continue-on-error: true
         env:
@@ -68,7 +70,7 @@ jobs:
           git_config_user_email: 'ffp-bot@github.com'
           git_config_user_name: 'ffp-bot'
           target_repo: 'dianlight/hassio-addons-beta'
-          source_dir: '${{ steps.extract_branch.outputs.BR_VERSION }}'
+          source_dir: '${{ steps.extract_branch.outputs.BR_PROJECT }}'
 #          source_dir_copy_glob: '!(*.yaml)'
           target_dir: ''
           pr_target_repo_base_branch: 'master'
@@ -88,9 +90,13 @@ jobs:
       - name: pull-request ${{ steps.version_set.outputs.value_old }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --title "Releasing ${{ github.ref }}" --body ":exclamation: Set `do_release` label to enable merge! " --fill
-#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
+          git fetch origin master ${BRANCH_NAME} 
+          gh pr create --head "${BRANCH_NAME}" \
+          --title "Releasing ${BRANCH_NAME}" \
+          --fill \
+          --draft || :
 
