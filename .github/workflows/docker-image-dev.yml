@@ -76,7 +76,7 @@ jobs:
           #  --template "pull_request_template.md"
           #  --draft
           #  
-          git fetch origin master     
+          git fetch origin master ${BRANCH_NAME}   
           git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master" && \
             git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
           #gh pr close "${{ github.ref }}" || :
@@ -86,4 +86,4 @@ jobs:
             --head "${BRANCH_NAME}" \
             --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --fill \
-            --draft || ( git log --left-right --graph --cherry-pick --oneline master...${BRANCH_NAME} | gh pr edit ${BRANCH_NAME} --body-file - ) 
+            --draft || ( git log --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${BRANCH_NAME} --body-file - ) 
