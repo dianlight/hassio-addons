@@ -15,30 +15,23 @@ jobs:
         if: github.event.pull_request.draft == false
         runs-on: ubuntu-latest
 
-        steps:
-        - uses: actions/checkout@v4
-          with:
-                submodules: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
 
-        - name: Login to DockerHub
-          uses: docker/login-action@v3
-          with:
-                username: ${{ secrets.DOCKERHUB_USERNAME }}
-                password: ${{ secrets.DOCKERHUB_TOKEN }}
-       
-        - name: Extract branch name
-          shell: bash
-          run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-          id: extract_branch
-                
-        - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon
-          uses: home-assistant/builder@master
-          env:
-                CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
-          with:
-                args: |
-                    --all \
-                    --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-                    --docker-hub dianlight
-            
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Publish SambaNAS Addon
+        uses: home-assistant/builder@master
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+        with:
+          args: |
+            --all \
+            --target sambanas \
+            --docker-hub dianlight
