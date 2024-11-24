@@ -25,11 +25,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract branch name
-        shell: zsh
+        shell: bash
         run: |
            echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-           echo "BR_PROJECT=${${GITHUB_REF##*/}%%_*}"" >> "$GITHUB_OUTPUT"
-          
+           echo "BR_PROJECT=$(TMP=${GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
