@@ -85,6 +85,6 @@ jobs:
             --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --head "${BRANCH_NAME}" \
             --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
-            --fill
+            --fill \
             --draft || \ 
           ( git log --left-right --graph --cherry-pick --oneline master...${BRANCH_NAME} | gh pr edit ${BRANCH_NAME} --body-file - ) 
