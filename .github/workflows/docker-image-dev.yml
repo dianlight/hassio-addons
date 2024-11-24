@@ -55,6 +55,7 @@ jobs:
       - name: pull-request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         continue-on-error: true
         shell: bash
         run: |
@@ -78,11 +79,12 @@ jobs:
           git fetch origin master     
           git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master" && \
             git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
-          gh pr close "${{ github.ref }}" || :
-          git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} -- | \
-           gh pr create \
+          #gh pr close "${{ github.ref }}" || :
+          #git log --left-right --graph --cherry-pick --oneline master...${BRANCH_NAME} -- |  --body-file - \
+          gh pr create \
             --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
-            --head "${{ github.ref }}" \
-            --title "Releasing ${{ github.ref }} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
-            --body-file - \
-            --draft    
+            --head "${BRANCH_NAME}" \
+            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --fill
+            --draft || \ 
+          ( git log --left-right --graph --cherry-pick --oneline master...${BRANCH_NAME} | gh pr edit ${BRANCH_NAME} --body-file - ) 
