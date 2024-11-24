@@ -97,5 +97,5 @@ jobs:
           gh pr create --title "Releasing ${BRANCH_NAME}" \
           --body ":exclamation: Set `do_release` label to enable merge! " \
           --fill \
-          --draft || ( git log --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${BRANCH_NAME} --body-file - )
+          --draft || :
 
