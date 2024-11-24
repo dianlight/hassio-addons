@@ -79,7 +79,7 @@ jobs:
           git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master" && \
             git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
           gh pr close "${{ github.ref }}" || :
-          git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
+          git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} -- | \
            gh pr create \
             --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --head "${{ github.ref }}" \

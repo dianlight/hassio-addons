@@ -94,5 +94,6 @@ jobs:
         shell: bash
         run: |
           gh pr create --title "Releasing ${{ github.ref }}" --body ":exclamation: Set `do_release` label to enable merge! " --fill --draft  
-#          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
+          # Fix udate body always with git log!
+          #          gh pr create --base "release/${{ steps.extract_branch.outputs.BR_VERSION }}" --title "Releasing ${{ github.ref }} into release" --body ":crown: *An automated PR*"  
 
