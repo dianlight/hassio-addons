@@ -1,8 +1,7 @@
 name: Close issues related to a merged pull request based on master branch.
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
       - master
 
