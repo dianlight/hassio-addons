@@ -94,8 +94,9 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          gh pr create --title "Releasing ${BRANCH_NAME}" \
-          --body ":exclamation: Set `do_release` label to enable merge! " \
+          git fetch origin master ${BRANCH_NAME} 
+          gh pr create --head "${BRANCH_NAME}" \
+          --title "Releasing ${BRANCH_NAME}" \
           --fill \
           --draft || :
 

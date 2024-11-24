@@ -2,7 +2,7 @@ name: PR Body Syncronizer
 
 on:
     pull_request:
-        types: [ synchronize ]
+        types: [ synchronize, opened ]
     workflow_dispatch:
 
 jobs:
@@ -24,4 +24,4 @@ jobs:
             git config --global user.email "workflow-bot@github.com"
             git config --global user.name "Prerelease Bot"
             git fetch origin master ${BRANCH_NAME}
-            git log --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${{ github.event.pull_request.number }} --body-file -
+            git log --no-merges --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${{ github.event.pull_request.number }} --body-file -
