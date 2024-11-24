@@ -81,7 +81,7 @@ jobs:
           git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
           gh pr create \
             --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
-            --head "origin/${BRANCH_NAME}" \
+            --head "${BRANCH_NAME}" \
             --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --fill \
             --draft || :
