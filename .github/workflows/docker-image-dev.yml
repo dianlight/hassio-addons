@@ -58,6 +58,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          set -x
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
           #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
@@ -80,7 +81,7 @@ jobs:
           gh pr close "${{ github.ref }}" || :
           gh pr create \
             --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
-            --head "${{ github.ref }}"
+            --head "${{ github.ref }}" \
             --title "Releasing ${{ github.ref }} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"  \
             --fill \
             --draft    

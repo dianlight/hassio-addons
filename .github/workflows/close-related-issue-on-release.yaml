@@ -8,9 +8,8 @@ on:
 
 jobs:
   closeIssueOnPrMergeTrigger:
-
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.draft == false
     steps:
       - name: Closes issues related to a merged pull request.
         uses: ldez/gha-mjolnir@v1.4.1
