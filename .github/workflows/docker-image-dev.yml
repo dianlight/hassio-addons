@@ -60,9 +60,27 @@ jobs:
         run: |
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
-          git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
-          git restore .
-          git clean -f
-          git cherry -v ${GITHUB_REF} master
-          gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"
+          #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
+          #  git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
+          #git restore .
+          #git clean -f
+          #git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
+          #  gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*" --body-file -
+          #git fetch origin master    
+          #gh pr create --base "prerelease2/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \ 
+          #  --title "Releasing ${{ github.ref }} into prerelease" \ 
+          #  --fill \
+          #  --head "${{ github.ref }}"
+          #  --template "pull_request_template.md"
+          #  --draft
+          #  
+          git fetch origin master     
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" master && \
+            git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
+          gh pr close "${{ github.ref }}" || :
+          gh pr create \
+            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --head "${{ github.ref }}"
+            --title "Releasing ${{ github.ref }} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"  \
+            --fill \
+            --draft    
