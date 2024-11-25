@@ -75,6 +75,7 @@ jobs:
 #          source_dir_copy_glob: '!(*.yaml)'
           target_dir: ''
           pr_target_repo_base_branch: 'master'
+          pr_target_repo_compare_branch: 'autobot/${{ steps.extract_branch.outputs.BR_PROJECT }}'
 #          pr_target_repo_compare_branch: 'autobot/${{ steps.version_set.outputs.value_new }}'
 #          pr_title: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
 #          pr_description_text: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
