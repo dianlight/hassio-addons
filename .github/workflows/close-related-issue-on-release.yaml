@@ -8,9 +8,7 @@ on:
 
 jobs:
   closeIssueOnPrMergeTrigger:
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Closes issues related to a merged pull request.
         uses: ldez/gha-mjolnir@v1.4.1
