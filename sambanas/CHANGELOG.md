@@ -13,6 +13,8 @@
 ###  🏗 Chore
 - [X] Better CI and Change scripts
 - [X] Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
+- [X] Update Based Image to 16.3.6 (Alpine 3.21.0, Samba 4.20.6-r1)  
+
 
 ###### __🚧 Work in progess__
   

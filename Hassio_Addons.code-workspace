@@ -38,7 +38,10 @@
       "--ignore=E128"
     ],
     "conventionalCommits.scopes": [
-      "gh_actions"
+      "gh_actions",
+      "monorepo",
+      "api",
+      "webapp"
     ]
   }
 }
