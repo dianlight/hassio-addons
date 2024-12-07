@@ -6,7 +6,7 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
-ARG HDDTEMP_VERSION
+#ARG HDDTEMP_VERSION
 
 # hadolint ignore=DL3006
 FROM $BUILD_FROM as builder
@@ -17,10 +17,10 @@ RUN apk add --no-cache make \
     python3-dev musl-dev poetry
 
 ARG BUILD_ARCH
-ARG HDDTEMP_VERSION
+#ARG HDDTEMP_VERSION
 
-RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
-    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
+#RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
+#    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master && make
@@ -102,9 +102,9 @@ RUN apk add --no-cache \
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
 # HDDTEMP
-ARG HDDTEMP_VERSION
-COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
-RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
+#ARG HDDTEMP_VERSION
+#COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
+#RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
@@ -130,20 +130,8 @@ RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/downlo
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
-# PYTHON ADDONS
-#RUN pip install \ 
-#    pySMART==1.3.0 \
-#    psutil==5.9.8 \
-#    humanize==4.9.0 \
-#    diskinfo==3.1.1 \
-#    pydantic==1.10.14 \
-#    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip#0.13.1
-
 # Copy data
 COPY rootfs /
-
-#RUN cd /usr/local/bin/ && \
-#    poetry install 
 
 HEALTHCHECK \
     CMD smbclient -L '\\localhost' -U '%' -m SMB3
