@@ -6,6 +6,11 @@ on:
         branches: 
             - master
     workflow_dispatch:
+        inputs:
+          addon:
+            description: 'Addon to build'     
+            required: true
+            default: 'sambanas'
 
 permissions:
   pull-requests: write
@@ -28,8 +33,16 @@ jobs:
 
         - name: Extract branch name
           shell: bash
-          run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+          run: |
+              if [ -z "${GITHUB_REF}" ]; then
+                echo "BR_VERSION=${{ github.event.inputs.addon }}" >> "$GITHUB_OUTPUT"
+              else
+                echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+              fi
           id: extract_branch
+
+
+          
                 
         - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon
           uses: home-assistant/builder@master
