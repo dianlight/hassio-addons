@@ -34,7 +34,7 @@ jobs:
         - name: Extract branch name
           shell: bash
           run: |
-              if [ -z "${GITHUB_REF}" ]; then
+              if [ -z "${{ github.event.inputs.addon }}" ]; then
                 echo "BR_VERSION=${{ github.event.inputs.addon }}" >> "$GITHUB_OUTPUT"
               else
                 echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
