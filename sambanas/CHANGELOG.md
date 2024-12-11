@@ -4,16 +4,21 @@
 
 ###  ✨ Features
 ###### __🚧 Work in progess__
+- [ ] New Admin Panel ( SRAT ) **Experimantal**
 - [ ] ACL For foleders [#208](https://github.com/dianlight/hassio-addons/issues/208) 
 
 ###  🩹 BugFix
+- [X] Build for armv7 arch 
 ##### __🚧 Work in progess__
 - [ ] MQTT Entities sometime are not deleted on close
+- [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
+
   
 ###  🏗 Chore
 - [X] Better CI and Change scripts
 - [X] Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
 - [X] Update Based Image to 16.3.6 (Alpine 3.21.0, Samba 4.20.6-r1)  
+- [X] WSDD2. Use patch from openwrt to compile on GCC14 and 64bit
 
 
 ###### __🚧 Work in progess__
