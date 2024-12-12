@@ -10,6 +10,18 @@ arch:
   - aarch64
   - amd64
 startup: initialize
+webui: http://[HOST]:[PORT:3000]/static/index.html
+ports:
+  3000/tcp: 3000
+ports_description:
+  3000/tcp: Web and API UI
+ingress: true
+ingress_port: 3000
+ingress_entry: static/index.html
+panel_icon: mdi:folder-network
+panel_title: Samba NAS
+panel_admin: true
+
 boot: auto
 init: false
 hassio_api: true

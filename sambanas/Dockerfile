@@ -14,23 +14,36 @@ FROM $BUILD_FROM as builder
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache make \
     gcc libc-dev linux-headers build-base autoconf automake git \
-    python3-dev musl-dev poetry
+    python3-dev musl-dev poetry go lsblk eudev 
 
 ARG BUILD_ARCH
-#ARG HDDTEMP_VERSION
-
-#RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
-#    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
-    && cd wsdd2-master && make
+    && cd wsdd2-master \ 
+    && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
+    && make
 
 COPY rootfs /
 RUN cd /usr/local/bin/ && \
+    if [ "$BUILD_ARCH" == "armv7" ]; then \ 
+    export PIP_NO_BINARY="pyyaml" ; \
+    fi && \
     poetry install 
 
-#RUN cd / && git clone https://github.com/linux-apfs/linux-apfs-rw.git \ 
-#    && cd linux-apfs-rw && make
+# SRAT // DON'T ON ARMv7 WORK USE RELESES!
+#COPY /Users/ltarantino/Documents/Source/srat/backend/dist/srat /srat
+#RUN \ 
+#    if [ "$BUILD_ARCH" != "armv7" ]; then \ 
+#    cd / && git clone https://github.com/dianlight/srat.git \
+#    && GOBIN=/usr/local/bin/ go install github.com/swaggo/swag/cmd/swag@latest \
+#    && wget -q -O - https://bun.sh/install | bash  \
+#    && export BUN_INSTALL="$HOME/.bun" \
+#    && export PATH="$BUN_INSTALL/bin:$PATH" \
+#    && cd srat && make AARGS="$(AARGS)" SUFFIX="$(SUFFIX)" VERSION=$(VERSION) \
+#    && pwd; \
+#    else \
+#    mkdir -p /srat/backend/dist && touch /srat/backend/dist/srat; \
+#    fi
 
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
@@ -97,20 +110,21 @@ RUN apk add --no-cache \
     fuse3 \
     py3-pip \
     pipx \
-    poetry
+    poetry \
+    lsblk 
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
-
-# HDDTEMP
-#ARG HDDTEMP_VERSION
-#COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
-#RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
 # SAMBANAS UTILS (POERTY VIRTUAL ENV)
 COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
+
+# SRAT TODO: Fix me only for development, use curl from release 
+#COPY --from=builder /srat/backend/dist/srat /usr/sbin
+#ADD https://example.com/archive.zip /usr/src/things/
+#COPY --parents ../Sources/srat/backend/dist/srat /usr/sbin/ 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
@@ -123,9 +137,6 @@ RUN  mkdir -p /var/lib/samba \
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 
-
-
-#RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs

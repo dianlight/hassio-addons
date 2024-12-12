@@ -5,9 +5,6 @@
     },
     {
       "path": "../ha-mqtt-discoverable"
-    },
-    {
-      "path": "../srat"
     }
   ],
   "settings": {
@@ -41,7 +38,10 @@
       "gh_actions",
       "monorepo",
       "api",
-      "webapp"
+      "webapp",
+      "http_server",
+      "samba",
+      "docker"
     ]
   }
 }
