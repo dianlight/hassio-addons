@@ -54,9 +54,9 @@ for addon in "$@"; do
 
   ## Snapshot Different Projects Enrichment
   ### Sambanas SRAT
-  if [[ "${addon}" == "sambanas" ]]; then
-    cp -rv ../Sources/srat/backend/dist/* sambanas/rootfs/usr/local/bin
-  fi
+  #if [[ "${addon}" == "sambanas" ]]; then
+  #  cp -rv ../Sources/srat/backend/dist/* sambanas/rootfs/usr/local/bin
+  #fi
   ## END
 
   hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile &&

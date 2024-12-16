@@ -121,10 +121,9 @@ COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 # SAMBANAS UTILS (POERTY VIRTUAL ENV)
 COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
 
-# SRAT TODO: Fix me only for development, use curl from release 
-#COPY --from=builder /srat/backend/dist/srat /usr/sbin
-#ADD https://example.com/archive.zip /usr/src/things/
-#COPY --parents ../Sources/srat/backend/dist/srat /usr/sbin/ 
+# HA API
+RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+    && chmod a+x /usr/bin/ha 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
@@ -134,9 +133,9 @@ RUN  mkdir -p /var/lib/samba \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
 
-# HA API
-RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
+# SRAT
+RUN curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}" \
+    && chmod a+x /usr/local/bin/srat 
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs

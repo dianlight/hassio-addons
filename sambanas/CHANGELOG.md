@@ -3,6 +3,8 @@
 ## 12.3.2-nas1 [ 🚧 Unreleased ]
 
 ###  ✨ Features
+- [X] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) ) 
+- [X] New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
 ###### __🚧 Work in progess__
 - [ ] New Admin Panel ( SRAT ) **Experimantal**
 - [ ] ACL For foleders [#208](https://github.com/dianlight/hassio-addons/issues/208) 
