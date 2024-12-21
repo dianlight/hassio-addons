@@ -6,7 +6,7 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
-ARG HDDTEMP_VERSION
+#ARG HDDTEMP_VERSION
 
 # hadolint ignore=DL3006
 FROM $BUILD_FROM as builder
@@ -14,23 +14,36 @@ FROM $BUILD_FROM as builder
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache make \
     gcc libc-dev linux-headers build-base autoconf automake git \
-    python3-dev musl-dev poetry
+    python3-dev musl-dev poetry go lsblk eudev 
 
 ARG BUILD_ARCH
-ARG HDDTEMP_VERSION
-
-RUN cd / && wget -q -O - "http://download.savannah.nongnu.org/releases/hddtemp/hddtemp-${HDDTEMP_VERSION}.tar.bz2" | tar jxvf - \
-    && cd "hddtemp-${HDDTEMP_VERSION}" && ./configure --build=${BUILD_ARCH}-unknown-linux-gnu && make && find /hddtemp-${HDDTEMP_VERSION} -name "hddtemp"
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
-    && cd wsdd2-master && make
+    && cd wsdd2-master \ 
+    && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
+    && make
 
 COPY rootfs /
 RUN cd /usr/local/bin/ && \
+    if [ "$BUILD_ARCH" == "armv7" ]; then \ 
+    export PIP_NO_BINARY="pyyaml" ; \
+    fi && \
     poetry install 
 
-#RUN cd / && git clone https://github.com/linux-apfs/linux-apfs-rw.git \ 
-#    && cd linux-apfs-rw && make
+# SRAT // DON'T ON ARMv7 WORK USE RELESES!
+#COPY /Users/ltarantino/Documents/Source/srat/backend/dist/srat /srat
+#RUN \ 
+#    if [ "$BUILD_ARCH" != "armv7" ]; then \ 
+#    cd / && git clone https://github.com/dianlight/srat.git \
+#    && GOBIN=/usr/local/bin/ go install github.com/swaggo/swag/cmd/swag@latest \
+#    && wget -q -O - https://bun.sh/install | bash  \
+#    && export BUN_INSTALL="$HOME/.bun" \
+#    && export PATH="$BUN_INSTALL/bin:$PATH" \
+#    && cd srat && make AARGS="$(AARGS)" SUFFIX="$(SUFFIX)" VERSION=$(VERSION) \
+#    && pwd; \
+#    else \
+#    mkdir -p /srat/backend/dist && touch /srat/backend/dist/srat; \
+#    fi
 
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
@@ -63,6 +76,7 @@ ENV S6_SYNC_DISKS=1
 # Setup base
 ARG BUILD_ARCH
 ARG CLI_VERSION
+ARG SRAT_VERSION
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
@@ -97,20 +111,20 @@ RUN apk add --no-cache \
     fuse3 \
     py3-pip \
     pipx \
-    poetry
+    poetry \
+    lsblk 
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
-
-# HDDTEMP
-ARG HDDTEMP_VERSION
-COPY --from=builder /hddtemp-${HDDTEMP_VERSION}/src/hddtemp /usr/sbin
-RUN  curl http://download.savannah.nongnu.org/releases/hddtemp/hddtemp.db -Lso /usr/share/misc/hddtemp.db
 
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
 # SAMBANAS UTILS (POERTY VIRTUAL ENV)
 COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
+
+# HA API
+RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+    && chmod a+x /usr/bin/ha 
 
 # SAMBA Config
 RUN  mkdir -p /var/lib/samba \
@@ -120,30 +134,15 @@ RUN  mkdir -p /var/lib/samba \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
 
-# HA API
-RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
-
-
-#RUN echo "devtmpfs /dev_ devtmpfs rw,relatime,size=1965288k,nr_inodes=182901,mode=755 0 0" >> /etc/fstab
+# SRAT
+RUN curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}" \
+    && chmod a+x /usr/local/bin/srat && echo "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}"
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 
-# PYTHON ADDONS
-#RUN pip install \ 
-#    pySMART==1.3.0 \
-#    psutil==5.9.8 \
-#    humanize==4.9.0 \
-#    diskinfo==3.1.1 \
-#    pydantic==1.10.14 \
-#    https://github.com/dianlight/ha-mqtt-discoverable/archive/refs/heads/main.zip#0.13.1
-
 # Copy data
 COPY rootfs /
-
-#RUN cd /usr/local/bin/ && \
-#    poetry install 
 
 HEALTHCHECK \
     CMD smbclient -L '\\localhost' -U '%' -m SMB3
