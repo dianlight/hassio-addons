@@ -2,6 +2,13 @@
 
 ## 12.3.2-nas1 [ 🚧 Unreleased ]
 
+### 🎉 NEWS NEWS 🎉
+Today, I'm excited to introduce SRAT, our new web interface designed to simplify SambaNAS configuration and management.
+
+SRAT is a game-changer for SambaNAS administrators. It offers an intuitive interface that streamlines tasks, from setting up shares to monitoring system health.
+
+SRAT is still under development, but we're excited about the future. We're actively seeking feedback and contributions from the community to make SRAT even better.
+
 ###  ✨ Features
 - [X] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) ) 
 - [X] New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
@@ -10,21 +17,16 @@
 - [ ] ACL For foleders [#208](https://github.com/dianlight/hassio-addons/issues/208) 
 
 ###  🩹 BugFix
-- [X] Build for armv7 arch 
+- [X] Build for armv7 arch Fix: [#288](https://github.com/dianlight/hassio-addons/issues/288)]
 ##### __🚧 Work in progess__
 - [ ] MQTT Entities sometime are not deleted on close
 - [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
 
-  
 ###  🏗 Chore
 - [X] Better CI and Change scripts
 - [X] Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
 - [X] Update Based Image to 16.3.6 (Alpine 3.21.0, Samba 4.20.6-r1)  
-- [X] WSDD2. Use patch from openwrt to compile on GCC14 and 64bit
-
-
-###### __🚧 Work in progess__
-  
+- [X] WSDD2. Use patch from openwrt to compile on GCC14 and 64bit  
 
 ## 12.3.2-nas
 

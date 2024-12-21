@@ -23,4 +23,5 @@ fi
 # s6-svc -r /var/run/s6/services/<service name>
 exec /usr/local/bin/srat \
   -port 3000 \
-  -conf /config/bootconfig.json
+  -conf /config/bootconfig.json \
+  -ro true

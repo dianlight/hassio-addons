@@ -76,6 +76,7 @@ ENV S6_SYNC_DISKS=1
 # Setup base
 ARG BUILD_ARCH
 ARG CLI_VERSION
+ARG SRAT_VERSION
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
@@ -135,7 +136,7 @@ RUN  mkdir -p /var/lib/samba \
 
 # SRAT
 RUN curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}" \
-    && chmod a+x /usr/local/bin/srat 
+    && chmod a+x /usr/local/bin/srat && echo "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}"
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
