@@ -25,7 +25,9 @@ SRAT is still under development, but we're excited about the future. We're activ
 ###  🏗 Chore
 - [X] Better CI and Change scripts
 - [X] Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)  
-- [X] Update Based Image to 16.3.6 (Alpine 3.21.0, Samba 4.20.6-r1)  
+- [X] Update Based Image to 17.0.1 (Alpine 3.21.0, Samba 4.20.6-r1)  
+- [X] Update Based Image to 17.0.0 (Alpine 3.21.0, Samba 4.20.6-r1)  
+- [X] Update Based Image to 16.3.6 (Alpine 3.20.3)  
 - [X] WSDD2. Use patch from openwrt to compile on GCC14 and 64bit  
 
 ## 12.3.2-nas
