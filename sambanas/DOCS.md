@@ -373,6 +373,17 @@ Setting this option to `true` will disable the delete of MQTT discovery messages
 
 Defaults to `false`.
 
+### Options `update_srat_onstart` (optional) **_Exteprimental_**
+
+SRAT (Samba REST Administration Tool) is a new system designed to provide a simplified user interface for configuring SAMBA. It has been developed to work within Home Assistant, specifically for this addon, but can also be used in other contexts.
+
+Currently under development and in an alpha state, SRAT is set to become the preferred system for configuring and using this addon, eventually "retiring" the YAML configuration.
+
+Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool ) 
+on the choosed channel.
+
+Defaults to `no`
+
 ## Support
 
 ### Do you like the Addon?
