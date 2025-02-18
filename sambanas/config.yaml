@@ -128,7 +128,7 @@ image: dianlight/{arch}-addon-sambanas
 services:
   - mqtt:want
 udev: true
-#usb: true
+usb: true
 host_dbus: true
 kernel_modules: true
 privileged:
@@ -140,8 +140,11 @@ full_access: true
 devicetree: false
 apparmor: true
 host_ipc: true
-#advanced: true
-homeassistant: 2023.11.0
+advanced: true
+homeassistant: 2024.12.0
 backup: hot
 # Get Points!!!
 auth_api: true
+timeout: 60
+breaking_versions:
+  - 12.3.2-nas1 # Update to 12.3.2-nas1 bring SRAT Admin Panel and remove options
