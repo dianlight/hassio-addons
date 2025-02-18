@@ -290,13 +290,13 @@ dev = ["build", "flake8", "mypy", "pytest", "twine"]
 
 [[package]]
 name = "pysmart"
-version = "1.3.0"
+version = "1.4.1"
 description = "Wrapper for smartctl (smartmontools)"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "pySMART-1.3.0-py3-none-any.whl", hash = "sha256:e915c954c52f01d6fdbb682268fe4b29388c4e6316db19a9b27176cd9524d25c"},
-    {file = "pySMART-1.3.0.tar.gz", hash = "sha256:43f5e049957bdd80f181ae88223c0a2bdbe38181f241be21160d4c4b51c87365"},
+    {file = "pySMART-1.4.1-py3-none-any.whl", hash = "sha256:8bb92d0bb579a073c60dca60cb69eea6516d7cf2673ad6d149d2a49e61432e5d"},
+    {file = "pysmart-1.4.1.tar.gz", hash = "sha256:65700612477861acd83550c33a9430933017c93d91f66973ed409696b0327723"},
 ]
 
 [package.dependencies]
