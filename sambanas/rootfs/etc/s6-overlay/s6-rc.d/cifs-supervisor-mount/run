@@ -29,9 +29,10 @@ if [ -f /tmp/cifs_network ]; then
     #bashio::log "Samba Ready: ${status}"
     #bashio::log "Children: $(smbcontrol smbd num-children)"
 
-    bashio::log.info "Wait Samba Server to going up..(max 30s)"
-    timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
-    smbstatus
+    bashio::log.info "Wait Samba Server to going up..(max 60s)"
+    # timeout 30 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; done' ${ipaddress/\/*/} 445
+    bashio::net.wait_for 445 ${ipaddress/\/*/} 60
+    # smbstatus
 
     while read -r -a device; do
         [[ ${device,,} == @(share|config|addons|ssl|backup|media|addon_configs|homeassistant) ]] && continue
@@ -50,7 +51,7 @@ if [ -f /tmp/cifs_network ]; then
         for rt in {1..3}; do
             status=$(bashio::api.supervisor POST /mounts "${cmdshare}") && break
             bashio::log.warning "Retry ${rt}/3 Error Automount ${device} Msg: $(jq -c '.password="********"' <<<${cmdshare})"
-            sleep 1
+            sleep 3
         done
     done <<<"${available_shares}"
 fi

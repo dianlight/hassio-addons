@@ -10,7 +10,17 @@ Share your disks over the network using Windows file sharing.
 ![downloads evolution](https://raw.githubusercontent.com/dianlight/hassio-addons/master/sambanas/stats.png)
 -->
 
+## Installations
+
+![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas.total&label=SambaNas%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)
+![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.c9a35110_sambanas.total&label=SambaNas%20β%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)
+
+## Help Me!
+
+[![](https://img.shields.io/github/sponsors/dianlight?label=Sponsor&logo=GitHub)](https://github.com/sponsors/dianlight)
+
 <a href="https://www.buymeacoffee.com/ypKZ2I0"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ypKZ2I0&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+
 
 ## About
 

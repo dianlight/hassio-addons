@@ -24,7 +24,7 @@ jobs:
           #github_base_url: https://github.mycompany.com/api/v3
 
           # Disable dry run and actually get stuff deleted
-          dry_run: on
+          dry_run: yes
 
       - name: Get output
         run: "echo 'Deleted branches: ${{ steps.delete_stuff.outputs.deleted_branches }}'"

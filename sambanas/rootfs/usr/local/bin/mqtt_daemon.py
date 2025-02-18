@@ -9,7 +9,7 @@ import asyncio
 import json
 import os
 import typing
-import uuid
+import hashlib
 from pySMART import DeviceList, Device
 from pySMART.interface import NvmeAttributes, AtaAttributes
 import psutil
@@ -36,6 +36,12 @@ ap.add_argument("-p", "--port", required=True, help="Broker Port")
 ap.add_argument("-u", "--user", required=True, help="Broker User")
 ap.add_argument("-P", "--password", required=True, help="Broker Password")
 ap.add_argument("-t", "--topic", required=False, help="Topic", default="sambanas")
+ap.add_argument(
+    "-i",
+    "--hdidle_log",
+    required=False,
+    help="HD_IDLE log to listen for sleeping drivers",
+)
 ap.add_argument(
     "-T", "--discovery_topic", required=False, help="Topic", default="homeassistant"
 )
@@ -146,6 +152,21 @@ class ConfigEntityFromDevice(ConfigEntity):
         self.sensor.delete()
 
 
+class ConfigEntityFromHDIdle(ConfigEntity):
+    def __init__(
+        self,
+        sensorInfo: Union[SensorInfo, BinarySensorInfo],
+        device: Device,
+        state_function: Callable[[Self], Any],
+        attributes_function: Callable[[Self], dict[str, Any]] = None,  # type: ignore
+    ):
+        super().__init__(sensorInfo, state_function, attributes_function)
+        self.device = device
+
+    def detstroy(self) -> None:
+        self.sensor.delete()
+
+
 class ConfigEntityFromIoStat(ConfigEntity):
     def __init__(
         self,
@@ -156,8 +177,8 @@ class ConfigEntityFromIoStat(ConfigEntity):
     ) -> None:
         super().__init__(sensorInfo, state_function, attributes_function)
         self.iostat_device: str = iostat_device
-        self._iostat: collections.deque[tuple[int, dict[str, sdiskio] | None]] = collections.deque(
-            [(0, None), (0, None)], maxlen=2
+        self._iostat: collections.deque[tuple[int, dict[str, sdiskio] | None]] = (
+            collections.deque([(0, None), (0, None)], maxlen=2)
         )
 
     @property
@@ -221,6 +242,7 @@ def sambaMetricCollector() -> dict[str, Any]:
 
 
 sensorList: List[Tuple[str, ConfigEntity]] = []
+devicePowerStatus: dict[str, str] = {}
 
 # Main device SambaNas
 samba: dict[str, Any] = sambaMetricCollector()
@@ -287,7 +309,9 @@ for dev_name in psdata.keys():
         smartAssessment = ConfigEntityFromDevice(
             sensorInfo=BinarySensorInfo(
                 name=f"S.M.A.R.T {dev.name}",
-                unique_id=str(uuid.uuid4()),
+                unique_id=hashlib.md5(
+                    f"S.M.A.R.T {dev.name}".encode("utf-8")
+                ).hexdigest(),
                 device=disk_device_info,
                 # enabled_by_default= dev.smart_capable
                 device_class="problem",
@@ -298,9 +322,25 @@ for dev_name in psdata.keys():
         )
         sensorList.append((f"smart_{dev.name}", smartAssessment.createSensor()))
 
+    if args["hdidle_log"] is not None:
+        hdIdleAssessment = ConfigEntityFromHDIdle(
+            sensorInfo=BinarySensorInfo(
+                name=f"POWER {dev.name}",
+                unique_id=hashlib.md5(f"POWER {dev.name}".encode("utf-8")).hexdigest(),
+                device=disk_device_info,
+                device_class="power",
+            ),
+            state_function=lambda ce: devicePowerStatus.get(ce.device.name) != "spindown",
+            attributes_function=lambda ce: {"pipe_file": args["hdidle_log"] + "s"},
+            device=dev,
+        )
+        sensorList.append((f"power_{dev.name}", hdIdleAssessment.createSensor()))
+
     def totalDiskRate(ce: ConfigEntityFromIoStat) -> float | Literal[0]:
 
-        if ce.h_iostat[0] in [0, ce.iostat[0]] or ce.iostat[1] is None or ce.h_iostat[1] is None:
+        if (
+            ce.h_iostat[0] in [0, ce.iostat[0]] or ce.iostat[1] is None or ce.h_iostat[1] is None
+        ):
             return 0
         t_read: int = int(ce.iostat[1][ce.iostat_device].read_bytes) - int(
             ce.h_iostat[1][ce.iostat_device].read_bytes
@@ -324,7 +364,7 @@ for dev_name in psdata.keys():
     diskInfo = ConfigEntityFromIoStat(
         sensorInfo=SensorInfo(
             name=f"IOSTAT {dev.name}",
-            unique_id=str(uuid.uuid4()),
+            unique_id=hashlib.md5(f"IOSTAT {dev.name}".encode("utf-8")).hexdigest(),
             device=disk_device_info,
             unit_of_measurement="kB/s",
             device_class="data_rate",
@@ -343,7 +383,7 @@ for dev_name in psdata.keys():
             continue
         if not partition.get_name() in partitionDevices:
             partitionDevices[partition.get_name()] = DeviceInfo(
-                name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid() }",
+                name=f"SambaNas Partition {partition.get_fs_label() or partition.get_fs_uuid()}",
                 model=partition.get_fs_label() or partition.get_fs_uuid(),
                 manufacturer=partition.get_fs_type(),
                 identifiers=[partition.get_fs_label() or partition.get_fs_uuid()],
@@ -360,7 +400,9 @@ for dev_name in psdata.keys():
                 if partitionDevices[partition.get_name()].identifiers is None:
                     partitionDevices[partition.get_name()].identifiers = []
                 if isinstance(partitionDevices[partition.get_name()].identifiers, str):
-                    partitionDevices[partition.get_name()].identifiers = [str(partitionDevices[partition.get_name()].identifiers)]
+                    partitionDevices[partition.get_name()].identifiers = [
+                        str(partitionDevices[partition.get_name()].identifiers)
+                    ]
                 partitionDevices[partition.get_name()].identifiers.append(  # type: ignore
                     sdiskparts[0].mountpoint
                 )
@@ -375,7 +417,9 @@ for dev_name in psdata.keys():
         partitionInfo = ConfigEntityFromIoStat(
             sensorInfo=SensorInfo(
                 name=f"IOSTAT {partitionDeviceInfo.model}",
-                unique_id=str(uuid.uuid4()),
+                unique_id=hashlib.md5(
+                    f"IOSTAT {partitionDeviceInfo.model}".encode("utf-8")
+                ).hexdigest(),
                 device=partitionDeviceInfo,
                 unit_of_measurement="kB/s",
                 device_class="data_rate",
@@ -408,11 +452,15 @@ for dev_name in psdata.keys():
             )
             return psutil.disk_usage(ce.sensorInfo.device.identifiers[-1]).percent
 
-        if partitionDeviceInfo.identifiers is not None and len(partitionDeviceInfo.identifiers) > 1:
+        if (
+            partitionDeviceInfo.identifiers is not None and len(partitionDeviceInfo.identifiers) > 1
+        ):
             partitionInfo = ConfigEntityAutonomous(
                 sensorInfo=SensorInfo(
                     name=f"Usage {partitionDeviceInfo.model}",
-                    unique_id=str(uuid.uuid4()),
+                    unique_id=hashlib.md5(
+                        f"Usage {partitionDeviceInfo.model}".encode("utf-8")
+                    ).hexdigest(),
                     device=partitionDeviceInfo,
                     icon="mdi:harddisk",
                     unit_of_measurement="%",
@@ -428,7 +476,9 @@ for dev_name in psdata.keys():
 
 sambaUsers = ConfigEntityFromSamba(
     sensorInfo=SensorInfo(
-        name="Online Users", device=sambanas_device_info, unique_id=str(uuid.uuid4())
+        name="Online Users",
+        device=sambanas_device_info,
+        unique_id=hashlib.md5("Online Users".encode("utf-8")).hexdigest(),
     ),
     state_function=lambda ce: ce.samba["users"],
     samba=samba,
@@ -438,7 +488,7 @@ sambaConnections = ConfigEntityFromSamba(
     sensorInfo=SensorInfo(
         name="Active Connections",
         device=sambanas_device_info,
-        unique_id=str(uuid.uuid4()),
+        unique_id=hashlib.md5("Active Connections".encode("utf-8")).hexdigest(),
     ),
     state_function=lambda ce: ce.samba["connections"],
     attributes_function=lambda ce: {"open_files": ce.samba["open_files"]},
@@ -447,18 +497,6 @@ sambaConnections = ConfigEntityFromSamba(
 sensorList.append(("samba_connections", sambaConnections.createSensor()))
 
 tasks: list[asyncio.Task] = []
-
-
-def handler(signum, frame) -> None:
-    logging.warning("Signal %x. Unpublish %d sensors", signum, len(sensorList))
-
-    for task in tasks:
-        task.cancel()
-
-
-signal.signal(signal.SIGINT, handler=handler)
-signal.signal(signal.SIGTERM, handler=handler)
-signal.signal(signal.SIGHUP, handler=handler)
 
 
 async def publish_states() -> NoReturn:
@@ -474,14 +512,52 @@ async def publish_states() -> NoReturn:
         await asyncio.sleep(5)
 
 
+async def publish_idle_states() -> NoReturn:
+    with open(args["hdidle_log"]) as pipe_hdidle:
+        while True:
+            line = pipe_hdidle.readline()
+            if len(line) == 0:
+                logging.error(f"Pipe Broken {args["hdidle_log"]}!")
+                break
+            # Parse line with ilde status
+            # Aug  8 00:14:55 enterprise hd-idle[9958]: sda spindown
+            # Aug  8 00:14:55 enterprise hd-idle[9958]: sdb spindown
+            # Aug  8 00:14:56 enterprise hd-idle[9958]: sdc spindown
+            # Aug  8 00:17:55 enterprise hd-idle[9958]: sdb spinup
+            # Aug  8 00:28:55 enterprise hd-idle[9958]: sdb spindown
+            disk, status = line.split(' ', maxsplit=1)
+            logging.info("Disk %s change to status %s", disk, status.strip())
+            devicePowerStatus[disk] = status.strip()
+            logging.debug(devicePowerStatus)
+            for sensor in sensorList:
+                if isinstance(sensor[1], ConfigEntityFromHDIdle) and sensor[1].device.name == disk:
+                    logging.info("Updating sensor %s", sensor[0])
+                    if isinstance(sensor[1].sensor, BinarySensor):
+                        sensor[1].sensor.update_state(sensor[1].state_function(sensor[1]))
+                    elif isinstance(sensor[1].sensor, Sensor):
+                        sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))  # type: ignore
+                    if sensor[1].attributes_function is not None:
+                        sensor[1].sensor.set_attributes(
+                            sensor[1].attributes_function(sensor[1])
+                        )
+
+
 async def publish_device_states() -> NoReturn:
     while True:
         for sensor in sensorList:
             if isinstance(sensor[1], ConfigEntityFromDevice):
-                logging.info("Updating Device sensor %s", sensor[0])
+                logging.info(
+                    "Updating Device sensor %s (pw:%s)",
+                    sensor[0],
+                    devicePowerStatus.get(sensor[1].device.name),
+                )
+
+                if devicePowerStatus.get(sensor[1].device.name) == "spindown":
+                    continue
+
                 sensor[1].device.update()
                 if isinstance(sensor[1].sensor, BinarySensor):
-                    sensor[1].sensor._update_state(sensor[1].state_function(sensor[1]))
+                    sensor[1].sensor.update_state(sensor[1].state_function(sensor[1]))
                 elif isinstance(sensor[1].sensor, Sensor):
                     sensor[1].sensor.set_state(sensor[1].state_function(sensor[1]))
                 if sensor[1].attributes_function is not None:
@@ -493,6 +569,7 @@ async def publish_device_states() -> NoReturn:
 
 async def publish_iostate_states() -> NoReturn:
     while True:
+
         iostate: dict[str, sdiskio] = psutil.disk_io_counters(perdisk=True, nowrap=True)
 
         for sensor in sensorList:
@@ -524,27 +601,49 @@ async def publish_samba_states() -> NoReturn:
 
 
 async def run() -> None:
+
+    def doneCallback(task):
+        for sensor in sensorList:
+            logging.info("Unpublish sensor %s", sensor[0])
+            sensor[1].sensor.delete()
+
     # Loop Status publish
     async with asyncio.TaskGroup() as tg:
-        tasks.append(tg.create_task(publish_states(), name="Publish States"))
-        tasks.append(
-            tg.create_task(publish_device_states(), name="Publish Device States")
-        )
-        tasks.append(tg.create_task(publish_iostate_states(), name="Publish IO States"))
-        tasks.append(
-            tg.create_task(publish_samba_states(), name="Publish Samba States")
-        )
+        if args["hdidle_log"] is not None:
+            task = tg.create_task(publish_idle_states(), name="Read and Publish HD-IDLE states")
+            task.add_done_callback(doneCallback)
+            tasks.append(task)
+        task = tg.create_task(publish_states(), name="Publish States")
+        task.add_done_callback(doneCallback)
+        tasks.append(task)
+        task = tg.create_task(publish_device_states(), name="Publish Device States")
+        task.add_done_callback(doneCallback)
+        tasks.append(task)
+        task = tg.create_task(publish_iostate_states(), name="Publish IO States")
+        task.add_done_callback(doneCallback)
+        tasks.append(task)
+        task = tg.create_task(publish_samba_states(), name="Publish Samba States")
+        task.add_done_callback(doneCallback)
+        tasks.append(task)
 
-    for task in tasks:
-        try:
-            await task
-        except asyncio.CancelledError:
-            logging.info("Task %s cancelled!", task.get_name())
+    loop = asyncio.get_event_loop()
 
-    for sensor in sensorList:
-        logging.info("Unpublish sensor %s", sensor[0])
-        sensor[1].sensor.delete()
-        await asyncio.sleep(0.5)
+    async def ask_exit(signame):
+        logging.warning("Signal %x. Unpublish %d sensors", signame, len(sensorList))
+
+        loop.remove_signal_handler(signame)
+
+        for task in tasks:
+            try:
+                task.cancel()
+            finally:
+                logging.warning(f"Task {task.get_name()} cancelled!")
+
+    for signame in ('SIGINT', 'SIGTERM', 'SIGHUP'):
+        loop.add_signal_handler(getattr(signal, signame),
+                                lambda signame=signame: asyncio.create_task(ask_exit(signame)))
+
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":

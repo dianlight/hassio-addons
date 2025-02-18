@@ -3,9 +3,11 @@
 # ==============================================================================
 # Start hd-idle service
 # ==============================================================================
-if bashio::config.has_value 'hdd_idle_seconds'; then
+if bashio::config.has_value 'hdd_idle_seconds' && ! bashio::config.equals 'hdd_idle_seconds' '0'; then
     bashio::log.info "Enabling HDD IDLE after $(bashio::config 'hdd_idle_seconds')sec"
-    exec hd-idle -i "$(bashio::config 'hdd_idle_seconds')"
+    bashio::log.warning "HDD IDLE is subject to host file-handle policy. So severals minutes can be wait before real IDLE can be performed!"
+    mkfifo /tmp/hdidle.events || true
+    exec hd-idle -i "$(bashio::config 'hdd_idle_seconds')" | tee /tmp/hdidle.events
 else
     exec sleep infinity
 fi

@@ -7,6 +7,12 @@
    client min protocol = SMB2_10
    {{ end }}
 
+   {{if .multi_channel }}
+   server multi channel support = yes
+   aio read size = 1
+   aio write size = 1
+   {{ end }}  
+
    dns proxy = yes 
 
    ea support = yes
@@ -36,10 +42,12 @@
    netbios name = {{ env "HOSTNAME" }}
    workgroup = {{ .workgroup }}
    server string = Samba NAS HomeAssistant config
-   multicast dns register = no
+   multicast dns register = {{ if or .wsdd .wsdd2 }}no{{ else }}yes{{ end }}
 
    security = user
    ntlm auth = yes
+   idmap config * : backend = tdb
+   idmap config * : range = 1000000-2000000
 
    load printers = no
    disable spoolss = yes
@@ -50,10 +58,6 @@
    bind interfaces only = {{ .bind_all_interfaces | default false | ternary "no" "yes" }}
    interfaces = 127.0.0.1 {{ .interfaces | join " " }} {{ .docker_interface | default " "}}
    hosts allow = 127.0.0.1 {{ .allow_hosts | join " " }} {{ .docker_net | default " " }}
-
-   idmap config * : backend = tdb
-   idmap config * : range = 3000-7999
-
 
    mangled names = no
    dos charset = CP1253
@@ -100,7 +104,7 @@
    #recycle:maxsize = 0
 {{ end }}  
 
-# TM:{{ if has $dinfo.fs $unsupported }}unsupported{{else}}{{ .timemachine }}{{ end }} {{- if .medialibrary.enable }} {{ if .usage }}USAGE:{{ .usage }} {{ end }} FS:{{ $dinfo.fs | default "native" }} {{ if .recyle_bin_enabled }} RECYCLEBIN {{ end }} {{ end }}
+# TM:{{ if has $dinfo.fs $unsupported }}unsupported{{else}}{{ .timemachine }}{{ end }} US:{{ .users|default .username|join "," }} {{ .ro_users|join "," }}{{- if .medialibrary.enable }}{{ if .usage }} CL:{{ .usage }}{{ end }} FS:{{ $dinfo.fs | default "native" }} {{ if .recyle_bin_enabled }}RECYCLEBIN{{ end }} {{ end }}
 {{- if and .timemachine (has $dinfo.fs $unsupported | not ) }}
    vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
 
@@ -122,7 +126,7 @@
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
                 {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}} 
-                {{- if eq $dd.share $ndisk -}}
+                {{- if eq ($dd.share|upper) ($ndisk|upper) -}}
                         {{- $def := deepCopy $dd }}
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}

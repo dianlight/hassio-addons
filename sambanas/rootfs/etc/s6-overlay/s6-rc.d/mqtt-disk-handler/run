@@ -111,7 +111,7 @@ if [ -f /root/.config/mosquitto_pub ]; then
                     }' <<<"$row")
                 ;;
             *)
-                bashio::log.waring "Autodiscovery for $entity missing!"
+                bashio::log.warning "Autodiscovery for $entity missing!"
                 ;;
             esac
             #bashio::log.info "2.4 $base $exmsg"
