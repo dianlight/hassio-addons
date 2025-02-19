@@ -30,6 +30,16 @@
   ],
   "packageRules": [
     {
+      "groupName":"SambaNas",
+      "matchBaseBranches":"devrelease/sambanas",
+      "includePaths": ["/sambanas/**"]
+    },
+    {
+      "groupName":"BeSim",
+      "matchBaseBranches":"devrelease/besim",
+      "includePaths": ["/besim/**"]
+    },    
+    {
       "groupName": "Add-on base image",
       "matchDatasources": ["docker"]
     },
