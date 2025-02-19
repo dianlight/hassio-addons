@@ -32,12 +32,12 @@
     {
       "matchBaseBranches":"devrelease/sambanas",
       "matchFileNames":["/besim/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enable":false
+      "enabled":false
     },
     {
       "matchBaseBranches":"devrelease/besim",
       "matchFileNames":["/sambanas/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enable":false
+      "enabled":false
     },
     {
       "groupName":"SambaNas",
