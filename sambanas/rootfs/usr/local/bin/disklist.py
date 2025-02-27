@@ -2,16 +2,15 @@
 
 # Return the list of mountable external Devices
 
-from diskinfo import DiskType, DiskInfo
-import subprocess
-import re
+from diskinfo import DiskInfo
 
 
-di=DiskInfo()
-disks=di.get_disk_list(sorting=True)
+di = DiskInfo()
+disks = di.get_disk_list(sorting=True)
 regex = r"Name:\s+(\w+)\s.*\n"
 for d in disks:
-    if d.get_partition_table_type()=="": continue
+    if d.get_partition_table_type() == "":
+        continue
     plist = d.get_partition_list()
     for item in plist:
         label = item.get_fs_label()

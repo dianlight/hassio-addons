@@ -33,7 +33,18 @@
       "!csharp",
       "log"
     ],
-    "pythonTestExplorer.testFramework": null,
-    "python.testing.pytestEnabled": true
+    "flake8.args": [
+      "--max-line-length=132",
+      "--ignore=E128"
+    ],
+    "conventionalCommits.scopes": [
+      "gh_actions",
+      "monorepo",
+      "api",
+      "webapp",
+      "http_server",
+      "samba",
+      "docker"
+    ]
   }
 }

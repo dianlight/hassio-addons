@@ -1,60 +1,126 @@
 # Changelog
 
+## 12.3.2-nas1
+
+### 🩹 BugFix
+
+- Build for armv7 arch Fix: [#288](https://github.com/dianlight/hassio-addons/issues/288)]
+
+### 🏗 Chore
+
+- c018288 ⬆️ Update ha-mqtt-discoverable to v0.16.4
+- 9989ae7 ⬆️ Update humanize to v4.12.1
+- 93e576d ⬆️ Update ldez/gha-mjolnir action to v1.5.0
+- 4fcddcc ⬆️ Update pySMART to v1.4.1
+- 382ae4c ⬆️ Update psutil to v7
+- ed888dc ⬆️ Update ghcr.io/hassio-addons/base Docker tag to v17.2.1 (#327)
+- Better CI and Change scripts
+- Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)
+- WSDD2. Use patch from openwrt to compile on GCC14 and 64bit
+
+## 12.3.2-nas
+
+### ✨ Features
+
+- Allow use of samba multicast dns register
+- New `wsdd` option to enable/disable wsdd
+- New Sensor `Power` if you enable `hdd_idle_seconds` option in config
+- New Option `multi_channel` to Enable multi-channel in smb.conf [#262](https://github.com/dianlight/hassio-addons/issues/262)
+
+### 🩹 BugFix
+
+- Fix Startup/Shutdown sequence [#252](https://github.com/dianlight/hassio-addons/issues/252)
+- Fix ACL miss on mixed-case disk's labels [#257](https://github.com/dianlight/hassio-addons/issues/257)
+- Fix passwords with spaces [#251](https://github.com/dianlight/hassio-addons/issues/251)
+- `bind_all_interfaces` option now act also on wsdd or wsdd2 daemon
+- Fix medialibrary can't use moredisks that contain a reserved word [#250](https://github.com/dianlight/hassio-addons/issues/250)
+- HD-Idle log monitoring. Fix [#240](https://github.com/dianlight/hassio-addons/issues/240)
+- Fix MQTT ID Changes Fix [#247](https://github.com/dianlight/hassio-addons/issues/247)
+
+### 🏗 Chore
+
+- [Full Changelog from official addon 12.3.2][changelog_12.3.2]
+  - Suppress benign idmap logged error
+- [Full Changelog from official addon 12.3.1][changelog_12.3.1]
+  - Handle passwords with backslash correctly
+- [Full Changelog from official addon 12.3.0][changelog_12.3.0]
+  - Upgrade Alpine Linux to 3.19 (Skipped)
+- Update Based Image to 16.3.6 (Alpine 3.20.3, Samba 4.19.9)
+- On trace log level the smb.conf and other datas are dumped in the ADDONS_CONFIG directory
+- Reduced smartd output
+- Update DOCS.md with more note on Power management use
+
+### 👁️ Known Issue
+
+- MQTT Entities sometime are not deleted on close
+
+[changelog_12.3.0]: https://github.com/home-assistant/addons/pull/3456
+[changelog_12.3.1]: https://github.com/home-assistant/addons/pull/3508
+[changelog_12.3.2]: https://github.com/home-assistant/addons/pull/3704
+
 ## 12.2.0-nas2
 
-###  ✨ Features
-- New `bind_all_interfaces` option to allow work with pseudo ethernet devices. Support Tailscale may work for [#176](https://github.com/dianlight/hassio-addons/issues/176) 
+### ✨ Features
 
-###  🩹 BugFix
+- New `bind_all_interfaces` option to allow work with pseudo ethernet devices. Support Tailscale may work for [#176](https://github.com/dianlight/hassio-addons/issues/176)
+
+### 🩹 BugFix
+
 - Pin Python packages version on all platform. [#206](https://github.com/dianlight/hassio-addons/issues/206)
 - Change DOS charset to CP1253. [#204](https://github.com/dianlight/hassio-addons/issues/204)
 
 ### 🏗 Chore
-- Update Based Image to 15.0.6 (Alpine 3.19.1)
 
+- Update Based Image to 15.0.6 (Alpine 3.19.1)
 
 ## 12.2.0-nas1
 
-###  ✨ Features
+### ✨ Features
+
 - New `mqtt_nexgen_entities` option and scripts to enable new MQTT integration. This will be the default system for future integration is more efficent and use less resources but now is **Experimental**
 - `automount` now see also APFS drivers
-- Support reuse names from reserved share disabled  (for [#188](https://github.com/dianlight/hassio-addons/issues/188))
+- Support reuse names from reserved share disabled (for [#188](https://github.com/dianlight/hassio-addons/issues/188))
 
 ### 💥 BREAKING CHANGE
+
 - Removed deprecated `mqtt_use_legacy_entities` option and scripts.
 - Drop support for `armhf` and `i386`
 
-###  🩹 BugFix
+### 🩹 BugFix
+
 - 🐛 [Samba NAS] Auto mount fails afterupgrade to 12.1.0-nas [#181](https://github.com/dianlight/hassio-addons/issues/181)
 - SambaNAS - error after update /etc/s6-overlay/s6-rc.d/init-samba/run: line 47: /tmp/local_mount.json: No such file or directory [#194](https://github.com/dianlight/hassio-addons/issues/194)
 
 ## 12.2.0-nas
 
-###  ✨ Features
+### ✨ Features
+
 - Move addon config in `addons_config`
 - Homeassitant Automount also with different user in acl
 - ✨ [REQUEST] Support for APFS formatted hard drives [#184](https://github.com/dianlight/hassio-addons/issues/184) - Only ReadOnly for now
 
-###  🩹 BugFix
+### 🩹 BugFix
+
 - 🐛 [SambaNAS] Can't mount moredisks with label that contains a reserved word as substring [#188](https://github.com/dianlight/hassio-addons/issues/188)
 - 🐛 [sambanas] 0x80070032 The request is not supported [#182](https://github.com/dianlight/hassio-addons/issues/182)
-- 🐛 [SAMBA NAS] Unable to upload or rename files in external usb  [#171](https://github.com/dianlight/hassio-addons/issues/171)
+- 🐛 [SAMBA NAS] Unable to upload or rename files in external usb [#171](https://github.com/dianlight/hassio-addons/issues/171)
 - 🐛 [SAMBA NAS] Getting error 100093 when trying to add a file via SMB on an external exFat disk attached to the pi [#175](https://github.com/dianlight/hassio-addons/issues/175)
 
 ### 💥 BREAKING CHANGE
+
 - **This is the last version with** `mqtt_use_legacy_entities`. Legacy implementation will be removed in next version.
-- "vfat" "msdos"	"f2fs" "fuseblk" and "exfat" are now marked unsupported for timemachine.
+- "vfat" "msdos" "f2fs" "fuseblk" and "exfat" are now marked unsupported for timemachine.
 - Internal HA Storage Mount is done with a generated superuser
 
 ### 🏗 Chore
+
 - [Full Changelog from official addon 12.2.0][changelog_12.2.0]
   - Decrease Samba log level (Skipped. Loglevel is configurable)
 - Update Based Image to 15.0.3 (Alpine 3.19.0)
 
 ### 🧪 Experimental
+
 - Rework on all MQTT client implementation. [In Progress]
-
-
 
 [changelog_12.2.0]: https://github.com/home-assistant/addons/pull/3002
 
@@ -81,36 +147,46 @@
 [changelog_10.0.2]: https://github.com/home-assistant/addons/pull/3062
 [changelog_10.0.1]: https://github.com/home-assistant/addons/pull/2997
 
-###  🩹 BugFix
+### 🩹 BugFix
+
 - Fix mount concurrency. Solve some issue on addon-restart. (try to resolve [#159](https://github.com/dianlight/hassio-addons/issues/159))
 
-###  ✨ Features
+### ✨ Features
+
 - Based Image 14.1.0 (Alpine 3.18.3)
 - Added recycle bin option option default is set to 'false' [cherry pick from PR#167] ([DOCS.md][docs])
 - Added mount options default is set to 'nosuid,relatime,noexec' [cherry pick from PR#167] ([DOCS.md][docs])
-- Added filter for reserved sharenames (config addons ssl share backup media) [cherry pick from PR#167] 
-
+- Added filter for reserved sharenames (config addons ssl share backup media) [cherry pick from PR#167]
 
 ## 10.0.2-nas4
-###  🩹 BugFix
+
+### 🩹 BugFix
+
 - Fix mount bug for ha 2023.7.x without acl config.
 
 ## 10.0.2-nas3
 
 ### ✨ Features
+
 - Add support of `acl.usage` to specify what scope of disk is, usefull for network storage mount in ha ([DOCS.md][docs])
 
-###  🩹 BugFix
-- Always add docker network to whitelist - Try fix  [#157](https://github.com/dianlight/hassio-addons/issues/157)
+### 🩹 BugFix
+
+- Always add docker network to whitelist - Try fix [#157](https://github.com/dianlight/hassio-addons/issues/157)
 - Correct cifs mount precedence. Try fix [[#159](https://github.com/dianlight/hassio-addons/issues/159)]
 
 ### 💥 BREAKING CHANGE
+
 - Default `acl.timemachine` option now is set to `true`
 
 ## 10.0.2-nas2
+
 ### ✨ Features
+
 - Read only users [[#141](https://github.com/dianlight/hassio-addons/issues/141)]
+
 ### 🩹 BugFix
+
 - Fix Bug [[#154](https://github.com/dianlight/hassio-addons/issues/154)]
 - Fix Bug [[#155](https://github.com/dianlight/hassio-addons/issues/155)]
 

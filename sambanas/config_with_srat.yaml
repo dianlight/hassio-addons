@@ -15,7 +15,7 @@ ports:
   3000/tcp: 3000
 ports_description:
   3000/tcp: Web and API UI
-ingress: false
+ingress: true
 ingress_port: 3000
 ingress_entry: static/index.html
 panel_icon: mdi:folder-network
@@ -116,6 +116,7 @@ schema:
         - str?
       timemachine: bool?
       usage: list(media|backup|share)?
+  update_srat_onstart: list(no|release|prerelease)?
   interfaces:
     - str?
   bind_all_interfaces: bool?
