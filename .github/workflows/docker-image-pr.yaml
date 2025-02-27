@@ -45,9 +45,11 @@ jobs:
                     echo "BR_VERSION from github ref ${_GITHUB_REF}"
                 fi
                 echo "BR_VERSION=${_GITHUB_REF##*/}" | tee -a "$GITHUB_OUTPUT"
+                echo "BR_PROJECT=$(TMP=${_GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
               else
                 echo "BR_VERSION from event"  
                 echo "BR_VERSION=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
+                echo "BR_PROJECT=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
               fi
           id: extract_branch
 
@@ -61,5 +63,6 @@ jobs:
           with:
                 args: |
                     --all \
-                    --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+                    --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
                     --docker-hub dianlight
+                    --cosign
