@@ -64,5 +64,5 @@ jobs:
                 args: |
                     --all \
                     --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
-                    --docker-hub dianlight
+                    --docker-hub dianlight \
                     --cosign
