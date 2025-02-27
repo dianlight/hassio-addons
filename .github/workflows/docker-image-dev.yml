@@ -75,7 +75,7 @@ jobs:
         shell: bash
         id: git_sha_master
         run: |
-          echo "sha=$(git rev-parse origin/master)" >> $GITHUB_OUTPUT   
+          echo "sha=$(git rev-parse origin/master)" >> $GITHUB_OUTPUT
 
       - name: Create prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }} if not exists
         continue-on-error: true
@@ -89,11 +89,32 @@ jobs:
       - name: 🧑🏽‍💻 pull-request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         continue-on-error: true
         shell: bash
         run: |
+          set -x
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          git restore .
-          git clean -f
-          gh pr create --base "prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*"
+          #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
+          #  git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
+          #git restore .
+          #git clean -f
+          #git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
+          #  gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*" --body-file -
+          #git fetch origin master
+          #gh pr create --base "prerelease2/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+          #  --title "Releasing ${{ github.ref }} into prerelease" \
+          #  --fill \
+          #  --head "${{ github.ref }}"
+          #  --template "pull_request_template.md"
+          #  --draft
+          #
+          git fetch origin master ${BRANCH_NAME}
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master"
+          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
+          gh pr create \
+            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --head "${BRANCH_NAME}" \
+            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --fill || :

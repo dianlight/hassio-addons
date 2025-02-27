@@ -1,0 +1,27 @@
+name: PR Body Syncronizer
+
+on:
+    pull_request:
+        types: [ synchronize, opened ]
+    workflow_dispatch:
+
+jobs:
+  updateBody:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+          with:
+                submodules: true
+
+        - name: pull-request
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+          continue-on-error: true
+          shell: bash
+          run: |
+            set -x
+            git config --global user.email "workflow-bot@github.com"
+            git config --global user.name "Prerelease Bot"
+            git fetch origin master ${BRANCH_NAME}
+            git log --no-merges --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${{ github.event.pull_request.number }} --body-file -
