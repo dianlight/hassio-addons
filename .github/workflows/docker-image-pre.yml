@@ -12,6 +12,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +29,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract branch name
+      - name: 📽️ Extract dev branch project name
+        shell: bash
+        run: |
+           FULL_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/prerelease/}}"
+           echo "full_name=${FULL_NAME} >> $GITHUB_OUTPUT
+           echo "name=${FULL_NAME%%_*}" >> $GITHUB_OUTPUT
+        id: extract_project
+
+      - name: ✍🏼 version ${{ steps.extract_project.outputs.name }}
+        id: version_get
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./${{ steps.extract_project.outputs.name }}/config.yaml
+          path: version
+          get: true
+
+      - name: 📽️ Identify SemVer ${{ steps.version_get.outputs.value_old }} suffix
         shell: bash
         run: |
            echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
@@ -37,7 +58,7 @@ jobs:
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
-          set: .beta${{ github.run_number }}
+          set: ${{ steps.semver-suffix.outputs.suffix }}beta${{ github.run_number }}
           get: true
           append: true
 
@@ -50,7 +71,7 @@ jobs:
           set: -β
           get: true
           append: true
-            
+
       - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
         if: false
         uses: home-assistant/builder@master
@@ -88,7 +109,7 @@ jobs:
           git config --global user.name "Prerelease Bot"
           git restore .
           git clean -f
-          
+
       - name: pull-request ${{ steps.version_set.outputs.value_old }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -96,7 +117,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          git fetch origin master ${BRANCH_NAME} 
+          git fetch origin master ${BRANCH_NAME}
           gh pr create --head "${BRANCH_NAME}" \
           --title "Releasing ${BRANCH_NAME}" \
           --fill \
