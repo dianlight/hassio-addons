@@ -34,10 +34,22 @@ jobs:
         - name: Extract branch name
           shell: bash
           run: |
+              env
+              #echo ${{ github.head_ref || github.ref_name }}
               if [ -z "${{ github.event.inputs.addon }}" ]; then
-                echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+                if [ -z "${{ github.head_ref || github.ref_name }}" ]; then
+                    export _GITHUB_REF=${GITHUB_REF}
+                    echo "BR_VERSION from env ref ${_GITHUB_REF}"
+                else
+                    export _GITHUB_REF=${{ github.head_ref || github.ref_name }}
+                    echo "BR_VERSION from github ref ${_GITHUB_REF}"
+                fi
+                echo "BR_VERSION=${_GITHUB_REF##*/}" | tee -a "$GITHUB_OUTPUT"
+                echo "BR_PROJECT=$(TMP=${_GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
               else
-                echo "BR_VERSION=${{ github.event.inputs.addon }}" >> "$GITHUB_OUTPUT"
+                echo "BR_VERSION from event"  
+                echo "BR_VERSION=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
+                echo "BR_PROJECT=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
               fi
           id: extract_branch
 
@@ -51,5 +63,6 @@ jobs:
           with:
                 args: |
                     --all \
-                    --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-                    --docker-hub dianlight
+                    --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
+                    --docker-hub dianlight \
+                    --cosign
