@@ -35,15 +35,18 @@ jobs:
           shell: bash
           run: |
               env
-              echo ${{ github.head_ref || github.ref_name }}
+              #echo ${{ github.head_ref || github.ref_name }}
               if [ -z "${{ github.event.inputs.addon }}" ]; then
                 if [ -z "${{ github.head_ref || github.ref_name }}" ]; then
                     export _GITHUB_REF=${GITHUB_REF}
+                    echo "BR_VERSION from env ref ${_GITHUB_REF}"
                 else
-                    export _GITHUB_REF=${{ github.event.inputs.addon }}
+                    export _GITHUB_REF=${{ github.head_ref || github.ref_name }}
+                    echo "BR_VERSION from github ref ${_GITHUB_REF}"
                 fi
                 echo "BR_VERSION=${_GITHUB_REF##*/}" | tee -a "$GITHUB_OUTPUT"
               else
+                echo "BR_VERSION from event"  
                 echo "BR_VERSION=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
               fi
           id: extract_branch
