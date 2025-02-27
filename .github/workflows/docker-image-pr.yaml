@@ -38,13 +38,13 @@ jobs:
               echo ${{ github.head_ref || github.ref_name }}
               if [ -z "${{ github.event.inputs.addon }}" ]; then
                 if [ -z "${{ github.head_ref || github.ref_name }}" ]; then
-                    _GITHUB_REF=${GITHUB_REF}
+                    export _GITHUB_REF=${GITHUB_REF}
                 else
-                    _GITHUB_REF=${{ github.event.inputs.addon }}
+                    export _GITHUB_REF=${{ github.event.inputs.addon }}
                 fi
-                echo "BR_VERSION=${_GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+                echo "BR_VERSION=${_GITHUB_REF##*/}" | tee -a "$GITHUB_OUTPUT"
               else
-                echo "BR_VERSION=${{ github.event.inputs.addon }}" >> "$GITHUB_OUTPUT"
+                echo "BR_VERSION=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
               fi
           id: extract_branch
 
