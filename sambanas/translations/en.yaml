@@ -49,7 +49,7 @@ configuration:
     name: Enable recyle_bin on share
     description: Allow client SO to use Recycle Bin functionality on share
   wsdd:
-    name: Enable the use of extreanl WSDD daemon
+    name: Enable the use of external WSDD daemon
     description: Setting this option to `true` will enable the use of wsdd over internal samba system.
   wsdd2:
     name: Enable the use of Netgear WSDD daemon
