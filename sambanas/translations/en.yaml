@@ -79,7 +79,8 @@ configuration:
     name: Enable the exposition of disk information via MQTT
     description: Setting this option to `true` will enable the use of mqtt to send disks status data.
   autodiscovery:
-    disable_discovery:
+      name: "Autodiscovery options"
+  disable_discovery:
       name: Enable the automatic MQTT messages
       description: Setting this option to `true` will disable the sending of Auto Discovery MQTT messages. You need to configure MQTT sensors manually
   other_users:

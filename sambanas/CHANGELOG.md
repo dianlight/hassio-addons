@@ -17,6 +17,7 @@ SRAT is still under development, but we're excited about the future. We're activ
 - [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 
 ###  🩹 BugFix
+- Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
 ##### __🚧 Work in progess__
 - [ ] MQTT Entities sometime are not deleted on close
 - [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
@@ -31,6 +32,7 @@ SRAT is still under development, but we're excited about the future. We're activ
   - Enable Samba configurations to improve interoperability with Apple devices (Already applied)
 
 [changelog_12.3.3]: https://github.com/home-assistant/addons/commit/be105fa07eedf5b29fc9ce9d0702914f5a8d6b03
+[changelog_12.4.0]: https://github.com/home-assistant/addons/pull/3877
 [changelog_12.5.0]: https://github.com/home-assistant/addons/commit/976afaf0206afb40d456a007cdc90b72f0943f13
 
 ## 12.3.2-nas1
