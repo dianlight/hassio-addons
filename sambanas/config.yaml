@@ -15,7 +15,7 @@ ports:
   3000/tcp: null
 ports_description:
   3000/tcp: Web and API UI
-ingress: false
+ingress: true
 ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
 ingress_entry: static/index.html
 panel_icon: mdi:folder-network
@@ -149,5 +149,5 @@ auth_api: true
 homeassistant_api: true
 timeout: 60
 breaking_versions:
-  - 12.3.2-nas2 # Version with SRAT enabled as first source of configuration
+  - 12.5.0-nas  # Version with SRAT enabled as first source of configuration
   - 12.3.2-nas1 # Update to 12.3.2-nas1 bring SRAT Admin Panel and remove options
