@@ -1,6 +1,6 @@
 # Changelog
 
-## 12.3.2-nas2 [ 🚧 Unreleased ]
+## 12.5.0-nas [ 🚧 Unreleased ]
 
 ### 🎉 NEWS NEWS 🎉
 Today, I'm excited to introduce SRAT, our new web interface designed to simplify SambaNAS configuration and management.
@@ -10,17 +10,28 @@ SRAT is a game-changer for SambaNAS administrators. It offers an intuitive inter
 SRAT is still under development, but we're excited about the future. We're actively seeking feedback and contributions from the community to make SRAT even better.
 
 ###  ✨ Features
-- [X] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) ) 
+- [X] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
 - [X] New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
 ###### __🚧 Work in progess__
 - [ ] New Admin Panel ( SRAT ) **Experimantal**
-- [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208) 
+- [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 
 ###  🩹 BugFix
 ##### __🚧 Work in progess__
 - [ ] MQTT Entities sometime are not deleted on close
 - [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
 
+### 🏗 Chore
+
+- [Full Changelog from official addon 12.3.2][changelog_12.5.0]
+  - Add the ability to enable and disable trying to become a local master browser on a subnet
+- [Full Changelog from official addon 12.4.0][changelog_12.4.0]
+  - (Skip) Add the ability to enable and disable specific shares, improving user control over folder access
+- [Full Changelog from official addon 12.3.3][changelog_12.3.3]
+  - Enable Samba configurations to improve interoperability with Apple devices (Already applied)
+
+[changelog_12.3.3]: https://github.com/home-assistant/addons/commit/be105fa07eedf5b29fc9ce9d0702914f5a8d6b03
+[changelog_12.5.0]: https://github.com/home-assistant/addons/commit/976afaf0206afb40d456a007cdc90b72f0943f13
 
 ## 12.3.2-nas1
 
@@ -39,7 +50,7 @@ SRAT is still under development, but we're excited about the future. We're activ
 - Better CI and Change scripts
 - Remove HDDTEMP for deprecation [#265](https://github.com/dianlight/hassio-addons/issues/265)
 - WSDD2. Use patch from openwrt to compile on GCC14 and 64bit
-  
+
 ## 12.3.2-nas
 
 ### ✨ Features

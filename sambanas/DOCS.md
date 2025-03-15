@@ -17,9 +17,7 @@ Follow these steps to get the add-on installed on your system:
 ## How to use
 
 1. In the configuration section, set a username and password.
-2. Save the configuration.
-3. Start the add-on.
-4. Check the add-on log output to see the result.
+2. Review the enabled shares. Disable any you do not plan to use. Shares can be re-enabled later if needed.
 
 ## Connection
 
@@ -44,6 +42,7 @@ Fields between `<` and `>` indicate values that are omitted and need to be chang
 
 ```yaml
 workgroup: WORKGROUP
+local_master: true
 username: Hassio
 password: "<Your secret password>"
 allow_hosts:
@@ -89,6 +88,10 @@ acl:
 ### Option: `workgroup` (required)
 
 Change WORKGROUP to reflect your network needs.
+
+### Option: `local_master` (required)
+
+Enable to try and become a local master browser on a subnet.
 
 ### Option: `username` (required)
 
@@ -177,7 +180,7 @@ Defaults to `false`.
 
 The **_PRIVATE_** key for SSH access to the host on port 22222.
 
-Enables mounting of `moredisk` by the host and not by the container. 
+Enables mounting of `moredisk` by the host and not by the container.
 
 NOTE<sup>1</sup>: It works only and only on HassOS on other hosts it is not tested and most likely it does not work.
 
@@ -238,10 +241,10 @@ Defaults to none
 If is true the share is exposed with timechine compatible setting.
 
 Defaults to `false` for internal share, `true` forn extra disks.
- 
+
 ### Option: `usage` (optional) (**valid only for external disks**)
 
-Set the scope of the disk, usefull for ha network storage mount. Valid values are `media`,`backup`,`share` 
+Set the scope of the disk, usefull for ha network storage mount. Valid values are `media`,`backup`,`share`
 
 Defaults to `media` for external disks if `medialibray` is enabled.
 
@@ -274,7 +277,7 @@ Defaults to `false`.
 
 ### Option: `wsdd`
 
-Setting this option to `true` will enable the use of wsdd over internal samba system. 
+Setting this option to `true` will enable the use of wsdd over internal samba system.
 
 Defaults to `true`.
 
@@ -288,8 +291,8 @@ Defaults to `false`.
 
 Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
 
-**NOTE<sup>1</sup>**: Depending on your environment host system can take up to **10minutes** to unlock used file on disk so setting to a low number like 10 don't garantee that the disk go on sleep after 10s from last access. Sometime you need to wait 10 or 15 minutes. 
-**NOTE<sup>2</sup>**: If you use `mqtt_nexgen_entities` also enable a new sensor for power disk status. 
+**NOTE<sup>1</sup>**: Depending on your environment host system can take up to **10minutes** to unlock used file on disk so setting to a low number like 10 don't garantee that the disk go on sleep after 10s from last access. Sometime you need to wait 10 or 15 minutes.
+**NOTE<sup>2</sup>**: If you use `mqtt_nexgen_entities` also enable a new sensor for power disk status.
 
 Defaults to hd-idle demon not being used at all.
 
@@ -324,7 +327,7 @@ Defaults to `false`.
 
 Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
 
-**NOTE<sup>1</sup>**: If your HDD newer spindown please set `hdd_idle_seconds`.  
+**NOTE<sup>1</sup>**: If your HDD newer spindown please set `hdd_idle_seconds`.
 
 
 Defaults to `false`.
@@ -379,7 +382,7 @@ SRAT (Samba REST Administration Tool) is a new system designed to provide a simp
 
 Currently under development and in an alpha state, SRAT is set to become the preferred system for configuring and using this addon, eventually "retiring" the YAML configuration.
 
-Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool ) 
+Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool )
 on the choosed channel.
 
 Defaults to `no`
