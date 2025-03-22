@@ -1,4 +1,6 @@
 #!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
 # ==============================================================================
 # Start srat service
 # ==============================================================================
@@ -10,18 +12,24 @@ if bashio::config.has_value 'update_srat_onstart'; then
   bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
   if bashio::config.equals 'update_srat_onstart' 'release'; then
     bashio::log.info "Updating to ${RELEASE_TAG}"
-    curl -L https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch) >/usr/local/bin/srat
+    curl -L "https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $RELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
   else
     bashio::log.info "Updating to ${PRERELEASE_TAG}"
-    curl -L https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch) >/usr/local/bin/srat
+    curl -L "https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $PRERELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
   fi
   chmod +x /usr/local/bin/srat
 fi
 
 # s6-svc -r /var/run/s6/services/<service name>
+# -addon \
+
 exec /usr/local/bin/srat \
   -port 3000 \
   -conf /config/bootconfig.json \
-  -ro true
+  -db /data/config.db3 \
+  -out /etc/samba/smb.conf \
+  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
+
