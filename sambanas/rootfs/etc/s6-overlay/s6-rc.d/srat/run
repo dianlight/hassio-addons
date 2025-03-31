@@ -12,10 +12,12 @@ if bashio::config.has_value 'update_srat_onstart'; then
   bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
   if bashio::config.equals 'update_srat_onstart' 'release'; then
     bashio::log.info "Updating to ${RELEASE_TAG}"
+    bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch)"  
     curl -L "https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $RELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
   else
     bashio::log.info "Updating to ${PRERELEASE_TAG}"
+    bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch)"  
     curl -L "https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $PRERELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
   fi
