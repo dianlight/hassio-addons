@@ -15,11 +15,15 @@ if bashio::config.has_value 'update_srat_onstart'; then
     bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch)"  
     curl -L "https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $RELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
-  else
+  elif bashio::config.equals 'update_srat_onstart' 'prerelease'; then
     bashio::log.info "Updating to ${PRERELEASE_TAG}"
     bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch)"  
     curl -L "https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat_$(arch)" >/usr/local/bin/srat
     #gh -R dianlight/srat release download $PRERELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
+  elif bashio::config.equals 'update_srat_onstart' 'localdev'; then
+    bashio::log.info "Updating to from local_addon_registry.home repository"
+    bashio::log.debug "Downloading from local_addon_registry.home repository"
+    curl -L "http://local_addon_registry.home:8090/srat_$(arch)" >/usr/local/bin/srat
   fi
   chmod +x /usr/local/bin/srat
 fi
@@ -29,6 +33,7 @@ fi
 
 exec /usr/local/bin/srat \
   -port 3000 \
+  -addon \
   -conf /config/bootconfig.json \
   -db /data/config.db3 \
   -out /etc/samba/smb.conf \
