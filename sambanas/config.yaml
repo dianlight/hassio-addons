@@ -1,6 +1,6 @@
 ---
 name: Samba NAS⍺
-version: 12.5.0-nas.alpha7
+version: 12.5.0-nas.alpha8
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -11,12 +11,12 @@ arch:
   - amd64
 startup: initialize
 webui: http://[HOST]:[PORT:3000]/static/index.html
-ports:
-  3000/tcp: null
-ports_description:
-  3000/tcp: Web and API UI
+#ports:
+#  3000/tcp: null
+#ports_description:
+#  3000/tcp: Web and API UI
 ingress: true
-ingress_port: 3000 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
+ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
 ingress_entry: index.html
 panel_icon: mdi:folder-network
 panel_title: Samba NAS

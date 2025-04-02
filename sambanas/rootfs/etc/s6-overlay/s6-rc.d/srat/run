@@ -32,7 +32,7 @@ fi
 # -addon \
 
 exec /usr/local/bin/srat \
-  -port 3000 \
+  -port $(bashio::addon.ingress_port) \
   -addon \
   -conf /config/bootconfig.json \
   -db /data/config.db3 \
