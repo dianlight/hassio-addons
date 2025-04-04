@@ -95,3 +95,5 @@ configuration:
   bind_all_interfaces:
     name: Enable the use of all network interfaces
     description: Force Samba to bind on all network interface. This is usefull for pseudo-ethernet devices like TailScale
+network:
+  3000/tcp: Web interface (to use without Home Assistant)

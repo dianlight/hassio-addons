@@ -33,7 +33,7 @@ fi
 
 exec /usr/local/bin/srat \
   -port $(bashio::addon.ingress_port) \
-  -addon \
+  $(bashio::var.has_value "$(bashio::addon.port 3000)" || echo " -addon") \
   -conf /config/bootconfig.json \
   -db /data/config.db3 \
   -out /etc/samba/smb.conf \

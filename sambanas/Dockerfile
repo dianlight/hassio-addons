@@ -112,7 +112,9 @@ RUN apk add --no-cache \
     py3-pip \
     pipx \
     poetry \
-    lsblk 
+    lsblk \
+    socat \
+    figlet
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
