@@ -145,11 +145,10 @@ devicetree: false
 apparmor: true
 host_ipc: true
 advanced: true
-homeassistant: 2025.3.0
+homeassistant: 2025.4.0
 backup: hot
 auth_api: true
 homeassistant_api: true
 timeout: 60
 breaking_versions:
   - 12.5.0-nas  # Version with SRAT enabled as first source of configuration
-  - 12.3.2-nas1 # Update to 12.3.2-nas1 bring SRAT Admin Panel and remove options
