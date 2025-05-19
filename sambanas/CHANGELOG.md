@@ -18,12 +18,13 @@ SRAT is still under development, but we're excited about the future. We're activ
 
 ###  🩹 BugFix
 - Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
+- [X] Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
 ##### __🚧 Work in progess__
 - [ ] MQTT Entities sometime are not deleted on close
 - [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
 
 ### 🏗 Chore
-
+- Update Based Image to 17.2.5 (Alpine 3.21.3, Samba 4.20.6)
 - [Full Changelog from official addon 12.3.2][changelog_12.5.0]
   - Add the ability to enable and disable trying to become a local master browser on a subnet
 - [Full Changelog from official addon 12.4.0][changelog_12.4.0]
