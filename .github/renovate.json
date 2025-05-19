@@ -5,8 +5,13 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
-  "labels": ["dependencies", "no-stale"],
-  "baseBranches": ["/^devrelease\\/.*/"],
+  "labels": [
+    "dependencies",
+    "no-stale"
+  ],
+  "baseBranches": [
+    "/^devrelease\\/.*/"
+  ],
   "commitMessagePrefix": "⬆️",
   "commitMessageTopic": "{{depName}}",
   "configMigration": true,
@@ -19,7 +24,10 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["/Dockerfile$", "/build.yaml$"],
+      "managerFilePatterns": [
+        "//Dockerfile$/",
+        "//build.yaml$/"
+      ],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ARG BUILD_FROM=(?<depName>.*?):(?<currentValue>.*?)\\s+",
@@ -30,33 +38,54 @@
   ],
   "packageRules": [
     {
-      "matchBaseBranches":"devrelease/sambanas",
-      "matchFileNames":["/besim/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enabled":false
+      "matchBaseBranches": "devrelease/sambanas",
+      "matchFileNames": [
+        "/besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "matchBaseBranches":"devrelease/besim",
-      "matchFileNames":["/sambanas/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enabled":false
+      "matchBaseBranches": "devrelease/besim",
+      "matchFileNames": [
+        "/sambanas/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "groupName":"SambaNas",
-      "matchBaseBranches":"devrelease/sambanas",
-      "includePaths": ["/sambanas/**"]
+      "groupName": "SambaNas",
+      "matchBaseBranches": "devrelease/sambanas",
+      "includePaths": [
+        "/sambanas/**"
+      ]
     },
     {
-      "groupName":"BeSim",
-      "matchBaseBranches":"devrelease/besim",
-      "includePaths": ["/besim/**"]
-    },    
+      "groupName": "BeSim",
+      "matchBaseBranches": "devrelease/besim",
+      "includePaths": [
+        "/besim/**"
+      ]
+    },
     {
       "groupName": "Add-on base image",
-      "matchDatasources": ["docker"]
+      "matchDatasources": [
+        "docker"
+      ]
     },
     {
       "groupName": "Add-on base image",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true
     }
   ]
