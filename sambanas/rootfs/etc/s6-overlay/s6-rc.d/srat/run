@@ -57,4 +57,5 @@ exec /usr/local/bin/srat \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
   $(bashio::config.equals 'update_srat_onstart' 'localdev' && echo " -update-file-path /config/srat_$(arch)") \
-  -loglevel $(bashio::config 'loglevel' 'info')
+  -loglevel $(bashio::config 'loglevel' 'info') \
+  -ip-address $(bashio::addon.ip_address)
