@@ -1,0 +1,154 @@
+---
+name: Samba NAS2-⍺
+version: 12.5.0-ns2.alpha0
+slug: sambanas2
+description: Expose Home Assistant disc with SMB/CIFS
+url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
+codenotary: lucio.tarantino@gmail.com
+arch:
+  - armv7
+  - aarch64
+  - amd64
+startup: initialize
+webui: http://[HOST]:[PORT:3000]/static/index.html
+ports:
+  3000/tcp: null
+ports_description:
+  3000/tcp: Web interface (to use without Home Assistant)
+ingress: true
+ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
+ingress_entry: index.html
+panel_icon: mdi:folder-network
+panel_title: Samba NAS 2
+panel_admin: true
+
+boot: auto
+init: false
+hassio_api: true
+hassio_role: admin
+host_network: true
+map:
+  - homeassistant_config:rw
+  - addon_config:rw
+  - ssl:rw
+  - all_addon_configs:rw
+  - addons:rw
+  - share:rw
+  - backup:rw
+  - media:rw
+options:
+  workgroup: WORKGROUP
+  username: homeassistant
+  local_master: true
+  allow_hosts:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+    - 169.254.0.0/16
+    - fe80::/10
+    - fc00::/7
+  automount: true
+  moredisks: []
+  mountoptions:
+    - nosuid
+    - relatime
+    - noexec
+  available_disks_log: true
+  medialibrary:
+    enable: false
+  veto_files:
+    - "._*"
+    - ".DS_Store"
+    - Thumbs.db
+    - icon?
+    - ".Trashes"
+  compatibility_mode: false
+  recyle_bin_enabled: false
+  wsdd2: false
+  wsdd: true
+  mqtt_nexgen_entities: false
+  autodiscovery: {}
+  other_users: []
+  acl: []
+  update_srat_onstart: no
+  interfaces: []
+schema:
+  workgroup: str
+  local_master: bool
+  username: str
+  password: password
+  automount: bool?
+  moredisks:
+    - str
+  mountoptions:
+    - str
+  available_disks_log: bool?
+  medialibrary:
+    enable: bool?
+    ssh_private_key: password?
+  allow_hosts:
+    - str
+  veto_files:
+    - str
+  compatibility_mode: bool?
+  recyle_bin_enabled: bool?
+  wsdd: bool
+  wsdd2: bool?
+  hdd_idle_seconds: int(0,)?
+  enable_smart: bool?
+  mqtt_nexgen_entities: bool?
+  mqtt_enable: bool?
+  mqtt_host: str?
+  mqtt_username: str?
+  mqtt_password: password?
+  mqtt_port: str?
+  mqtt_topic: str?
+  autodiscovery:
+    disable_discovery: bool?
+    disable_persistent: bool?
+    disable_autoremove: bool?
+  other_users:
+    - username: str
+      password: str
+  acl:
+    - share: str
+      disabled: bool?
+      users:
+        - str?
+      ro_users:
+        - str?
+      timemachine: bool?
+      usage: list(media|backup|share)?
+  update_srat_onstart: list(no|release|prerelease|localdev)?
+  interfaces:
+    - str?
+  bind_all_interfaces: bool?
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
+  meaning_of_life: int?
+  multi_channel: bool?
+  leave_front_door_open: bool?
+
+#image: dianlight/{arch}-addon-sambanas
+services:
+  - mqtt:want
+udev: true
+usb: true
+host_dbus: true
+kernel_modules: true
+privileged:
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - SYS_RESOURCE
+  - SYS_MODULE
+full_access: true
+devicetree: false
+apparmor: true
+host_ipc: true
+advanced: true
+homeassistant: 2025.4.0
+backup: hot
+auth_api: true
+homeassistant_api: true
+timeout: 60
+breaking_versions:
+  - 12.5.0-nas  # Version with SRAT enabled as first source of configuration

@@ -1,0 +1,47 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Prepare the MQTT config for running
+# ==============================================================================
+readonly CONF="/root/.config/mosquitto_pub"
+readonly CONF_SUB="/root/.config/mosquitto_sub"
+declare host
+declare username
+declare password
+declare port
+declare topic
+
+if bashio::config.true "mqtt_enable"; then
+
+
+    topic=$(bashio::config 'mqtt_topic' "sambanas")
+    host=$(bashio::config 'mqtt_host' "$(bashio::services 'mqtt' 'host')")
+    username=$(bashio::config 'mqtt_username' "$(bashio::services 'mqtt' 'username')")
+    password=$(bashio::config 'mqtt_password' "$(bashio::services 'mqtt' 'password')")
+    port=$(bashio::config 'mqtt_port' "$(bashio::services 'mqtt' 'port')")
+
+    topic=$(bashio::config 'mqtt_topic')
+
+    #bashio::log.info "Init MQTT config ${host}:${port} ${username}:${password}"
+
+    [ -z "$host" ] && bashio::log.warning "No MQTT Server found. Homeassistant integration can't work!"
+
+    if bashio::var.has_value "host" && ! bashio::config.false "mqtt_enable" && [ -n "$host" ]; then
+        {
+            echo "-h ${host}"
+            echo "--username ${username}"
+            echo "--pw ${password}"
+            echo "--port ${port}"
+        } >"${CONF}"
+        {
+            echo "-h ${host}"
+            echo "--username ${username}"
+            echo "--pw ${password}"
+            echo "--port ${port}"
+        } >"${CONF_SUB}"
+    fi
+else
+
+    bashio::log.info "MQTT support not enabled in config"
+
+fi
