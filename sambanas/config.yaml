@@ -1,5 +1,5 @@
 ---
-name: Samba NAS⍺
+name: Samba NAS
 version: 12.5.0-nas
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
@@ -136,4 +136,4 @@ auth_api: true
 homeassistant_api: true
 timeout: 60
 breaking_versions:
-  - 12.5.0-nas  # Version with SRAT enabled as first source of configuration
+  - 12.5.0-nas  # Turn in maintence mode
