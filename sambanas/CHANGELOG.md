@@ -2,24 +2,25 @@
 
 ## 12.5.0-nas [ 🚧 Unreleased ]
 
-### 🎉 NEWS NEWS 🎉
-Today, I'm excited to introduce SRAT, our new web interface designed to simplify SambaNAS configuration and management.
+### 🚨 Important Notice Regarding SambaNas Addon Development
 
-SRAT is a game-changer for SambaNAS administrators. It offers an intuitive interface that streamlines tasks, from setting up shares to monitoring system health.
+**SambaNas Addon is Now in Maintenance Mode**
 
-SRAT is still under development, but we're excited about the future. We're actively seeking feedback and contributions from the community to make SRAT even better.
+This notice is to inform our users that the **SambaNas addon will now transition into maintenance mode.** This means that **no future features will be implemented** for this version of the addon. Our development efforts will be focused solely on providing **critical bug fixes** to ensure its continued stability for existing users.
 
-###  ✨ Features
-- [X] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
-- [X] New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
-###### __🚧 Work in progess__
-- [ ] New Admin Panel ( SRAT ) **Experimantal**
-- [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
+**Introducing SambaNas2: The Future of Samba Integration**
+
+We are excited to announce **SambaNas2**, the successor to the original SambaNas addon! SambaNas2 represents a **complete rewrite from the ground up, developed in Go with a brand new core.** This will bring significant improvements in performance, stability, and future extensibility.
+
+**Current Status and Upcoming Beta Release**
+
+SambaNas2 is currently in an **Alpha stage** of development. We are pleased to announce that a **public Beta version will be released in the coming weeks** and will be available through our beta channel.
+
+We encourage users interested in the latest features and improvements to keep an eye out for the SambaNas2 beta release. Thank you for your continued support.
 
 ###  🩹 BugFix
 - Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
-- [X] Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
-##### __🚧 Work in progess__
+- Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
 - [ ] MQTT Entities sometime are not deleted on close
 - [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
 

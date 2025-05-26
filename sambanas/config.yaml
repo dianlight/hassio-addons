@@ -10,18 +10,6 @@ arch:
   - aarch64
   - amd64
 startup: initialize
-webui: http://[HOST]:[PORT:3000]/static/index.html
-ports:
-  3000/tcp: null
-ports_description:
-  3000/tcp: Web interface (to use without Home Assistant)
-ingress: true
-ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
-ingress_entry: index.html
-panel_icon: mdi:folder-network
-panel_title: Samba NAS
-panel_admin: true
-
 boot: auto
 init: false
 hassio_api: true
@@ -70,7 +58,6 @@ options:
   autodiscovery: {}
   other_users: []
   acl: []
-  update_srat_onstart: no
   interfaces: []
 schema:
   workgroup: str
@@ -119,14 +106,12 @@ schema:
         - str?
       timemachine: bool?
       usage: list(media|backup|share)?
-  update_srat_onstart: list(no|release|prerelease|localdev)?
   interfaces:
     - str?
   bind_all_interfaces: bool?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   meaning_of_life: int?
   multi_channel: bool?
-  leave_front_door_open: bool?
 
 #image: dianlight/{arch}-addon-sambanas
 services:

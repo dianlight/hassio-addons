@@ -1,6 +1,23 @@
 # Home Assistant Add-on: Samba NAS share
 
-## ![#f03c15](https://via.placeholder.com/15/f03c15/f03c15.png) Important Note ![#f03c15](https://via.placeholder.com/15/f03c15/f03c15.png)
+# 📰 Important Notice Regarding SambaNas Addon Development
+
+**SambaNas Addon is Now in Maintenance Mode**
+
+This notice is to inform our users that the **SambaNas addon will now transition into maintenance mode.** This means that **no future features will be implemented** for this version of the addon. Our development efforts will be focused solely on providing **critical bug fixes** to ensure its continued stability for existing users.
+
+**Introducing SambaNas2: The Future of Samba Integration**
+
+We are excited to announce **SambaNas2**, the successor to the original SambaNas addon! SambaNas2 represents a **complete rewrite from the ground up, developed in Go with a brand new core.** This will bring significant improvements in performance, stability, and future extensibility.
+
+**Current Status and Upcoming Beta Release**
+
+SambaNas2 is currently in an **Alpha stage** of development. We are pleased to announce that a **public Beta version will be released in the coming weeks** and will be available through our beta channel.
+
+We encourage users interested in the latest features and improvements to keep an eye out for the SambaNas2 beta release. Thank you for your continued support.
+
+
+## 🚨 Important Note 🚨
 
 This addon has been designed, built and tested to work with HAOS (Homeassistant Operating System). The use in other types of installations is not recommended and useless as other solutions given by the host can be used.
 
@@ -375,17 +392,6 @@ Defaults to `false`.
 Setting this option to `true` will disable the delete of MQTT discovery messages when addon stop.
 
 Defaults to `false`.
-
-### Options `update_srat_onstart` (optional) **_Exteprimental_**
-
-SRAT (Samba REST Administration Tool) is a new system designed to provide a simplified user interface for configuring SAMBA. It has been developed to work within Home Assistant, specifically for this addon, but can also be used in other contexts.
-
-Currently under development and in an alpha state, SRAT is set to become the preferred system for configuring and using this addon, eventually "retiring" the YAML configuration.
-
-Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool )
-on the choosed channel.
-
-Defaults to `no`
 
 ## Support
 

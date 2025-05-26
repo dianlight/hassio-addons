@@ -10,6 +10,22 @@ Share your disks over the network using Windows file sharing.
 ![downloads evolution](https://raw.githubusercontent.com/dianlight/hassio-addons/master/sambanas/stats.png)
 -->
 
+## Important Notice Regarding SambaNas Addon Development
+
+**SambaNas Addon is Now in Maintenance Mode**
+
+This notice is to inform our users that the **SambaNas addon will now transition into maintenance mode.** This means that **no future features will be implemented** for this version of the addon. Our development efforts will be focused solely on providing **critical bug fixes** to ensure its continued stability for existing users.
+
+**Introducing SambaNas2: The Future of Samba Integration**
+
+We are excited to announce **SambaNas2**, the successor to the original SambaNas addon! SambaNas2 represents a **complete rewrite from the ground up, developed in Go with a brand new core.** This will bring significant improvements in performance, stability, and future extensibility.
+
+**Current Status and Upcoming Beta Release**
+
+SambaNas2 is currently in an **Alpha stage** of development. We are pleased to announce that a **public Beta version will be released in the coming weeks** and will be available through our beta channel.
+
+We encourage users interested in the latest features and improvements to keep an eye out for the SambaNas2 beta release. Thank you for your continued support.
+
 ## Installations
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas.total&label=SambaNas%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)
