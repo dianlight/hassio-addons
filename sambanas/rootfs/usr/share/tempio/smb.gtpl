@@ -11,18 +11,18 @@
    server multi channel support = yes
    aio read size = 1
    aio write size = 1
-   {{ end }}  
+   {{ end }}
 
-   dns proxy = yes 
+   dns proxy = yes
 
    ea support = yes
-   vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}  
+   vfs objects = catia fruit streams_xattr{{ if .recyle_bin_enabled }} recycle{{ end }}
    fruit:aapl = yes
    fruit:model = MacSamba
 
    fruit:resource = file
    fruit:veto_appledouble = no
-   fruit:posix_rename = yes 
+   fruit:posix_rename = yes
    fruit:wipe_intentionally_left_blank_rfork = yes
    fruit:zero_file_id = yes
    fruit:delete_empty_adfiles = yes
@@ -36,12 +36,13 @@
    min receivefile size = 16384
    getwd cache = yes
    aio read size = 1
-   aio write size = 1  
+   aio write size = 1
    # End PR#167
 
    netbios name = {{ env "HOSTNAME" }}
    workgroup = {{ .workgroup }}
    server string = Samba NAS HomeAssistant config
+   local master = {{ .local_master | ternary "yes" "no" }}
    multicast dns register = {{ if or .wsdd .wsdd2 }}no{{ else }}yes{{ end }}
 
    security = user
@@ -61,7 +62,7 @@
 
    mangled names = no
    dos charset = CP1253
-   unix charset = UTF-8   
+   unix charset = UTF-8
 
 {{ define "SHT" }}
 {{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
@@ -102,7 +103,7 @@
    #recycle:exclude =
    #recycle:exclude_dir =
    #recycle:maxsize = 0
-{{ end }}  
+{{ end }}
 
 # TM:{{ if has $dinfo.fs $unsupported }}unsupported{{else}}{{ .timemachine }}{{ end }} US:{{ .users|default .username|join "," }} {{ .ro_users|join "," }}{{- if .medialibrary.enable }}{{ if .usage }} CL:{{ .usage }}{{ end }} FS:{{ $dinfo.fs | default "native" }} {{ if .recyle_bin_enabled }}RECYCLEBIN{{ end }} {{ end }}
 {{- if and .timemachine (has $dinfo.fs $unsupported | not ) }}
@@ -125,7 +126,7 @@
 {{- range $disk := $disks -}}
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}} 
+                {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}}
                 {{- if eq ($dd.share|upper) ($ndisk|upper) -}}
                         {{- $def := deepCopy $dd }}
                         {{- $acld = true -}}
