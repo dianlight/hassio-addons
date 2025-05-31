@@ -1,6 +1,6 @@
 ---
 name: Samba NAS2-⍺
-version: 12.5.0-ns2.alpha0
+version: 12.5.0-ns2.alpha10
 slug: sambanas2
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
@@ -128,11 +128,11 @@ schema:
   multi_channel: bool?
   leave_front_door_open: bool?
 
-#image: dianlight/{arch}-addon-sambanas
+#image: dianlight/{arch}-addon-sambanas2
 services:
   - mqtt:want
 udev: true
-usb: true
+#usb: true
 host_dbus: true
 kernel_modules: true
 privileged:
