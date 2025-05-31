@@ -117,7 +117,7 @@ image: dianlight/{arch}-addon-sambanas
 services:
   - mqtt:want
 udev: true
-usb: true
+#usb: true
 host_dbus: true
 kernel_modules: true
 privileged:
