@@ -4,15 +4,18 @@
 # ==============================================================================
 # Start srat service
 # ==============================================================================
+ipaddress=$(bashio::addon.ip_address)
+
+bashio::log.info "Wait Samba Server to going up..(max 60s)"
+bashio::net.wait_for 445 ${ipaddress/\/*/} 60
 
 exec /usr/local/bin/srat-server \
   -port $(bashio::addon.ingress_port) \
   $(bashio::var.has_value "$(bashio::addon.port 3000)" || echo " -addon") \
-  -conf /config/bootconfig.json \
   -db /config/config.db3 \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
-  $(bashio::config.equals 'update_srat_onstart' 'localdev' && echo " -update-file-path /config/srat_$(arch)") \
+  $(bashio::config.equals 'update_srat_onstart' 'localdev' && echo " -update-file-path /config/srat-server_$(arch)") \
   -loglevel $(bashio::config 'loglevel' 'info') \
   -ip-address $(bashio::addon.ip_address)
