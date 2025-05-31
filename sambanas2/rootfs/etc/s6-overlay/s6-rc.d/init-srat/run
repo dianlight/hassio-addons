@@ -1,0 +1,86 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start srat-cli service
+# ==============================================================================
+
+PRERELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease)) | .[0].tag_name')
+RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.release)) | .[0].tag_name')
+tmp_file_cli=$(mktemp -u -t srat-cli.XXXXXX)
+tmp_file_server=$(mktemp -u -t srat-server.XXXXXX)
+
+if bashio::config.has_value 'update_srat_onstart'; then
+  bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
+  if bashio::config.equals 'update_srat_onstart' 'release'; then
+    bashio::log.info "Updating to ${RELEASE_TAG}"
+    bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat-[cli|server]_$(arch)"  
+    if ! curl --silent --fail -L "https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat-cli_$(arch)" >$tmp_file_cli; then
+      bashio::log.error "Failed to download srat release from github"
+    fi
+    if ! curl --silent --fail -L "https://github.com/dianlight/srat/releases/download/${RELEASE_TAG}/srat-server_$(arch)" >$tmp_file_server; then
+      bashio::log.error "Failed to download srat release from github"
+    fi
+    #gh -R dianlight/srat release download $RELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
+  elif bashio::config.equals 'update_srat_onstart' 'prerelease'; then
+    bashio::log.info "Updating to ${PRERELEASE_TAG}"
+    bashio::log.debug "Downloading from https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat-[cli|server]_$(arch)"  
+    if ! curl --silent --fail -L "https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat-cli_$(arch)" >$tmp_file_cli; then
+      bashio::log.error "Failed to download srat prerelease from github"
+    fi
+    if ! curl --silent --fail -L "https://github.com/dianlight/srat/releases/download/${PRERELEASE_TAG}/srat-server_$(arch)" >$tmp_file_server; then
+      bashio::log.error "Failed to download srat prerelease from github"
+    fi
+    #gh -R dianlight/srat release download $PRERELEASE_TAG -p "srat_$(arch)" -O /usr/local/bin/srat --clobber
+  elif bashio::config.equals 'update_srat_onstart' 'localdev'; then    
+    bashio::log.info "Updating to from local_addon_registry.home repository"
+    bashio::log.debug "Downloading from local_addon_registry.home repository"  
+    if ! curl --silent --fail -L "http://local_addon_registry.home:8090/srat-cli_$(arch)" >$tmp_file_cli; then
+      bashio::log.error "Failed to download srat from local_addon_registry.home"
+      if [ -f /config/srat-cli_$(arch) ]; then
+        bashio::log.info "Using existing srat from /config/srat-cli_$(arch)"
+        tmp_file_cli=/config/srat-cli_$(arch)
+      else
+        bashio::log.error "Failed to download srat from local_addon_registry.home and no existing srat-cli_$(arch) found"
+      fi
+    fi
+    if ! curl --silent --fail -L "http://local_addon_registry.home:8090/srat-server_$(arch)" >$tmp_file_server; then
+      bashio::log.error "Failed to download srat from local_addon_registry.home"
+      if [ -f /config/srat-server_$(arch) ]; then
+        bashio::log.info "Using existing srat from /config/srat-server_$(arch)"
+        tmp_file_server=/config/srat-server_$(arch)
+      else
+        bashio::log.error "Failed to download srat from local_addon_registry.home and no existing srat-server_$(arch) found"
+      fi
+    fi
+  fi
+
+  if [ -f $tmp_file_cli ]; then
+    bashio::log.info "Installing $tmp_file_cli to /usr/local/bin/srat-cli"
+    cp -v $tmp_file_cli /usr/local/bin/srat-cli
+    chmod +x /usr/local/bin/srat-cli
+  else
+    bashio::log.error "Failed to download srat from github"
+  fi
+  if [ -f $tmp_file_server ]; then
+    bashio::log.info "Installing $tmp_file_server to /usr/local/bin/srat-server"
+    cp -v $tmp_file_server /usr/local/bin/srat-server
+    chmod +x /usr/local/bin/srat-server
+  else
+    bashio::log.error "Failed to download srat from github"
+  fi
+fi
+
+ls -al /usr/local/bin/srat* 
+
+/usr/local/bin/srat-cli \
+  -conf /config/bootconfig.json \
+  -db /config/config.db3 \
+  -out /etc/samba/smb.conf \
+  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
+  -loglevel $(bashio::config 'loglevel' 'info') \
+  2>&1
+
+ bashio::log.info "srat-cli ok"
+
