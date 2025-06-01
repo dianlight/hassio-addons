@@ -122,10 +122,9 @@ RUN  mkdir -p /var/lib/samba \
     /var/lib/samba/winbindd_idmap.tdb
 
 # SRAT
-#RUN curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat-server_${BUILD_ARCH}" \
-#    && chmod a+x /usr/local/bin/srat && echo "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat-server_${BUILD_ARCH}" \
-#    && curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat-cli_${BUILD_ARCH}" \
-#    && chmod a+x /usr/local/bin/srat && echo "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat-cli_${BUILD_ARCH}" \
+RUN curl -Lso /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}.zip" \
+    && unzip /tmp/srat.zip -d /usr/local/bin/ \
+    && chmod a+x /usr/local/bin/srat* 
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
