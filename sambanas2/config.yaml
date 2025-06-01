@@ -1,9 +1,9 @@
 ---
-name: Samba NAS
-version: 12.3.2-nas1
-slug: sambanas
+name: Samba NAS2-⍺
+version: 12.5.0-ns2
+slug: sambanas2
 description: Expose Home Assistant disc with SMB/CIFS
-url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
+url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
 codenotary: lucio.tarantino@gmail.com
 arch:
   - armv7
@@ -12,14 +12,14 @@ arch:
 startup: initialize
 webui: http://[HOST]:[PORT:3000]/static/index.html
 ports:
-  3000/tcp: 3000
+  3000/tcp: null
 ports_description:
-  3000/tcp: Web and API UI
+  3000/tcp: Web interface (to use without Home Assistant)
 ingress: true
-ingress_port: 3000
-ingress_entry: static/index.html
+ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
+ingress_entry: index.html
 panel_icon: mdi:folder-network
-panel_title: Samba NAS
+panel_title: Samba NAS 2
 panel_admin: true
 
 boot: auto
@@ -39,6 +39,7 @@ map:
 options:
   workgroup: WORKGROUP
   username: homeassistant
+  local_master: true
   allow_hosts:
     - 10.0.0.0/8
     - 172.16.0.0/12
@@ -69,9 +70,11 @@ options:
   autodiscovery: {}
   other_users: []
   acl: []
+  update_srat_onstart: no
   interfaces: []
 schema:
   workgroup: str
+  local_master: bool
   username: str
   password: password
   automount: bool?
@@ -116,17 +119,18 @@ schema:
         - str?
       timemachine: bool?
       usage: list(media|backup|share)?
-  update_srat_onstart: list(no|release|prerelease)?
+  update_srat_onstart: list(no|release|prerelease|localdev|localfile)?
   interfaces:
     - str?
   bind_all_interfaces: bool?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   meaning_of_life: int?
   multi_channel: bool?
+  leave_front_door_open: bool?
 
-image: dianlight/{arch}-addon-sambanas
-services:
-  - mqtt:want
+image: dianlight/{arch}-addon-sambanas2
+#services:
+#  - mqtt:want
 udev: true
 #usb: true
 host_dbus: true
@@ -140,8 +144,11 @@ full_access: true
 devicetree: false
 apparmor: true
 host_ipc: true
-#advanced: true
-homeassistant: 2023.11.0
+advanced: true
+homeassistant: 2025.4.0
 backup: hot
-# Get Points!!!
 auth_api: true
+homeassistant_api: true
+timeout: 60
+breaking_versions:
+  - 12.5.0-nas  # Version with SRAT enabled as first source of configuration

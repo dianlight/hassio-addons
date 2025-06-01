@@ -1,4 +1,38 @@
+---
 configuration:
+  username:
+    name: Username
+    description: >-
+      The username you would like to use to authenticate with the Samba server.
+  password:
+    name: Password
+    description: >-
+      The password that goes with the username configured for authentication.
+  workgroup:
+    name: Workgroup
+    description: Change WORKGROUP to reflect your network needs.
+  local_master:
+    name: Local master
+    description: Enable to try and become a local master browser on a subnet.
+  enabled_shares:
+    name: >-
+      Enabled Shares - allowed values are:
+      addons, addon_configs, backup, config, media, share, or ssl.
+    description: >-
+      List of file shares to make available.
+      Adding a share requires typing its name to add it.
+      The listed values are the only allowed values.
+      The configuration cannot be saved if any non-allowed value is in the list.
+  compatibility_mode:
+    name: Enable Compatibility Mode
+    description: >-
+      Enable this to use old legacy Samba protocols on the Samba add-on.
+  veto_files:
+    name: Veto Files
+    description: List of files that are neither visible nor accessible.
+  allow_hosts:
+    name: Allowed Hosts
+    description: List of hosts/networks allowed to access the shared folders.
   automount:
     name: Enable Automatic Mount
     description: Automatic mount and expose all labeled disk.
@@ -11,18 +45,11 @@ configuration:
   medialibrary:
     name: Configure the mount in media path
     description: Enable the visibility of `moredisk` on /media path.
-  compatibility_mode:
-    name: Enable compatibility with old legacy clients
-    description: |-
-      Setting this option to `true` will enable old legacy Samba protocols
-      on the Samba add-on. This might solve issues with some clients that cannot
-      handle the newer protocols, however, it lowers security. Only use this
-      when you absolutely need it and understand the possible consequences.
   recyle_bin_enabled:
     name: Enable recyle_bin on share
     description: Allow client SO to use Recycle Bin functionality on share
   wsdd:
-    name: Enable the use of extreanl WSDD daemon
+    name: Enable the use of external WSDD daemon
     description: Setting this option to `true` will enable the use of wsdd over internal samba system.
   wsdd2:
     name: Enable the use of Netgear WSDD daemon
@@ -52,7 +79,8 @@ configuration:
     name: Enable the exposition of disk information via MQTT
     description: Setting this option to `true` will enable the use of mqtt to send disks status data.
   autodiscovery:
-    disable_discovery:
+      name: "Autodiscovery options"
+  disable_discovery:
       name: Enable the automatic MQTT messages
       description: Setting this option to `true` will disable the sending of Auto Discovery MQTT messages. You need to configure MQTT sensors manually
   other_users:
