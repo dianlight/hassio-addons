@@ -31,17 +31,18 @@ if bashio::config.has_value 'update_srat_onstart'; then
     fi
   elif bashio::config.equals 'update_srat_onstart' 'localfile'; then
     bashio::log.info "Updating to from local_addon_registry.home repository"
-    if [ -f /config/srat-cli_$(arch) ]; then
-      bashio::log.info "Using existing srat from /config/srat-cli_$(arch)"
-      cp -f /config/srat* $tmp_dir
+    if [ -f /config/srat-cli ]; then
+      bashio::log.info "Using existing srat from /config/srat*"
+      cp -v /config/srat* ${tmp_dir}
+      ls -al ${tmp_dir}
     else
       bashio::log.error "No update found"
     fi
   fi
-  find $tmp_dir -name "srat*" -exec echo "Installing {} to /usr/local/bin/" -exec mv -v {} /usr/local/bin/ \;
+  mv -v $tmp_dir/srat* /usr/local/bin/ | :
 fi
 
-ls -al /usr/local/bin/srat*
+#ls -al /usr/local/bin/srat*
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
