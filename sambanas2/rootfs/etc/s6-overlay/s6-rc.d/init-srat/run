@@ -9,7 +9,7 @@ PRERELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | 
 RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.release)) | .[0].tag_name')
 tmp_dir=$(mktemp -d -t srat.XXXXXX)
 BASE_URL=https://github.com/dianlight/srat/releases/download/
-ZIP_NAME=srat_${BUILD_ARCH}.zip
+ZIP_NAME=srat_$(arch).zip
 DOWNLOAD_URL=http://local_addon_registry.home:8090/
 
 if bashio::config.has_value 'update_srat_onstart'; then
@@ -33,7 +33,7 @@ if bashio::config.has_value 'update_srat_onstart'; then
     bashio::log.info "Updating to from local_addon_registry.home repository"
     if [ -f /config/srat-cli_$(arch) ]; then
       bashio::log.info "Using existing srat from /config/srat-cli_$(arch)"
-      mv -v /config/srat* $tmp_dir
+      cp -f /config/srat* $tmp_dir
     else
       bashio::log.error "No update found"
     fi
