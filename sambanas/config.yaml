@@ -1,6 +1,6 @@
 ---
 name: Samba NAS
-version: 12.3.2-nas1
+version: 12.5.0-nas
 slug: sambanas
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
@@ -10,18 +10,6 @@ arch:
   - aarch64
   - amd64
 startup: initialize
-webui: http://[HOST]:[PORT:3000]/static/index.html
-ports:
-  3000/tcp: 3000
-ports_description:
-  3000/tcp: Web and API UI
-ingress: false
-ingress_port: 3000
-ingress_entry: static/index.html
-panel_icon: mdi:folder-network
-panel_title: Samba NAS
-panel_admin: true
-
 boot: auto
 init: false
 hassio_api: true
@@ -39,6 +27,7 @@ map:
 options:
   workgroup: WORKGROUP
   username: homeassistant
+  local_master: true
   allow_hosts:
     - 10.0.0.0/8
     - 172.16.0.0/12
@@ -72,6 +61,7 @@ options:
   interfaces: []
 schema:
   workgroup: str
+  local_master: bool
   username: str
   password: password
   automount: bool?
@@ -139,8 +129,11 @@ full_access: true
 devicetree: false
 apparmor: true
 host_ipc: true
-#advanced: true
-homeassistant: 2023.11.0
+advanced: true
+homeassistant: 2025.4.0
 backup: hot
-# Get Points!!!
 auth_api: true
+homeassistant_api: true
+timeout: 60
+breaking_versions:
+  - 12.5.0-nas  # Turn in maintence mode

@@ -30,21 +30,6 @@ RUN cd /usr/local/bin/ && \
     fi && \
     poetry install 
 
-# SRAT // DON'T ON ARMv7 WORK USE RELESES!
-#COPY /Users/ltarantino/Documents/Source/srat/backend/dist/srat /srat
-#RUN \ 
-#    if [ "$BUILD_ARCH" != "armv7" ]; then \ 
-#    cd / && git clone https://github.com/dianlight/srat.git \
-#    && GOBIN=/usr/local/bin/ go install github.com/swaggo/swag/cmd/swag@latest \
-#    && wget -q -O - https://bun.sh/install | bash  \
-#    && export BUN_INSTALL="$HOME/.bun" \
-#    && export PATH="$BUN_INSTALL/bin:$PATH" \
-#    && cd srat && make AARGS="$(AARGS)" SUFFIX="$(SUFFIX)" VERSION=$(VERSION) \
-#    && pwd; \
-#    else \
-#    mkdir -p /srat/backend/dist && touch /srat/backend/dist/srat; \
-#    fi
-
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
@@ -76,7 +61,6 @@ ENV S6_SYNC_DISKS=1
 # Setup base
 ARG BUILD_ARCH
 ARG CLI_VERSION
-ARG SRAT_VERSION
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
@@ -112,7 +96,9 @@ RUN apk add --no-cache \
     py3-pip \
     pipx \
     poetry \
-    lsblk 
+    lsblk \
+    socat \
+    figlet
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
@@ -133,10 +119,6 @@ RUN  mkdir -p /var/lib/samba \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
-
-# SRAT
-RUN curl -Lso /usr/local/bin/srat "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}" \
-    && chmod a+x /usr/local/bin/srat && echo "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${BUILD_ARCH}"
 
 # ENABLE FUSE APFS
 RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs

@@ -1,5 +1,6 @@
 #!/command/with-contenv bashio
 # shellcheck shell=bash
+# vim: ft=bash
 # ==============================================================================
 # Prepare the Samba service for running
 # ==============================================================================
@@ -80,7 +81,7 @@ addSambaUser "${username}" "${password}"
 # Init superuser
 if [ -f /tmp/cifs_network ]; then
     username="_ha_mount_user_"
-    password=$(cat /proc/sys/kernel/random/uuid | sed 's/[-]//g' | head -c 20)
+    password=$(sed 's/[-]//g' /proc/sys/kernel/random/uuid | head -c 20)
     addSambaUser "${username}" "${password}"
     jq -n --arg username "${username}" --arg password "${password}" '{username:$username, password:$password}' >/tmp/auth.json
 fi

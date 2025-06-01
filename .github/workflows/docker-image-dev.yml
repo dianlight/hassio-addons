@@ -40,10 +40,16 @@ jobs:
           set: .dev${{ github.run_number }}
           get: true
           append: true
-  
+
+      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        uses: pietrobolcato/action-read-yaml@1.1.0
+        id: read_action_js
+        with:
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
 
       - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
-        uses: home-assistant/builder@master
+        uses: home-assistant/builder@2025.03.0
+        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
@@ -53,6 +59,7 @@ jobs:
             --docker-hub dianlight
 
       - name: pull-request
+        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
