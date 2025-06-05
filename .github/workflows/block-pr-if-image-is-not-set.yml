@@ -17,7 +17,13 @@ jobs:
 
         - name: Extract branch name
           shell: bash
-          run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+          run: |
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              echo "BR_VERSION=${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+            else # For workflow_dispatch
+              # GITHUB_REF will be refs/heads/your-branch-name
+              echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+            fi
           id: extract_branch
 
         - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
