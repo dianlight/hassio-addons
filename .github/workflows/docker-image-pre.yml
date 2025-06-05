@@ -86,6 +86,8 @@ jobs:
           get: true
           # append: true is removed because 'set' is now providing the complete, desired value
 
+          
+
       - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
         if: false
         uses: home-assistant/builder@master

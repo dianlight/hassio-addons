@@ -95,14 +95,13 @@ jobs:
 
       - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
         uses: home-assistant/builder@2025.03.0
-        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
             --aarch64 \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --docker-hub dianlight
+            --docker-hub dianlight ${{ steps.read_action_js.outputs.image == '' && '--test' || '' }}
 
       - name: pull-request
         if: ${{ steps.read_action_js.outputs.image != '' }}
