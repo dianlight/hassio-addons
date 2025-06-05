@@ -39,10 +39,11 @@ if bashio::config.has_value 'update_srat_onstart'; then
       bashio::log.error "No update found"
     fi
   fi
-  mv -v $tmp_dir/srat* /usr/local/bin/ | :
+  bashio::log.info "Before move updated files ${tmp_dir}/srat* -> /usr/local/bin/"
+  bashio::log.info "Move updated files $(mv -v $tmp_dir/srat* /usr/local/bin/)"
 fi
 
-#ls -al /usr/local/bin/srat*
+ls -al /usr/local/bin/srat*
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
@@ -51,7 +52,6 @@ fi
   -conf /config/bootconfig.json \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
-  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
-  2>&1
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
 
 bashio::log.info "srat-cli ok"
