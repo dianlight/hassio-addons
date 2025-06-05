@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start besim service
+# ==============================================================================
+log_level=$(bashio::string.lower "$(bashio::config log_level info)")
+args="-l ${log_level^^} -c /config "
+if bashio::config.true 'work_as_proxy'; then
+    args="${args} -p $(bashio::config upstream_dns)"
+fi
+
+# FIXME: Add parameter or remove after data collection
+args="${args} --datalog-udp-path /config/upd.csv --datalog-tcp-path /config/tcp.csv"
+
+if bashio::config.has_value 'zone_entity'; then
+    COORS=$(curl -s -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/states/$(bashio::config 'zone_entity') | jq --raw-output '[.attributes.latitude, .attributes.longitude]|join(" ")')
+    if [ -z "${COORS//['\t\r\n ']/}" ]; then
+        bash::log.error "Entity $(bashio::config 'zone_entity') not found or is not a zone entity!"
+    else
+        args="${args} -w ${COORS}"
+    fi
+fi
+
+bashio::log.debug "${args}"
+# shellcheck disable=SC2086
+exec python3 /opt/BeSIM/app.py ${args}
