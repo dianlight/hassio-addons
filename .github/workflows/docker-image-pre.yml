@@ -74,8 +74,14 @@ jobs:
              VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}${{ github.run_number }}"
           fi
 
+          # Strip any existing .alpha<num> or .beta<num> suffix from the current version to get the base version
+          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(\.alpha[0-9]+|\.beta[0-9]+)$//')
+
+          # Construct the final version string by appending the determined suffix to the base version
+          FINAL_VERSION_STRING="${BASE_VERSION}${VERSION_SUFFIX_VALUE}"
+
           echo "FINAL_NAME_TO_SET=$PROCESSED_NAME" >> "$GITHUB_OUTPUT"
-          echo "VERSION_SUFFIX_TO_SET=$VERSION_SUFFIX_VALUE" >> "$GITHUB_OUTPUT"
+          echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_STRING" >> "$GITHUB_OUTPUT" # Output the complete new version string
           echo "ORIGINAL_NAME_IS_PLAIN=$ORIGINAL_NAME_IS_PLAIN" >> "$GITHUB_OUTPUT"
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
@@ -84,9 +90,9 @@ jobs:
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
-          set: ${{ steps.prepare_name_and_version_suffix.outputs.VERSION_SUFFIX_TO_SET }}
+          set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }} # Use the fully constructed version string
           get: true
-          append: true
+          # append: true is removed as 'set' now provides the complete desired value
 
       - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }}
         id: betaname_set
