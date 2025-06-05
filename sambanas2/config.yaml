@@ -128,7 +128,7 @@ schema:
   multi_channel: bool?
   leave_front_door_open: bool?
 
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true
@@ -151,4 +151,4 @@ auth_api: true
 homeassistant_api: true
 timeout: 60
 breaking_versions:
-  - 12.5.0-nas  # Version with SRAT enabled as first source of configuration
+  - 12.5.0-nas # Version with SRAT enabled as first source of configuration
