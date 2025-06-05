@@ -179,7 +179,7 @@ jobs:
 
           # 3. rsync SOURCE_DIR to TMP/ (which is the root of TARGET_COMPARE_BRANCH) with delete
           echo "Copying content from $GITHUB_WORKSPACE/$SOURCE_DIR/ to current directory ($PWD) using rsync..."
-          rsync -av --delete "$GITHUB_WORKSPACE/$SOURCE_DIR/" .
+          rsync -av --delete "$GITHUB_WORKSPACE/$SOURCE_DIR/" "./$SOURCE_DIR/"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to rsync source directory contents."
             exit 1
@@ -241,7 +241,6 @@ jobs:
               # Continue on error as per original action's continue-on-error: true
             fi
           fi
-
 
       - name: Restoring original repository
         shell: bash
