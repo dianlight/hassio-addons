@@ -30,33 +30,78 @@ jobs:
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
-
-      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_VERSION }}
-        id: version_set
-        uses: endaft/action-yamler@v1.1.1
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          path: version
-          set: .dev${{ github.run_number }}
-          get: true
-          append: true
+      #      - name: Uncomment image line in config.yaml if commented
+      #        shell: bash
+      #        run: |
+      #          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
+      #          echo "Checking and uncommenting image line in $CONFIG_FILE"
+      #          # Use sed to remove '# ' prefix from the line starting with '# image:'
+      #          sed -i 's/^#\s*image:/image:/' "$CONFIG_FILE"
+      #          echo "Finished uncommenting check."
 
       - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
         uses: pietrobolcato/action-read-yaml@1.1.0
         id: read_action_js
         with:
-          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          # This action reads all top-level keys, so 'name' and 'version' will be available
+          # as steps.read_action_js.outputs.name and steps.read_action_js.outputs.version
 
-      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
+      - name: Prepare Version and Name for YAML
+        id: prepare_yaml_values
+        shell: bash
+        run: |
+          CURRENT_VERSION_FROM_FILE="${{ steps.read_action_js.outputs.version }}"
+          CURRENT_NAME_FROM_FILE="${{ steps.read_action_js.outputs.name }}"
+
+          FINAL_VERSION_BASE="$CURRENT_VERSION_FROM_FILE"
+          FINAL_NAME="$CURRENT_NAME_FROM_FILE"
+
+          # Check for .alpha<N> suffix on version
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)\.alpha([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove .alpha<N> from version
+            if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
+              FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
+            fi
+          # Check for .beta<N> suffix on version
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)\.beta([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove .beta<N> from version
+            if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
+              FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
+            fi
+          fi
+
+          # Append .dev<run_number> to the (potentially modified) base version
+          FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}.dev${{ github.run_number }}"
+
+          echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_TO_SET" >> "$GITHUB_OUTPUT"
+          echo "FINAL_NAME_TO_SET=$FINAL_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: ✍🏼 Set version in ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        id: version_set # This ID is used by subsequent steps for value_old
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          path: version
+          set: ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
+          get: true # Captures the version value before this 'set' operation
+
+      - name: ✍🏼 Set name in ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          path: name
+          set: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
+
+      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon  ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
         uses: home-assistant/builder@2025.03.0
-        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
           args: |
             --aarch64 \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --docker-hub dianlight
+            --docker-hub dianlight ${{ steps.read_action_js.outputs.image == '' && '--test' || '' }}
 
       - name: pull-request
         if: ${{ steps.read_action_js.outputs.image != '' }}
@@ -69,21 +114,7 @@ jobs:
           set -x
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
-          #  git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
-          #git restore .
-          #git clean -f
-          #git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
-          #  gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*" --body-file -
-          #git fetch origin master    
-          #gh pr create --base "prerelease2/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \ 
-          #  --title "Releasing ${{ github.ref }} into prerelease" \ 
-          #  --fill \
-          #  --head "${{ github.ref }}"
-          #  --template "pull_request_template.md"
-          #  --draft
-          #  
-          git fetch origin master ${BRANCH_NAME}   
+          git fetch origin master ${BRANCH_NAME}
           git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master"
           git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
           gh pr create \
