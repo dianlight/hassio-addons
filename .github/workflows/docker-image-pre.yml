@@ -43,7 +43,8 @@ jobs:
         id: prepare_name_and_version_suffix
         shell: bash
         run: |
-          CURRENT_NAME_FROM_FILE="${{ steps.read_config.outputs.name }}"
+          CURRENT_NAME_FROM_FILE="${{ steps.read_config.outputs.name }}" # Original name from config.yaml
+          CURRENT_VERSION_FROM_FILE="${{ steps.read_config.outputs.version }}" # Original version from config.yaml
           PROCESSED_NAME="$CURRENT_NAME_FROM_FILE"
           VERSION_SUFFIX_VALUE=""
           ORIGINAL_NAME_IS_PLAIN="false"
@@ -55,11 +56,22 @@ jobs:
             PROCESSED_NAME="${PROCESSED_NAME}-β"
           fi
 
-          # Determine version suffix based on the PROCESSED_NAME
+          # Determine the expected suffix type based on the PROCESSED_NAME
+          EXPECTED_SUFFIX_TYPE=""
           if [[ "$PROCESSED_NAME" =~ \-⍺$ ]]; then
-            VERSION_SUFFIX_VALUE=".alpha${{ github.run_number }}"
+            EXPECTED_SUFFIX_TYPE=".alpha"
           elif [[ "$PROCESSED_NAME" =~ \-β$ ]]; then
-            VERSION_SUFFIX_VALUE=".beta${{ github.run_number }}"
+            EXPECTED_SUFFIX_TYPE=".beta"
+          fi
+
+          # Check if the current version already has a matching suffix
+          # If it does, use the existing suffix. Otherwise, append the new one.
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ (${EXPECTED_SUFFIX_TYPE}[0-9]+)$ ]]; then
+             # Version already has the correct suffix type, extract it
+             VERSION_SUFFIX_VALUE="${BASH_REMATCH[1]}" # Capture the whole suffix including the dot and number
+          else
+             # Version does not have the correct suffix type or no suffix, append the new one
+             VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}${{ github.run_number }}"
           fi
 
           echo "FINAL_NAME_TO_SET=$PROCESSED_NAME" >> "$GITHUB_OUTPUT"
@@ -86,7 +98,7 @@ jobs:
           get: true
           # append: true is removed because 'set' is now providing the complete, desired value
 
-          
+
 
       - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
         if: false
