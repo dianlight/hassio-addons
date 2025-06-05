@@ -93,7 +93,7 @@ jobs:
           path: name
           set: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
 
-      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
+      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon  ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
         uses: home-assistant/builder@2025.03.0
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}

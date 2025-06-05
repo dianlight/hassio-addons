@@ -2,6 +2,8 @@ name: PR Chack if Image is set in config
 
 on:
     pull_request:
+        branches-ignore:
+          - 'devrelease/**'
         types: [ synchronize, opened ]
     workflow_dispatch:
 
@@ -16,13 +18,13 @@ jobs:
         - name: Extract branch name
           shell: bash
           run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-          id: extract_branch                
+          id: extract_branch
 
         - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           uses: pietrobolcato/action-read-yaml@1.1.0
           id: read_action_js
           with:
-            config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
+            config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
 
         - name: Check image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }}
           if: ${{ steps.read_action_js.outputs.image == '' }}
