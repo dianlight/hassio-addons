@@ -47,7 +47,7 @@ ls -al /usr/local/bin/srat*
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
-  -loglevel $(bashio::config 'loglevel' 'info') \
+  -loglevel $(bashio::config 'log_level' 'info') \
   start \
   -conf /config/bootconfig.json \
   -out /etc/samba/smb.conf \

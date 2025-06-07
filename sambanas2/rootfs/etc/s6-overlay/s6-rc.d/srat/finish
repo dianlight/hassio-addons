@@ -7,7 +7,7 @@
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
-  -loglevel $(bashio::config 'loglevel' 'info') \
+  -loglevel $(bashio::config 'log_level' 'info') \
   stop \
   2>&1
 
