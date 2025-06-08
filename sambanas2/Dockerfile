@@ -99,7 +99,8 @@ RUN apk add --no-cache \
     poetry \
     lsblk \
     socat \
-    figlet
+    figlet \
+    shadow
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
