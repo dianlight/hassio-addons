@@ -92,7 +92,7 @@ schema:
   #  - str
   #compatibility_mode: bool?
   #recyle_bin_enabled: bool?
-  wsdd: bool   # for WSDD
+  wsdd: bool # for WSDD
   wsdd2: bool? # for WSDD
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
@@ -120,7 +120,7 @@ schema:
   #    timemachine: bool?
   #    usage: list(media|backup|share)?
   update_srat_onstart: list(no|release|prerelease|localdev|localfile)?
-  interfaces:  # for WSDD
+  interfaces: # for WSDD
     - str?
   bind_all_interfaces: bool? # for WSDD
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
@@ -128,7 +128,7 @@ schema:
   #multi_channel: bool?
   leave_front_door_open: bool?
 
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true
