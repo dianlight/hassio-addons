@@ -84,7 +84,7 @@ jobs:
           echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_STRING" >> "$GITHUB_OUTPUT" # Output the complete new version string
           echo "ORIGINAL_NAME_IS_PLAIN=$ORIGINAL_NAME_IS_PLAIN" >> "$GITHUB_OUTPUT"
 
-      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
+      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }}
         id: version_set
         uses: endaft/action-yamler@v1.1.1
         with:
@@ -94,7 +94,7 @@ jobs:
           get: true
           # append: true is removed as 'set' now provides the complete desired value
 
-      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }}
+      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}
         id: betaname_set
         uses: endaft/action-yamler@v1.1.1
         with:
@@ -103,14 +103,6 @@ jobs:
           set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }} # Set the prepared name
           get: true
           # append: true is removed because 'set' is now providing the complete, desired value
-
-      - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
-        if: false
-        uses: home-assistant/builder@master
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
-        with:
-          args: --all --target ${{ steps.extract_branch.outputs.BR_PROJECT }} --docker-hub dianlight
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         # uses: thzois/autobot@v1.0.3 # Replaced with gh CLI commands
@@ -179,7 +171,7 @@ jobs:
 
           # 3. rsync SOURCE_DIR to TMP/ (which is the root of TARGET_COMPARE_BRANCH) with delete
           echo "Copying content from $GITHUB_WORKSPACE/$SOURCE_DIR/ to current directory ($PWD) using rsync..."
-          rsync -av --delete "$GITHUB_WORKSPACE/$SOURCE_DIR/" "./$SOURCE_DIR/"
+          rsync -acv --force -I --delete "$GITHUB_WORKSPACE/$SOURCE_DIR/" "./$SOURCE_DIR/"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to rsync source directory contents."
             exit 1
