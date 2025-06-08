@@ -101,7 +101,8 @@ jobs:
           args: |
             --aarch64 \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --docker-hub dianlight ${{ steps.read_action_js.outputs.image == '' && '--test' || '' }}
+            --no-latest \
+            --docker-hub dianlight ${{ steps.read_action_js.outputs.image == '' && format('--test --image dianlight/aarch64-addon-{0}', steps.extract_branch.outputs.BR_VERSION) || '' }}
 
       - name: pull-request
         if: ${{ steps.read_action_js.outputs.image != '' }}
