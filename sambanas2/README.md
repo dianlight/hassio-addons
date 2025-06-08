@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Samba NAS 2 ![Logo](docs/full_logo.png)
+# Home Assistant Add-on: Samba NAS 2 ![Logo](https://github.com/dianlight/hassio-addons/raw/devrelease/sambanas2/sambanas2/docs/full_logo.png)
 
 The next generation addon for 
 share your disks over the network using Windows file sharing.

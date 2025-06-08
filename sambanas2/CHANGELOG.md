@@ -12,16 +12,20 @@ SRAT is engineered from the ground up to provide unparalleled control and flexib
 We believe SambaNAS2, with its fresh interface and the intelligent SRAT engine, will be a true game-changer for anyone looking to optimize their Home Assistant storage and sharing capabilities. Stay tuned for release details!
 
 ###  ✨ Features
-- [X] Brand New icon and logo AI Generated
-- [X] New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
+- Brand New icon and logo AI Generated
+- New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
+- New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
 ###### __🚧 Work in progess__
-- [ ] New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
 - [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
+- [ ] Migrate config from SambaNas addon
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon
+- Use [SRAT 2025.06.1.dev0801](https://github.com/dianlight/srat/tree/2025.06.1.dev0801)
+###### __🚧 Work in progess__
+- [ ] Update the documentation
 
-# SambaNas addon changelog!
+# SambaNas addon changelog! -- CUT BEFORE RELEASE
 
 ## 12.5.0-nas
 
