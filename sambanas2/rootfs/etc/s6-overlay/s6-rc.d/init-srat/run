@@ -45,11 +45,12 @@ fi
 
 ls -al /usr/local/bin/srat*
 
+#-conf /config/bootconfig.json \
+
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
   -loglevel $(bashio::config 'log_level' 'info') \
   start \
-  -conf /config/bootconfig.json \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
