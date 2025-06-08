@@ -1,6 +1,8 @@
 # Changelog
 
-## 12.5.0-nas [ 🚧 Unreleased ]
+## 12.5.0-nas [ Maintenance Mode ]
+
+### ✨ Features 
 
 ### 🚨 Important Notice Regarding SambaNas Addon Development
 
@@ -18,11 +20,11 @@ SambaNas2 is currently in an **Alpha stage** of development. We are pleased to a
 
 We encourage users interested in the latest features and improvements to keep an eye out for the SambaNas2 beta release. Thank you for your continued support.
 
+[Add our Hass.io BETA add-ons repository][beta-repository] to your Hass.io instance.
+
 ###  🩹 BugFix
 - Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
 - Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
-- [ ] MQTT Entities sometime are not deleted on close
-- [ ] Volumes with whitespace in label [#285](https://github.com/dianlight/hassio-addons/issues/285)
 
 ### 🏗 Chore
 - Update Based Image to 17.2.5 (Alpine 3.21.3, Samba 4.20.6)
