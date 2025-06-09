@@ -36,7 +36,7 @@ if bashio::config.true 'wsdd2'; then
     bashio::log.info "Starting the WSDD2 daemon $(printf '%s ' "${interfaces[@]}") for ${SMB_GROUP}/${SMB_HOST}..."
     setcap CAP_NET_RAW+ep /usr/sbin/wsdd2
     # shellcheck disable=SC2046
-    exec /usr/sbin/wsdd2 -t -u -w $(printf '%s ' "${interfaces[@]}") -H "${SMB_HOST}" -b vendor:homeassistant,model:sambanas
+    exec /usr/sbin/wsdd2 -t -u -w $(printf '%s ' "${interfaces[@]}") -H "${SMB_HOST}" -b vendor:homeassistant,model:sambanas2
 elif bashio::config.true 'wsdd'; then
     bashio::log.info "Starting the WSDD daemon $(printf '%s ' "${interfaces[@]}") for ${SMB_GROUP}/${SMB_HOST}..."
     # shellcheck disable=SC2046
