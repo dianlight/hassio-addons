@@ -15,12 +15,12 @@ DOWNLOAD_URL=http://local_addon_registry.home:8090/
 if bashio::config.has_value 'update_srat_onstart'; then
   bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
   if bashio::config.equals 'update_srat_onstart' 'release'; then
-    bashio::log.info "Updating to ${RELEASE_TAG}"
+    bashio::log.info "Updating to ${RELEASE_TAG}/$(arch)"
     if ! curl --silent --fail -L "${BASE_URL}${RELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
       bashio::log.error "Failed to download srat release from github"
     fi
   elif bashio::config.equals 'update_srat_onstart' 'prerelease'; then
-    bashio::log.info "Updating to ${PRERELEASE_TAG}"
+    bashio::log.info "Updating to ${PRERELEASE_TAG}/$(arch)"
     if ! curl --silent --fail -L "${BASE_URL}${PRERELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
       bashio::log.error "Failed to download srat release from github"
     fi
