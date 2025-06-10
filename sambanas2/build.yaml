@@ -11,4 +11,4 @@ build_from:
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
   #  HDDTEMP_VERSION: "0.3-beta15"
-  SRAT_VERSION: "2025.06.3.dev1002"
+  SRAT_VERSION: "2025.06.4.dev1004"
