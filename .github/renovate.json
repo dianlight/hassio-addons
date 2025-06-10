@@ -40,6 +40,18 @@
     {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
+        "/sambanas2/**",
+        "/besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
+    },
+    {
+      "matchBaseBranches": "devrelease/sambanas2",
+      "matchFileNames": [
+        "/sambanas/**",
         "/besim/**",
         "plex/**",
         "RPiMySensor/**",
@@ -50,6 +62,7 @@
     {
       "matchBaseBranches": "devrelease/besim",
       "matchFileNames": [
+        "/sambanas2/**",
         "/sambanas/**",
         "plex/**",
         "RPiMySensor/**",
@@ -62,6 +75,13 @@
       "matchBaseBranches": "devrelease/sambanas",
       "includePaths": [
         "/sambanas/**"
+      ]
+    },
+    {
+      "groupName": "SambaNas2",
+      "matchBaseBranches": "devrelease/sambanas2",
+      "includePaths": [
+        "/sambanas2/**"
       ]
     },
     {
