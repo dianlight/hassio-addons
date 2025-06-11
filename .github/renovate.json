@@ -34,7 +34,18 @@
         "(aarch64|amd64|armhf|armv7|i386):\\s[\"']?(?<depName>.*?):(?<currentValue>.*?)[\"']?\\s"
       ],
       "datasourceTemplate": "docker"
-    }
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^sambanas2/build\\.yaml$"
+      ],
+      "matchStrings": [
+        "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "dianlight/srat"
+    }    
   ],
   "packageRules": [
     {
@@ -107,6 +118,19 @@
         "patch"
       ],
       "automerge": true
-    }
+    },
+    {
+      "groupName": "SambaNas2 SRAT",
+      "matchBaseBranches": "devrelease/sambanas2",
+      "includePaths": [
+        "/sambanas2/build.yaml"
+      ],
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "dianlight/srat"
+      ]
+    }    
   ]
 }
