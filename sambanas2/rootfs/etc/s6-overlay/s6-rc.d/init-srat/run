@@ -6,7 +6,39 @@
 # ==============================================================================
 
 PRERELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease)) | .[0].tag_name')
-RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.release)) | .[0].tag_name')
+RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease == false)) | .[0].tag_name')
+original_prerelease_tag="${PRERELEASE_TAG}" # Save original value for logging and comparison
+
+# If RELEASE_TAG is newer than PRERELEASE_TAG (semver compare), update PRERELEASE_TAG.
+# This also handles cases where PRERELEASE_TAG is "null" or empty, and RELEASE_TAG is valid.
+if [[ -n "${RELEASE_TAG}" && "${RELEASE_TAG}" != "null" ]]; then
+  perform_update=false
+  log_reason=""
+
+  if [[ -z "${PRERELEASE_TAG}" || "${PRERELEASE_TAG}" == "null" ]]; then
+    # PRERELEASE_TAG is invalid (empty or "null"), and RELEASE_TAG is valid.
+    # Consider RELEASE_TAG as the "greater" one to use.
+    perform_update=true
+    log_reason="PRERELEASE_TAG ('${original_prerelease_tag}') was invalid or empty; RELEASE_TAG is '${RELEASE_TAG}'."
+  else
+    # Both PRERELEASE_TAG and RELEASE_TAG are non-empty and not "null".
+    # Perform semantic version comparison to see if RELEASE_TAG > PRERELEASE_TAG.
+    # `sort -Vr` sorts versions in reverse (descending) order. Highest version first.
+    highest_version=$(printf '%s\n%s\n' "${RELEASE_TAG}" "${PRERELEASE_TAG}" | sort -Vr | head -n1)
+
+    if [[ "${highest_version}" == "${RELEASE_TAG}" && "${RELEASE_TAG}" != "${PRERELEASE_TAG}" ]]; then
+      # RELEASE_TAG is strictly greater than PRERELEASE_TAG.
+      perform_update=true
+      log_reason="RELEASE_TAG ('${RELEASE_TAG}') is newer than PRERELEASE_TAG ('${original_prerelease_tag}')."
+    fi
+  fi
+
+  if [[ "${perform_update}" == true && "${original_prerelease_tag}" != "${RELEASE_TAG}" ]]; then
+    bashio::log.info "${log_reason} Updating PRERELEASE_TAG to '${RELEASE_TAG}'."
+    PRERELEASE_TAG="${RELEASE_TAG}"
+  fi
+fi
+
 tmp_dir=$(mktemp -d -t srat.XXXXXX)
 BASE_URL=https://github.com/dianlight/srat/releases/download/
 ZIP_NAME=srat_$(arch).zip
@@ -16,17 +48,17 @@ if bashio::config.has_value 'update_srat_onstart'; then
   bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
   if bashio::config.equals 'update_srat_onstart' 'release'; then
     bashio::log.info "Updating to ${RELEASE_TAG}/$(arch)"
-    if ! curl --silent --fail -L "${BASE_URL}${RELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+    if ! curl --silent --fail -L "${BASE_URL}${RELEASE_TAG}/${ZIP_NAME}" | busybox unzip -d $tmp_dir -; then
       bashio::log.error "Failed to download srat release from github"
     fi
   elif bashio::config.equals 'update_srat_onstart' 'prerelease'; then
     bashio::log.info "Updating to ${PRERELEASE_TAG}/$(arch)"
-    if ! curl --silent --fail -L "${BASE_URL}${PRERELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+    if ! curl --silent --fail -L "${BASE_URL}${PRERELEASE_TAG}/${ZIP_NAME}" | busybox unzip -d $tmp_dir -; then
       bashio::log.error "Failed to download srat release from github"
     fi
   elif bashio::config.equals 'update_srat_onstart' 'localdev'; then
     bashio::log.info "Updating to from local_addon_registry.home repository"
-    if ! curl --silent --fail -L "http://local_addon_registry.home:8090/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+    if ! curl --silent --fail -L "http://local_addon_registry.home:8090/${ZIP_NAME}" | busybox unzip -d $tmp_dir -; then
       bashio::log.error "Failed to download srat release from github"
     fi
   elif bashio::config.equals 'update_srat_onstart' 'localfile'; then
