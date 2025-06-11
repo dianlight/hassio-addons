@@ -1,3 +1,6 @@
 [submodule "addon-plex"]
 	path = addon-plex
 	url = https://github.com/dianlight/addon-plex
+[submodule "besim/rootfs/BeSIM"]
+	path = besim/rootfs/opt/BeSIM
+	url = git@github.com:dianlight/BeSIM-MQTT.git

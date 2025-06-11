@@ -1,0 +1,71 @@
+---
+name: BeSim
+version: 0.0.3
+slug: besim
+description: A simulator for the cloud server the BeSMART thermostat/wifi box connects to.
+url: https://github.com/dianlight/hassio-addons/tree/master/besim
+codenotary: lucio.tarantino@gmail.com
+arch:
+  - armv7
+  - aarch64
+  - amd64
+startup: system
+boot: auto
+init: false
+hassio_api: true
+homeassistant_api: true
+#hassio_role: admin
+#host_network: true
+map:
+  #  - homeassistant_config:rw
+  - addon_config:rw
+#  - ssl:rw
+#  - all_addon_configs:rw
+#  - addons:rw
+#  - share:rw
+#  - backup:rw
+#  - media:rw
+options:
+  updateonboot: false
+  work_as_proxy: true
+  upstream_dns: 1.1.1.1
+schema:
+  updateonboot: bool?
+  work_as_proxy: bool?
+  upstream_dns: match(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$)
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
+  zone_entity: str?
+image: dianlight/{arch}-addon-besim
+ports:
+  6199/udp: 6199
+  80/tcp: 80
+ports_description:
+  6199/udp: "api.besmart-home.com:6199 (udp)"
+  80/tcp: "api.besmart-home.com:80 (tcp, http get) and www.cloudwarm.com:80 (tcp, http post)"
+#services:
+#  - mqtt:want
+#udev: true
+#host_dbus: true
+#kernel_modules: true
+#privileged:
+#  - SYS_ADMIN
+#  - SYS_RAWIO
+#  - SYS_RESOURCE
+#  - SYS_MODULE
+#full_access: true
+#devicetree: false
+apparmor: true
+#host_ipc: true
+#advanced: true
+homeassistant: 2023.11.0
+backup: hot
+#auth_api: true
+ingress: true
+ingress_port: 8080
+ingress_entry: /
+panel_icon: mdi:thermostat
+panel_title: BeSIM Control
+panel_admin: true
+# network
+stage: experimental
+watchdog: http://[HOST]:[PORT:8080]/
