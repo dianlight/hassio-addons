@@ -163,9 +163,10 @@ jobs:
           # 2. Create a new branch TARGET_COMPARE_BRANCH from TARGET_BASE_BRANCH or if TARGET_COMPARE_BRANCH exists rebase to TARGET_BASE_BRANCH
           echo "Remote branch origin/$TARGET_COMPARE_BRANCH exists. Checking it out and rebasing onto origin/$TARGET_BASE_BRANCH."
           # Use -B to create if not exists, or reset if exists, to match remote state
-          git checkout -B "$TARGET_COMPARE_BRANCH" "origin/$TARGET_COMPARE_BRANCH"
+          
+          git checkout -B "$TARGET_COMPARE_BRANCH" "origin/$TARGET_BASE_BRANCH"
           if [ $? -ne 0 ]; then
-            echo "Error: Failed to checkout/reset branch $TARGET_COMPARE_BRANCH to origin/$TARGET_COMPARE_BRANCH."
+            echo "Error: Failed to create/reset branch $TARGET_COMPARE_BRANCH from origin/$TARGET_BASE_BRANCH."
             exit 1
           fi
 
