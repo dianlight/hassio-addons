@@ -74,8 +74,9 @@ jobs:
           # Append .dev<run_number> to the (potentially modified) base version
           FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}.dev${{ github.run_number }}"
 
-          echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_TO_SET" >> "$GITHUB_OUTPUT"
-          echo "FINAL_NAME_TO_SET=$FINAL_NAME" >> "$GITHUB_OUTPUT"
+          echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
+          echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
+          echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT" # Output the base version
 
       - name: ✍🏼 Set version in ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
         id: version_set # This ID is used by subsequent steps for value_old
@@ -116,10 +117,10 @@ jobs:
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
           git fetch origin master ${BRANCH_NAME}
-          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master"
-          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" "origin/master"
+          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
           gh pr create \
-            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" \
             --head "${BRANCH_NAME}" \
-            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" \
             --fill || :
