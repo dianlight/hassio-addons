@@ -27,59 +27,212 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-           echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-           echo "BR_PROJECT=$(TMP=${GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
+          echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+          echo "BR_PROJECT=$(TMP=${GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
         id: extract_branch
 
-      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
+      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
+        uses: pietrobolcato/action-read-yaml@1.1.0
+        id: read_config
+        with:
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
+          # This action reads all top-level keys, so 'name' and 'version' will be available
+          # as steps.read_config.outputs.name and steps.read_config.outputs.version
+
+      - name: Prepare Name and Version Suffix
+        id: prepare_name_and_version_suffix
+        shell: bash
+        run: |
+          CURRENT_NAME_FROM_FILE="${{ steps.read_config.outputs.name }}" # Original name from config.yaml
+          CURRENT_VERSION_FROM_FILE="${{ steps.read_config.outputs.version }}" # Original version from config.yaml
+          PROCESSED_NAME="$CURRENT_NAME_FROM_FILE"
+          VERSION_SUFFIX_VALUE=""
+          ORIGINAL_NAME_IS_PLAIN="false"
+
+          # Check if the original name already ends with -β or -⍺.
+          # If not, it's a "plain" name, and we'll append -β for this pre-release.
+          if [[ ! "$PROCESSED_NAME" =~ \-[β⍺]$ ]]; then
+            ORIGINAL_NAME_IS_PLAIN="true" # Original name was plain
+            PROCESSED_NAME="${PROCESSED_NAME}-β"
+          fi
+
+          # Determine the expected suffix type based on the PROCESSED_NAME
+          EXPECTED_SUFFIX_TYPE=""
+          if [[ "$PROCESSED_NAME" =~ \-⍺$ ]]; then
+            EXPECTED_SUFFIX_TYPE=".alpha"
+          elif [[ "$PROCESSED_NAME" =~ \-β$ ]]; then
+            EXPECTED_SUFFIX_TYPE=".beta"
+          fi
+
+          # Check if the current version already has a matching suffix
+          # If it does, use the existing suffix. Otherwise, append the new one.
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ (${EXPECTED_SUFFIX_TYPE}[0-9]+)$ ]]; then
+             # Version already has the correct suffix type, extract it
+             VERSION_SUFFIX_VALUE="${BASH_REMATCH[1]}" # Capture the whole suffix including the dot and number
+          else
+             # Version does not have the correct suffix type or no suffix, append the new one
+             VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}${{ github.run_number }}"
+          fi
+
+          # Strip any existing .alpha<num> or .beta<num> suffix from the current version to get the base version
+          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(\.alpha[0-9]+|\.beta[0-9]+)$//')
+
+          # Construct the final version string by appending the determined suffix to the base version
+          FINAL_VERSION_STRING="${BASE_VERSION}${VERSION_SUFFIX_VALUE}"
+
+          echo "FINAL_NAME_TO_SET=$PROCESSED_NAME" >> "$GITHUB_OUTPUT"
+          echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_STRING" >> "$GITHUB_OUTPUT" # Output the complete new version string
+          echo "ORIGINAL_NAME_IS_PLAIN=$ORIGINAL_NAME_IS_PLAIN" >> "$GITHUB_OUTPUT"
+
+      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }}
         id: version_set
         uses: endaft/action-yamler@v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
-          set: .beta${{ github.run_number }}
+          set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }} # Use the fully constructed version string
           get: true
-          append: true
+          # append: true is removed as 'set' now provides the complete desired value
 
-      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }}
+      - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}
         id: betaname_set
         uses: endaft/action-yamler@v1.1.1
         with:
-          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
+          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml # File path remains the same
           path: name
-          set: -β
+          set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }} # Set the prepared name
           get: true
-          append: true
-            
-      - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
-        if: false
-        uses: home-assistant/builder@master
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
-        with:
-          args: |
-            --all \
-            --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
-            --docker-hub dianlight
+          # append: true is removed because 'set' is now providing the complete, desired value
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
-        uses: thzois/autobot@v1.0.3
+        # uses: thzois/autobot@v1.0.3 # Replaced with gh CLI commands
         continue-on-error: true
         env:
-          GH_ACCESS_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          git_config_user_email: 'ffp-bot@github.com'
-          git_config_user_name: 'ffp-bot'
-          target_repo: 'dianlight/hassio-addons-beta'
-          source_dir: '${{ steps.extract_branch.outputs.BR_PROJECT }}'
-#          source_dir_copy_glob: '!(*.yaml)'
-          target_dir: ''
-          pr_target_repo_base_branch: 'master'
-          pr_target_repo_compare_branch: 'autobot/${{ steps.extract_branch.outputs.BR_PROJECT }}'
-#          pr_target_repo_compare_branch: 'autobot/${{ steps.version_set.outputs.value_new }}'
-#          pr_title: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
-#          pr_description_text: '[autobot] ${{ steps.version_set.outputs.value_new }} Automated changes'
-          pr_label: 'autobot'
+          # GH_ACCESS_TOKEN is used for git clone/push authentication
+          # GH_TOKEN is used by the gh CLI for authentication
+          GH_ACCESS_TOKEN: ${{ secrets.API_TOKEN_GITHUB }} # Ensure this secret has repo scope in the target repo
+          GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }} # gh CLI uses GH_TOKEN by default
+        shell: bash
+        run: |
+          # --- Script Setup ---
+          SOURCE_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
+          NEW_VERSION="${{ steps.version_set.outputs.value_new }}"
+          TARGET_REPO="dianlight/hassio-addons-beta"
+          TARGET_REPO_URL="github.com/$TARGET_REPO"
+          TARGET_BASE_BRANCH="master"
+          TARGET_COMPARE_BRANCH="autobot/$SOURCE_DIR"
+          PR_TITLE="[autobot] $SOURCE_DIR $NEW_VERSION Automated changes"
+          PR_LABEL="autobot"
+          TEMP_DIR=$(mktemp -d)
+
+          echo "--- Starting autobot replacement script ---"
+          echo "Configuration:"
+          echo "  Source Project Dir (in this repo): $SOURCE_DIR"
+          echo "  New Version: $NEW_VERSION"
+          echo "  Target Repository: $TARGET_REPO"
+          echo "  Target Base Branch: $TARGET_BASE_BRANCH"
+          echo "  Target Compare Branch: $TARGET_COMPARE_BRANCH"
+          echo "  Temporary Directory: $TEMP_DIR"
+          echo "  GitHub Workspace: $GITHUB_WORKSPACE"
+
+          # Ensure temp directory is cleaned up on exit or error
+          trap 'echo "Cleaning up temporary directory $TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
+
+          # --- Steps ---
+          # 1. Clone the target repository
+          echo "Cloning target repository $TARGET_REPO into $TEMP_DIR"
+          git clone "https://${GH_ACCESS_TOKEN}@${TARGET_REPO_URL}.git" "$TEMP_DIR"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to clone target repository."
+            exit 1
+          fi
+
+          cd "$TEMP_DIR" || { echo "Error: Failed to change directory to $TEMP_DIR"; exit 1; }
+
+          echo "Configuring git user..."
+          git config user.email "ffp-bot@github.com"
+          git config user.name "ffp-bot"
+
+          echo "Fetching from origin..."
+          git fetch origin --prune
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to fetch from origin."
+            exit 1
+          fi
+
+          # 2. Create a new branch TARGET_COMPARE_BRANCH from TARGET_BASE_BRANCH or if TARGET_COMPARE_BRANCH exists rebase to TARGET_BASE_BRANCH
+          echo "Remote branch origin/$TARGET_COMPARE_BRANCH exists. Checking it out and rebasing onto origin/$TARGET_BASE_BRANCH."
+          # Use -B to create if not exists, or reset if exists, to match remote state
+          git checkout -B "$TARGET_COMPARE_BRANCH" "origin/$TARGET_COMPARE_BRANCH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to checkout/reset branch $TARGET_COMPARE_BRANCH to origin/$TARGET_COMPARE_BRANCH."
+            exit 1
+          fi
+
+          # 3. rsync SOURCE_DIR to TMP/ (which is the root of TARGET_COMPARE_BRANCH) with delete
+          echo "Copying content from $GITHUB_WORKSPACE/$SOURCE_DIR/ to current directory ($PWD) using rsync..."
+          rsync -acv --force -I --delete "$GITHUB_WORKSPACE/$SOURCE_DIR/" "./$SOURCE_DIR/"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to rsync source directory contents."
+            exit 1
+          fi
+
+          # 4. Stage all modified files and commit (if changes exist)
+          echo "Staging changes..."
+          git add .
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No file content changes to commit after rsync."
+            # A push is still needed if the branch was rebased, even if no new content changes.
+          else
+            echo "Committing changes..."
+            git commit -m "[Release Beta] Update $SOURCE_DIR to $NEW_VERSION"
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to commit changes." # Should not happen if git status --porcelain showed changes
+              exit 1
+            fi
+          fi
+
+          echo "Pushing branch $TARGET_COMPARE_BRANCH to origin (with force)..."
+          git push -f origin "$TARGET_COMPARE_BRANCH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push branch."
+            exit 1 # Exit script, trap will clean up
+          fi
+
+          # Navigate back to the original GITHUB_WORKSPACE before running gh commands (optional, but good practice)
+          echo "Navigating back to $GITHUB_WORKSPACE"
+          cd "$GITHUB_WORKSPACE" || { echo "Error: Failed to change directory back to $GITHUB_WORKSPACE"; exit 1; }
+
+          # 5. Create or Update the Pull Request
+          echo "Checking for existing PR for branch $TARGET_COMPARE_BRANCH in $TARGET_REPO"
+          # Check for open PRs with the specific head branch
+          # Use the GH_TOKEN env var which gh CLI picks up
+          EXISTING_PR_NUMBER=$(gh pr list -R "$TARGET_REPO" --head "$TARGET_COMPARE_BRANCH" --state open --json number -q '.[0].number')
+
+          if [ -n "$EXISTING_PR_NUMBER" ]; then
+            echo "An open PR already exists for branch $TARGET_COMPARE_BRANCH (PR #$EXISTING_PR_NUMBER). Updating title and labels."
+            # Update the existing PR title and labels
+            gh pr edit "$EXISTING_PR_NUMBER" -R "$TARGET_REPO" --title "$PR_TITLE" --add-label "$PR_LABEL"
+            if [ $? -ne 0 ]; then
+              echo "Warning: Failed to update existing PR #$EXISTING_PR_NUMBER."
+              # Continue on error as per original action's continue-on-error: true
+            fi
+          else
+            echo "No open PR found for branch $TARGET_COMPARE_BRANCH. Creating a new one."
+            # Create a new PR
+            # Use --body "" or --body-file /dev/null for an empty body
+            gh pr create -R "$TARGET_REPO" \
+              --base "$TARGET_BASE_BRANCH" \
+              --head "$TARGET_COMPARE_BRANCH" \
+              --title "$PR_TITLE" \
+              --label "$PR_LABEL" \
+              --body "" # Add an empty body or a simple message
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to create new PR."
+              # Continue on error as per original action's continue-on-error: true
+            fi
+          fi
 
       - name: Restoring original repository
         shell: bash
@@ -88,17 +241,17 @@ jobs:
           git config --global user.name "Prerelease Bot"
           git restore .
           git clean -f
-          
+
       - name: pull-request ${{ steps.version_set.outputs.value_old }}
+        if: steps.prepare_name_and_version_suffix.outputs.ORIGINAL_NAME_IS_PLAIN == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         continue-on-error: true
         shell: bash
         run: |
-          git fetch origin master ${BRANCH_NAME} 
+          git fetch origin master ${BRANCH_NAME}
           gh pr create --head "${BRANCH_NAME}" \
           --title "Releasing ${BRANCH_NAME}" \
           --fill \
           --draft || :
-

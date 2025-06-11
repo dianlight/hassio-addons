@@ -1,0 +1,58 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start srat-cli service
+# ==============================================================================
+
+PRERELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease)) | .[0].tag_name')
+RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.release)) | .[0].tag_name')
+tmp_dir=$(mktemp -d -t srat.XXXXXX)
+BASE_URL=https://github.com/dianlight/srat/releases/download/
+ZIP_NAME=srat_$(arch).zip
+DOWNLOAD_URL=http://local_addon_registry.home:8090/
+
+if bashio::config.has_value 'update_srat_onstart'; then
+  bashio::log.info "Update on start: $(bashio::config 'update_srat_onstart')"
+  if bashio::config.equals 'update_srat_onstart' 'release'; then
+    bashio::log.info "Updating to ${RELEASE_TAG}/$(arch)"
+    if ! curl --silent --fail -L "${BASE_URL}${RELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+      bashio::log.error "Failed to download srat release from github"
+    fi
+  elif bashio::config.equals 'update_srat_onstart' 'prerelease'; then
+    bashio::log.info "Updating to ${PRERELEASE_TAG}/$(arch)"
+    if ! curl --silent --fail -L "${BASE_URL}${PRERELEASE_TAG}/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+      bashio::log.error "Failed to download srat release from github"
+    fi
+  elif bashio::config.equals 'update_srat_onstart' 'localdev'; then
+    bashio::log.info "Updating to from local_addon_registry.home repository"
+    if ! curl --silent --fail -L "http://local_addon_registry.home:8090/${ZIP_NAME}" | unzip - -d $tmp_dir; then
+      bashio::log.error "Failed to download srat release from github"
+    fi
+  elif bashio::config.equals 'update_srat_onstart' 'localfile'; then
+    bashio::log.info "Updating to from local_addon_registry.home repository"
+    if [ -f /config/srat-cli ]; then
+      bashio::log.info "Using existing srat from /config/srat*"
+      cp -v /config/srat* ${tmp_dir}
+      ls -al ${tmp_dir}
+    else
+      bashio::log.error "No update found"
+    fi
+  fi
+  bashio::log.info "Before move updated files ${tmp_dir}/srat* -> /usr/local/bin/"
+  bashio::log.info "Move updated files $(mv -v $tmp_dir/srat* /usr/local/bin/)"
+fi
+
+ls -al /usr/local/bin/srat*
+
+#-conf /config/bootconfig.json \
+
+/usr/local/bin/srat-cli \
+  -db /config/config.db3 \
+  -loglevel $(bashio::config 'log_level' 'info') \
+  start \
+  -out /etc/samba/smb.conf \
+  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
+
+bashio::log.info "srat-cli ok"
