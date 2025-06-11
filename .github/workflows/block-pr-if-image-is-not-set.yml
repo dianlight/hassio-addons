@@ -2,8 +2,8 @@ name: PR Chack if Image is set in config
 
 on:
     pull_request:
-        branches-ignore:
-          - 'devrelease/**'
+        branches:
+          - 'prerelease/**'
         types: [ synchronize, opened ]
     workflow_dispatch:
 
