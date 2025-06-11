@@ -78,12 +78,7 @@ RUN apk add --no-cache \
     e2fsprogs \
     util-linux \
     e2fsprogs-extra \
-    avahi \
-    avahi-compat-libdns_sd \
-    avahi-tools \
     curl \
-    mosquitto-clients \
-    openssh-client \
     findmnt \
     ntfs-3g-progs \
     sysstat \
@@ -95,8 +90,6 @@ RUN apk add --no-cache \
     hd-idle \
     fuse3 \
     py3-pip \
-    pipx \
-    poetry \
     lsblk \
     socat \
     figlet \
