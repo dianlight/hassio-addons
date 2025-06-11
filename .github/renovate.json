@@ -5,8 +5,13 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
-  "labels": ["dependencies", "no-stale"],
-  "baseBranches": ["/^devrelease\\/.*/"],
+  "labels": [
+    "dependencies",
+    "no-stale"
+  ],
+  "baseBranches": [
+    "/^devrelease\\/.*/"
+  ],
   "commitMessagePrefix": "⬆️",
   "commitMessageTopic": "{{depName}}",
   "configMigration": true,
@@ -19,45 +24,113 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["/Dockerfile$", "/build.yaml$"],
+      "managerFilePatterns": [
+        "//Dockerfile$/",
+        "//build.yaml$/"
+      ],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ARG BUILD_FROM=(?<depName>.*?):(?<currentValue>.*?)\\s+",
         "(aarch64|amd64|armhf|armv7|i386):\\s[\"']?(?<depName>.*?):(?<currentValue>.*?)[\"']?\\s"
       ],
       "datasourceTemplate": "docker"
-    }
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^sambanas2/build\\.yaml$"
+      ],
+      "matchStrings": [
+        "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "dianlight/srat"
+    }    
   ],
   "packageRules": [
     {
-      "matchBaseBranches":"devrelease/sambanas",
-      "matchFileNames":["/besim/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enabled":false
+      "matchBaseBranches": "devrelease/sambanas",
+      "matchFileNames": [
+        "/sambanas2/**",
+        "/besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "matchBaseBranches":"devrelease/besim",
-      "matchFileNames":["/sambanas/**","plex/**","RPiMySensor/**","addon-plex/**"],
-      "enabled":false
+      "matchBaseBranches": "devrelease/sambanas2",
+      "matchFileNames": [
+        "/sambanas/**",
+        "/besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "groupName":"SambaNas",
-      "matchBaseBranches":"devrelease/sambanas",
-      "includePaths": ["/sambanas/**"]
+      "matchBaseBranches": "devrelease/besim",
+      "matchFileNames": [
+        "/sambanas2/**",
+        "/sambanas/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "groupName":"BeSim",
-      "matchBaseBranches":"devrelease/besim",
-      "includePaths": ["/besim/**"]
-    },    
+      "groupName": "SambaNas",
+      "matchBaseBranches": "devrelease/sambanas",
+      "includePaths": [
+        "/sambanas/**"
+      ]
+    },
+    {
+      "groupName": "SambaNas2",
+      "matchBaseBranches": "devrelease/sambanas2",
+      "includePaths": [
+        "/sambanas2/**"
+      ]
+    },
+    {
+      "groupName": "BeSim",
+      "matchBaseBranches": "devrelease/besim",
+      "includePaths": [
+        "/besim/**"
+      ]
+    },
     {
       "groupName": "Add-on base image",
-      "matchDatasources": ["docker"]
+      "matchDatasources": [
+        "docker"
+      ]
     },
     {
       "groupName": "Add-on base image",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true
-    }
+    },
+    {
+      "groupName": "SambaNas2 SRAT",
+      "matchBaseBranches": "devrelease/sambanas2",
+      "includePaths": [
+        "/sambanas2/build.yaml"
+      ],
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "dianlight/srat"
+      ]
+    }    
   ]
 }
