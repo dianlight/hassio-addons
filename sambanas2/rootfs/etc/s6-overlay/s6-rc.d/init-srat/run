@@ -75,6 +75,7 @@ if bashio::config.has_value 'update_srat_onstart'; then
   bashio::log.info "Move updated files $(mv -v $tmp_dir/srat* /usr/local/bin/)"
 fi
 
+chmod a+x /usr/local/bin/srat*
 ls -al /usr/local/bin/srat*
 
 #-conf /config/bootconfig.json \
