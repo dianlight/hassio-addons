@@ -4,6 +4,7 @@
 # ==============================================================================
 # Start srat-cli service
 # ==============================================================================
+export HOSTNAME
 
 PRERELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease)) | .[0].tag_name')
 RELEASE_TAG=$(curl -s https://api.github.com/repos/dianlight/srat/releases | jq -r 'map(select(.prerelease == false)) | .[0].tag_name')
@@ -79,6 +80,14 @@ chmod a+x /usr/local/bin/srat*
 ls -al /usr/local/bin/srat*
 
 #-conf /config/bootconfig.json \
+
+# Read hostname from API or setting default "hassio"
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+    bashio::log.warning "Can't read hostname, using default."
+    HOSTNAME="homeassistant"
+fi
+bashio::log.info "Hostname: ${HOSTNAME}"
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
