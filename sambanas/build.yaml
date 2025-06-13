@@ -1,14 +1,13 @@
 ---
 build_from:
-  aarch64: ghcr.io/hassio-addons/base:17.2.1
-  amd64: ghcr.io/hassio-addons/base:17.2.1
-  armv7: ghcr.io/hassio-addons/base:17.2.1
+  aarch64: ghcr.io/hassio-addons/base:17.2.5
+  amd64: ghcr.io/hassio-addons/base:17.2.5
+  armv7: ghcr.io/hassio-addons/base:17.2.5
 #codenotary:
 #  signer: lucio.tarantino@gmail.com
 #  base_image: codenotary@frenck.dev
-#cosign:
+cosign:
 #  #base_identity: https://github.com/home-assistant/builder/.*
-#  identity: https://github.com/dianlight/hassio-addons/.*
-args:
+  identity: https://github.com/dianlight/hassio-addons/.*
+#args:
   #  HDDTEMP_VERSION: "0.3-beta15"
-  SRAT_VERSION: "v2024.12.0"
