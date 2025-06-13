@@ -18,12 +18,15 @@ We believe SambaNAS2, with its fresh interface and the intelligent SRAT engine, 
 ###### __🚧 Work in progess__
 - [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 - [ ] Migrate config from SambaNas addon
+- [ ] Mobile ready UI
+- [ ] Support WSDD and WSDD2
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon
 - Use [SRAT 2025.06.1.dev0801](https://github.com/dianlight/srat/tree/2025.06.1.dev0801)
 ###### __🚧 Work in progess__
 - [ ] Update the documentation
+- [ ] New version model
 
 # SambaNas addon changelog! -- CUT BEFORE RELEASE
 
