@@ -10,9 +10,12 @@ permissions:
   pull-requests: write
 
 jobs:
-  build:
+  create_beta_pr:
     runs-on: ubuntu-latest
-
+    outputs:
+      ORIGINAL_NAME_IS_PLAIN: ${{ steps.prepare_name_and_version_suffix.outputs.ORIGINAL_NAME_IS_PLAIN }}
+      # Output BR_PROJECT and CURRENT_BRANCH_NAME if they were needed by the next job and not easily re-derivable.
+      # For this specific split, the next job can re-derive GITHUB_REF or use github.head_ref.
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,23 +62,19 @@ jobs:
           # Determine the expected suffix type based on the PROCESSED_NAME
           EXPECTED_SUFFIX_TYPE=""
           if [[ "$PROCESSED_NAME" =~ \-⍺$ ]]; then
-            EXPECTED_SUFFIX_TYPE=".alpha"
+            EXPECTED_SUFFIX_TYPE="-alpha"
           elif [[ "$PROCESSED_NAME" =~ \-β$ ]]; then
-            EXPECTED_SUFFIX_TYPE=".beta"
+            EXPECTED_SUFFIX_TYPE="-beta"
           fi
 
-          # Check if the current version already has a matching suffix
-          # If it does, use the existing suffix. Otherwise, append the new one.
-          if [[ "$CURRENT_VERSION_FROM_FILE" =~ (${EXPECTED_SUFFIX_TYPE}[0-9]+)$ ]]; then
-             # Version already has the correct suffix type, extract it
-             VERSION_SUFFIX_VALUE="${BASH_REMATCH[1]}" # Capture the whole suffix including the dot and number
-          else
-             # Version does not have the correct suffix type or no suffix, append the new one
-             VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}${{ github.run_number }}"
-          fi
+          # Strip any existing -alpha<num> or -beta<num> suffix from the current version to get the base version
+          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha\.[0-9]+|-beta\.[0-9]+)$//')
 
-          # Strip any existing .alpha<num> or .beta<num> suffix from the current version to get the base version
-          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(\.alpha[0-9]+|\.beta[0-9]+)$//')
+          # Construct the version suffix using the determined type and the current run number.
+          # This ensures a new pre-release number for each run if an EXPECTED_SUFFIX_TYPE is determined.
+          # If EXPECTED_SUFFIX_TYPE is empty (e.g. name was not -⍺ or -β), VERSION_SUFFIX_VALUE will be just the run_number, which might not be desired.
+          # However, PROCESSED_NAME logic ensures it becomes -β if plain, so EXPECTED_SUFFIX_TYPE should be set.
+          VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}.${{ github.run_number }}"
 
           # Construct the final version string by appending the determined suffix to the base version
           FINAL_VERSION_STRING="${BASE_VERSION}${VERSION_SUFFIX_VALUE}"
@@ -235,23 +234,26 @@ jobs:
             fi
           fi
 
-      - name: Restoring original repository
-        shell: bash
-        run: |
-          git config --global user.email "workflow-bot@github.com"
-          git config --global user.name "Prerelease Bot"
-          git restore .
-          git clean -f
+  create_master_pr:
+    runs-on: ubuntu-latest
+    needs: create_beta_pr
+    if: needs.create_beta_pr.outputs.ORIGINAL_NAME_IS_PLAIN == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true # Match original top-level checkout for consistency
 
-      - name: pull-request ${{ steps.version_set.outputs.value_old }}
-        if: steps.prepare_name_and_version_suffix.outputs.ORIGINAL_NAME_IS_PLAIN == 'true'
+      - name: Create pull request to master
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         continue-on-error: true
         shell: bash
         run: |
+          echo "Current branch for PR head: ${BRANCH_NAME}"
+          echo "Fetching origin master and head branch ${BRANCH_NAME}"
           git fetch origin master ${BRANCH_NAME}
+          echo "Creating PR from '${BRANCH_NAME}' to default base (likely master)"
           gh pr create --head "${BRANCH_NAME}" \
           --title "Releasing ${BRANCH_NAME}" \
           --fill \

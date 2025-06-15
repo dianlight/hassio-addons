@@ -58,14 +58,14 @@ jobs:
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
 
           # Check for .alpha<N> suffix on version
-          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)\.alpha([0-9]+)$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove .alpha<N> from version
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
             fi
           # Check for .beta<N> suffix on version
-          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)\.beta([0-9]+)$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove .beta<N> from version
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
             fi
@@ -114,13 +114,84 @@ jobs:
         shell: bash
         run: |
           set -x
+          
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
-          git fetch origin master ${BRANCH_NAME}
-          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" "origin/master"
-          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
+
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          BASE_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
+          # PR_BASE_BRANCH_NAME is the target branch for script commits and the PR base
+          PR_BASE_BRANCH_NAME="prerelease/${ADDON_DIR}_${BASE_VERSION}"
+          # PR_HEAD_BRANCH_NAME is the source branch for the PR (e.g., devrelease/myaddon)
+          PR_HEAD_BRANCH_NAME="${BRANCH_NAME}" # Using the env var already defined for the step
+          # Note: SCRIPTS_DIR_FROM_ROOT would be "./${ADDON_DIR}/scripts"
+
+          echo "Fetching origin master and head branch ${PR_HEAD_BRANCH_NAME}"
+          git fetch origin master "${PR_HEAD_BRANCH_NAME}"
+
+          echo "Creating/resetting local branch '${PR_BASE_BRANCH_NAME}' from 'origin/master'"
+          git branch -f "${PR_BASE_BRANCH_NAME}" "origin/master"
+
+          echo "Checking out branch '${PR_BASE_BRANCH_NAME}' to run scripts"
+          git checkout "${PR_BASE_BRANCH_NAME}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to checkout branch ${PR_BASE_BRANCH_NAME}."
+            exit 1 # This will be caught by continue-on-error for the step
+          fi
+
+          # Run scripts if the directory exists
+          if [ -d "$SCRIPTS_DIR" ]; then
+            echo "Scripts directory '$SCRIPTS_DIR' found. Executing scripts..."
+            # Robustly iterate over script files
+            find "$SCRIPTS_DIR" -type f -print0 | while IFS= read -r -d $'\0' SCRIPT_FILE; do
+              echo "Executing script: $SCRIPT_FILE"
+              # Attempt to execute directly if permissions allow, otherwise use bash as a fallback.
+              # Ensure scripts have a shebang (e.g., #!/bin/bash, #!/usr/bin/env python3) if they are not bash scripts but are marked executable.
+              if [ -x "$SCRIPT_FILE" ]; then
+                  "$SCRIPT_FILE"
+              else
+                  bash "$SCRIPT_FILE"
+              fi
+              
+              SCRIPT_EXIT_CODE=$?
+              if [ $SCRIPT_EXIT_CODE -ne 0 ]; then
+                  echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
+                  # Continue to the next script even if one fails
+              fi
+            done
+
+            echo "Checking for changes after script execution on branch '${PR_BASE_BRANCH_NAME}'..."
+            git add . # Stage all changes made by scripts
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Committing script-generated changes to '${PR_BASE_BRANCH_NAME}'"
+              git commit -m "auto: Run scripts in $SCRIPTS_DIR for $ADDON_DIR"
+              if [ $? -ne 0 ]; then
+                echo "Warning: Failed to commit script-generated changes."
+              fi
+            else
+              echo "No changes to commit after script execution."
+            fi
+          else
+            echo "Scripts directory '$SCRIPTS_DIR' not found. Skipping script execution."
+          fi
+
+          echo "Pushing branch '${PR_BASE_BRANCH_NAME}' to origin (with force)"
+          git push -f origin "${PR_BASE_BRANCH_NAME}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push branch ${PR_BASE_BRANCH_NAME}."
+            exit 1 # Caught by continue-on-error
+          fi
+
+          echo "Switching back to branch '${PR_HEAD_BRANCH_NAME}'"
+          git checkout "${PR_HEAD_BRANCH_NAME}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to checkout back to branch ${PR_HEAD_BRANCH_NAME}."
+            exit 1 # Caught by continue-on-error
+          fi
+
+          echo "Creating PR from '${PR_HEAD_BRANCH_NAME}' to '${PR_BASE_BRANCH_NAME}'"
           gh pr create \
-            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" \
-            --head "${BRANCH_NAME}" \
-            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}" \
+            --base "${PR_BASE_BRANCH_NAME}" \
+            --head "${PR_HEAD_BRANCH_NAME}" \
+            --title "Releasing ${PR_HEAD_BRANCH_NAME} into ${PR_BASE_BRANCH_NAME}" \
             --fill || :

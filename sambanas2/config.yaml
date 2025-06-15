@@ -1,6 +1,6 @@
 ---
 name: Samba NAS2-⍺
-version: 12.5.0-ns2.alpha38
+version: 2025.6.0-dev
 slug: sambanas2
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
@@ -70,7 +70,7 @@ options:
   #autodiscovery: {}
   #other_users: []
   #acl: []
-  update_srat_onstart: no
+  srat_update_channel: none
   interfaces: []
 schema:
   #workgroup: str
@@ -119,7 +119,7 @@ schema:
   #      - str?
   #    timemachine: bool?
   #    usage: list(media|backup|share)?
-  update_srat_onstart: list(no|release|prerelease|localdev|localfile)?
+  srat_update_channel: list(none|release|prerelease|develop)?
   interfaces: # for WSDD
     - str?
   bind_all_interfaces: bool? # for WSDD

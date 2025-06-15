@@ -20,7 +20,7 @@ ARG BUILD_ARCH
 
 RUN cd / \
     && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
-    && cd wsdd2-master \ 
+    && cd wsdd2-master \
     && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
     && make
 
@@ -99,7 +99,10 @@ RUN apk add --no-cache \
     avahi-compat-libdns_sd \
     avahi-tools 
 
-RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
+# hadolint ignore=DL3018,DL3003
+RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
+    apk add --no-cache apfs-fuse; \
+    fi
 
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin

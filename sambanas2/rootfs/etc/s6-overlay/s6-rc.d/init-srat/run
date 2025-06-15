@@ -84,10 +84,18 @@ ls -al /usr/local/bin/srat*
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
 if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
-    bashio::log.warning "Can't read hostname, using default."
-    HOSTNAME="homeassistant"
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
 fi
 bashio::log.info "Hostname: ${HOSTNAME}"
+
+if bashio::config.has_value 'srat_update_channel'; then
+  /usr/local/bin/srat-cli \
+    -db /config/config.db3 \
+    -loglevel $(bashio::config 'log_level' 'info') \
+    upgrade \
+    -channel $(bashio::config 'srat_update_channel')
+fi
 
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \

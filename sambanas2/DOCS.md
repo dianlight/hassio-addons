@@ -78,7 +78,7 @@ Fields between `<` and `>` indicate values that are omitted and need to be chang
 ```yaml
   wsdd: true
   wsdd2: false
-  update_srat_onstart: no
+  srat_update_channel: none
   interfaces: []
 ```
 
@@ -139,7 +139,7 @@ Enable SMART on all disks, enable automatic offline testing every four hours, an
 
 Defaults to `true`.
 
-### Options `update_srat_onstart` (optional) **_Exteprimental_**
+### Options `srat_update_channel` (optional) **_Exteprimental_**
 
 SRAT (Samba REST Administration Tool) is a new system designed to provide a simplified user interface for configuring SAMBA. It has been developed to work within Home Assistant, specifically for this addon, but can also be used in other contexts.
 
@@ -148,7 +148,7 @@ Currently under development and in an alpha state, SRAT is set to become the pre
 Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool )
 on the choosed channel.
 
-Defaults to `no`
+Defaults to `none`
 
 ## Support
 
