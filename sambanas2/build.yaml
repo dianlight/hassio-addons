@@ -10,5 +10,4 @@ build_from:
 #  #base_identity: https://github.com/home-assistant/builder/.*
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
-  #  HDDTEMP_VERSION: "0.3-beta15"
-  SRAT_VERSION: "2025.06.07.dev15"
+  SRAT_VERSION: "2025.6.9-dev.1"
