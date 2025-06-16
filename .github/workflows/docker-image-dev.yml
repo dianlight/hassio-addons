@@ -69,10 +69,13 @@ jobs:
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
             fi
+          # Check for .dev<N> suffix on version
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev([0-9]*)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev<N> from version
           fi
 
-          # Append .dev<run_number> to the (potentially modified) base version
-          FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}.dev${{ github.run_number }}"
+          # Append -dev<run_number> to the (potentially modified) base version
+          FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}-dev${{ github.run_number }}"
 
           echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
