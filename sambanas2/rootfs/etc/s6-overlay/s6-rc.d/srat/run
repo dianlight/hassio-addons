@@ -14,11 +14,10 @@ bashio::net.wait_for 445 ${ipaddress/\/*/} 60
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
 if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
-    bashio::log.warning "Can't read hostname, using default."
-    HOSTNAME="homeassistant"
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
 fi
 bashio::log.info "Hostname: ${HOSTNAME}"
-
 
 exec /usr/local/bin/srat-server \
   -port $(bashio::addon.ingress_port) \
@@ -27,6 +26,6 @@ exec /usr/local/bin/srat-server \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
-  $(bashio::config.equals 'update_srat_onstart' 'localfile' && echo " -update-file-path /config/srat-server") \
+  $(bashio::config.equals 'srat_update_channel' 'develop' && echo " -update-file-path /config/srat-server") \
   -loglevel $(bashio::config 'log_level' 'info') \
   -ip-address $(bashio::addon.ip_address)
