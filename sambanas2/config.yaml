@@ -130,7 +130,7 @@ schema:
   #multi_channel: bool?
   leave_front_door_open: bool?
 
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true
