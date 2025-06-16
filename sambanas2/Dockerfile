@@ -78,12 +78,12 @@ RUN apk add --no-cache \
     sysstat \
     hdparm \
     smartmontools \
-    wsdd \
+#    wsdd \
     udisks2 \
     libcap \
     hd-idle \
     fuse3 \
-    py3-pip \
+#    py3-pip \
     lsblk \
     socat \
     figlet \
