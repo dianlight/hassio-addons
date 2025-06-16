@@ -1,0 +1,72 @@
+#!/usr/bin/with-contenv sh
+
+# shellcheck shell=bash
+#
+# Script di avvio per wsdd2
+# Legge dinamicamente i parametri da smb.conf inclusi interfacce e log level
+#
+
+echo "Configuring and starting wsdd2..."
+
+# --- Configurazione ---
+SMB_CONF="/etc/samba/smb.conf"
+
+if [ ! -f "$SMB_CONF" ]; then
+  echo "Fatal: Samba config file not found at ${SMB_CONF}!"
+  exit 1
+fi
+
+# --- Estrazione Parametri (Metodo Robusto con testparm) ---
+WORKGROUP=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*workgroup\s*=' | awk '{print $3}')
+NETBIOS_NAME=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*netbios name\s*=' | awk '{print $3}')
+LOG_LEVEL=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*log level\s*=' | awk '{print $3}')
+
+# Per le interfacce, il valore può contenere spazi, quindi usiamo sed per estrarre l'intera riga
+INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=' | sed 's/^\s*interfaces\s*=\s*//')
+
+
+# --- Valori di Default ---
+: "${WORKGROUP:=WORKGROUP}"
+: "${NETBIOS_NAME:=$(hostname -s)}"
+: "${LOG_LEVEL:=0}" # Default a 0 (nessun log verboso)
+# Nessun default per INTERFACES. Se vuoto, wsdd2 ascolterà su tutte le interfacce.
+
+
+# --- Costruzione Argomenti ---
+WSDD2_ARGS=""
+
+# Parametri base
+if [ -n "$WORKGROUP" ]; then
+  WSDD2_ARGS="${WSDD2_ARGS} -w ${WORKGROUP}"
+fi
+if [ -n "$NETBIOS_NAME" ]; then
+  WSDD2_ARGS="${WSDD2_ARGS} -n ${NETBIOS_NAME}"
+fi
+
+# Mappatura del log level di Samba ai flag di verbosità di wsdd2 (-v, -vv, ...)
+# Un log level di 1 in Samba è già abbastanza verboso.
+case "$LOG_LEVEL" in
+  1)
+    WSDD2_ARGS="${WSDD2_ARGS} -v"
+    ;;
+  2)
+    WSDD2_ARGS="${WSDD2_ARGS} -vv"
+    ;;
+  [3-9]|10) # Per livelli 3 o superiori, usiamo il massimo della verbosità di wsdd2
+    WSDD2_ARGS="${WSDD2_ARGS} -vvv"
+    ;;
+esac
+
+# Aggiunge le interfacce specificate, una per una.
+# Lo shell for loop itera automaticamente sugli elementi separati da spazi.
+if [ -n "$INTERFACES" ]; then
+  for iface in $INTERFACES; do
+    WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
+  done
+fi
+
+
+echo "Starting wsdd2 with arguments:${WSDD2_ARGS}"
+
+# --- Esecuzione ---
+exec /usr/bin/wsdd2 ${WSDD2_ARGS}
