@@ -136,7 +136,7 @@ jobs:
           git branch -f "${PR_BASE_BRANCH_NAME}" "origin/master"
 
           echo "Checking out branch '${PR_BASE_BRANCH_NAME}' to run scripts"
-          git checkout "${PR_BASE_BRANCH_NAME}"
+          git stash && git checkout "${PR_BASE_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to checkout branch ${PR_BASE_BRANCH_NAME}."
             exit 1 # This will be caught by continue-on-error for the step

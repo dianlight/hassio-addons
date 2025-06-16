@@ -13,13 +13,13 @@ We believe SambaNAS2, with its fresh interface and the intelligent SRAT engine, 
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
-- New option `update_srat_onstart`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
+- [X] New option `srat_update_channel`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
 - New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
 ###### __🚧 Work in progess__
 - [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 - [ ] Migrate config from SambaNas addon
 - [ ] Mobile ready UI
-- [ ] Support WSDD and WSDD2
+- [X] Support ~~WSDD~~ and WSDD2
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon
