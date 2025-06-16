@@ -11,6 +11,8 @@ arch:
   - amd64
 startup: initialize
 #webui: http://[HOST]:[PORT:3000]/static/index.html
+#watchdog: http://[HOST]:[PORT:3000]/api/health   # Tema porta dinamica 
+watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
 ports_description:
@@ -64,8 +66,8 @@ options:
   #  - ".Trashes"
   #compatibility_mode: false
   #recyle_bin_enabled: false
-  wsdd2: false
-  wsdd: true
+  #wsdd2: false
+  #wsdd: true
   #mqtt_nexgen_entities: false
   #autodiscovery: {}
   #other_users: []
@@ -92,8 +94,8 @@ schema:
   #  - str
   #compatibility_mode: bool?
   #recyle_bin_enabled: bool?
-  wsdd: bool # for WSDD
-  wsdd2: bool? # for WSDD
+  #wsdd: bool # for WSDD
+  #wsdd2: bool? # for WSDD
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
   #mqtt_nexgen_entities: bool?
@@ -120,9 +122,9 @@ schema:
   #    timemachine: bool?
   #    usage: list(media|backup|share)?
   update_srat_onstart: list(no|release|prerelease|localdev|localfile)?
-  interfaces: # for WSDD
-    - str?
-  bind_all_interfaces: bool? # for WSDD
+  #interfaces: # for WSDD
+  #  - str?
+  #bind_all_interfaces: bool? # for WSDD
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   #meaning_of_life: int?
   #multi_channel: bool?

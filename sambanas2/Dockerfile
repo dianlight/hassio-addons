@@ -24,13 +24,6 @@ RUN cd / \
     && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
     && make
 
-COPY rootfs /
-RUN cd /usr/local/bin/ && \
-    if [ "$BUILD_ARCH" == "armv7" ]; then \ 
-    export PIP_NO_BINARY="pyyaml" ; \
-    fi && \
-    poetry install 
-
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
@@ -104,9 +97,6 @@ RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 
-# SAMBANAS UTILS (POERTY VIRTUAL ENV)
-COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
-
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 
@@ -135,8 +125,11 @@ RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
 # Copy data
 COPY rootfs /
 
-HEALTHCHECK \
-    CMD smbclient -L '\\localhost' -U '%' -m SMB3
+# Set the exec flags correctly
+RUN find /etc/s6-overlay -type f -print0 | xargs -0 chmod a+x
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD smbcontrol smbd ping || exit 1
 
 # Labels
 LABEL \
