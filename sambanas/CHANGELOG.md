@@ -1,5 +1,44 @@
 # Changelog
 
+## 12.5.0-nas [ Maintenance Mode ]
+
+### ✨ Features 
+
+### 🚨 Important Notice Regarding SambaNas Addon Development
+
+**SambaNas Addon is Now in Maintenance Mode**
+
+This notice is to inform our users that the **SambaNas addon will now transition into maintenance mode.** This means that **no future features will be implemented** for this version of the addon. Our development efforts will be focused solely on providing **critical bug fixes** to ensure its continued stability for existing users.
+
+**Introducing SambaNas2: The Future of Samba Integration**
+
+We are excited to announce **SambaNas2**, the successor to the original SambaNas addon! SambaNas2 represents a **complete rewrite from the ground up, developed in Go with a brand new core.** This will bring significant improvements in performance, stability, and future extensibility.
+
+**Current Status and Upcoming Beta Release**
+
+SambaNas2 is currently in an **Alpha stage** of development. We are pleased to announce that a **public Beta version will be released in the coming weeks** and will be available through our beta channel.
+
+We encourage users interested in the latest features and improvements to keep an eye out for the SambaNas2 beta release. Thank you for your continued support.
+
+[Add our Hass.io BETA add-ons repository][beta-repository] to your Hass.io instance.
+
+###  🩹 BugFix
+- Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
+- Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
+
+### 🏗 Chore
+- Update Based Image to 17.2.5 (Alpine 3.21.3, Samba 4.20.6)
+- [Full Changelog from official addon 12.3.2][changelog_12.5.0]
+  - Add the ability to enable and disable trying to become a local master browser on a subnet
+- [Full Changelog from official addon 12.4.0][changelog_12.4.0]
+  - (Skip) Add the ability to enable and disable specific shares, improving user control over folder access
+- [Full Changelog from official addon 12.3.3][changelog_12.3.3]
+  - Enable Samba configurations to improve interoperability with Apple devices (Already applied)
+
+[changelog_12.3.3]: https://github.com/home-assistant/addons/commit/be105fa07eedf5b29fc9ce9d0702914f5a8d6b03
+[changelog_12.4.0]: https://github.com/home-assistant/addons/pull/3877
+[changelog_12.5.0]: https://github.com/home-assistant/addons/commit/976afaf0206afb40d456a007cdc90b72f0943f13
+
 ## 12.3.2-nas1
 
 ### 🩹 BugFix

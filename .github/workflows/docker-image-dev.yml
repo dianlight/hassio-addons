@@ -60,8 +60,15 @@ jobs:
           get: true
           append: true
 
-      - name: 📰 Publish ${{ steps.extract_project.outputs.name }} Addon ${{ steps.version_set.outputs.value_new }}
-        uses: home-assistant/builder@master
+      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        uses: pietrobolcato/action-read-yaml@1.1.0
+        id: read_action_js
+        with:
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
+
+      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
+        uses: home-assistant/builder@2025.03.0
+        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
@@ -71,22 +78,8 @@ jobs:
             --docker-hub dianlight \
             --cosign
 
-      - name: Get Master SHA
-        shell: bash
-        id: git_sha_master
-        run: |
-          echo "sha=$(git rev-parse origin/master)" >> $GITHUB_OUTPUT
-
-      - name: Create prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }} if not exists
-        continue-on-error: true
-        uses: peterjgrainger/action-create-branch@v3.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          branch: 'refs/heads/prerelease/${{ steps.extract_project.outputs.name }}_${{ steps.version_set.outputs.value_old }}'
-          sha: '${{ steps.git_sha_master.outputs.sha }}'
-
-      - name: 🧑🏽‍💻 pull-request
+      - name: pull-request
+        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
