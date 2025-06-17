@@ -68,7 +68,7 @@ jobs:
           fi
 
           # Strip any existing -alpha<num> or -beta<num> suffix from the current version to get the base version
-          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha\.[0-9]+|-beta\.[0-9]+)$//')
+          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?)$//')
 
           # Construct the version suffix using the determined type and the current run number.
           # This ensures a new pre-release number for each run if an EXPECTED_SUFFIX_TYPE is determined.
