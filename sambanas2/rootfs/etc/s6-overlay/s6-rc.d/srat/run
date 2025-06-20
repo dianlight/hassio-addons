@@ -5,6 +5,7 @@
 # Start srat service
 # ==============================================================================
 export HOSTNAME
+export ADDON_VERSION=$(bashio::addon.version)
 
 ipaddress=$(bashio::addon.ip_address)
 
@@ -17,7 +18,7 @@ if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
   bashio::log.warning "Can't read hostname, using default."
   HOSTNAME="homeassistant"
 fi
-bashio::log.info "Hostname: ${HOSTNAME}"
+bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
 
 exec /usr/local/bin/srat-server \
   -port $(bashio::addon.ingress_port) \

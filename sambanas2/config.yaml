@@ -39,97 +39,14 @@ map:
   - backup:rw
   - media:rw
 options:
-  #workgroup: WORKGROUP
-  #username: homeassistant
-  #local_master: true
-  #allow_hosts:
-  #  - 10.0.0.0/8
-  #  - 172.16.0.0/12
-  #  - 192.168.0.0/16
-  #  - 169.254.0.0/16
-  #  - fe80::/10
-  #  - fc00::/7
-  #automount: true
-  #moredisks: []
-  #mountoptions:
-  #  - nosuid
-  #  - relatime
-  #  - noexec
-  #available_disks_log: true
-  #medialibrary:
-  #  enable: false
-  #veto_files:
-  #  - "._*"
-  #  - ".DS_Store"
-  #  - Thumbs.db
-  #  - icon?
-  #  - ".Trashes"
-  #compatibility_mode: false
-  #recyle_bin_enabled: false
-  #wsdd2: false
-  #wsdd: true
-  #mqtt_nexgen_entities: false
-  #autodiscovery: {}
-  #other_users: []
-  #acl: []
   srat_update_channel: none
   interfaces: []
 schema:
-  #workgroup: str
-  #local_master: bool
-  #username: str
-  #password: password
-  #automount: bool?
-  #moredisks:
-  #  - str
-  #mountoptions:
-  #  - str
-  #available_disks_log: bool?
-  #medialibrary:
-  #  enable: bool?
-  #  ssh_private_key: password?
-  #allow_hosts:
-  #  - str
-  #veto_files:
-  #  - str
-  #compatibility_mode: bool?
-  #recyle_bin_enabled: bool?
-  #wsdd: bool # for WSDD
-  #wsdd2: bool? # for WSDD
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
-  #mqtt_nexgen_entities: bool?
-  #mqtt_enable: bool?
-  #mqtt_host: str?
-  #mqtt_username: str?
-  #mqtt_password: password?
-  #mqtt_port: str?
-  #mqtt_topic: str?
-  #autodiscovery:
-  #  disable_discovery: bool?
-  #  disable_persistent: bool?
-  #  disable_autoremove: bool?
-  #other_users:
-  #  - username: str
-  #    password: str
-  #acl:
-  #  - share: str
-  #    disabled: bool?
-  #    users:
-  #      - str?
-  #    ro_users:
-  #      - str?
-  #    timemachine: bool?
-  #    usage: list(media|backup|share)?
   srat_update_channel: list(none|release|prerelease|develop)?
-  #interfaces: # for WSDD
-  #  - str?
-  #bind_all_interfaces: bool? # for WSDD
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
-  #meaning_of_life: int?
-  #multi_channel: bool?
   leave_front_door_open: bool?
-
 image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want

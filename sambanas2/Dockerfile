@@ -98,6 +98,9 @@ RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
     apk add --no-cache apfs-fuse; \
     fi
 
+# AVAHI (Remove all services)
+RUN rm -f /etc/avahi/services/*.service 
+
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 

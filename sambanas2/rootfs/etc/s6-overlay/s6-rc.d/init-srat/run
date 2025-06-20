@@ -5,6 +5,7 @@
 # Start srat-cli service
 # ==============================================================================
 export HOSTNAME
+export ADDON_VERSION=$(bashio::addon.version)
 
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)

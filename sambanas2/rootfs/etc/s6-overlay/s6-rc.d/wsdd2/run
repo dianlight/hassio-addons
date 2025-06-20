@@ -42,12 +42,9 @@ case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to low
   WSDD2_ARGS="${WSDD2_ARGS} -WWW -LLL"
   ;;
 "debug")
-  WSDD2_ARGS="${WSDD2_ARGS} -WW -LL"
+  WSDD2_ARGS="${WSDD2_ARGS} -W -L"
   ;;
-"info" | "notice")
-  WSDD2_ARGS="${WSDD2_ARGS} -W -L" # Default verbosity for wsdd2 if add-on log level is info/notice
-  ;;
-"warning" | "error" | "fatal")
+"info" | "notice" | "warning" | "error" | "fatal")
   # For these levels, wsdd2 runs with its default verbosity (logs its own errors/criticals).
   # No additional -v flags are added.
   ;;
