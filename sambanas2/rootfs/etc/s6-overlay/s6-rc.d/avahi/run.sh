@@ -1,0 +1,85 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# This script starts the Avahi daemon.
+# It should run as a 'longrun' service under s6.
+declare INTERFACES
+declare NETBIOS_NAME
+declare SMB_CONF
+declare AVAHI_CONF_FILE
+declare DEFAULT_HOSTNAME
+
+bashio::log.info "Configuring and starting Avahi daemon..."
+
+# Ensure the DBus socket directory exists.
+# Avahi needs D-Bus. `host_dbus: true` in config.yaml implies host D-Bus is used.
+mkdir -p /var/run/dbus
+
+SMB_CONF="/etc/samba/smb.conf"
+AVAHI_CONF_FILE="/etc/avahi/avahi-daemon.conf"
+
+INTERFACES="" # Initialize interfaces to empty
+# Determine the hostname for Avahi
+if bashio::fs.file_exists "${SMB_CONF}"; then
+    # Attempt to get NetBIOS name from smb.conf using testparm
+    # testparm output for "netbios name = VALUE" makes VALUE the 4th field.
+    # '|| true' ensures the command doesn't exit on error and NETBIOS_NAME remains empty.
+    # 'tr -d '[:space:]'' removes any potential stray whitespace around the value.
+    NETBIOS_NAME=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*netbios name\s*=' | awk '{print $4}' | tr -d '[:space:]') || true
+    INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=' | sed 's/^\s*interfaces\s*=\s*//') || true
+    if [ -n "$INTERFACES" ]; then
+        bashio::log.info "Found interfaces in smb.conf: '${INTERFACES}'. These will be used for Avahi's 'allow-interfaces'."
+    fi
+fi
+
+if [[ -z "${NETBIOS_NAME}" || "${NETBIOS_NAME}" == "null" ]]; then
+    DEFAULT_HOSTNAME=$(hostname -s)
+    bashio::log.info "NetBIOS name not found or empty in smb.conf. Using system hostname '${DEFAULT_HOSTNAME}' for Avahi."
+    NETBIOS_NAME="${DEFAULT_HOSTNAME}"
+else
+    bashio::log.info "Using NetBIOS name '${NETBIOS_NAME}' from smb.conf for Avahi."
+fi
+
+if [[ -z "$INTERFACES" ]]; then
+    bashio::log.info "No specific interfaces found in smb.conf. Avahi will listen on all available interfaces by default."
+fi
+
+# Avahi hostnames are case-insensitive according to RFCs but often preferred/displayed in lowercase.
+# Convert the determined name to lowercase for use in avahi-daemon.conf.
+AVAHI_HOSTNAME=$(echo "${NETBIOS_NAME}" | tr '[:upper:]' '[:lower:]')
+
+if [[ "${NETBIOS_NAME}" != "${AVAHI_HOSTNAME}" ]]; then
+    bashio::log.info "Avahi host-name will be set to '${AVAHI_HOSTNAME}' (converted to lowercase from '${NETBIOS_NAME}')."
+else
+    bashio::log.info "Avahi host-name will be set to '${AVAHI_HOSTNAME}'."
+fi
+
+if bashio::fs.file_exists "${AVAHI_CONF_FILE}"; then
+    bashio::log.info "Setting host-name in ${AVAHI_CONF_FILE} to '${AVAHI_HOSTNAME}'..."
+    # This command finds lines starting with optional '#' or spaces, followed by 'host-name=',
+    # and replaces the entire line with 'host-name=${AVAHI_HOSTNAME}'.
+    # This effectively uncomments the line if commented and sets the new hostname.
+    # Using '~' as sed delimiter as AVAHI_HOSTNAME is unlikely to contain it.
+    sed -i "s~^[#[:space:]]*host-name=.*~host-name=${AVAHI_HOSTNAME}~" "${AVAHI_CONF_FILE}"
+
+    # Configure allow-interfaces based on SMB_CONF
+    if [ -n "$INTERFACES" ]; then
+        bashio::log.info "Setting 'allow-interfaces' in ${AVAHI_CONF_FILE} to '${INTERFACES}'."
+        if grep -q "^\s*#\?allow-interfaces=" "${AVAHI_CONF_FILE}"; then
+            # Line exists (commented or uncommented), replace it
+            sed -i "s~^[#[:space:]]*allow-interfaces=.*~allow-interfaces=${INTERFACES}~" "${AVAHI_CONF_FILE}"
+        else
+            # Line does not exist, add it after the [server] section
+            sed -i "/^\[server\]/a allow-interfaces=${INTERFACES}" "${AVAHI_CONF_FILE}"
+        fi
+    else
+        bashio::log.info "No interfaces specified in smb.conf. Ensuring 'allow-interfaces' is commented out in ${AVAHI_CONF_FILE}."
+        sed -i "s~^\s*allow-interfaces=.*~#allow-interfaces=~" "${AVAHI_CONF_FILE}"
+    fi
+else
+    bashio::log.warning "Avahi config file ${AVAHI_CONF_FILE} not found. Cannot set host-name. Avahi will use its default (system hostname)."
+fi
+
+bashio::log.info "Starting Avahi daemon process..."
+# Using exec ensures that s6 directly supervises the avahi-daemon process.
+# --no-chroot is often useful in containers to ensure D-Bus access.
+exec /usr/sbin/avahi-daemon --no-chroot
