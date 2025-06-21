@@ -25,7 +25,7 @@ INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=
 # No default for INTERFACES. If empty, wsdd2 will listen on all interfaces.
 
 # --- Argument Construction ---
-WSDD2_ARGS="-b vendor:homeassistant,model:sambanas2"
+WSDD2_ARGS="-b vendor:homeassistant,model:sambanas2 -w"
 
 if [ -n "$WORKGROUP" ]; then
   WSDD2_ARGS="${WSDD2_ARGS} -G ${WORKGROUP}"
@@ -39,10 +39,10 @@ fi
 # The log_level is sourced from bashio::config 'log_level' (defaults to 'info').
 case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to lowercase for robust matching
 "trace")
-  WSDD2_ARGS="${WSDD2_ARGS} -WWW -LLL"
+  WSDD2_ARGS="${WSDD2_ARGS} -WWW"
   ;;
 "debug")
-  WSDD2_ARGS="${WSDD2_ARGS} -W -L"
+  WSDD2_ARGS="${WSDD2_ARGS} -W"
   ;;
 "info" | "notice" | "warning" | "error" | "fatal")
   # For these levels, wsdd2 runs with its default verbosity (logs its own errors/criticals).
