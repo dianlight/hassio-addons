@@ -73,6 +73,7 @@ RUN apk add --no-cache \
     util-linux \
     e2fsprogs-extra \
     curl \
+    unzip \
     findmnt \
     ntfs-3g-progs \
     sysstat \
@@ -122,7 +123,7 @@ RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
       SRAT_ARCH_SUFFIX="x86_64"; \
     fi; \
     curl -Lso /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${SRAT_ARCH_SUFFIX}.zip" \
-    && unzip /tmp/srat.zip -d /usr/local/bin/ \
+    && unzip -o /tmp/srat.zip -d /usr/local/bin/ \
     && chmod a+x /usr/local/bin/srat* \
     && rm -f /tmp/srat.zip
 
