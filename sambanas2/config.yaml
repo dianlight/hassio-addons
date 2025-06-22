@@ -40,7 +40,6 @@ map:
   - media:rw
 options:
   srat_update_channel: none
-  interfaces: []
 schema:
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
