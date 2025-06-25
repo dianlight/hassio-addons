@@ -4,130 +4,234 @@ on:
   push:
     branches:
       - devrelease/*
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 permissions:
-  pull-requests: write
-  contents: write
+  pull-requests: write # Required for creating pull requests
+  contents: write # Required for committing changes and pushing to the repository
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Specifies the runner environment
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4 # Checks out the repository code
         with:
-          submodules: true
+          submodules: true # Also checks out git submodules if any
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v3 # Logs into DockerHub using provided credentials
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract branch name
+        id: extract_branch # Assigns an ID to this step to reference its outputs
         shell: bash
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-        id: extract_branch
+        # Extracts the branch name (e.g., 'myaddon' from 'devrelease/myaddon')
+        # and sets it as a step output named BR_VERSION.
 
-      #      - name: Uncomment image line in config.yaml if commented
-      #        shell: bash
-      #        run: |
-      #          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
-      #          echo "Checking and uncommenting image line in $CONFIG_FILE"
-      #          # Use sed to remove '# ' prefix from the line starting with '# image:'
-      #          sed -i 's/^#\s*image:/image:/' "$CONFIG_FILE"
-      #          echo "Finished uncommenting check."
-
-      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-        uses: pietrobolcato/action-read-yaml@1.1.0
-        id: read_action_js
+      - name: 👓 Read config.yaml
+        uses: pietrobolcato/action-read-yaml@1.1.0 # Reads values from a YAML file
+        id: read_action_js # Assigns an ID to reference its outputs
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          # This action reads all top-level keys, so 'name' and 'version' will be available
-          # as steps.read_action_js.outputs.name and steps.read_action_js.outputs.version
+          # Reads 'name' and 'version' (and potentially 'image') from the config.yaml
+          # These will be available as steps.read_action_js.outputs.name, .version, .image
 
-      - name: Prepare Version and Name for YAML
-        id: prepare_yaml_values
+      - name: Prepare Version, Name, and Image for YAML
+        id: prepare_yaml_values # Assigns an ID to reference its outputs
         shell: bash
         run: |
           CURRENT_VERSION_FROM_FILE="${{ steps.read_action_js.outputs.version }}"
           CURRENT_NAME_FROM_FILE="${{ steps.read_action_js.outputs.name }}"
+          # Get the current image from config.yaml, or an empty string if not found/commented
+          CURRENT_IMAGE_FROM_FILE="${{ steps.read_action_js.outputs.image }}"
 
           FINAL_VERSION_BASE="$CURRENT_VERSION_FROM_FILE"
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
 
-          # Check for .alpha<N> suffix on version
+          # Check for .alpha<N> suffix on version and adjust name/version base
           if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha([0-9]+)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
             fi
-          # Check for .beta<N> suffix on version
+          # Check for .beta<N> suffix on version and adjust name/version base
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta([0-9]+)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
             fi
-          # Check for .dev<N> suffix on version
+          # Check for .dev<N> suffix on version (already handled by builder suffix)
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev([0-9]*)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev<N> from version
           fi
 
-          # Append -dev<run_number> to the (potentially modified) base version
+          # Append -dev<run_number> to the (potentially modified) base version for the final dev version
           FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}-dev${{ github.run_number }}"
+
+          # Construct the Docker image name (repository part)
+          # The builder will automatically append the version as the tag.
+          FINAL_IMAGE_TO_SET="dianlight/${FINAL_NAME}"
 
           echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
+          echo "FINAL_IMAGE_TO_SET=${FINAL_IMAGE_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT" # Output the base version
 
-      - name: ✍🏼 Set version in ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+      - name: ✍🏼 Set version in config.yaml
         id: version_set # This ID is used by subsequent steps for value_old
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@v1.1.1 # Action to modify YAML files
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: version
           set: ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
           get: true # Captures the version value before this 'set' operation
 
-      - name: ✍🏼 Set name in ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+      - name: ✍🏼 Set name in config.yaml
         uses: endaft/action-yamler@v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: name
           set: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
 
-      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon  ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
-        uses: home-assistant/builder@2025.03.0
+      - name: ✍🏼 Set image in config.yaml
+        uses: endaft/action-yamler@v1.1.1
+        with:
+          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          path: image
+          set: ${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}
+          # The image field will be set to the DockerHub repository (e.g., dianlight/myaddon-alpha)
+          # The 'home-assistant/builder' will then tag this image with the 'version' from config.yaml.
+
+      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
+        uses: home-assistant/builder@2025.03.0 # Home Assistant Add-on builder action
         env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:
           args: |
-            --aarch64 \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --no-latest \
-            --docker-hub dianlight ${{ steps.read_action_js.outputs.image == '' && format('--test --image dianlight/aarch64-addon-{0}', steps.extract_branch.outputs.BR_VERSION) || '' }}
+            --aarch64 \ # Specifies to build for aarch64 architecture
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \ # Specifies the add-on directory
+            --no-latest \ # Prevents tagging the Docker image with ':latest'
+            --docker-hub dianlight # Specifies the DockerHub organization to push the image to
 
-      - name: pull-request
-        if: ${{ steps.read_action_js.outputs.image != '' }}
+      - name: Run Scripts and Create Merge Release Branch
+        # Only run this step if the scripts directory exists for the current addon
+        if: -d "${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/scripts"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        continue-on-error: true
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
         shell: bash
         run: |
-          set -x
-          
+          set -x # Enable verbose output for debugging
+
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot" # Using the same bot name for consistency
+
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          SCRIPTS_DIR="${{ github.workspace }}/${ADDON_DIR}/scripts"
+          MERGE_RELEASE_BRANCH="mergerelease/${ADDON_DIR}" # New branch name: mergerelease/<addon>
+
+          echo "Fetching origin master and current branch ${BRANCH_NAME}"
+          git fetch origin master "${BRANCH_NAME}"
+
+          echo "Ensuring a clean working directory before operating on branches"
+          git stash -u # Stash untracked files as well, to avoid conflicts
+
+          # Check if MERGE_RELEASE_BRANCH already exists remotely or locally
+          if git rev-parse --verify "origin/${MERGE_RELEASE_BRANCH}" >/dev/null 2>&1 || git rev-parse --verify "${MERGE_RELEASE_BRANCH}" >/dev/null 2>&1; then
+            echo "Branch '${MERGE_RELEASE_BRANCH}' already exists. Resetting it to origin/${BRANCH_NAME}."
+            git branch -f "${MERGE_RELEASE_BRANCH}" "origin/${BRANCH_NAME}" # Force reset local branch
+            git checkout "${MERGE_RELEASE_BRANCH}"
+          else
+            echo "Creating new branch '${MERGE_RELEASE_BRANCH}' from 'origin/${BRANCH_NAME}'."
+            git checkout -b "${MERGE_RELEASE_BRANCH}" "origin/${BRANCH_NAME}"
+          fi
+
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to checkout or create branch ${MERGE_RELEASE_BRANCH}."
+            exit 1
+          fi
+
+          # Run scripts if the directory exists (already checked by 'if' condition)
+          echo "Scripts directory '$SCRIPTS_DIR' found. Executing scripts..."
+          find "$SCRIPTS_DIR" -type f -print0 | while IFS= read -r -d $'\0' SCRIPT_FILE; do
+            echo "Executing script: $SCRIPT_FILE"
+            if [ -x "$SCRIPT_FILE" ]; then
+              "$SCRIPT_FILE"
+            else
+              bash "$SCRIPT_FILE"
+            fi
+            
+            SCRIPT_EXIT_CODE=$?
+            if [ $SCRIPT_EXIT_CODE -ne 0 ]; then
+              echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
+              # Continue to the next script even if one fails
+            fi
+          done
+
+          echo "Checking for changes after script execution on branch '${MERGE_RELEASE_BRANCH}'..."
+          git add . # Stage all changes made by scripts
+          if [ -n "$(git status --porcelain)" ]; then # Check if there are any staged changes
+            echo "Committing script-generated changes to '${MERGE_RELEASE_BRANCH}'"
+            git commit -m "auto: Run scripts for mergerelease in $ADDON_DIR"
+            if [ $? -ne 0 ]; then
+              echo "Warning: Failed to commit script-generated changes to ${MERGE_RELEASE_BRANCH}."
+            fi
+          else
+            echo "No changes to commit after script execution on ${MERGE_RELEASE_BRANCH}."
+          fi
+
+          echo "Pushing branch '${MERGE_RELEASE_BRANCH}' to origin (with force)"
+          git push -f origin "${MERGE_RELEASE_BRANCH}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push branch ${MERGE_RELEASE_BRANCH}."
+            exit 1
+          fi
+
+          echo "Switching back to original branch '${BRANCH_NAME}'"
+          git checkout "${BRANCH_NAME}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to checkout back to original branch ${BRANCH_NAME}."
+            exit 1
+          fi
+          git stash pop || true # Apply stashed changes back to the original branch, ignore errors if nothing stashed
+
+      - name: Create Pull Request
+        # This step runs if the 'image' field was initially NOT empty,
+        # indicating it's a "real" addon for which a PR is desired.
+        if: ${{ steps.read_action_js.outputs.image != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication with 'gh' CLI
+          CURRENT_WORKFLOW_BRANCH: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
+        continue-on-error: true # Allows the workflow to continue even if this step fails
+        shell: bash
+        run: |
+          set -x # Enable verbose output for debugging
+
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
 
           ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
           BASE_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
-          # PR_BASE_BRANCH_NAME is the target branch for script commits and the PR base
+          # PR_BASE_BRANCH_NAME is the target branch for script commits and the PR base (e.g., prerelease/myaddon_1.0.0)
           PR_BASE_BRANCH_NAME="prerelease/${ADDON_DIR}_${BASE_VERSION}"
-          # PR_HEAD_BRANCH_NAME is the source branch for the PR (e.g., devrelease/myaddon)
-          PR_HEAD_BRANCH_NAME="${BRANCH_NAME}" # Using the env var already defined for the step
-          # Note: SCRIPTS_DIR_FROM_ROOT would be "./${ADDON_DIR}/scripts"
+
+          # Determine PR_HEAD_BRANCH_NAME: prefer mergerelease/* if it exists, else use devrelease/*
+          MERGE_RELEASE_CHECK_BRANCH="mergerelease/${ADDON_DIR}"
+          PR_HEAD_BRANCH_NAME="${{ env.CURRENT_WORKFLOW_BRANCH }}" # Default to the current workflow branch
+
+          echo "Checking if merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' exists..."
+          # Fetch the remote branch list and check for the merge release branch
+          if git ls-remote --exit-code origin "${MERGE_RELEASE_CHECK_BRANCH}" &>/dev/null; then
+            echo "Merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' exists. Using it as PR head."
+            PR_HEAD_BRANCH_NAME="${MERGE_RELEASE_CHECK_BRANCH}"
+          else
+            echo "Merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' does not exist. Using current workflow branch as PR head."
+            # PR_HEAD_BRANCH_NAME already defaults to CURRENT_WORKFLOW_BRANCH
+          fi
 
           echo "Fetching origin master and head branch ${PR_HEAD_BRANCH_NAME}"
           git fetch origin master "${PR_HEAD_BRANCH_NAME}"
@@ -135,64 +239,31 @@ jobs:
           echo "Creating/resetting local branch '${PR_BASE_BRANCH_NAME}' from 'origin/master'"
           git branch -f "${PR_BASE_BRANCH_NAME}" "origin/master"
 
-          echo "Checking out branch '${PR_BASE_BRANCH_NAME}' to run scripts"
-          git stash && git checkout "${PR_BASE_BRANCH_NAME}"
+          echo "Checking out branch '${PR_BASE_BRANCH_NAME}'"
+          git stash -u # Stash untracked files as well, to avoid conflicts
+          git checkout "${PR_BASE_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to checkout branch ${PR_BASE_BRANCH_NAME}."
-            exit 1 # This will be caught by continue-on-error for the step
-          fi
-
-          # Run scripts if the directory exists
-          if [ -d "$SCRIPTS_DIR" ]; then
-            echo "Scripts directory '$SCRIPTS_DIR' found. Executing scripts..."
-            # Robustly iterate over script files
-            find "$SCRIPTS_DIR" -type f -print0 | while IFS= read -r -d $'\0' SCRIPT_FILE; do
-              echo "Executing script: $SCRIPT_FILE"
-              # Attempt to execute directly if permissions allow, otherwise use bash as a fallback.
-              # Ensure scripts have a shebang (e.g., #!/bin/bash, #!/usr/bin/env python3) if they are not bash scripts but are marked executable.
-              if [ -x "$SCRIPT_FILE" ]; then
-                  "$SCRIPT_FILE"
-              else
-                  bash "$SCRIPT_FILE"
-              fi
-              
-              SCRIPT_EXIT_CODE=$?
-              if [ $SCRIPT_EXIT_CODE -ne 0 ]; then
-                  echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
-                  # Continue to the next script even if one fails
-              fi
-            done
-
-            echo "Checking for changes after script execution on branch '${PR_BASE_BRANCH_NAME}'..."
-            git add . # Stage all changes made by scripts
-            if [ -n "$(git status --porcelain)" ]; then
-              echo "Committing script-generated changes to '${PR_BASE_BRANCH_NAME}'"
-              git commit -m "auto: Run scripts in $SCRIPTS_DIR for $ADDON_DIR"
-              if [ $? -ne 0 ]; then
-                echo "Warning: Failed to commit script-generated changes."
-              fi
-            else
-              echo "No changes to commit after script execution."
-            fi
-          else
-            echo "Scripts directory '$SCRIPTS_DIR' not found. Skipping script execution."
+            exit 1
           fi
 
           echo "Pushing branch '${PR_BASE_BRANCH_NAME}' to origin (with force)"
           git push -f origin "${PR_BASE_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to push branch ${PR_BASE_BRANCH_NAME}."
-            exit 1 # Caught by continue-on-error
+            exit 1
           fi
 
-          echo "Switching back to branch '${PR_HEAD_BRANCH_NAME}'"
+          echo "Switching back to the determined head branch '${PR_HEAD_BRANCH_NAME}' for PR creation"
           git checkout "${PR_HEAD_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to checkout back to branch ${PR_HEAD_BRANCH_NAME}."
-            exit 1 # Caught by continue-on-error
+            exit 1
           fi
+          git stash pop || true # Apply stashed changes back to the head branch, ignore errors if nothing stashed
 
           echo "Creating PR from '${PR_HEAD_BRANCH_NAME}' to '${PR_BASE_BRANCH_NAME}'"
+          # 'gh pr create' will create a PR; '|| :' prevents the step from failing if PR already exists
           gh pr create \
             --base "${PR_BASE_BRANCH_NAME}" \
             --head "${PR_HEAD_BRANCH_NAME}" \
