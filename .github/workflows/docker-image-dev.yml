@@ -112,10 +112,10 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:
           args: |
-            --aarch64 \ # Specifies to build for aarch64 architecture
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \ # Specifies the add-on directory
-            --no-latest \ # Prevents tagging the Docker image with ':latest'
-            --docker-hub dianlight # Specifies the DockerHub organization to push the image to
+            --aarch64 \
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \ 
+            --no-latest \ 
+            --docker-hub dianlight 
 
       - name: Run Scripts and Create Merge Release Branch
         # Only run this step if the scripts directory exists for the current addon
