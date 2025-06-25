@@ -113,9 +113,9 @@ jobs:
         with:
           args: |
             --aarch64 \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \ 
-            --no-latest \ 
-            --docker-hub dianlight 
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+            --no-latest \
+            --docker-hub dianlight
 
       - name: Run Scripts and Create Merge Release Branch
         # Only run this step if the scripts directory exists for the current addon
