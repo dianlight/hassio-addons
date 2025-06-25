@@ -52,18 +52,21 @@ jobs:
 
           FINAL_VERSION_BASE="$CURRENT_VERSION_FROM_FILE"
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
+          FINAL_IMAGE_TO_SET="$CURRENT_IMAGE_FROM_FILE"
 
           # Check for .alpha<N> suffix on version and adjust name/version base
           if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha([0-9]+)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
+              FINAL_IMAGE_TO_SET="${CURRENT_IMAGE_FROM_FILE%-⍺}-⍺" # Remove -⍺ from image if it exists
             fi
           # Check for .beta<N> suffix on version and adjust name/version base
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta([0-9]+)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
+              FINAL_IMAGE_TO_SET="${CURRENT_IMAGE_FROM_FILE%-β}-β" # Remove -β from image if it exists
             fi
           # Check for .dev<N> suffix on version (already handled by builder suffix)
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev([0-9]*)$ ]]; then
@@ -72,10 +75,6 @@ jobs:
 
           # Append -dev<run_number> to the (potentially modified) base version for the final dev version
           FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}-dev${{ github.run_number }}"
-
-          # Construct the Docker image name (repository part)
-          # The builder will automatically append the version as the tag.
-          FINAL_IMAGE_TO_SET="dianlight/${FINAL_NAME}"
 
           echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
