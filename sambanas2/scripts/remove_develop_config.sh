@@ -90,21 +90,21 @@ if [ "$is_prerelease" = false ]; then
     echo "Version is not a pre-release. Attempting to update 'srat_update_channel'..."
 
     # Check if srat_update_channel key exists
-    srat_channel_exists=$(yq e 'has("srat_update_channel")' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
+    srat_channel_exists=$(yq e '.schema | has("srat_update_channel")' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
 
     if [ "$srat_channel_exists" = "true" ]; then
         # Check if srat_update_channel is an array (YAML sequence)
-        srat_channel_type=$(yq e '.srat_update_channel | type' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
+        srat_channel_type=$(yq e '.schema.srat_update_channel | type' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
 
         if [ "$srat_channel_type" = "!!seq" ]; then
             # Check if "develop" is present in the array
-            contains_develop=$(yq e '.srat_update_channel | contains(["develop"])' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
+            contains_develop=$(yq e '.schema.srat_update_channel | contains(["develop"])' "$CONFIG_FILE" | tr -d '\n') # Ensure newline stripping
 
             if [ "$contains_develop" = "true" ]; then
                 echo "Removing 'develop' from 'srat_update_channel' in '$CONFIG_FILE'."
                 # yq command to delete the 'develop' string from the array.
                 # The -i flag modifies the file in-place.
-                yq e 'del(.srat_update_channel[] | select(. == "develop"))' -i "$CONFIG_FILE"
+                yq e 'del(.schema.srat_update_channel[] | select(. == "develop"))' -i "$CONFIG_FILE"
                 echo "'develop' removed from 'srat_update_channel'."
             else
                 echo "'develop' not found in 'srat_update_channel' array. No changes made."
