@@ -24,9 +24,11 @@ echo "Processing configuration file: $CONFIG_FILE"
 
 # 1. Read version from config.yaml
 # yq e '.version' outputs the value, or the string 'null' if not found/YAML null.
-# FIX: Pipe to 'tr -d '\n\r'' to remove all newlines and carriage returns,
+# FIX: Use 'read -r' with a here-string for robust trailing newline removal,
 # then use 'sed' to trim all leading/trailing whitespace more robustly.
-version_str=$(yq e '.version' "$CONFIG_FILE" | tr -d '\n\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+raw_yq_output=$(yq e '.version' "$CONFIG_FILE")
+read -r version_str <<< "$raw_yq_output" # 'read -r' strips exactly one trailing newline
+version_str=$(echo "$version_str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') # Trim any other whitespace
 
 if [ "$version_str" = "null" ]; then
     echo "Error: 'version' key not found or is YAML null in '$CONFIG_FILE'." >&2
@@ -50,8 +52,8 @@ echo "$version_str" | hexdump -C
 # Core: (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
 # Pre-release: -([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
 # Build metadata: \+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
-# The regex allows for SemVer valid strings, optionally followed by any trailing whitespace.
-semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?[[:space:]]*$'
+# The regex now expects the string to be perfectly trimmed due to the robust pre-processing.
+semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 
 if ! [[ "$version_str" =~ $semver_regex ]]; then
     echo "Error: Version '$version_str' in '$CONFIG_FILE' is not a valid semantic version." >&2
