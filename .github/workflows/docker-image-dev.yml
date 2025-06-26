@@ -59,14 +59,12 @@ jobs:
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
-              FINAL_IMAGE_TO_SET="${CURRENT_IMAGE_FROM_FILE%-⍺}-⍺" # Remove -⍺ from image if it exists
             fi
           # Check for .beta<N> suffix on version and adjust name/version base
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta([0-9]+)$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
-              FINAL_IMAGE_TO_SET="${CURRENT_IMAGE_FROM_FILE%-β}-β" # Remove -β from image if it exists
             fi
           # Check for .dev<N> suffix on version (already handled by builder suffix)
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev([0-9]*)$ ]]; then
@@ -106,18 +104,7 @@ jobs:
           # The image field will be set to the DockerHub repository (e.g., dianlight/myaddon-alpha)
           # The 'home-assistant/builder' will then tag this image with the 'version' from config.yaml.
 
-      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
-        uses: home-assistant/builder@2025.03.0 # Home Assistant Add-on builder action
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
-        with:
-          args: |
-            --aarch64 \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --no-latest \
-            --docker-hub dianlight
-
-      - name: Run Scripts and Create Merge Release Branch
+      - name: Run Addon custom scripts
         # Only run this step if the scripts directory exists for the current addon
         if: -d "${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/scripts"
         env:
@@ -126,33 +113,8 @@ jobs:
         run: |
           set -x # Enable verbose output for debugging
 
-          git config --global user.email "workflow-bot@github.com"
-          git config --global user.name "Prerelease Bot" # Using the same bot name for consistency
-
           ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
           SCRIPTS_DIR="${{ github.workspace }}/${ADDON_DIR}/scripts"
-          MERGE_RELEASE_BRANCH="mergerelease/${ADDON_DIR}" # New branch name: mergerelease/<addon>
-
-          echo "Fetching origin master and current branch ${BRANCH_NAME}"
-          git fetch origin master "${BRANCH_NAME}"
-
-          echo "Ensuring a clean working directory before operating on branches"
-          git stash -u # Stash untracked files as well, to avoid conflicts
-
-          # Check if MERGE_RELEASE_BRANCH already exists remotely or locally
-          if git rev-parse --verify "origin/${MERGE_RELEASE_BRANCH}" >/dev/null 2>&1 || git rev-parse --verify "${MERGE_RELEASE_BRANCH}" >/dev/null 2>&1; then
-            echo "Branch '${MERGE_RELEASE_BRANCH}' already exists. Resetting it to origin/${BRANCH_NAME}."
-            git branch -f "${MERGE_RELEASE_BRANCH}" "origin/${BRANCH_NAME}" # Force reset local branch
-            git checkout "${MERGE_RELEASE_BRANCH}"
-          else
-            echo "Creating new branch '${MERGE_RELEASE_BRANCH}' from 'origin/${BRANCH_NAME}'."
-            git checkout -b "${MERGE_RELEASE_BRANCH}" "origin/${BRANCH_NAME}"
-          fi
-
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to checkout or create branch ${MERGE_RELEASE_BRANCH}."
-            exit 1
-          fi
 
           # Run scripts if the directory exists (already checked by 'if' condition)
           echo "Scripts directory '$SCRIPTS_DIR' found. Executing scripts..."
@@ -171,17 +133,41 @@ jobs:
             fi
           done
 
-          echo "Checking for changes after script execution on branch '${MERGE_RELEASE_BRANCH}'..."
-          git add . # Stage all changes made by scripts
-          if [ -n "$(git status --porcelain)" ]; then # Check if there are any staged changes
-            echo "Committing script-generated changes to '${MERGE_RELEASE_BRANCH}'"
-            git commit -m "auto: Run scripts for mergerelease in $ADDON_DIR"
-            if [ $? -ne 0 ]; then
-              echo "Warning: Failed to commit script-generated changes to ${MERGE_RELEASE_BRANCH}."
-            fi
-          else
-            echo "No changes to commit after script execution on ${MERGE_RELEASE_BRANCH}."
-          fi
+      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
+        uses: home-assistant/builder@2025.03.0 # Home Assistant Add-on builder action
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
+        with:
+          args: |
+            --aarch64 \
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+            --no-latest \
+            --docker-hub dianlight
+
+      - name: Create Merge Release Branch
+        # Only run this step if the scripts directory exists for the current addon
+        if: -d "${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/scripts"
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
+        shell: bash
+        run: |
+          set -x # Enable verbose output for debugging
+
+          git config --global user.email "workflow-bot@github.com"
+          git config --global user.name "Prerelease Bot" # Using the same bot name for consistency
+
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          SCRIPTS_DIR="${{ github.workspace }}/${ADDON_DIR}/scripts"
+          MERGE_RELEASE_BRANCH="mergerelease/${ADDON_DIR}" # New branch name: mergerelease/<addon>
+
+          echo "Add all changes to git staging area"
+          git add .
+
+          echo "Committing changes"
+          git commit -m "ci(script) Commit all automatic changes for mergerelease in $ADDON_DIR" || true
+
+          echo "Checking out branch '${MERGE_RELEASE_BRANCH}'"
+          git checkout -b "${MERGE_RELEASE_BRANCH}"
 
           echo "Pushing branch '${MERGE_RELEASE_BRANCH}' to origin (with force)"
           git push -f origin "${MERGE_RELEASE_BRANCH}"
@@ -189,14 +175,6 @@ jobs:
             echo "Error: Failed to push branch ${MERGE_RELEASE_BRANCH}."
             exit 1
           fi
-
-          echo "Switching back to original branch '${BRANCH_NAME}'"
-          git checkout "${BRANCH_NAME}"
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to checkout back to original branch ${BRANCH_NAME}."
-            exit 1
-          fi
-          git stash pop || true # Apply stashed changes back to the original branch, ignore errors if nothing stashed
 
       - name: Create Pull Request
         # This step runs if the 'image' field was initially NOT empty,
