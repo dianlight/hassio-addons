@@ -71,7 +71,6 @@ jobs:
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev.<N> from version
           fi
 
-          echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
           echo "FINAL_IMAGE_TO_SET=${FINAL_IMAGE_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT" # Output the base version
@@ -82,7 +81,7 @@ jobs:
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: version
-          set: ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}
+          set: ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}
           get: true # Captures the version value before this 'set' operation
 
       - name: ✍🏼 Set name in config.yaml
@@ -137,7 +136,7 @@ jobs:
         with:
           args: |
             --aarch64 \
-            --version ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}-dev.${{ github.run_number }} \
+            --version ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }} \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
             --no-latest \
             --docker-hub dianlight
