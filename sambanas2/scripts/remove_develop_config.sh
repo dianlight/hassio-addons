@@ -96,8 +96,8 @@ if [ "$is_prerelease" = false ]; then
 
         echo "'srat_update_channel' key found in '$CONFIG_FILE'. Proceeding to check its type."
         # Set srat_channel_type to the same without |develop string
-        yq eval '.schema.srat_update_channel |= sub(" *\\| *develop$", "")' "$CONFIG_FILE" -i
-        
+        yq eval '.schema.srat_update_channel |= sub(" *\| *develop", "")' "$CONFIG_FILE" -i
+
     else
         echo "Warning: 'srat_update_channel' key not found in '$CONFIG_FILE'. Cannot remove 'develop'." >&2
     fi
