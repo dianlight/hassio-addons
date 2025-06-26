@@ -54,25 +54,22 @@ jobs:
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
           FINAL_IMAGE_TO_SET="$CURRENT_IMAGE_FROM_FILE"
 
-          # Check for .alpha<N> suffix on version and adjust name/version base
-          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha([0-9]+)$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha<N> from version
+          # Check for .alpha.<N> suffix on version and adjust name/version base
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha\.([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha.<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
             fi
-          # Check for .beta<N> suffix on version and adjust name/version base
-          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta([0-9]+)$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta<N> from version
+          # Check for .beta.<N> suffix on version and adjust name/version base
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta\.([0-9]+)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta.<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
             fi
-          # Check for .dev<N> suffix on version (already handled by builder suffix)
-          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev([0-9]*)$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev<N> from version
+          # Check for .dev.<N> suffix on version (already handled by builder suffix)
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev\.([0-9]*)$ ]]; then
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev.<N> from version
           fi
-
-          # Append -dev<run_number> to the (potentially modified) base version for the final dev version
-          FINAL_VERSION_TO_SET="${FINAL_VERSION_BASE}-dev${{ github.run_number }}"
 
           echo "FINAL_VERSION_TO_SET=${FINAL_VERSION_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
@@ -140,6 +137,7 @@ jobs:
         with:
           args: |
             --aarch64 \
+            --version ${{ steps.prepare_yaml_values.outputs.FINAL_VERSION_TO_SET }}-dev.${{ github.run_number }} \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
             --no-latest \
             --docker-hub dianlight
