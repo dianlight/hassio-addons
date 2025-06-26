@@ -3,8 +3,8 @@
 # and update srat_update_channel based on the version type.
 
 set -e          # Exit immediately if a command exits with a non-zero status.
+set -u          # Treat unset variables as an error and exit.
 set -o pipefail # Causes a pipeline to return the exit status of the last command in the pipe that returned a non-zero status.
-# Consider adding 'set -u' (nounset) if all variable usages are confirmed to be safe.
 
 CONFIG_FILE="${1:-$(dirname "$0")/../config.yaml}"
 
@@ -24,7 +24,8 @@ echo "Processing configuration file: $CONFIG_FILE"
 
 # 1. Read version from config.yaml
 # yq e '.version' outputs the value, or the string 'null' if not found/YAML null.
-version_str=$(yq e '.version' "$CONFIG_FILE")
+# IMPORTANT FIX: Pipe to 'tr -d '\n'' to remove potential trailing newlines from yq output.
+version_str=$(yq e '.version' "$CONFIG_FILE" | tr -d '\n')
 
 if [ "$version_str" = "null" ]; then
     echo "Error: 'version' key not found or is YAML null in '$CONFIG_FILE'." >&2
@@ -36,6 +37,8 @@ if [ -z "$version_str" ]; then # Handles case where version is an empty string "
 fi
 
 echo "Found version: '$version_str'"
+# Optional: For debugging, you can check the length to see if any hidden characters remain:
+# echo "Version string length: ${#version_str}"
 
 # 2. Validate SemVer
 # Regex for SemVer: Major.Minor.Patch[-prerelease][+buildmetadata]
@@ -45,7 +48,7 @@ echo "Found version: '$version_str'"
 # Build metadata: \+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
 semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 
-if ! [[ $version_str =~ $semver_regex ]]; then
+if ! [[ "$version_str" =~ $semver_regex ]]; then # Quote version_str for safety, though [[ does word splitting
     echo "Error: Version '$version_str' in '$CONFIG_FILE' is not a valid semantic version." >&2
     echo "A valid semantic version typically looks like MAJOR.MINOR.PATCH (e.g., 1.2.3), " >&2
     echo "optionally followed by a pre-release identifier (e.g., -alpha.1) " >&2
@@ -73,15 +76,15 @@ if [ "$is_prerelease" = false ]; then
     echo "Version is not a pre-release. Attempting to update 'srat_update_channel'..."
 
     # Check if srat_update_channel key exists
-    srat_channel_exists=$(yq e 'has("srat_update_channel")' "$CONFIG_FILE")
+    srat_channel_exists=$(yq e 'has("srat_update_channel")' "$CONFIG_FILE" | tr -d '\n')
 
     if [ "$srat_channel_exists" = "true" ]; then
         # Check if srat_update_channel is an array (YAML sequence)
-        srat_channel_type=$(yq e '.srat_update_channel | type' "$CONFIG_FILE")
+        srat_channel_type=$(yq e '.srat_update_channel | type' "$CONFIG_FILE" | tr -d '\n')
 
         if [ "$srat_channel_type" = "!!seq" ]; then
             # Check if "develop" is present in the array
-            contains_develop=$(yq e '.srat_update_channel | contains(["develop"])' "$CONFIG_FILE")
+            contains_develop=$(yq e '.srat_update_channel | contains(["develop"])' "$CONFIG_FILE" | tr -d '\n')
 
             if [ "$contains_develop" = "true" ]; then
                 echo "Removing 'develop' from 'srat_update_channel' in '$CONFIG_FILE'."
