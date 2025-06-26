@@ -24,11 +24,9 @@ echo "Processing configuration file: $CONFIG_FILE"
 
 # 1. Read version from config.yaml
 # yq e '.version' outputs the value, or the string 'null' if not found/YAML null.
-# FIX: Use 'read -r' with a here-string for robust trailing newline removal,
-# then use 'sed' to trim all leading/trailing whitespace more robustly.
-raw_yq_output=$(yq e '.version' "$CONFIG_FILE")
-read -r version_str <<< "$raw_yq_output" # 'read -r' strips exactly one trailing newline
-version_str=$(echo "$version_str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') # Trim any other whitespace
+# FIX: Robustly remove all newlines/carriage returns and trim all leading/trailing whitespace.
+# This ensures the string is clean for the regex match.
+version_str=$(yq e '.version' "$CONFIG_FILE" | tr -d '\n\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
 if [ "$version_str" = "null" ]; then
     echo "Error: 'version' key not found or is YAML null in '$CONFIG_FILE'." >&2
