@@ -45,7 +45,7 @@ echo "Found version: '$version_str'"
 # Build metadata: \+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
 semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 
-if ! [[ "$version_str" =~ $semver_regex ]]; then
+if ! [[ $version_str =~ $semver_regex ]]; then
     echo "Error: Version '$version_str' in '$CONFIG_FILE' is not a valid semantic version." >&2
     echo "A valid semantic version typically looks like MAJOR.MINOR.PATCH (e.g., 1.2.3), " >&2
     echo "optionally followed by a pre-release identifier (e.g., -alpha.1) " >&2
