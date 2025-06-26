@@ -6,7 +6,7 @@ set -e          # Exit immediately if a command exits with a non-zero status.
 set -o pipefail # Causes a pipeline to return the exit status of the last command in the pipe that returned a non-zero status.
 # Consider adding 'set -u' (nounset) if all variable usages are confirmed to be safe.
 
-CONFIG_FILE="${1:-config.yaml}" # Allow config file path as an argument, default to config.yaml in CWD
+CONFIG_FILE="${1:-$(dirname "$0")/../config.yaml}"
 
 # Check if yq is installed
 if ! command -v yq &>/dev/null; then

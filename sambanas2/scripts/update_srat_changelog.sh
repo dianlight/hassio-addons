@@ -13,8 +13,8 @@ set -o pipefail
 
 # --- Configuration ---
 # Assumes the script is run from the addon root directory (e.g., 'sambanas2/').
-CHANGELOG_FILE="CHANGELOG.md"
-BUILD_FILE="build.yaml"
+CHANGELOG_FILE="$(dirname "$0")/../CHANGELOG.md"
+BUILD_FILE="$(dirname "$0")/../build.yaml"
 SRAT_REPO_URL="https://github.com/dianlight/srat"
 
 # The header for the section we are managing in CHANGELOG.md
