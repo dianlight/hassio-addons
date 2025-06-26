@@ -41,7 +41,7 @@ echo "Found version: '$version_str'"
 # Debugging: Output string length and a hex dump to identify invisible characters.
 echo "Debug: Version string length: ${#version_str}"
 echo "Debug: Version string hex dump (if any invisible chars):"
-echo "$version_str" | hexdump -C
+echo -n "$version_str" | hexdump -C
 
 
 # 2. Validate SemVer
