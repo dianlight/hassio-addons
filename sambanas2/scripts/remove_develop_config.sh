@@ -24,8 +24,9 @@ echo "Processing configuration file: $CONFIG_FILE"
 
 # 1. Read version from config.yaml
 # yq e '.version' outputs the value, or the string 'null' if not found/YAML null.
-# IMPORTANT FIX: Pipe to 'tr -d '\n'' to remove potential trailing newlines from yq output.
-version_str=$(yq e '.version' "$CONFIG_FILE" | tr -d '\n')
+# FIX: Pipe to 'tr -d '\n\r'' to remove all newlines and carriage returns,
+# then use 'sed' to trim all leading/trailing whitespace more robustly.
+version_str=$(yq e '.version' "$CONFIG_FILE" | tr -d '\n\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
 if [ "$version_str" = "null" ]; then
     echo "Error: 'version' key not found or is YAML null in '$CONFIG_FILE'." >&2
@@ -37,20 +38,22 @@ if [ -z "$version_str" ]; then # Handles case where version is an empty string "
 fi
 
 echo "Found version: '$version_str'"
-# Optional: For debugging, you can check the length to see if any hidden characters remain:
-# echo "Version string length: ${#version_str}"
+# Debugging: Output string length and a hex dump to identify invisible characters.
+echo "Debug: Version string length: ${#version_str}"
+echo "Debug: Version string hex dump (if any invisible chars):"
+echo "$version_str" | hexdump -C
+
 
 # 2. Validate SemVer
 # Regex for SemVer: Major.Minor.Patch[-prerelease][+buildmetadata]
 # Based on https://semver.org/spec/v2.0.0.html
 # Core: (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
-# Pre-release: -((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)
+# Pre-release: -([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
 # Build metadata: \+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)
-# FIX: Adjusted the pre-release part of the regex to be more broadly compatible.
-# The pre-release identifier is now simplified to allow any sequence of alphanumeric characters and hyphens.
+# The regex allows for SemVer valid strings, optionally followed by any trailing whitespace.
 semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?[[:space:]]*$'
 
-if ! [[ "$version_str" =~ $semver_regex ]]; then # Quote version_str for safety, though [[ does word splitting
+if ! [[ "$version_str" =~ $semver_regex ]]; then
     echo "Error: Version '$version_str' in '$CONFIG_FILE' is not a valid semantic version." >&2
     echo "A valid semantic version typically looks like MAJOR.MINOR.PATCH (e.g., 1.2.3), " >&2
     echo "optionally followed by a pre-release identifier (e.g., -alpha.1) " >&2
