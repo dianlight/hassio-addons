@@ -55,25 +55,31 @@ jobs:
           FINAL_IMAGE_TO_SET="$CURRENT_IMAGE_FROM_FILE"
 
           # Check for .alpha.<N> suffix on version and adjust name/version base
-          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha\.([0-9]+)$ ]]; then
+          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha(\.([0-9]+))?$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha.<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-⍺" # Add -⍺ to name
             fi
           # Check for .beta.<N> suffix on version and adjust name/version base
-          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta\.([0-9]+)$ ]]; then
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta(\.([0-9]+))?$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta.<N> from version
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
               FINAL_NAME="${CURRENT_NAME_FROM_FILE}-β" # Add -β to name
             fi
           # Check for .dev.<N> suffix on version (already handled by builder suffix)
-          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev\.([0-9]*)$ ]]; then
+          elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)(-dev\.([0-9]*))?$ ]]; then
             FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev.<N> from version
           fi
 
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
           echo "FINAL_IMAGE_TO_SET=${FINAL_IMAGE_TO_SET}" >> "$GITHUB_OUTPUT"
           echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT" # Output the base version
+
+          #Debugging output to verify values
+          echo "Final name to set: $FINAL_NAME_TO_SET"
+          echo "Final image to set: $FINAL_IMAGE_TO_SET"
+          echo "Extracted base version: $EXTRACTED_BASE_VERSION"
+          
 
       - name: ✍🏼 Set version in config.yaml
         id: version_set # This ID is used by subsequent steps for value_old
