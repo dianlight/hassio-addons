@@ -38,7 +38,7 @@
     {
       "customType": "regex",
       "fileMatch": [
-        "**/build.yaml$"
+        "(^|/)(?:.+\/)?build\\.yaml$"
       ],
       "matchStrings": [
         "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
