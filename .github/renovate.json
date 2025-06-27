@@ -118,19 +118,6 @@
         "patch"
       ],
       "automerge": true
-    },
-    {
-      "groupName": "SambaNas2 SRAT",
-      "matchBaseBranches": "devrelease/sambanas2",
-      "includePaths": [
-        "/sambanas2/build.yaml"
-      ],
-      "matchDatasources": [
-        "github-releases"
-      ],
-      "matchPackageNames": [
-        "dianlight/srat"
-      ]
-    }    
+    }
   ]
 }
