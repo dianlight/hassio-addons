@@ -37,15 +37,15 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "(^|/)(?:.+\/)?build\\.yaml$"
+      "managerFilePatterns": [
+        "/(^|/)(?:.+/)?build\\.yaml$/"
       ],
       "matchStrings": [
         "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "dianlight/srat"
-    }   
+    }
   ],
   "packageRules": [
     {
