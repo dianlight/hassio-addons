@@ -111,7 +111,7 @@
     {
       "matchDatasources": ["github-releases"],
       "matchDepNames": ["dianlight/srat"],
-      "prerelease": true
+      "allowedVersions": ">0.0.0-0"
     },
     {
       "groupName": "Add-on base image",
