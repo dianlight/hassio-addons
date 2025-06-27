@@ -11,7 +11,6 @@
 #### __🚧 Work in progess__
 - [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 - [ ] Migrate config from SambaNas addon
-- [ ] Mobile ready UI
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon
