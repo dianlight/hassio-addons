@@ -37,15 +37,15 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "^sambanas2/build\\.yaml$"
+      "fileMatch": [
+        "**/build.yaml$"
       ],
       "matchStrings": [
-        "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
+        "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "dianlight/srat"
-    }    
+      "depNameTemplate": "dianlight/srat"
+    }   
   ],
   "packageRules": [
     {
