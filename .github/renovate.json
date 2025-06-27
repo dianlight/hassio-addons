@@ -109,6 +109,11 @@
       ]
     },
     {
+      "matchDatasources": ["github-releases"],
+      "matchDepNames": ["dianlight/srat"],
+      "prerelease": true
+    },
+    {
       "groupName": "Add-on base image",
       "matchDatasources": [
         "docker"
