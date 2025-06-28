@@ -62,7 +62,9 @@ esac
 # The shell for loop automatically iterates over space-separated elements.
 if [ -n "$INTERFACES" ]; then
   for iface in $INTERFACES; do
-    WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
+    if [[ "${iface}" != "lo" ]]; then
+      WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
+    fi
   done
 fi
 
