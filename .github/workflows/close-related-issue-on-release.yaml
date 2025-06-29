@@ -8,6 +8,7 @@ on:
 
 jobs:
   closeIssueOnPrMergeTrigger:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Closes issues related to a merged pull request.
