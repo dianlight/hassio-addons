@@ -76,10 +76,7 @@ This is an example of a configuration. **_DO NOT USE_** without making the neces
 Fields between `<` and `>` indicate values that are omitted and need to be changed.
 
 ```yaml
-  wsdd: true
-  wsdd2: false
   srat_update_channel: none
-  interfaces: []
 ```
 
 ### Option: `log_level` (optional)
@@ -94,35 +91,6 @@ The log_level option controls the level of log output by the addon and can be ch
 - fatal: Something went terribly wrong. Add-on becomes unusable.
 
 Please note that each level automatically includes log messages from a more severe level, e.g., debug also shows info messages. By default, the log_level is set to info, which is the recommended setting unless you are troubleshooting.
-
-### Option: `interfaces` (optional) (**advanced users only**)
-
-The network interfaces Samba should listen on for incoming connections.
-
-This option should only be used in advanced cases. In general, setting this option is not needed.
-
-If omitted Samba will listen on all supported interfaces of Home Assistant (see > ha network info), but if there are no supported interfaces, Samba will exit with an error.
-
-**Note**: Samba needs at least one non-loopback, non-ipv6, local interface to listen on and become browser on it. Without it, it works, but reloads it's interfaces in an infinite loop forever in each 10 seconds to check, whether a non-loopback, non-ipv6, local interface is added. This reload will fill the log file with infinite number of entries like added interface lo ip=::1 bcast= netmask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff.
-
-### Option: `bind_all_interfaces` (optional)
-
-Force Samba to bind on all network interface.
-This is usefull for pseudo-ethernet devices like TailScale
-
-Defaults to `false`.
-
-### Option: `wsdd`
-
-Setting this option to `true` will enable the use of wsdd over internal samba system.
-
-Defaults to `true`.
-
-### Option: `wsdd2` (optional) (**advanced users only**)
-
-Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to true if you have trouble to see the disk on Windows 11+
-
-Defaults to `false`.
 
 ### Option: `hdd_idle_seconds` (optional) (**Use only if your disks never spind down**)
 
