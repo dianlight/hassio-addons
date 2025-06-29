@@ -1,0 +1,74 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# Startup script for wsdd2
+# Dynamically reads parameters from smb.conf including interfaces and log level
+#
+echo "Configuring and starting wsdd2..."
+
+SMB_CONF="/etc/samba/smb.conf"
+
+if [ ! -f "$SMB_CONF" ]; then
+  echo "Fatal: Samba config file not found at ${SMB_CONF}!"
+  exit 1
+fi
+
+# --- Parameter Extraction (Robust method with testparm) ---
+WORKGROUP=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*workgroup\s*=' | awk '{print $3}') || true
+NETBIOS_NAME=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*netbios name\s*=' | awk '{print $4}') || true
+LOG_LEVEL=$(bashio::config 'log_level' 'info')
+INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=' | sed 's/^\s*interfaces\s*=\s*//') || true
+
+# --- Default Values ---
+: "${WORKGROUP:=WORKGROUP}"
+: "${NETBIOS_NAME:=$(hostname -s)}"
+# No default for INTERFACES. If empty, wsdd2 will listen on all interfaces.
+
+# --- Argument Construction ---
+WSDD2_ARGS="-b vendor:homeassistant,model:sambanas2 -w"
+
+if [ -n "$WORKGROUP" ]; then
+  WSDD2_ARGS="${WSDD2_ARGS} -G ${WORKGROUP}"
+fi
+if [ -n "$NETBIOS_NAME" ]; then
+  WSDD2_ARGS="${WSDD2_ARGS} -H ${NETBIOS_NAME}"
+fi
+
+# Map the add-on's log level (trace|debug|info|notice|warning|error|fatal)
+# to wsdd2's verbosity flags (-v, -vv, -vvv).
+# The log_level is sourced from bashio::config 'log_level' (defaults to 'info').
+case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to lowercase for robust matching
+"trace")
+  WSDD2_ARGS="${WSDD2_ARGS} -WWW"
+  ;;
+"debug")
+  WSDD2_ARGS="${WSDD2_ARGS} -W"
+  ;;
+"info" | "notice" | "warning" | "error" | "fatal")
+  # For these levels, wsdd2 runs with its default verbosity (logs its own errors/criticals).
+  # No additional -v flags are added.
+  ;;
+*)
+  # Fallback for unexpected log_level values.
+  # Since bashio::config 'log_level' 'info' has a default ('info'),
+  # and 'info' is handled above, this case is for truly unexpected values.
+  # Defaulting to -v verbosity, same as 'info', and logging a warning.
+  bashio::log.warning "wsdd2: Unknown log_level '${LOG_LEVEL}'. Defaulting wsdd2 to -v verbosity."
+  WSDD2_ARGS="${WSDD2_ARGS} -v"
+  ;;
+esac
+
+# Adds the specified interfaces, one by one.
+# The shell for loop automatically iterates over space-separated elements.
+if [ -n "$INTERFACES" ]; then
+  for iface in $INTERFACES; do
+    if [[ "${iface}" != "lo" ]]; then
+      WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
+    fi
+  done
+fi
+
+echo "Starting wsdd2 with arguments:${WSDD2_ARGS}"
+
+# --- Esecuzione ---
+exec /usr/sbin/wsdd2 ${WSDD2_ARGS}
