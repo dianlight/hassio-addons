@@ -1,6 +1,5 @@
----
-name: Samba NAS2-⍺
-version: 2025.6.0-dev
+name: Samba NAS2
+version: 2025.6.0
 slug: sambanas2
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
@@ -10,20 +9,17 @@ arch:
   - aarch64
   - amd64
 startup: initialize
-#webui: http://[HOST]:[PORT:3000]/static/index.html
-#watchdog: http://[HOST]:[PORT:3000]/api/health   # Tema porta dinamica 
 watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
 ports_description:
   3000/tcp: Web interface (to use without Home Assistant)
 ingress: true
-ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
+ingress_port: 0
 ingress_entry: index.html
 panel_icon: mdi:folder-network
 panel_title: Samba NAS2
 panel_admin: true
-
 boot: auto
 init: false
 hassio_api: true
@@ -43,14 +39,11 @@ options:
 schema:
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?
-  srat_update_channel: list(none|release|prerelease|develop)?
+  srat_update_channel: list(none|release|prerelease)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
 image: dianlight/{arch}-addon-sambanas2
-#services:
-#  - mqtt:want
 udev: true
-#usb: true
 host_dbus: true
 kernel_modules: true
 privileged:
@@ -68,5 +61,3 @@ backup: hot
 auth_api: true
 homeassistant_api: true
 timeout: 60
-#breaking_versions:
-#  - 12.5.0-nas # Version with SRAT enabled as first source of configuration
