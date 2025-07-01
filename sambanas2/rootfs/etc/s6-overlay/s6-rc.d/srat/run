@@ -22,7 +22,7 @@ bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
 
 exec /usr/local/bin/srat-server \
   -port $(bashio::addon.ingress_port) \
-  $(bashio::config.false 'leave_front_door_open' && echo " -addon") \
+  $(bashio::config.true 'leave_front_door_open' || echo " -addon") \
   -db /config/config.db3 \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
