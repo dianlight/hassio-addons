@@ -79,12 +79,12 @@ RUN apk add --no-cache \
     sysstat \
     hdparm \
     smartmontools \
-#    wsdd \
+    #    wsdd \
     udisks2 \
     libcap \
     hd-idle \
     fuse3 \
-#    py3-pip \
+    #    py3-pip \
     lsblk \
     socat \
     figlet \
@@ -92,7 +92,8 @@ RUN apk add --no-cache \
     avahi \
     avahi-compat-libdns_sd \
     avahi-tools \
-    ethtool
+    envsubst \
+    ethtool 
 
 # hadolint ignore=DL3018,DL3003
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
@@ -120,7 +121,7 @@ RUN  mkdir -p /var/lib/samba \
 # SRAT
 RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
     if [ "${BUILD_ARCH}" = "amd64" ]; then \
-      SRAT_ARCH_SUFFIX="x86_64"; \
+    SRAT_ARCH_SUFFIX="x86_64"; \
     fi; \
     curl -Lso /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${SRAT_ARCH_SUFFIX}.zip" \
     && unzip -o /tmp/srat.zip -d /usr/local/bin/ \
@@ -137,7 +138,7 @@ COPY rootfs /
 RUN find /etc/s6-overlay -type f -print0 | xargs -0 chmod a+x
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD smbcontrol smbd ping || exit 1
+    CMD smbcontrol smbd ping || exit 1
 
 # Labels
 LABEL \

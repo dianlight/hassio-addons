@@ -7,6 +7,7 @@ declare NETBIOS_NAME
 declare SMB_CONF
 declare AVAHI_CONF_FILE
 declare DEFAULT_HOSTNAME
+declare INGRESS_PORT
 
 bashio::log.info "Configuring and starting Avahi daemon..."
 
@@ -16,6 +17,8 @@ mkdir -p /var/run/dbus
 
 SMB_CONF="/etc/samba/smb.conf"
 AVAHI_CONF_FILE="/etc/avahi/avahi-daemon.conf"
+AVAHI_SERVICES_DIR="/etc/avahi/services"
+INGRESS_PORT=$(bashio::addon.ingress_port)
 
 INTERFACES="" # Initialize interfaces to empty
 # Determine the hostname for Avahi
@@ -80,6 +83,26 @@ if bashio::fs.file_exists "${AVAHI_CONF_FILE}"; then
     fi
 else
     bashio::log.warning "Avahi config file ${AVAHI_CONF_FILE} not found. Cannot set host-name. Avahi will use its default (system hostname)."
+fi
+
+if [ -d "${AVAHI_SERVICES_DIR}" ]; then
+    bashio::log.info "Processing Avahi service templates in ${AVAHI_SERVICES_DIR}..."
+    # Export variables that might be used in service templates
+    export INGRESS_PORT
+    export NETBIOS_NAME
+    export AVAHI_HOSTNAME
+
+    # Loop through all .tmpl files in the services directory
+    for tmpl_file in "${AVAHI_SERVICES_DIR}"/*.tmpl; do
+        # If glob doesn't find any files, it returns the pattern itself.
+        # This check ensures we only process actual files.
+        if [ -e "${tmpl_file}" ]; then
+            service_file="${tmpl_file%.tmpl}"
+            bashio::log.info "Generating '${service_file}' from '${tmpl_file}'..."
+            # Use envsubst to replace variables and create the service file.
+            envsubst <"${tmpl_file}" >"${service_file}"
+        fi
+    done
 fi
 
 bashio::log.info "Starting Avahi daemon process..."

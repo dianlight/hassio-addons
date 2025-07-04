@@ -34,6 +34,16 @@ if [ -n "$NETBIOS_NAME" ]; then
   WSDD2_ARGS="${WSDD2_ARGS} -H ${NETBIOS_NAME}"
 fi
 
+# Adds the specified interfaces, one by one.
+# The shell for loop automatically iterates over space-separated elements.
+if [ -n "$INTERFACES" ]; then
+  for iface in $INTERFACES; do
+    if [[ "${iface}" != "lo" ]]; then
+      WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
+    fi
+  done
+fi
+
 # Map the add-on's log level (trace|debug|info|notice|warning|error|fatal)
 # to wsdd2's verbosity flags (-v, -vv, -vvv).
 # The log_level is sourced from bashio::config 'log_level' (defaults to 'info').
@@ -44,9 +54,12 @@ case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to low
 "debug")
   WSDD2_ARGS="${WSDD2_ARGS} -W"
   ;;
-"info" | "notice" | "warning" | "error" | "fatal")
+"info")
   # For these levels, wsdd2 runs with its default verbosity (logs its own errors/criticals).
   # No additional -v flags are added.
+  ;;
+"notice" | "warning" | "error" | "fatal")
+  WSDD2_ARGS="${WSDD2_ARGS} >/dev/null"
   ;;
 *)
   # Fallback for unexpected log_level values.
@@ -57,16 +70,6 @@ case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to low
   WSDD2_ARGS="${WSDD2_ARGS} -v"
   ;;
 esac
-
-# Adds the specified interfaces, one by one.
-# The shell for loop automatically iterates over space-separated elements.
-if [ -n "$INTERFACES" ]; then
-  for iface in $INTERFACES; do
-    if [[ "${iface}" != "lo" ]]; then
-      WSDD2_ARGS="${WSDD2_ARGS} -i ${iface}"
-    fi
-  done
-fi
 
 echo "Starting wsdd2 with arguments:${WSDD2_ARGS}"
 
