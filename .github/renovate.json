@@ -9,7 +9,7 @@
     "dependencies",
     "no-stale"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "/^devrelease\\/.*/"
   ],
   "commitMessagePrefix": "⬆️",
@@ -109,8 +109,12 @@
       ]
     },
     {
-      "matchDatasources": ["github-releases"],
-      "matchDepNames": ["dianlight/srat"],
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchDepNames": [
+        "dianlight/srat"
+      ],
       "allowedVersions": ">0.0.0-0"
     },
     {
