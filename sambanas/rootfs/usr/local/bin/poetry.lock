@@ -49,20 +49,20 @@ files = [
 
 [[package]]
 name = "ha-mqtt-discoverable"
-version = "0.19.2"
+version = "0.20.1"
 description = "Python library for creating MQTT entities compatible with Home Assistant"
 optional = false
 python-versions = "<4.0,>=3.10.0"
 files = [
-    {file = "ha_mqtt_discoverable-0.19.2-py3-none-any.whl", hash = "sha256:84725816a53d4e64f9d81cac6493c60dbd73899300c169b978fff9fdcbae2344"},
-    {file = "ha_mqtt_discoverable-0.19.2.tar.gz", hash = "sha256:2c0facdfdff5573a4bae7ab40e9b66cc077e65445fb9d6f356e1c74ce00aa9d9"},
+    {file = "ha_mqtt_discoverable-0.20.1-py3-none-any.whl", hash = "sha256:9c5f35d5c74c0e936856e6f55d9c3782b69fc753f7f79cfbe3993d8f147e527e"},
+    {file = "ha_mqtt_discoverable-0.20.1.tar.gz", hash = "sha256:8ebcdcd107c54b5ebf9161697783bf1fd1c7378931403fc9e90a6f240632167d"},
 ]
 
 [package.dependencies]
 gitlike-commands = ">=0.2.1,<0.4.0"
 paho-mqtt = "2.1.0"
 pyaml = "25.5.0"
-pydantic = "2.11.5"
+pydantic = "2.11.7"
 
 [[package]]
 name = "humanfriendly"
@@ -148,13 +148,13 @@ anchors = ["unidecode"]
 
 [[package]]
 name = "pydantic"
-version = "2.11.5"
+version = "2.11.7"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic-2.11.5-py3-none-any.whl", hash = "sha256:f9c26ba06f9747749ca1e5c94d6a85cb84254577553c8785576fd38fa64dc0f7"},
-    {file = "pydantic-2.11.5.tar.gz", hash = "sha256:7f853db3d0ce78ce8bbb148c401c2cdd6431b3473c0cdff2755c7690952a7b7a"},
+    {file = "pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b"},
+    {file = "pydantic-2.11.7.tar.gz", hash = "sha256:d989c3c6cb79469287b1569f7447a17848c998458d49ebe294e975b9baf0f0db"},
 ]
 
 [package.dependencies]
@@ -400,4 +400,4 @@ typing-extensions = ">=4.12.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "13b19a408fb9cc0752b3e7d593791056598fe9ab78303fef118e37a7b6a3836f"
+content-hash = "02edc92398637d3d65ad8ec0b8110a7bbd3777966879634b4ef4064f973b3b3f"
