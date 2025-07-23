@@ -11,7 +11,7 @@
     "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
-  }
+  },
   "labels": [
     "dependencies",
     "no-stale"
