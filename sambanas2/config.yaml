@@ -11,7 +11,7 @@ arch:
   - amd64
 startup: initialize
 #webui: http://[HOST]:[PORT:3000]/static/index.html
-#watchdog: http://[HOST]:[PORT:3000]/api/health   # Tema porta dinamica 
+#watchdog: http://[HOST]:[PORT:3000]/api/health   # Tema porta dinamica
 watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
@@ -46,7 +46,7 @@ schema:
   srat_update_channel: list(none|release|prerelease|develop)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true
