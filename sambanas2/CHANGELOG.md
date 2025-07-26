@@ -20,7 +20,31 @@
     - [ ] Tutorial screenshots?
 - [ ] En translation 
 
-### 🐭 Features from SRAT [ 🚧 Unreleased ]
+### 🐭 Features from SRAT [v2025.7.0-dev.1](https://github.com/dianlight/srat)
 
+####  ✨ Features
+- Manage `recycle bin`option for share
+- Manage WSDD2 service
+- Manage Avahi service
+- Veto files for share not global [#79](https://github.com/dianlight/srat/issues/79)
+- Ingress security validation [#89](https://github.com/dianlight/srat/issues/89)
+- [W] Dashboard
+##### __🚧 Work in progess__
+- [ ] Manage `local master`option (?)
+- [ ] Help screen or overlay help/tour [#82](https://github.com/dianlight/srat/issues/82)
+- [ ] Custom component [#83](https://github.com/dianlight/srat/issues/83)
+- [ ] Smart Control [#100](https://github.com/dianlight/srat/issues/100)
+- [ ] HDD Spin down [#101](https://github.com/dianlight/srat/issues/101)
 
-[docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
+####  🐛 Bug Fixes
+- `enable`/`disable` share functionality is not working as expected.
+- Renaming the admin user does not correctly create the new user or rename the existing one; issues persist until a full addon reboot.
+##### __🚧 Work in progess__
+- [W] Addon protected mode check [#80](https://github.com/dianlight/srat/issues/85)
+
+#### 🏗 Chore
+- Implemet wachdog
+- Align UI elements to HA [#81](https://github.com/dianlight/srat/issues/81)
+##### __🚧 Work in progess__
+- [ ] Create the base documentation [#80](https://github.com/dianlight/srat/issues/80)
+- [ ] Display version from ADDON
