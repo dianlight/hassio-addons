@@ -52,13 +52,16 @@ function reserved_mount_name() { # $1 disk
 
      # Clean reserved name with disaled
      for rdisk in "${reserved_names[@]}"; do
-          deleted=$(jq -r --arg share "${rdisk,,}" '.acl[] | select( (.share|ascii_upcase) == ($share|ascii_upcase) )  | select (.disabled) | .share' </data/options.json)
+          deleted=$(jq -r --arg share "${rdisk,,}" '.acl[] | select( (.share | gsub("[^A-Za-z0-9_/ ]"; "_") | ascii_upcase) == ($share | gsub("[^A-Za-z0-9_/ ]"; "_") | ascii_upcase) )  | select (.disabled) | .share' </data/options.json)
           reserved_names=("${reserved_names[@]/$deleted/}")
      done
 
      # Clean tomountdisks
      for rdisk in "${reserved_names[@]}"; do
-          if [[ ${rdisk,,} = ${disk,,} ]]; then
+          # Normalize both disk names for comparison
+          normalized_rdisk=$(echo "${rdisk,,}" | sed 's/[^A-Za-z0-9_/ ]/_/g')
+          normalized_disk=$(echo "${disk,,}" | sed 's/[^A-Za-z0-9_/ ]/_/g')
+          if [[ "${normalized_rdisk}" = "${normalized_disk}" ]]; then
                tomountdisks=("${tomountdisks[@]/$disk/}")
                return 0
           fi
@@ -148,7 +151,7 @@ function mount_disk() { # $1 disk $2 path $3 remote_mount $4 mount_options
           bashio::log.debug "Exec command: ${cmd} ${m_args[@]} \"${path}/${mdisk}\""
           $cmd ${m_args[@]} "$path/$mdisk" &&
                echo "$path"/"$mdisk" >>/tmp/local_mount &&
-               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname | gsub( "-"; "_") | ascii_upcase ):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
+               jq --arg dname "${mdisk}" --arg path "${path}/${mdisk}" --arg fs "${fstype}" ' . += {($dname | gsub( "[^A-Za-z0-9_/ ]"; "_") | ascii_upcase ):{"path":$path,"fs":$fs}}' /tmp/local_mount.json >/tmp/local_mount.json.tmp &&
                mv /tmp/local_mount.json.tmp /tmp/local_mount.json &&
                bashio::log.info "Mount ${mdisk}[${fstype}] Success!"
 
