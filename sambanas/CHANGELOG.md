@@ -1,8 +1,14 @@
 # Changelog
 
+## 12.5.0-nas1 [ Maintenance Mode ]
+
+### 🩹 BugFix
+
+- Fix ACL config not working as expected if disk label contains special characters [#442](https://github.com/dianlight/hassio-addons/issues/442)
+
 ## 12.5.0-nas [ Maintenance Mode ]
 
-### ✨ Features 
+### ✨ Features
 
 ### 🚨 Important Notice Regarding SambaNas Addon Development
 
@@ -22,11 +28,13 @@ We encourage users interested in the latest features and improvements to keep an
 
 [Add our Hass.io BETA add-ons repository][beta-repository] to your Hass.io instance.
 
-###  🩹 BugFix
+### 🩹 BugFix
+
 - Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
 - Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
 
 ### 🏗 Chore
+
 - Update Based Image to 17.2.5 (Alpine 3.21.3, Samba 4.20.6)
 - [Full Changelog from official addon 12.3.2][changelog_12.5.0]
   - Add the ability to enable and disable trying to become a local master browser on a subnet

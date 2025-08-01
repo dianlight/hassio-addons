@@ -126,8 +126,9 @@
 {{- range $disk := $disks -}}
         {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}}
-                {{- if eq ($dd.share|upper) ($ndisk|upper) -}}
+                {{- $ndisk := $disk | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
+                {{- $aclshare := $dd.share | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
+                {{- if eq ($aclshare|upper) ($ndisk|upper) -}}
                         {{- $def := deepCopy $dd }}
                         {{- $acld = true -}}
                         {{- if not $dd.disabled -}}
