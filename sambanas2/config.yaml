@@ -40,6 +40,10 @@ map:
   - media:rw
 options:
   srat_update_channel: none
+  enable_smart: true
+  hdd_idle_seconds: 30
+  log_level: warning
+  leave_front_door_open: false
 schema:
   hdd_idle_seconds: int(0,)?
   enable_smart: bool?

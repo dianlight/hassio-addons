@@ -37,6 +37,11 @@ The following table compares the major functionalities available in SambaNAS and
 
 ## Installation
 
+**Requirements:**
+- Home Assistant 2025.5.0 or newer
+- Home Assistant Operating System (HAOS) - recommended and tested platform
+- Supported architectures: armv7, aarch64, amd64
+
 Follow these steps to get the add-on installed on your system:
 
 1. Navigate in your Home Assistant frontend to **Supervisor** -> **Add-on Store**.
@@ -53,6 +58,16 @@ Follow these steps to get the add-on installed on your system:
 
 1. In the configuration section, set a username and password.
 2. Review the enabled shares. Disable any you do not plan to use. Shares can be re-enabled later if needed.
+
+## Web Interface
+
+Samba NAS2 includes an integrated web interface for management and configuration. You can access it in two ways:
+
+1. **Through Home Assistant Ingress** (Recommended): Click "Samba NAS 2" in your Home Assistant sidebar. This provides seamless integration within your Home Assistant interface.
+
+2. **Direct Access**: If you need to access the interface outside of Home Assistant, you can connect directly using `http://<HOME_ASSISTANT_IP>:3000`. Note that this port is not exposed by default and may require additional configuration.
+
+The web interface provides access to SRAT (Samba REST Administration Tool), which offers a user-friendly way to configure and manage your Samba shares, users, and settings.
 
 ## Connection
 
@@ -72,12 +87,17 @@ This addon exposes the following directories over smb (samba):
 
 ## Configuration
 
-This is an example of a configuration. **_DO NOT USE_** without making the necessary changes especially for the username, password, secret and moredisk part.
-Fields between `<` and `>` indicate values that are omitted and need to be changed.
+This is an example of a configuration with all available options and their default values:
 
 ```yaml
-  srat_update_channel: none
+srat_update_channel: none
+enable_smart: true
+hdd_idle_seconds: 30
+log_level: warning
+leave_front_door_open: false
 ```
+
+**Note**: All configuration options are optional. You only need to specify options where you want to change the default value.
 
 ### Option: `log_level` (optional)
 
@@ -113,10 +133,23 @@ SRAT (Samba REST Administration Tool) is a new system designed to provide a simp
 
 Currently under development and in an alpha state, SRAT is set to become the preferred system for configuring and using this addon, eventually "retiring" the YAML configuration.
 
-Setting this option to `release` or `prerelease` turn on the auto update of srat ( Samba Rest Adminitration Tool )
+Setting this option to `release`, `prerelease`, or `develop` turn on the auto update of srat ( Samba Rest Adminitration Tool )
 on the choosed channel.
 
+- `none`: No automatic updates (default)
+- `release`: Stable releases only
+- `prerelease`: Beta/pre-release versions
+- `develop`: Development versions (experimental, use with caution, not available in release)
+
 Defaults to `none`
+
+### Option: `leave_front_door_open` (optional)
+
+When enabled (set to `true`), this option allows guest access to the Samba shares without requiring authentication. This creates an open network share that can be accessed by anyone on the network without providing a username and password.
+
+⚠️ **Security Warning**: Enabling this option significantly reduces security as it allows unrestricted access to your shared directories. Only enable this in trusted network environments where you want to provide easy access without authentication barriers.
+
+Defaults to `false` (authentication required).
 
 ## Support
 
