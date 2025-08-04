@@ -29,8 +29,27 @@ if bashio::fs.file_exists "${SMB_CONF}"; then
     # 'tr -d '[:space:]'' removes any potential stray whitespace around the value.
     NETBIOS_NAME=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*netbios name\s*=' | awk '{print $4}' | tr -d '[:space:]') || true
     INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=' | sed 's/^\s*interfaces\s*=\s*//') || true
+    
+    # Filter out 'lo' and 'hassio' interfaces if present
     if [ -n "$INTERFACES" ]; then
-        bashio::log.info "Found interfaces in smb.conf: '${INTERFACES}'. These will be used for Avahi's 'allow-interfaces'."
+        # Convert to array, filter out unwanted interfaces, then rejoin
+        FILTERED_INTERFACES=""
+        for iface in $INTERFACES; do
+            if [[ "$iface" != "lo" && "$iface" != "hassio" ]]; then
+                if [ -z "$FILTERED_INTERFACES" ]; then
+                    FILTERED_INTERFACES="$iface"
+                else
+                    FILTERED_INTERFACES="$FILTERED_INTERFACES $iface"
+                fi
+            fi
+        done
+        INTERFACES="$FILTERED_INTERFACES"
+        
+        if [ -n "$INTERFACES" ]; then
+            bashio::log.info "Found interfaces in smb.conf (after filtering): '${INTERFACES}'. These will be used for Avahi's 'allow-interfaces'."
+        else
+            bashio::log.info "All interfaces from smb.conf were filtered out (lo, hassio). No specific interfaces will be configured for Avahi."
+        fi
     fi
 fi
 
