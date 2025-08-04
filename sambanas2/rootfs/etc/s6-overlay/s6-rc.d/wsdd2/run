@@ -45,33 +45,40 @@ if [ -n "$INTERFACES" ]; then
 fi
 
 # Map the add-on's log level (trace|debug|info|notice|warning|error|fatal)
-# to wsdd2's verbosity flags (-v, -vv, -vvv).
+# to wsdd2's debug level flags (-W).
 # The log_level is sourced from bashio::config 'log_level' (defaults to 'info').
 case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to lowercase for robust matching
 "trace")
   WSDD2_ARGS="${WSDD2_ARGS} -WWW"
   ;;
 "debug")
-  WSDD2_ARGS="${WSDD2_ARGS} -W"
+  WSDD2_ARGS="${WSDD2_ARGS} -WW"
   ;;
 "info")
-  # For these levels, wsdd2 runs with its default verbosity (logs its own errors/criticals).
-  # No additional -v flags are added.
+  WSDD2_ARGS="${WSDD2_ARGS} -W"
   ;;
 "notice" | "warning" | "error" | "fatal")
-  WSDD2_ARGS="${WSDD2_ARGS} >/dev/null"
+  # For these levels, wsdd2 runs with minimal verbosity (no -W flags)
+  # and output will be redirected to /dev/null at execution time
   ;;
 *)
   # Fallback for unexpected log_level values.
   # Since bashio::config 'log_level' 'info' has a default ('info'),
   # and 'info' is handled above, this case is for truly unexpected values.
-  # Defaulting to -v verbosity, same as 'info', and logging a warning.
-  bashio::log.warning "wsdd2: Unknown log_level '${LOG_LEVEL}'. Defaulting wsdd2 to -v verbosity."
-  WSDD2_ARGS="${WSDD2_ARGS} -v"
+  # Defaulting to -W verbosity, same as 'info', and logging a warning.
+  bashio::log.warning "wsdd2: Unknown log_level '${LOG_LEVEL}'. Defaulting wsdd2 to -W verbosity."
+  WSDD2_ARGS="${WSDD2_ARGS} -W"
   ;;
 esac
 
 echo "Starting wsdd2 with arguments:${WSDD2_ARGS}"
 
 # --- Esecuzione ---
-exec /usr/sbin/wsdd2 ${WSDD2_ARGS}
+case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in
+"notice" | "warning" | "error" | "fatal")
+  exec /usr/sbin/wsdd2 ${WSDD2_ARGS} >/dev/null
+  ;;
+*)
+  exec /usr/sbin/wsdd2 ${WSDD2_ARGS}
+  ;;
+esac
