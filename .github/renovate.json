@@ -116,6 +116,6 @@
         "dianlight/srat"
       ],
       "allowedVersions": ">0.0.0-0"
-    },
+    }
   ]
 }
