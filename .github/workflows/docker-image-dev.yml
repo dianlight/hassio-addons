@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4 # Checks out the repository code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4 # Checks out the repository code
         with:
           submodules: true # Also checks out git submodules if any
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3 # Logs into DockerHub using provided credentials
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3 # Logs into DockerHub using provided credentials
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -34,7 +34,7 @@ jobs:
         # and sets it as a step output named BR_VERSION.
 
       - name: 👓 Read config.yaml
-        uses: pietrobolcato/action-read-yaml@1.1.0 # Reads values from a YAML file
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0 # Reads values from a YAML file
         id: read_action_js # Assigns an ID to reference its outputs
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
@@ -87,7 +87,7 @@ jobs:
 
       - name: ✍🏼 Set version in config.yaml
         id: version_set # This ID is used by subsequent steps for value_old
-        uses: endaft/action-yamler@v1.1.1 # Action to modify YAML files
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1 # Action to modify YAML files
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: version
@@ -95,14 +95,14 @@ jobs:
           get: true # Captures the version value before this 'set' operation
 
       - name: ✍🏼 Set name in config.yaml
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: name
           set: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
 
       - name: ✍🏼 Set image in config.yaml
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
           path: image
@@ -140,7 +140,7 @@ jobs:
           done
 
       - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
-        uses: home-assistant/builder@2025.03.0 # Home Assistant Add-on builder action
+        uses: home-assistant/builder@71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:

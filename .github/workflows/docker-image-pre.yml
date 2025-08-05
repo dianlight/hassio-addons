@@ -17,12 +17,12 @@ jobs:
       # Output BR_PROJECT and CURRENT_BRANCH_NAME if they were needed by the next job and not easily re-derivable.
       # For this specific split, the next job can re-derive GITHUB_REF or use github.head_ref.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -35,7 +35,7 @@ jobs:
         id: extract_branch
 
       - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
-        uses: pietrobolcato/action-read-yaml@1.1.0
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
         id: read_config
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
@@ -85,7 +85,7 @@ jobs:
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }}
         id: version_set
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
@@ -95,7 +95,7 @@ jobs:
 
       - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}
         id: betaname_set
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml # File path remains the same
           path: name
@@ -239,7 +239,7 @@ jobs:
     needs: create_beta_pr
     if: needs.create_beta_pr.outputs.ORIGINAL_NAME_IS_PLAIN == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true # Match original top-level checkout for consistency
 

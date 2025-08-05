@@ -21,12 +21,12 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
           with:
                 submodules: true
 
         - name: Login to DockerHub
-          uses: docker/login-action@v3
+          uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
           with:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
 
         - name: Read config.yaml version for validation
           id: read_config_for_validation
-          uses: pietrobolcato/action-read-yaml@1.1.0
+          uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
           with:
             config: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
             # This action reads all top-level keys, 'version' will be steps.read_config_for_validation.outputs.version
