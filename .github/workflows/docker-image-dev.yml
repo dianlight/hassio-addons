@@ -9,6 +9,8 @@ on:
 permissions:
   pull-requests: write # Required for creating pull requests
   contents: write # Required for committing changes and pushing to the repository
+  packages: write
+  id-token: write
 
 jobs:
   build:
@@ -140,7 +142,7 @@ jobs:
           done
 
       - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
-        uses: home-assistant/builder@latest #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
+        uses: home-assistant/builder@master #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:
