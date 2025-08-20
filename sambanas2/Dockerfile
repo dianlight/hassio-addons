@@ -93,7 +93,10 @@ RUN apk add --no-cache \
     avahi-compat-libdns_sd \
     avahi-tools \
     envsubst \
-    ethtool 
+    ethtool \
+    erofs-utils \
+    squashfs-tools
+
 
 # hadolint ignore=DL3018,DL3003
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
