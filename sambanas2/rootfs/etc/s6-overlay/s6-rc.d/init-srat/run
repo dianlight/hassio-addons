@@ -7,13 +7,6 @@
 export HOSTNAME
 export ADDON_VERSION=$(bashio::addon.version)
 
-fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
-bashio::log.blue "------------------------------------------------------------------------------------------------------"
-bashio::log.green "Supported fs: ${fstypes}"
-if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
-bashio::log.blue "------------------------------------------------------------------------------------------------------"
-
-
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
 if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
