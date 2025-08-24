@@ -10,4 +10,4 @@ build_from:
 #  #base_identity: https://github.com/home-assistant/builder/.*
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
-  SRAT_VERSION: "2025.8.0-dev.5"
+  SRAT_VERSION: "2025.8.0-dev.6"
