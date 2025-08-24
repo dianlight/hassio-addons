@@ -9,9 +9,9 @@ arch:
   - armv7
   - aarch64
   - amd64
-startup: initialize
+startup: application
 #webui: http://[HOST]:[PORT:3000]/static/index.html
-#watchdog: http://[HOST]:[PORT:3000]/api/health   # Tema porta dinamica
+#watchdog: http://[HOST]:[PORT:3000]/api/status   # Tema porta dinamica
 watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
