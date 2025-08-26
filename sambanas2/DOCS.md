@@ -19,7 +19,7 @@ The following table compares the major functionalities available in SambaNAS and
 | Mounting additional volumes        |    ✔️     |    ✔️      |
 | Enhanced mount flags management    |    ❌     |    ✔️      |
 | Umounting volumes                  |    ❌     |    ✔️      |
-| Hotplug device events              |    ❌     |  🚧 Soon   |
+| Hotplug device events              |    ❌     |    ✔️      |
 | User Management                    |    ✔️     |    ✔️      |
 | User HA Integration                |    ❌     |  🚧 Soon   |
 | Advanced Share Permissions         |    ❌     |  🚧 Soon   |
@@ -29,16 +29,17 @@ The following table compares the major functionalities available in SambaNAS and
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | Regular Updates                    |  🔚 EOL   |    ✔️      |
 | MQTT integration                   |    ✔️     |    ❌      |
+| HA Native API Integration          |    ❌     |    ✔️      |
 | Component Integration              |    ❌     |  🚧 Soon   |
-| WSDD and WSDD2 Integration         |    ✔️     |    ✔️      |
-| Watchdog                           |    ✔️     |  🚧 Soon   |
+| WSDD and WSDD2 Integration         |    ✔️     |    ✔️ wsdd2 only      |
+| Watchdog                           |    ✔️     |    ✔️   |
 
 > ✔️ = Supported  ❌ = Not Supported  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
 
 ## Installation
 
 **Requirements:**
-- Home Assistant 2025.5.0 or newer
+- Home Assistant 2025.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
 - Supported architectures: armv7, aarch64, amd64
 
@@ -158,7 +159,6 @@ Defaults to `false` (authentication required).
 
 ### Common problems
 
-- **_In the menu `Media Browser` the folder with the name of the disk is empty_** : it happens when the homeassistant server starts before the add-on. Restart HomeAssitant from menu `Configuration->Server Controls->Server management -> RESTART`
 
 In case you've found a bug, please [open an issue on our GitHub][issue].
 
