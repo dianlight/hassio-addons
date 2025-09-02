@@ -118,7 +118,6 @@ Please note that each level automatically includes log messages from a more seve
 Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
 
 **NOTE<sup>1</sup>**: Depending on your environment host system can take up to **10minutes** to unlock used file on disk so setting to a low number like 10 don't garantee that the disk go on sleep after 10s from last access. Sometime you need to wait 10 or 15 minutes.
-**NOTE<sup>2</sup>**: If you use `mqtt_nexgen_entities` also enable a new sensor for power disk status.
 
 Defaults to hd-idle demon not being used at all.
 
