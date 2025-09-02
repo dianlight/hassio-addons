@@ -1,6 +1,6 @@
 ---
 name: Samba NAS2-⍺
-version: 2025.8.0-dev
+version: 2025.9.0-dev
 slug: sambanas2
 description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
@@ -20,6 +20,7 @@ ports_description:
 ingress: true
 ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
 ingress_entry: index.html
+ingress_stream: true
 panel_icon: mdi:folder-network
 panel_title: Samba NAS2
 panel_admin: true
@@ -71,6 +72,6 @@ homeassistant: 2025.5.0
 backup: hot
 auth_api: true
 homeassistant_api: true
-timeout: 60
+timeout: 120
 #breaking_versions:
 #  - 12.5.0-nas # Version with SRAT enabled as first source of configuration

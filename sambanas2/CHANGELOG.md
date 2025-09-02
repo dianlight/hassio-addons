@@ -1,6 +1,6 @@
 # Changelog
 
-## 2025.8.0-dev [ 🚧 Unreleased ]
+## 2025.9.0-dev [ 🚧 Unreleased ]
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
