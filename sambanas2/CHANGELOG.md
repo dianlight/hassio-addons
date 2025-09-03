@@ -10,7 +10,6 @@
 - Support ~~WSDD~~ and WSDD2
 - Automatic modprobe for all kernel fs
 #### __🚧 Work in progess__
-- [ ] ACL For folders [#208](https://github.com/dianlight/hassio-addons/issues/208)
 - [ ] Migrate config from SambaNas addon
 
 ### 🏗 Chore
@@ -19,7 +18,7 @@
 #### __🚧 Work in progess__
 - [x] Update the documentation
     - [x] Tutorial screenshots?
-- [ ] En translation 
+- [x] En translation 
 
 ### 🐭 Features from SRAT [ 🚧 Unreleased ]
 
