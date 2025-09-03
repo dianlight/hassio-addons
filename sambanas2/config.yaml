@@ -51,7 +51,7 @@ schema:
   srat_update_channel: list(none|release|prerelease|develop)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true
