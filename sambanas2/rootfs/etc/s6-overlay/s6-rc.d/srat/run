@@ -22,7 +22,7 @@ bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
 
 exec /usr/local/bin/srat-server \
   -port $(bashio::addon.ingress_port) \
-  $(if bashio::addon.protected >/dev/null 2>&1; then echo "-protected-mode"; fi) \
+  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
   $(bashio::config.true 'leave_front_door_open' || echo " -addon") \
   -db /config/config.db3 \
   -out /etc/samba/smb.conf \

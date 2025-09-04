@@ -29,7 +29,7 @@ fi
 /usr/local/bin/srat-cli \
   -db /config/config.db3 \
   -loglevel $(bashio::config 'log_level' 'info') \
-  $(if bashio::addon.protected >/dev/null 2>&1; then echo "-protected-mode"; fi) \
+  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
   start \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
