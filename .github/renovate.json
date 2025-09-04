@@ -1,19 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "customManagers:dockerfileVersions",
-    "customManagers:githubActionsVersions"
+    "customManagers:githubActionsVersions",
+    "group:monorepos",
+    ":automergeDigest",
+    "security:openssf-scorecard"
   ],
+    "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
   "labels": [
     "dependencies",
     "no-stale"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "/^devrelease\\/.*/"
   ],
   "commitMessagePrefix": "⬆️",
-  "commitMessageTopic": "{{depName}}",
   "configMigration": true,
   "rebaseWhen": "behind-base-branch",
   "dependencyDashboard": true,
@@ -38,21 +44,21 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^sambanas2/build\\.yaml$"
+        "/(^|/)(?:.+/)?build\\.yaml$/"
       ],
       "matchStrings": [
-        "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
+        "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "dianlight/srat"
-    }    
+      "depNameTemplate": "dianlight/srat"
+    }
   ],
   "packageRules": [
     {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
-        "/sambanas2/**",
-        "/besim/**",
+        "sambanas2/**",
+        "besim/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -62,8 +68,8 @@
     {
       "matchBaseBranches": "devrelease/sambanas2",
       "matchFileNames": [
-        "/sambanas/**",
-        "/besim/**",
+        "sambanas/**",
+        "besim/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -73,8 +79,8 @@
     {
       "matchBaseBranches": "devrelease/besim",
       "matchFileNames": [
-        "/sambanas2/**",
-        "/sambanas/**",
+        "sambanas2/**",
+        "sambanas/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -85,52 +91,31 @@
       "groupName": "SambaNas",
       "matchBaseBranches": "devrelease/sambanas",
       "includePaths": [
-        "/sambanas/**"
+        "sambanas/**"
       ]
     },
     {
       "groupName": "SambaNas2",
       "matchBaseBranches": "devrelease/sambanas2",
       "includePaths": [
-        "/sambanas2/**"
+        "sambanas2/**"
       ]
     },
     {
       "groupName": "BeSim",
       "matchBaseBranches": "devrelease/besim",
       "includePaths": [
-        "/besim/**"
+        "besim/**"
       ]
     },
     {
-      "groupName": "Add-on base image",
-      "matchDatasources": [
-        "docker"
-      ]
-    },
-    {
-      "groupName": "Add-on base image",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "automerge": true
-    },
-    {
-      "groupName": "SambaNas2 SRAT",
-      "matchBaseBranches": "devrelease/sambanas2",
-      "includePaths": [
-        "/sambanas2/build.yaml"
-      ],
       "matchDatasources": [
         "github-releases"
       ],
-      "matchPackageNames": [
+      "matchDepNames": [
         "dianlight/srat"
-      ]
-    }    
+      ],
+      "allowedVersions": ">0.0.0-0"
+    }
   ]
 }
