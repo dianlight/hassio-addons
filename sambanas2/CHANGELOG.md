@@ -20,7 +20,52 @@
     - [x] Tutorial screenshots?
 - [x] En translation 
 
-### 🐭 Features from SRAT [ 🚧 Unreleased ]
+### 🐭 Features from SRAT [v2025.9.0-dev.3](https://github.com/dianlight/srat)
 
+#### ✨ Features
 
-[docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
+- **Auto-Update Service**: Implemented a backend service for automatic updates from GitHub releases, with support for multiple channels and local development builds.
+- **Telemetry Configuration**: Added UI in Settings to configure telemetry modes, dependent on internet connectivity.
+- Manage `recycle bin`option for share
+- Manage WSDD2 service
+- Manage Avahi service
+- Veto files for share not global [#79](https://github.com/dianlight/srat/issues/79)
+- Ingress security validation [#89](https://github.com/dianlight/srat/issues/89)
+- Dashboard
+- Frontend: Async console.error callbacks & React hook — added a registry to register callbacks executed asynchronously whenever `console.error` is called, plus `useConsoleErrorCallback` hook for easy integration in components.
+- **Enhanced TLog Package [#152](https://github.com/dianlight/srat/issues/152)**: Complete logging system overhaul with advanced formatting capabilities:
+  - Added support for `github.com/k0kubun/pp/v3` for enhanced pretty printing
+  - Integrated `samber/slog-formatter` for professional-grade log formatting
+  - Enhanced error formatting with structured display and tree-formatted stack traces for `tozd/go/errors`
+  - Automatic terminal detection for color support
+  - Sensitive data protection (automatic masking of passwords, tokens, API keys, IP addresses)
+  - Custom time formatting with multiple preset options
+  - Enhanced context value extraction and display
+  - HTTP request/response formatting for web applications
+  - Comprehensive color support with level-based coloring (TRACE=Gray, DEBUG=Cyan, INFO=Green, etc.)
+  - Thread-safe configuration management
+  - Backward compatibility maintained with existing code
+- Manage `local master` option (?)
+- Add Rollbar telemetry service for error tracking and monitoring
+- Help screen or overlay help/tour [#82](https://github.com/dianlight/srat/issues/82)
+- Smart Control [#100](https://github.com/dianlight/srat/issues/100)
+- HDD Spin down [#101](https://github.com/dianlight/srat/issues/101)
+
+#### 🐛 Bug Fixes
+
+- `enable`/`disable` share functionality is not working as expected.
+- Renaming the admin user does not correctly create the new user or rename the existing one; issues persist until a full addon reboot.
+- Fix dianlight/hassio-addons#448 [SambaNAS2] Unable to create share for mounted volume
+- Fix dianlight/hassio-addons#447 [SambaNAS2] Unable to mount external drive
+- **Disk Stats Service**: Changed log level from `Error` to `Warn` for disk stats update failures to reduce log noise and better distinguish between critical errors and warnings
+- **SQLite concurrency lock (SQLITE_BUSY) resolved [#164](https://github.com/dianlight/srat/issues/164)**: Hardened database configuration to prevent intermittent "database is locked" errors when reading mount points under concurrent load. Changes include enabling WAL mode, setting `busy_timeout=5000ms`, using `synchronous=NORMAL`, and constraining the connection pool to a single open/idle connection. Added repository-level RWMutex guards and a concurrency stress test.
+- Addon protected mode check [#85](https://github.com/dianlight/srat/issues/85)
+
+#### 🏗 Chore
+
+- Implement watchdog
+- Align UI elements to HA [#81](https://github.com/dianlight/srat/issues/81)
+- Create the base documentation [#80](https://github.com/dianlight/srat/issues/80)
+- Display version from ADDON
+
+##### **🚧 Work in progress**
