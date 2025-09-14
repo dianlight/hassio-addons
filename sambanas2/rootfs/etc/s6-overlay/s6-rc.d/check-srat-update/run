@@ -13,14 +13,15 @@ if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
   bashio::log.warning "Can't read hostname, using default."
   HOSTNAME="homeassistant"
 fi
+bashio::log.info "Hostname: ${HOSTNAME}"
 
-/usr/local/bin/srat-cli \
-  -db /config/config.db3 \
-  -loglevel $(bashio::config 'log_level' 'info') \
-  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
-  start \
-  -out /etc/samba/smb.conf \
-  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
-  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
-
-bashio::log.info "srat-cli ok"
+if bashio::config.has_value 'srat_update_channel'; then
+  srat_channel_value=$(bashio::config 'srat_update_channel')
+  if [[ "${srat_channel_value}" != "none" ]]; then
+    /usr/local/bin/srat-cli \
+      -db /config/config.db3 \
+      -loglevel "$(bashio::config 'log_level' 'info')" \
+      upgrade \
+      -channel "${srat_channel_value}"
+  fi
+fi
