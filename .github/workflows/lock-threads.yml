@@ -24,7 +24,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Delete merged branches
-        uses: mmorenoregalado/action-branches-cleaner@v2.0.3
+        uses: mmorenoregalado/action-branches-cleaner@5c77343e5392bb534b7dd9868c48372d29850123 # v2.0.3
         with:
           base_branches: master, main, devrelease/sambanas, devrelease/sambanas2, devrelease/besim
           token: ${{ secrets.GITHUB_TOKEN }}
