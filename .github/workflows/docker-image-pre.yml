@@ -19,7 +19,7 @@ jobs:
           submodules: true
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -33,7 +33,7 @@ jobs:
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }}
         id: version_set
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: version
@@ -43,7 +43,7 @@ jobs:
 
       - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }}
         id: betaname_set
-        uses: endaft/action-yamler@v1.1.1
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
         with:
           file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
           path: name
@@ -63,7 +63,7 @@ jobs:
             --docker-hub dianlight
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
-        uses: thzois/autobot@v1.0.3
+        uses: thzois/autobot@2a6c1da57ea7beb1cdea3049b070977379c6dd2e # v1.0.3
         continue-on-error: true
         env:
           GH_ACCESS_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
