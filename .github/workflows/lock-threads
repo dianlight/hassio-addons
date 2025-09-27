@@ -1,0 +1,42 @@
+name: Lock Threads and Clean Branches
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Comment on inactive closed PRs with branch reference
+        run: |
+          gh pr list --state closed --limit 500 --json number,headRefName,mergedAt,updatedAt --jq '
+            .[] | select(.mergedAt == null) | select((now - (.updatedAt | fromdateiso8601)) / 86400 > 15) | {number, headRefName}
+          ' | jq -r '"\(.number) \(.headRefName)"' | while read pr branch; do
+            gh issue comment $pr --body "Before locking, note that the related branch is \`$branch\`."
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete merged branches
+        uses: mmorenoregalado/action-branches-cleaner@v2.0.3
+        with:
+          base_branches: master, main, devrelease/sambanas, devrelease/sambanas2, devrelease/besim
+          token: ${{ secrets.GITHUB_TOKEN }}
+          days_old_threshold: 90
+
+      - name: Lock threads
+        uses: dessant/lock-threads@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-inactive-days: '15'
+          issue-comment: |
+            This issue has been automatically locked since there has been no recent activity after it was closed. Please open a new issue for related bugs.
+          pr-inactive-days: '15'
+          pr-comment: |
+            This pull request has been automatically locked since there has been no recent activity after it was closed. Please open a new pull request for related changes.
