@@ -8,7 +8,7 @@
     ":automergeDigest",
     "security:openssf-scorecard"
   ],
-    "lockFileMaintenance": {
+  "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
   },
@@ -17,7 +17,8 @@
     "no-stale"
   ],
   "baseBranchPatterns": [
-    "/^devrelease\\/.*/"
+    "/^devrelease\\/.*/",
+    "main"
   ],
   "commitMessagePrefix": "⬆️",
   "configMigration": true,
@@ -54,6 +55,20 @@
     }
   ],
   "packageRules": [
+    {
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchFileNames": [
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
+    },
     {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
@@ -106,6 +121,60 @@
       "matchBaseBranches": "devrelease/besim",
       "includePaths": [
         "besim/**"
+      ]
+    },
+    {
+      "matchBaseBranches": "devrelease/plex",
+      "matchFileNames": [
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "Plex",
+      "matchBaseBranches": "devrelease/plex",
+      "includePaths": [
+        "plex/**"
+      ]
+    },
+    {
+      "matchBaseBranches": "devrelease/RPiMySensor",
+      "matchFileNames": [
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "RPiMySensor",
+      "matchBaseBranches": "devrelease/RPiMySensor",
+      "includePaths": [
+        "RPiMySensor/**"
+      ]
+    },
+    {
+      "matchBaseBranches": "devrelease/addon-plex",
+      "matchFileNames": [
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "RPiMySensor/**"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "Addon-Plex",
+      "matchBaseBranches": "devrelease/addon-plex",
+      "includePaths": [
+        "addon-plex/**"
       ]
     },
     {
