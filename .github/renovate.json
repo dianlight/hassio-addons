@@ -18,7 +18,7 @@
   ],
   "baseBranchPatterns": [
     "/^devrelease\\/.*/",
-    "main"
+    "master"
   ],
   "commitMessagePrefix": "⬆️",
   "configMigration": true,
@@ -57,7 +57,7 @@
   "packageRules": [
     {
       "matchBaseBranches": [
-        "main"
+        "master"
       ],
       "matchFileNames": [
         "sambanas/**",
@@ -72,6 +72,7 @@
     {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
+        ".github/**",
         "sambanas2/**",
         "besim/**",
         "plex/**",
@@ -83,6 +84,7 @@
     {
       "matchBaseBranches": "devrelease/sambanas2",
       "matchFileNames": [
+        ".github/**",
         "sambanas/**",
         "besim/**",
         "plex/**",
@@ -94,6 +96,7 @@
     {
       "matchBaseBranches": "devrelease/besim",
       "matchFileNames": [
+        ".github/**",
         "sambanas2/**",
         "sambanas/**",
         "plex/**",
@@ -126,6 +129,7 @@
     {
       "matchBaseBranches": "devrelease/plex",
       "matchFileNames": [
+        ".github/**",
         "sambanas/**",
         "sambanas2/**",
         "besim/**",
@@ -144,6 +148,7 @@
     {
       "matchBaseBranches": "devrelease/RPiMySensor",
       "matchFileNames": [
+        ".github/**",
         "sambanas/**",
         "sambanas2/**",
         "besim/**",
@@ -162,6 +167,7 @@
     {
       "matchBaseBranches": "devrelease/addon-plex",
       "matchFileNames": [
+        ".github/**",
         "sambanas/**",
         "sambanas2/**",
         "besim/**",
