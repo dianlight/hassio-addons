@@ -48,7 +48,7 @@ jobs:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
 
       - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
-        uses: home-assistant/builder@2025.03.0
+        uses: home-assistant/builder@37583b085e4ee389907ccbe8fc142db2003437e9 # 2025.09.0
         if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
