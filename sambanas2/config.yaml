@@ -16,9 +16,9 @@ watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
 ports_description:
-  3000/tcp: Web interface (to use without Home Assistant)
+  3000/tcp: Web interface
 ingress: true
-ingress_port: 0 #For add-ons that run on the host network, you can use 0 and read the port later via the API.
+ingress_port: 0 # For add-ons on host network
 ingress_entry: index.html
 ingress_stream: true
 panel_icon: mdi:folder-network
@@ -68,7 +68,7 @@ devicetree: false
 apparmor: true
 host_ipc: true
 advanced: true
-homeassistant: 2025.5.0
+homeassistant: 2025.8.0
 backup: hot
 auth_api: true
 homeassistant_api: true

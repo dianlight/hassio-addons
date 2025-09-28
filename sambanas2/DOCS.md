@@ -50,14 +50,14 @@ Follow these steps to get the add-on installed on your system:
 3. Click on the "INSTALL" button.
 4. Turn on "Show in sidebar" option
 5. Turn off "Protection mode" option
-6. In the configuration section, set a username and password.
+6. In the web interface, set a username and password.
 7. Click on the "START" button. 
 8. Wait until the addon start
 9. Click "Samba NAS 2" on your sidebar
 
 ## How to use
 
-1. In the configuration section, set a username and password.
+1. In the web interface, set a username and password.
 2. Review the enabled shares. Disable any you do not plan to use. Shares can be re-enabled later if needed.
 
 ## Web Interface
