@@ -11,4 +11,3 @@ build_from:
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
   SRAT_VERSION: "2025.9.0-dev.4"
-
