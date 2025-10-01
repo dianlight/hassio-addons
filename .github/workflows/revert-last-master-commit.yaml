@@ -1,71 +1,38 @@
-name: Revert last commit on master/main
+name: Revert Last Commit on Master
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   revert:
-    name: Revert last commit on master/main
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (full history)
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Checkout Master
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          ref: master
 
-      - name: Revert last commit on main or master (auto-handling merge commits)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Last Commit SHA
+        id: get_commit
         run: |
-          set -euo pipefail
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-          echo "Fetching remote branches..."
-          git fetch origin 'refs/heads/*:refs/remotes/origin/*' --prune
+      - name: Create Revert Branch
+        run: |
+          git checkout -b revert-last-commit
 
-          # Determine whether 'main' or 'master' exists on origin
-          if git show-ref --verify --quiet refs/remotes/origin/main; then
-            BRANCH=main
-          elif git show-ref --verify --quiet refs/remotes/origin/master; then
-            BRANCH=master
-          else
-            echo "Error: neither 'main' nor 'master' branch exists on origin." >&2
-            exit 1
-          fi
+      - name: Revert Last Commit
+        run: |
+          git revert $COMMIT_SHA --no-edit
 
-          echo "Target branch found: $BRANCH"
-          echo "Checking out origin/$BRANCH..."
-          git checkout -B "$BRANCH" "origin/$BRANCH"
+      - name: Push Revert Branch
+        run: |
+          git push origin revert-last-commit
 
-          LAST_COMMIT_HASH=$(git rev-parse HEAD)
-          LAST_COMMIT_SHORT=$(git rev-parse --short HEAD)
-          LAST_COMMIT_SUBJECT=$(git log -1 --pretty=%s HEAD)
-          echo "Last commit on $BRANCH: $LAST_COMMIT_SHORT — $LAST_COMMIT_SUBJECT"
-
-          # Count parents of HEAD to check for merge commit
-          PARENTS_LINE=$(git rev-list --parents -n 1 HEAD)
-          PARENT_COUNT=$(( $(echo "$PARENTS_LINE" | awk '{print NF}') - 1 ))
-
-          # Configure committer
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if [ "$PARENT_COUNT" -gt 1 ]; then
-            echo "HEAD is a merge commit with $PARENT_COUNT parents. Using git reset to undo."
-            # Get previous commit before merge (first parent)
-            PREV_HASH=$(echo "$PARENTS_LINE" | awk '{print $2}')
-            echo "Resetting branch $BRANCH to $PREV_HASH"
-            git reset --hard "$PREV_HASH"
-            git push --force origin "$BRANCH"
-            echo "Branch forcibly reset to before merge commit."
-          else
-            # Revert the last commit if not a merge
-            echo "Reverting commit $LAST_COMMIT_SHORT..."
-            git revert --no-edit "$LAST_COMMIT_HASH"
-            REVERT_COMMIT_SHORT=$(git rev-parse --short HEAD)
-            echo "Created revert commit: $REVERT_COMMIT_SHORT"
-            git push origin HEAD:"$BRANCH"
-            echo "Revert pushed: origin/$BRANCH (reverted $LAST_COMMIT_SHORT -> $REVERT_COMMIT_SHORT)"
-          fi
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Revert Last Commit"
+          body: "This PR reverts the last commit on master."
+          head: revert-last-commit
+          base: master
