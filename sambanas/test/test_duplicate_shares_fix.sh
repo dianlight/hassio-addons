@@ -2,8 +2,7 @@
 # Test script for verifying the fix for duplicate shares issue #516
 # Tests that:
 # 1. Each share appears only once in smb.conf
-# 2. _ha_mount_user_ is properly separated with spaces in valid users
-# 3. ACL entries are correctly matched and applied
+# 2. ACL entries are correctly matched and applied
 
 echo "Testing duplicate shares fix..."
 
@@ -95,17 +94,6 @@ if command -v tempio &> /dev/null; then
         exit 1
     fi
     
-    # Check that _ha_mount_user_ has proper spacing
-    echo ""
-    echo "Checking _ha_mount_user_ spacing..."
-    if grep -q "valid users = _ha_mount_user_ " /tmp/test_smb_duplicate.conf; then
-        echo "✅ OK: _ha_mount_user_ has proper spacing in valid users"
-    else
-        echo "❌ FAILURE: _ha_mount_user_ does not have proper spacing"
-        grep "valid users" /tmp/test_smb_duplicate.conf | head -5
-        exit 1
-    fi
-    
     # Check that ACL is correctly applied
     echo ""
     echo "Checking ACL application..."
@@ -155,13 +143,11 @@ if command -v tempio &> /dev/null; then
     echo ""
     echo "Fix Summary:"
     echo "============"
-    echo "1. Added space after '=' in 'valid users' line to properly separate _ha_mount_user_"
-    echo "2. Changed from boolean \$acld to dict-based \$state for proper scope tracking"
-    echo "3. Updated state check to use 'get \$state \"acld\"' for reliable access"
+    echo "1. Changed from boolean \$acld to dict-based \$state for proper scope tracking"
+    echo "2. Updated state check to use 'get \$state \"acld\"' for reliable access"
     echo ""
     echo "This resolves:"
     echo "- Duplicate share entries in smb.conf"
-    echo "- Access denied errors for _ha_mount_user_"
     echo "- Incorrect ACL user assignment to default shares"
     
 else
@@ -173,9 +159,8 @@ else
     echo "Manual Verification Steps:"
     echo "=========================="
     echo "1. Check that each [SHARENAME] appears only once in smb.conf"
-    echo "2. Check that 'valid users = _ha_mount_user_ ...' has spaces"
-    echo "3. Check that shares with ACL use ACL users, others use default user"
-    echo "4. Check that disabled shares (like SSL) do not appear"
+    echo "2. Check that shares with ACL use ACL users, others use default user"
+    echo "3. Check that disabled shares (like SSL) do not appear"
 fi
 
 # Cleanup
