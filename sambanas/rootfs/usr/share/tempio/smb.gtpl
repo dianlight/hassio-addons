@@ -67,7 +67,7 @@
 {{ define "SHT" }}
 {{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
 {{- $rosupported := list "apfs"}}
-{{- $name := regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
+{{- $name := .share | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
 {{- $dinfo := get .shares $name | default dict -}}
 [{{- $name -}}]
    browseable = yes
