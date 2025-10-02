@@ -30,7 +30,7 @@ jobs:
           git push origin revert-last-commit
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7
         with:
           title: "Revert Last Commit"
           body: "This PR reverts the last commit on master."
