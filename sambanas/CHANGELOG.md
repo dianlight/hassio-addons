@@ -3,7 +3,7 @@
 ## 12.5.0-nas2 [ Maintenance Mode ]
 
 ### 🩹 BugFix
-- [ ] Fix regression on unable to mount disks at startup if acl is not set [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
+- [x] Fix regression on unable to mount disks at startup if acl is not set [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
 - [ ] Fix regression on unable to mount disks with special characters in label [[[#517](https://github.com/dianlight/hassio-addons/issues/517)]
 
 
