@@ -67,7 +67,7 @@
 {{ define "SHT" }}
 {{- $unsupported := list "vfat"	"msdos"	"f2fs"	"fuseblk" "exfat" -}}
 {{- $rosupported := list "apfs"}}
-{{- $name := .share | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
+{{- $name := regexReplaceAll "[^A-Za-z0-9_/ ]" .share "_" | regexFind "[A-Za-z0-9_ ]+$" | upper -}}
 {{- $dinfo := get .shares $name | default dict -}}
 [{{- $name -}}]
    browseable = yes
@@ -81,7 +81,7 @@
    # End PR#167
 
    path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
-   valid users = _ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   valid users =_ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
    {{ end }}
