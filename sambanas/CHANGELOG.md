@@ -5,6 +5,7 @@
 ### 🩹 BugFix
 - [x] Fix regression on unable to mount disks at startup if acl is not set [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
 - [x] Fix duplicate shares and invalid smb.conf creation (missing space in valid users, variable scoping issue) [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
+  - Fixed incorrect regex function call syntax in smb.gtpl template that caused share names to be generated incorrectly
 - [ ] Fix regression on unable to mount disks with special characters in label [[[#517](https://github.com/dianlight/hassio-addons/issues/517)]
 
 
