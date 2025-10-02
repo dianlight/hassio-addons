@@ -124,13 +124,13 @@
 {{- $disks := concat $dfdisk (compact .moredisks|default list) -}}
 {{- $root := . -}}
 {{- range $disk := $disks -}}
-        {{- $acld := false -}}
+        {{- $state := dict "acld" false -}}
         {{- range $dd := $root.acl -}}
                 {{- $ndisk := $disk | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
                 {{- $aclshare := $dd.share | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
                 {{- if eq ($aclshare|upper) ($ndisk|upper) -}}
                         {{- $def := deepCopy $dd }}
-                        {{- $acld = true -}}
+                        {{- $_ := set $state "acld" true -}}
                         {{- if not $dd.disabled -}}
                            {{- $_ := set $dd "share" $disk -}}
                            {{- if has $disk $dfdisk -}}
@@ -144,7 +144,7 @@
                         {{- end -}}
                 {{- end -}}
         {{- end -}}
-        {{- if not $acld -}}
+        {{- if not (get $state "acld") -}}
                 {{- $dd := dict "share" $disk "timemachine" true -}}
                 {{- $_ := set $dd "usage" "media" -}}
                 {{- if has $disk $dfdisk -}}
