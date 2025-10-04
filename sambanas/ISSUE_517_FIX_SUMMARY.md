@@ -99,6 +99,43 @@ valid users = _ha_mount_user_ {{ .users|default .username|join " " }}
 
 This ensures proper Samba configuration parsing and eliminates the token warnings.
 
+### Fix 3: Improve User Creation Error Handling
+
+**Problem**: The `addSambaUser` function didn't check if users/groups already existed before creation, causing failures on addon restart or reprocessing.
+
+**Solution**: Added checks using `getent` before creating users/groups:
+
+```bash
+function addSambaUser() { # $1 username $2 password
+    username=$1
+    password=$2
+    
+    # Check if group exists, create if not
+    if ! getent group "${username}" > /dev/null 2>&1; then
+        addgroup "${username}" || bashio::log.warning "Failed to create group ${username}"
+    fi
+    
+    # Check if user exists, create if not
+    if ! getent passwd "${username}" > /dev/null 2>&1; then
+        adduser -D -H -G "${username}" -s /bin/false "${username}" || bashio::log.warning "Failed to create user ${username}"
+    fi
+    
+    # Always update/add to smbpasswd (password might have changed)
+    (
+        echo "$password"
+        echo "$password"
+    ) |
+        smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}" || bashio::log.error "Failed to add ${username} to smbpasswd"
+}
+```
+
+**Key improvements:**
+- Check for existing users/groups before attempting creation
+- Gracefully handle duplicate creation attempts
+- Always update smbpasswd (in case password changed)
+- Add error logging for debugging
+- Prevents addon startup failures on restart
+
 ## Testing
 
 Tested with a configuration matching petebanham's setup:
@@ -129,7 +166,8 @@ Tested with a configuration matching petebanham's setup:
 
 ## Files Modified
 
-- `sambanas/rootfs/usr/share/tempio/smb.gtpl`
+- `sambanas/rootfs/usr/share/tempio/smb.gtpl` - Fixed duplicate share rendering and `valid users` spacing
+- `sambanas/rootfs/etc/s6-overlay/s6-rc.d/init-samba/run` - Improved user creation error handling
 
 ## Recommendation
 
