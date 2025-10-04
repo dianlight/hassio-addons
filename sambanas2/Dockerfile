@@ -13,17 +13,34 @@ ARG SAMBA_VERSION
 FROM ${BUILD_FROM} AS builder_wsdd
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache make \
-    gcc libc-dev linux-headers build-base autoconf automake git \
-    python3-dev musl-dev poetry go lsblk eudev 
+
+# Install build dependencies in a single layer for better caching
+RUN apk add --no-cache \
+    make \
+    gcc \
+    libc-dev \
+    linux-headers \
+    build-base \
+    autoconf \
+    automake \
+    git \
+    wget \
+    patch
 
 ARG BUILD_ARCH
 
-RUN cd / \
-    && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
+# Build wsdd2 with optimizations
+RUN cd /tmp \
+    && wget -q -O wsdd2.tar.gz "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" \
+    && tar xzf wsdd2.tar.gz \
     && cd wsdd2-master \
-    && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
-    && make
+    && wget -q -O gcc14.patch https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch \
+    && patch -p1 < gcc14.patch \
+    && make -j"$(nproc)" \
+    && strip wsdd2 \
+    && mv wsdd2 /usr/sbin/ \
+    && cd / \
+    && rm -rf /tmp/wsdd2*
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
@@ -46,16 +63,16 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     pkgconfig \
     openssl-dev \
     gnutls-dev \
-    kmod \
     elfutils-dev \
     && cd /tmp \
-    && git clone --depth 1 https://github.com/lxin/quic.git \
+    && git clone --depth 1 --single-branch https://github.com/lxin/quic.git \
     && cd quic \
     && ./autogen.sh \
     && sed -i "s/as_fn_error \\\$? \"no kernel-devel found\" \"\\\$LINENO\" 5/echo \"Skipping kernel-devel check\"/" configure \
     && ./configure --prefix=/usr/local/quic --disable-kernel-check \
     && make -C libquic -j"$(nproc)" \
     && make -C libquic install \
+    && strip /usr/local/quic/lib/*.so* 2>/dev/null || true \
     && rm -rf /tmp/quic \
     ; fi
 
@@ -102,7 +119,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     libxslt \
     python3 \
     py3-pip \
-    git \
+    wget \
     cmocka-dev \
     && python3 -m pip install --no-cache-dir dnspython==2.8.0 \
     && cd /tmp \
@@ -132,6 +149,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     --without-gettext \
     && make -j"$(nproc)" \
     && make install \
+    && find /usr/local/samba -type f -executable -exec strip --strip-unneeded {} + 2>/dev/null || true \
     && rm -rf /tmp/samba-* \
     ; fi
 # hadolint ignore=DL3006
@@ -142,7 +160,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Environment variables
 ENV \
-    CARGO_NET_GIT_FETCH_WITH_CLI=true \
     HOME="/root" \
     LANG="C.UTF-8" \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -155,12 +172,9 @@ ENV \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_CMD_WAIT_FOR_SERVICES=1 \
-    YARN_HTTP_TIMEOUT=1000000 \
+    S6_KILL_GRACETIME=30000 \
+    S6_SYNC_DISKS=1 \
     TERM="xterm-256color"
-
-# Wait more time to allow gracefull shutdown
-ENV S6_KILL_GRACETIME=30000
-ENV S6_SYNC_DISKS=1
 
 # Setup base
 ARG BUILD_ARCH
@@ -168,31 +182,54 @@ ARG CLI_VERSION
 ARG SRAT_VERSION
 ARG SAMBA_VERSION
 
-# Install Samba either from distribution packages or from compiled source
+# Copy compiled binaries from builder stages
+COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/
+COPY --from=quic_builder /usr/local/quic/ /usr/local/quic/
+COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
+
+# Install Samba - either from distribution packages or use compiled binaries
 RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
     apk add --no-cache \
     samba-common-tools \
     samba-server \
     samba-client; \
     else \
-    # Create necessary directories for compiled Samba \
-    mkdir -p /usr/local/samba; \
+    # Install runtime dependencies for compiled Samba \
+    apk add --no-cache \
+    openssl \
+    gnutls \
+    talloc \
+    tevent \
+    tdb \
+    popt \
+    iniparser \
+    libarchive \
+    libbsd \
+    openldap \
+    libgcrypt \
+    gpgme \
+    acl \
+    attr \
+    libcap \
+    jansson \
+    json-c \
+    krb5-libs \
+    zlib \
+    && mkdir -p /usr/local/samba \
+    # Create symlinks for main Samba binaries \
+    && if [ -d "/usr/local/samba/bin" ]; then \
+    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
+    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
+    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
+    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
+    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
+    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm; \
+    fi \
+    # Add Samba to PATH \
+    && echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile \
+    # Create necessary runtime directories \
+    && mkdir -p /var/lib/samba /var/log/samba /var/cache/samba /etc/samba/private; \
     fi
-
-# Copy compiled QUIC library if it exists (when SAMBA_VERSION != "distribution")
-COPY --from=quic_builder /usr/local/quic/ /usr/local/quic/
-
-# Copy compiled Samba binaries if they exist (when SAMBA_VERSION != "distribution")
-COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
-
-# Install QUIC runtime dependencies when using compiled Samba
-# Note: Don't add to system library path - Samba will use LD_LIBRARY_PATH
-RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
-    apk add --no-cache openssl gnutls; \
-    fi
-
-# Use ash with pipefail instead of bash until readline is installed
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 # Install runtime dependencies first (needed for shell operations below)
 RUN apk add --no-cache \
@@ -216,82 +253,54 @@ RUN apk add --no-cache \
     sysstat \
     hdparm \
     smartmontools \
-    #    wsdd \
     udisks2 \
     libcap \
     hd-idle \
     fuse3 \
-    #    py3-pip \
     lsblk \
     socat \
     figlet \
     shadow \
-    # avahi \
-    # avahi-compat-libdns_sd \
-    # avahi-tools \
     envsubst \
     ethtool \
     erofs-utils \
     squashfs-tools \
     ngtcp2 
 
-# Set up Samba paths and symlinks for compiled version
-RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ -d "/usr/local/samba/bin" ]; then \
-    # Create symlinks for main Samba binaries \
-    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
-    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
-    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
-    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
-    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
-    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm && \
-    # Add Samba to PATH \
-    echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile && \
-    # Create necessary runtime directories \
-    mkdir -p /var/lib/samba /var/log/samba /var/cache/samba /etc/samba/private; \
-    fi
-
-
-# hadolint ignore=DL3018,DL3003
+# Install APFS support (not available for armv7)
+# hadolint ignore=DL3018
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
-    apk add --no-cache apfs-fuse; \
+    apk add --no-cache apfs-fuse \
+    && ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs; \
     fi
 
-# AVAHI (Remove all services)
-# RUN rm -f /etc/avahi/services/*.service 
+# Download and install Home Assistant CLI
+RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+    && chmod a+x /usr/bin/ha
 
-# WSDD2
-COPY --from=builder_wsdd /wsdd2-master/wsdd2 /usr/sbin
+# Download and install SRAT
+RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
+    if [ "${BUILD_ARCH}" = "amd64" ]; then \
+    SRAT_ARCH_SUFFIX="x86_64"; \
+    fi; \
+    curl -fsSL -o /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${SRAT_ARCH_SUFFIX}.zip" \
+    && unzip -o /tmp/srat.zip -d /usr/local/bin/ \
+    && chmod a+x /usr/local/bin/srat* \
+    && rm -f /tmp/srat.zip
 
-# HA API
-RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/ha 
-
-# SAMBA Config
-RUN  mkdir -p /var/lib/samba \
+# Initialize Samba configuration files
+RUN mkdir -p /var/lib/samba \
     && touch \
     /etc/samba/lmhosts \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
 
-# SRAT
-RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
-    if [ "${BUILD_ARCH}" = "amd64" ]; then \
-    SRAT_ARCH_SUFFIX="x86_64"; \
-    fi; \
-    curl -Lso /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${SRAT_ARCH_SUFFIX}.zip" \
-    && unzip -o /tmp/srat.zip -d /usr/local/bin/ \
-    && chmod a+x /usr/local/bin/srat* \
-    && rm -f /tmp/srat.zip
-
-# ENABLE FUSE APFS
-RUN ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs
-
 # Copy data
 COPY rootfs /
 
-# Set the exec flags correctly
-RUN find /etc/s6-overlay -type f -print0 | xargs -0 chmod a+x
+# Set executable permissions on s6-overlay scripts
+RUN find /etc/s6-overlay -type f -exec chmod a+x {} +
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD smbcontrol smbd ping || exit 1
