@@ -5,11 +5,12 @@ ARG BUILD_NAME
 ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
+ARG SAMBA_VERSION
 
 #ARG HDDTEMP_VERSION
 
 # hadolint ignore=DL3006
-FROM $BUILD_FROM as builder
+FROM ${BUILD_FROM} AS builder_wsdd
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache make \
@@ -24,6 +25,81 @@ RUN cd / \
     && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
     && make
 
+# Samba Builder Stage (only if SAMBA_VERSION is not "distribution")
+# hadolint ignore=DL3006
+FROM ${BUILD_FROM} AS samba_builder
+
+ARG SAMBA_VERSION
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
+# Install Samba build dependencies only if we need to compile Samba
+RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
+    apk add --no-cache \
+    build-base \
+    python3-dev \
+    talloc-dev \
+    tevent-dev \
+    tdb-dev \
+    popt-dev \
+    iniparser-dev \
+    libarchive-dev \
+    libbsd-dev \
+    openldap-dev \
+    cups-dev \
+    avahi-dev \
+    gnutls-dev \
+    libgcrypt-dev \
+    gpgme-dev \
+    acl-dev \
+    attr-dev \
+    libcap-dev \
+    jansson-dev \
+    json-c-dev \
+    krb5-dev \
+    openssl-dev \
+    zlib-dev \
+    perl \
+    perl-parse-yapp \
+    pkgconfig \
+    flex \
+    bison \
+    docbook-xsl \
+    libxslt \
+    python3 \
+    py3-pip \
+    git \
+    cmocka-dev \
+    && python3 -m pip install --no-cache-dir dnspython==2.8.0 \
+    && cd /tmp \
+    && wget -q "https://download.samba.org/pub/samba/stable/samba-${SAMBA_VERSION}.tar.gz" \
+    && tar -xzf "samba-${SAMBA_VERSION}.tar.gz" \
+    && cd "samba-${SAMBA_VERSION}" \
+    && ./configure \
+    --prefix=/usr/local/samba \
+    --sysconfdir=/etc/samba \
+    --localstatedir=/var \
+    --with-configdir=/etc/samba \
+    --with-lockdir=/var/lock/samba \
+    --with-piddir=/var/run/samba \
+    --with-cachedir=/var/cache/samba \
+    --with-privatedir=/etc/samba/private \
+    --with-logfilebase=/var/log/samba \
+    --with-pammodulesdir=/lib/security \
+    --enable-fhs \
+    --without-ad-dc \
+    --disable-fault-handling \
+    --with-shared-modules='!vfs_snapper' \
+    --without-systemd \
+    --disable-python \
+    --without-ldb-lmdb \
+    --without-pam \
+    --disable-cups \
+    --without-gettext \
+    && make -j"$(nproc)" \
+    && make install \
+    && rm -rf /tmp/samba-* \
+    ; fi
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
@@ -56,10 +132,38 @@ ENV S6_SYNC_DISKS=1
 ARG BUILD_ARCH
 ARG CLI_VERSION
 ARG SRAT_VERSION
-RUN apk add --no-cache \
+ARG SAMBA_VERSION
+
+# Install Samba either from distribution packages or from compiled source
+RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
+    apk add --no-cache \
     samba-common-tools \
     samba-server \
-    samba-client \
+    samba-client; \
+    else \
+    # Create necessary directories for compiled Samba \
+    mkdir -p /usr/local/samba; \
+    fi
+
+# Copy compiled Samba binaries if they exist (when SAMBA_VERSION != "distribution")
+COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
+
+# Set up Samba paths and symlinks for compiled version
+RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ -d "/usr/local/samba/bin" ]; then \
+    # Create symlinks for main Samba binaries \
+    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
+    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
+    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
+    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
+    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
+    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm && \
+    # Add Samba to PATH \
+    echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile && \
+    # Create necessary runtime directories \
+    mkdir -p /var/lib/samba /var/log/samba /var/cache/samba /etc/samba/private; \
+    fi
+
+RUN apk add --no-cache \
     dbus \
     exfatprogs \
     btrfs-progs \
@@ -107,7 +211,7 @@ RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
 # RUN rm -f /etc/avahi/services/*.service 
 
 # WSDD2
-COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
+COPY --from=builder_wsdd /wsdd2-master/wsdd2 /usr/sbin
 
 # HA API
 RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
