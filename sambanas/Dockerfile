@@ -12,76 +12,9 @@ ARG BUILD_VERSION
 FROM $BUILD_FROM as builder
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN apk add --no-cache \
-    bash \
-    git \
-    wget \
-    curl \
-    tar \
-    xz \
-    make \
-    gcc \
-    g++ \
-    libc-dev \
-    linux-headers \
-    build-base \
-    autoconf \
-    automake \
-    libtool \
-    python3 \
-    python3-dev \
-    py3-virtualenv \
-    musl-dev \
-    go \
-    lsblk \
-    eudev \
-    perl \
-    acl-dev \
-    attr-dev \
-    jansson-dev \
-    zlib-dev \
-    popt-dev \
-    libtirpc-dev \
-    libunwind-dev \
-    gnutls-dev \
-    openldap-dev \
-    krb5-dev \
-    lmdb-dev \
-    readline-dev \
-    json-c-dev \
-    talloc-dev \
-    tevent-dev \
-    ldb-dev \
-    cmocka-dev \
-    py3-cryptography \
-    py3-setuptools \
-    py3-pip \
-    perl-parse-yapp \
-    samba-dev || true 
-
-ARG SAMBA_VERSION=master
-ENV SAMBA_SRC_DIR=/tmp/samba-src
-# Conditionally build Samba from source unless SAMBA_VERSION is the literal string "distribution"
-RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
-    echo "Building Samba version: $SAMBA_VERSION from source"; \
-    git clone --depth=1 --branch "$SAMBA_VERSION" https://git.samba.org/samba.git "$SAMBA_SRC_DIR" && \
-    cd "$SAMBA_SRC_DIR" && \
-    ( scripts/bootstrap || ./buildtools/bin/waf --version || true ) && \
-    ./configure --enable-fhs --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-    --with-privatedir=/var/lib/samba/private --with-lockdir=/var/cache/samba \
-    --with-statedir=/var/lib/samba --with-cachedir=/var/cache/samba \
-    --with-piddir=/run/samba --with-sockets-dir=/run/samba \
-    --enable-selftest=no \
-    --bundled-libraries=NONE --builtin-libraries=NONE || true && \
-    make -j"$(nproc)" && \
-    make install DESTDIR=/samba-install && \
-    rm -rf /samba-install/usr/lib/python*/site-packages/tests || true && \
-    find /samba-install -type f -name "*.a" -delete && \
-    ( strip $(find /samba-install/usr/bin /samba-install/usr/sbin -type f -maxdepth 1 2>/dev/null || echo) 2>/dev/null || true ); \
-    else \
-    echo "Skipping Samba source build; will use distribution packages"; \
-    mkdir -p /samba-install; \
-    fi
+RUN apk add --no-cache make \
+    gcc libc-dev linux-headers build-base autoconf automake git \
+    python3-dev musl-dev poetry go lsblk eudev 
 
 ARG BUILD_ARCH
 
@@ -92,9 +25,10 @@ RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/ma
 
 COPY rootfs /
 RUN cd /usr/local/bin/ && \
-    if [ "$BUILD_ARCH" == "armv7" ]; then export PIP_NO_BINARY="pyyaml" ; fi && \
-    poetry install \
-    && true
+    if [ "$BUILD_ARCH" == "armv7" ]; then \ 
+    export PIP_NO_BINARY="pyyaml" ; \
+    fi && \
+    poetry install 
 
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
@@ -127,8 +61,10 @@ ENV S6_SYNC_DISKS=1
 # Setup base
 ARG BUILD_ARCH
 ARG CLI_VERSION
-ARG SAMBA_VERSION
 RUN apk add --no-cache \
+    samba-common-tools \
+    samba-server \
+    samba-client \
     dbus \
     exfatprogs \
     btrfs-progs \
@@ -138,7 +74,6 @@ RUN apk add --no-cache \
     hwids-udev \
     device-mapper-udev \
     attr \
-    acl \
     e2fsprogs \
     util-linux \
     e2fsprogs-extra \
@@ -163,26 +98,12 @@ RUN apk add --no-cache \
     poetry \
     lsblk \
     socat \
-    figlet \
-    popt \
-    jansson \
-    gnutls \
-    readline \
-    lmdb \
-    krb5-libs \
-    libldap \
-    libtirpc \
-    json-c \
-    $( [ "$SAMBA_VERSION" = "distribution" ] && echo "samba-server samba-client samba-common-tools" )
+    figlet
 
 RUN if [ "$BUILD_ARCH" != "armv7" ]; then apk add --no-cache apfs-fuse;fi
 
 # WSDD2
 COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
-
-# Copy Samba from builder stage (only populated when SAMBA_VERSION != distribution)
-ARG SAMBA_VERSION
-COPY --from=builder /samba-install/ /
 
 # SAMBANAS UTILS (POERTY VIRTUAL ENV)
 COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
