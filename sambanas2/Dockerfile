@@ -46,12 +46,14 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     pkgconfig \
     openssl-dev \
     gnutls-dev \
+    kmod \
+    elfutils-dev \
     && cd /tmp \
     && git clone --depth 1 https://github.com/lxin/quic.git \
     && cd quic \
     && ./autogen.sh \
-    && sed -i "s/as_fn_error \$? \"no kernel-devel found\" \"\$LINENO\" 5/echo \"Skipping kernel-devel check\"/" configure \
-    && ./configure --prefix=/usr/local/quic \
+    && sed -i "s/as_fn_error \\\$? \"no kernel-devel found\" \"\\\$LINENO\" 5/echo \"Skipping kernel-devel check\"/" configure \
+    && ./configure --prefix=/usr/local/quic --disable-kernel-check \
     && make -C libquic -j"$(nproc)" \
     && make -C libquic install \
     && rm -rf /tmp/quic \
