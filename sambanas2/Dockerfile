@@ -230,7 +230,8 @@ RUN apk add --no-cache \
     envsubst \
     ethtool \
     erofs-utils \
-    squashfs-tools
+    squashfs-tools \
+    ngtcp2 
 
 # Set up Samba paths and symlinks for compiled version
 RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ -d "/usr/local/samba/bin" ]; then \
