@@ -143,9 +143,13 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     --with-shared-modules='!vfs_snapper' \
     --without-systemd \
     --disable-python \
+    --without-ldap \
     --without-ldb-lmdb \
     --without-pam \
+    --without-ads \
     --disable-cups \
+    --disable-iprint \
+    --disable-avahi  \
     --without-gettext \
     && make -j"$(nproc)" \
     && make install \
@@ -216,14 +220,16 @@ RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
     krb5-libs \
     zlib \
     && mkdir -p /usr/local/samba \
-    # Create symlinks for main Samba binaries \
+    # Create symlinks for all Samba binaries \
+    && if [ -d "/usr/local/samba/sbin" ]; then \
+    for file in /usr/local/samba/sbin/*; do \
+    [ -e "$file" ] && ln -sf "$file" /usr/sbin/"$(basename "$file")"; \
+    done; \
+    fi \
     && if [ -d "/usr/local/samba/bin" ]; then \
-    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
-    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
-    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
-    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
-    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
-    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm; \
+    for file in /usr/local/samba/bin/*; do \
+    [ -e "$file" ] && ln -sf "$file" /usr/bin/"$(basename "$file")"; \
+    done; \
     fi \
     # Add Samba to PATH \
     && echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile \
