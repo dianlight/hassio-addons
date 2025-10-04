@@ -25,6 +25,38 @@ RUN cd / \
     && wget -q -O - https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch | patch -p1 \
     && make
 
+# QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
+# hadolint ignore=DL3006
+FROM ${BUILD_FROM} AS quic_builder
+
+ARG SAMBA_VERSION
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
+# Install QUIC build dependencies only if we need to compile Samba with QUIC support
+RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
+    apk add --no-cache \
+    build-base \
+    cmake \
+    git \
+    linux-headers \
+    autoconf \
+    automake \
+    libtool \
+    pkgconfig \
+    openssl-dev \
+    gnutls-dev \
+    && cd /tmp \
+    && git clone --depth 1 https://github.com/lxin/quic.git \
+    && cd quic \
+    && ./autogen.sh \
+    && sed -i "s/as_fn_error \$? \"no kernel-devel found\" \"\$LINENO\" 5/echo \"Skipping kernel-devel check\"/" configure \
+    && ./configure --prefix=/usr/local/quic \
+    && make -C libquic -j"$(nproc)" \
+    && make -C libquic install \
+    && rm -rf /tmp/quic \
+    ; fi
+
 # Samba Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM} AS samba_builder
@@ -145,25 +177,24 @@ RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
     mkdir -p /usr/local/samba; \
     fi
 
+# Copy compiled QUIC library if it exists (when SAMBA_VERSION != "distribution")
+COPY --from=quic_builder /usr/local/quic/ /usr/local/quic/
+
 # Copy compiled Samba binaries if they exist (when SAMBA_VERSION != "distribution")
 COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
 
-# Set up Samba paths and symlinks for compiled version
-RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ -d "/usr/local/samba/bin" ]; then \
-    # Create symlinks for main Samba binaries \
-    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
-    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
-    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
-    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
-    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
-    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm && \
-    # Add Samba to PATH \
-    echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile && \
-    # Create necessary runtime directories \
-    mkdir -p /var/lib/samba /var/log/samba /var/cache/samba /etc/samba/private; \
+# Install QUIC runtime dependencies when using compiled Samba
+# Note: Don't add to system library path - Samba will use LD_LIBRARY_PATH
+RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
+    apk add --no-cache openssl gnutls; \
     fi
 
+# Use ash with pipefail instead of bash until readline is installed
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
+# Install runtime dependencies first (needed for shell operations below)
 RUN apk add --no-cache \
+    readline \
     dbus \
     exfatprogs \
     btrfs-progs \
@@ -200,6 +231,21 @@ RUN apk add --no-cache \
     ethtool \
     erofs-utils \
     squashfs-tools
+
+# Set up Samba paths and symlinks for compiled version
+RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ -d "/usr/local/samba/bin" ]; then \
+    # Create symlinks for main Samba binaries \
+    ln -sf /usr/local/samba/bin/smbd /usr/sbin/smbd && \
+    ln -sf /usr/local/samba/bin/nmbd /usr/sbin/nmbd && \
+    ln -sf /usr/local/samba/bin/smbcontrol /usr/bin/smbcontrol && \
+    ln -sf /usr/local/samba/bin/smbclient /usr/bin/smbclient && \
+    ln -sf /usr/local/samba/bin/smbpasswd /usr/bin/smbpasswd && \
+    ln -sf /usr/local/samba/bin/testparm /usr/bin/testparm && \
+    # Add Samba to PATH \
+    echo "export PATH=\"/usr/local/samba/bin:/usr/local/samba/sbin:\$PATH\"" >> /etc/profile && \
+    # Create necessary runtime directories \
+    mkdir -p /var/lib/samba /var/log/samba /var/cache/samba /etc/samba/private; \
+    fi
 
 
 # hadolint ignore=DL3018,DL3003
