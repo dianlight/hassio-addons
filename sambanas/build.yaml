@@ -9,5 +9,7 @@ build_from:
 cosign:
 #  #base_identity: https://github.com/home-assistant/builder/.*
   identity: https://github.com/dianlight/hassio-addons/.*
-#args:
+args:
   #  HDDTEMP_VERSION: "0.3-beta15"
+  SAMBA_VERSION: "4.23.1" # Use "distribution" for use samba in distribution
+  
