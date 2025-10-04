@@ -64,13 +64,23 @@ fi
 function addSambaUser() { # $1 username $2 password
     username=$1
     password=$2
-    addgroup "${username}"
-    adduser -D -H -G "${username}" -s /bin/false "${username}"
+    
+    # Check if group exists, create if not
+    if ! getent group "${username}" > /dev/null 2>&1; then
+        addgroup "${username}" || bashio::log.warning "Failed to create group ${username}"
+    fi
+    
+    # Check if user exists, create if not
+    if ! getent passwd "${username}" > /dev/null 2>&1; then
+        adduser -D -H -G "${username}" -s /bin/false "${username}" || bashio::log.warning "Failed to create user ${username}"
+    fi
+    
+    # Always update/add to smbpasswd (password might have changed)
     (
         echo "$password"
         echo "$password"
     ) |
-        smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
+        smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}" || bashio::log.error "Failed to add ${username} to smbpasswd"
 }
 
 # Init user
