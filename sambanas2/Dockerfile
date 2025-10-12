@@ -50,6 +50,9 @@ ARG SAMBA_VERSION
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
+# Create directory that will be copied (ensures COPY doesn't fail)
+RUN mkdir -p /usr/local/quic
+
 # Install QUIC build dependencies only if we need to compile Samba with QUIC support
 RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     apk add --no-cache \
@@ -83,6 +86,9 @@ FROM ${BUILD_FROM} AS samba_builder
 ARG SAMBA_VERSION
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
+# Create directory that will be copied (ensures COPY doesn't fail)
+RUN mkdir -p /usr/local/samba
 
 # Install Samba build dependencies only if we need to compile Samba
 RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
@@ -196,7 +202,8 @@ RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
     apk add --no-cache \
     samba-common-tools \
     samba-server \
-    samba-client; \
+    samba-client \
+    openssl; \
     else \
     # Install runtime dependencies for compiled Samba \
     apk add --no-cache \

@@ -12,4 +12,4 @@ build_from:
 args:
   CLI_VERSION: "4.37.0"
   SRAT_VERSION: "2025.9.0-dev.4"
-  SAMBA_VERSION: "4.23.1" # Use "distribution" to use precompiled packages
+  SAMBA_VERSION: "distribution" #"4.23.1" # Use "distribution" to use precompiled packages
