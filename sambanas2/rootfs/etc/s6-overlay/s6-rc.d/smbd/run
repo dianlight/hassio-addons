@@ -2,6 +2,13 @@
 # ==============================================================================
 # Start smbd service
 # ==============================================================================
+# Add QUIC library to library path if it exists
+if [ -d "/usr/local/quic/lib" ]; then
+  export LD_LIBRARY_PATH="/usr/local/quic/lib:${LD_LIBRARY_PATH}"
+fi
+
+export PATH="/usr/local/samba/bin:/usr/local/samba/sbin:$PATH"
+
 exec smbd \
   --foreground \
   --debug-stdout \
