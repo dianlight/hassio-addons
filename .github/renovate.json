@@ -1,19 +1,26 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "customManagers:dockerfileVersions",
-    "customManagers:githubActionsVersions"
+    "customManagers:githubActionsVersions",
+    "group:monorepos",
+    ":automergeDigest",
+    "security:openssf-scorecard"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
   "labels": [
     "dependencies",
     "no-stale"
   ],
-  "baseBranches": [
-    "/^devrelease\\/.*/"
+  "baseBranchPatterns": [
+    "/^devrelease\\/.*/",
+    "master"
   ],
   "commitMessagePrefix": "⬆️",
-  "commitMessageTopic": "{{depName}}",
   "configMigration": true,
   "rebaseWhen": "behind-base-branch",
   "dependencyDashboard": true,
@@ -38,21 +45,36 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^sambanas2/build\\.yaml$"
+        "/(^|/)(?:.+/)?build\\.yaml$/"
       ],
       "matchStrings": [
-        "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
+        "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "dianlight/srat"
-    }    
+      "depNameTemplate": "dianlight/srat"
+    }
   ],
   "packageRules": [
     {
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchFileNames": [
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
+    },
+    {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
-        "/sambanas2/**",
-        "/besim/**",
+        ".github/**",
+        "sambanas2/**",
+        "besim/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -62,8 +84,9 @@
     {
       "matchBaseBranches": "devrelease/sambanas2",
       "matchFileNames": [
-        "/sambanas/**",
-        "/besim/**",
+        ".github/**",
+        "sambanas/**",
+        "besim/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -73,8 +96,9 @@
     {
       "matchBaseBranches": "devrelease/besim",
       "matchFileNames": [
-        "/sambanas2/**",
-        "/sambanas/**",
+        ".github/**",
+        "sambanas2/**",
+        "sambanas/**",
         "plex/**",
         "RPiMySensor/**",
         "addon-plex/**"
@@ -85,52 +109,88 @@
       "groupName": "SambaNas",
       "matchBaseBranches": "devrelease/sambanas",
       "includePaths": [
-        "/sambanas/**"
+        "sambanas/**"
       ]
     },
     {
       "groupName": "SambaNas2",
       "matchBaseBranches": "devrelease/sambanas2",
       "includePaths": [
-        "/sambanas2/**"
+        "sambanas2/**"
       ]
     },
     {
       "groupName": "BeSim",
       "matchBaseBranches": "devrelease/besim",
       "includePaths": [
-        "/besim/**"
+        "besim/**"
       ]
     },
     {
-      "groupName": "Add-on base image",
-      "matchDatasources": [
-        "docker"
-      ]
+      "matchBaseBranches": "devrelease/plex",
+      "matchFileNames": [
+        ".github/**",
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "RPiMySensor/**",
+        "addon-plex/**"
+      ],
+      "enabled": false
     },
     {
-      "groupName": "Add-on base image",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "automerge": true
-    },
-    {
-      "groupName": "SambaNas2 SRAT",
-      "matchBaseBranches": "devrelease/sambanas2",
+      "groupName": "Plex",
+      "matchBaseBranches": "devrelease/plex",
       "includePaths": [
-        "/sambanas2/build.yaml"
+        "plex/**"
+      ]
+    },
+    {
+      "matchBaseBranches": "devrelease/RPiMySensor",
+      "matchFileNames": [
+        ".github/**",
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "addon-plex/**"
       ],
+      "enabled": false
+    },
+    {
+      "groupName": "RPiMySensor",
+      "matchBaseBranches": "devrelease/RPiMySensor",
+      "includePaths": [
+        "RPiMySensor/**"
+      ]
+    },
+    {
+      "matchBaseBranches": "devrelease/addon-plex",
+      "matchFileNames": [
+        ".github/**",
+        "sambanas/**",
+        "sambanas2/**",
+        "besim/**",
+        "plex/**",
+        "RPiMySensor/**"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "Addon-Plex",
+      "matchBaseBranches": "devrelease/addon-plex",
+      "includePaths": [
+        "addon-plex/**"
+      ]
+    },
+    {
       "matchDatasources": [
         "github-releases"
       ],
-      "matchPackageNames": [
+      "matchDepNames": [
         "dianlight/srat"
-      ]
-    }    
+      ],
+      "allowedVersions": ">0.0.0-0"
+    }
   ]
 }

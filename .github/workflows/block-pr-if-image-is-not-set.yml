@@ -1,11 +1,11 @@
 name: PR Chack if Image is set in config
 
 on:
-    pull_request:
-        branches:
-          - 'prerelease/**'
-        types: [ synchronize, opened ]
-    workflow_dispatch:
+  pull_request:
+    branches:
+      - "prerelease/**"
+    types: [synchronize, opened]
+  workflow_dispatch:
 
 jobs:
   updateBody:

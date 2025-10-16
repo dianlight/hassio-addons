@@ -1,0 +1,124 @@
+name: Lock Threads and Clean Branches
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Comment on inactive closed PRs with branch reference
+        run: |
+          gh pr list --state closed --limit 500 --json number,headRefName,mergedAt,updatedAt --jq '
+            .[] | select(.mergedAt == null) | select((now - (.updatedAt | fromdateiso8601)) / 86400 > 15) | {number, headRefName}
+          ' | jq -r '"\(.number) \(.headRefName)"' | while read pr branch; do
+            gh issue comment $pr --body "Before locking, note that the related branch is \`$branch\`."
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches safely (skip open PRs and unmerged)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAYS_OLD_THRESHOLD: "90"
+          BASE_BRANCHES: "master main devrelease/sambanas devrelease/sambanas2 devrelease/besim"
+        run: |
+          set -euo pipefail
+          git fetch --all --prune
+
+          # Include default branch in base branches
+          DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name' || echo "")
+          if [ -n "${DEFAULT_BRANCH}" ] && ! grep -qE "(^| )${DEFAULT_BRANCH}( |$)" <<<"${BASE_BRANCHES}"; then
+            BASE_BRANCHES="${BASE_BRANCHES} ${DEFAULT_BRANCH}"
+          fi
+
+          echo "Base branches: ${BASE_BRANCHES}"
+          echo "Days old threshold: ${DAYS_OLD_THRESHOLD}"
+
+          # Collect open PR head branches
+          mapfile -t OPEN_PR_BRANCHES < <(gh pr list --state open --limit 500 --json headRefName --jq '.[].headRefName')
+          echo "Open PR branches: ${OPEN_PR_BRANCHES[*]:-<none>}"
+
+          is_in_list() { local item="$1"; shift; for x in "$@"; do [[ "$x" == "$item" ]] && return 0; done; return 1; }
+
+          # Get all remote branches under origin (strip origin/ prefix)
+          mapfile -t REMOTE_BRANCHES < <(git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin | sort -u)
+
+          NOW=$(date +%s)
+
+          for BR in "${REMOTE_BRANCHES[@]}"; do
+            # Skip HEAD alias
+            [[ "$BR" == "HEAD" ]] && continue
+
+            # Skip base branches
+            for BASE in ${BASE_BRANCHES}; do
+              if [[ "$BR" == "$BASE" ]]; then
+                continue 2
+              fi
+            done
+
+            # Skip if branch is used by an open PR
+            if is_in_list "$BR" "${OPEN_PR_BRANCHES[@]:-}"; then
+              echo "Skipping $BR (referenced by an open PR)"
+              continue
+            fi
+
+            # Verify the branch exists
+            if ! git show-ref --verify --quiet "refs/remotes/origin/$BR"; then
+              continue
+            fi
+
+            # Only delete if fully merged into at least one base branch
+            MERGED_INTO=""
+            for BASE in ${BASE_BRANCHES}; do
+              if git merge-base --is-ancestor "origin/$BR" "origin/$BASE"; then
+                MERGED_INTO="$BASE"
+                break
+              fi
+            done
+            if [[ -z "$MERGED_INTO" ]]; then
+              echo "Keeping $BR (contains unmerged changes)"
+              continue
+            fi
+
+            # Age check
+            LAST_COMMIT_TS=$(git log -1 --format=%ct "origin/$BR" 2>/dev/null || echo "")
+            if [[ -z "$LAST_COMMIT_TS" ]]; then
+              echo "Skipping $BR (unable to determine last commit time)"
+              continue
+            fi
+            AGE_DAYS=$(( (NOW - LAST_COMMIT_TS) / 86400 ))
+            if (( AGE_DAYS < DAYS_OLD_THRESHOLD )); then
+              echo "Keeping $BR (age ${AGE_DAYS}d < threshold ${DAYS_OLD_THRESHOLD}d)"
+              continue
+            fi
+
+            echo "Deleting branch $BR (merged into $MERGED_INTO, age ${AGE_DAYS}d)"
+            if gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/$BR"; then
+              echo "Deleted $BR"
+            else
+              echo "Failed to delete $BR" >&2
+            fi
+          done
+
+      - name: Lock threads
+        uses: dessant/lock-threads@1bf7ec25051fe7c00bdd17e6a7cf3d7bfb7dc771 # v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-inactive-days: '15'
+          issue-comment: |
+            This issue has been automatically locked since there has been no recent activity after it was closed. Please open a new issue for related bugs.
+          pr-inactive-days: '15'
+          pr-comment: |
+            This pull request has been automatically locked since there has been no recent activity after it was closed. Please open a new pull request for related changes.
