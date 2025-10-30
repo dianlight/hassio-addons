@@ -41,13 +41,13 @@ map:
   - media:rw
 options:
   srat_update_channel: none
-  enable_smart: true
-  hdd_idle_seconds: 30
+ # enable_smart: true
+ # hdd_idle_seconds: 30
   log_level: warning
   leave_front_door_open: false
 schema:
-  hdd_idle_seconds: int(0,)?
-  enable_smart: bool?
+ # hdd_idle_seconds: int(0,)?
+ # enable_smart: bool?
   srat_update_channel: list(none|release|prerelease|develop)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
