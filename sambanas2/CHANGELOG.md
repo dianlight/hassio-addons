@@ -1,6 +1,6 @@
 # Changelog
 
-## 2025.10.0-dev [ 🚧 Unreleased ]
+## 2025.11.0-dev [ 🚧 Unreleased ]
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
@@ -9,16 +9,15 @@
 - ~~Announce Samba service via Avahi/mDNS for better discovery~~ Remove for side effects
 - Support ~~WSDD~~ and WSDD2
 - Automatic modprobe for all kernel fs
+- Add ability to use Custom Samba Version 
 #### __🚧 Work in progess__
-- [x] Add ability to use Custom Samba Version 
 - [ ] Migrate config from SambaNas addon
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon
 - New version model
-- 
+- Samba to 4.23.1 compatibility 
 #### __🚧 Work in progess__
-- [x] Upgrade Samba to 4.23.1 
 - [x] Update the documentation
     - [x] Tutorial screenshots?
 - [x] En translation 
