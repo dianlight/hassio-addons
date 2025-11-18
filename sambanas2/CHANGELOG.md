@@ -17,10 +17,14 @@
 - Fork SambaNas to the new SambaNas2 addon
 - New version model
 - Samba to 4.23.1 compatibility 
+- Update base image to latest Home Assistant base image 19.0.0
 #### __🚧 Work in progess__
 - [x] Update the documentation
     - [x] Tutorial screenshots?
 - [x] En translation 
+
+#### 💥 Breaking Changes
+- Remove support to armv7 architecture
 
 ### 🐭 Features from SRAT [ 🚧 Unreleased ]
 
