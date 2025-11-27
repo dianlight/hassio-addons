@@ -5,13 +5,14 @@
 # Remove deprecated config options 
 # ==============================================================================
 bashio::log.debug  "-> Clean config ..."
-if bashio::config.has_value 'enable_smart'; then
-    bashio::log.warning "Option 'enable_smart' is deprecated and will be removed from the config."
-    bashio::addon.option 'enable_smart'
-fi
-if bashio::config.has_value 'hdd_idle_seconds'; then
-    bashio::log.warning "Option 'hdd_idle_seconds' is deprecated and will be removed from the config."
-    bashio::addon.option 'hdd_idle_seconds'
-fi
-bashio::log.debug  "-> Done."
+
+options=$(bashio::addon.options)
+old_keys='enable_smart hdd_idle_seconds'
+for old_key in ${old_keys}; do
+  if bashio::jq.exists "${options}" ".${old_key}"; then
+      bashio::log.info "Removing deprecated option ${old_key}"
+      bashio::addon.option "${old_key}"
+  fi
+done
+bashio::log.debug  "-> Clean Done."
 

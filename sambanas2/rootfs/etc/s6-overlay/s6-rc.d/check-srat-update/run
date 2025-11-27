@@ -19,7 +19,7 @@ if bashio::config.has_value 'srat_update_channel'; then
   srat_channel_value=$(bashio::config 'srat_update_channel')
   if [[ "${srat_channel_value}" != "none" ]]; then
     /usr/local/bin/srat-cli \
-      -db /config/config.db3 \
+      -db "file::memory:?cache=shared&_pragma=foreign_keys(1)" \
       -loglevel "$(bashio::config 'log_level' 'info')" \
       upgrade \
       -channel "${srat_channel_value}"
