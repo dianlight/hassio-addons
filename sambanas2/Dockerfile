@@ -6,6 +6,7 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 ARG SAMBA_VERSION
+ARG HA_CLI_VERSION
 
 #ARG HDDTEMP_VERSION
 
@@ -188,7 +189,7 @@ ENV \
 
 # Setup base
 ARG BUILD_ARCH
-ARG CLI_VERSION
+ARG HA_CLI_VERSION
 ARG SRAT_VERSION
 ARG SAMBA_VERSION
 
@@ -288,7 +289,7 @@ RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
     fi
 
 # Download and install Home Assistant CLI
-RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha
 
 # Download and install SRAT
