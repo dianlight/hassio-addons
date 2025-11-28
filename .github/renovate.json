@@ -44,15 +44,29 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)(?:.+/)?build\\.yaml$/"
+       "managerFilePatterns": [
+        "//Dockerfile$/",
+        "//build.yaml$/"
       ],
       "matchStrings": [
-        "SRAT_VERSION:\\s*(?<currentValue>\\S+)"
+        "HA_CLI_VERSION=[\"']?(?<currentValue>.+?)[\"']?\\s+"
       ],
       "datasourceTemplate": "github-releases",
-      "depNameTemplate": "dianlight/srat"
-    }
+      "depNameTemplate": "home-assistant/cli",
+      "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+       "managerFilePatterns": [
+        "//build.yaml$/"
+      ],
+      "matchStrings": [
+        "SRAT_VERSION=[\"']?(?<currentValue>.+?)[\"']?\\s+"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "dianlight/srat",
+      "versioningTemplate": "loose"
+    },       
   ],
   "packageRules": [
     {
