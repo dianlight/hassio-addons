@@ -41,10 +41,10 @@ The following table compares the major functionalities available in SambaNAS and
 | HA Native API Integration          |    ❌     |    ✔️      |
 | Component Integration              |    ❌     |  🚧 Soon   |
 | **Disk Management** | | |
-| SMART Monitoring                  |    ✔️     |    ✔️      |
-| SMART Test Support                      |    ❌     |    ✔️      |
-| Disk Spindown Support              |    ✔️     |    ✔️      |
-| Per Disk Spindown Support              |    ❌     |    ✔️      |
+| SMART Monitoring                  |    ✔️     |    🚧 Soon      |
+| SMART Test Support                      |    ❌     |    🚧 Soon      |
+| Disk Spindown Support              |    ✔️     |    🚧 Soon      |
+| Per Disk Spindown Support              |    ❌     |    🚧 Soon      |
 | **Filesystem Support** | | |
 | Filesystem Checking  | ❌ | 🚧 Soon  |
 | Advanced XFS Support | ❌ | 🚧 Soon  |

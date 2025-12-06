@@ -1,6 +1,6 @@
 # Changelog
 
-## 2025.11.0-dev [ 🚧 Unreleased ]
+## 2025.12.0-dev [ 🚧 Unreleased ]
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
@@ -9,7 +9,7 @@
 - ~~Announce Samba service via Avahi/mDNS for better discovery~~ Remove for side effects
 - Support ~~WSDD~~ and WSDD2
 - Automatic modprobe for all kernel fs
-- Add ability to use Custom Samba Version 
+- Add ability to use Custom Samba Version - Custom Build Only 
 #### __🚧 Work in progess__
 - [ ] Migrate config from SambaNas addon
 
@@ -18,10 +18,8 @@
 - New version model
 - Samba to 4.23.1 compatibility 
 - Update base image to latest Home Assistant base image 19.0.0
-#### __🚧 Work in progess__
-- [x] Update the documentation
-    - [x] Tutorial screenshots?
-- [x] En translation 
+- Update the documentation
+- En translation 
 
 #### 💥 Breaking Changes
 - Remove support to armv7 architecture
