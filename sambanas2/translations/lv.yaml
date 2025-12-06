@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT atjaunināšanas kanāls
+    description: >-
+      Izvēlieties, kā SRAT (Samba REST Administration Tool) atjauninās sevi:
+      none, release, prerelease vai develop.
+  log_level:
+    name: Žurnāla līmenis
+    description: >-
+      Iestatiet papildinājuma žurnālu detalizāciju (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: Atspējot SRAT autentifikāciju
+    description: >-
+      Kad ieslēgts, tīmekļa saskarne ir pieejama bez pieteikšanās. Lietojiet tikai
+      uzticamos tīklos.
+network:
+  3000/tcp: Tīmekļa saskarne (bez Home Assistant)

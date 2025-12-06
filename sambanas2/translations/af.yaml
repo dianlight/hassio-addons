@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT-bywerkingskanaal
+    description: >-
+      Kies hoe SRAT (Samba REST Administration Tool) homself bywerk: none,
+      release, prerelease of develop.
+  log_level:
+    name: Logvlak
+    description: >-
+      Stel die geselsheid van die byvoegsel se logs in (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: Skakel SRAT-verifikasie af
+    description: >-
+      Wanneer geaktiveer, is die webkoppelvlak toeganklik sonder aanmelding.
+      Gebruik dit net op vertroude netwerke.
+network:
+  3000/tcp: Webkoppelvlak (sonder Home Assistant)

@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: Kênh cập nhật SRAT
+    description: >-
+      Chọn cách SRAT (Samba REST Administration Tool) tự cập nhật: none,
+      release, prerelease hoặc develop.
+  log_level:
+    name: Mức ghi log
+    description: >-
+      Đặt độ chi tiết log của add-on (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Tắt xác thực SRAT
+    description: >-
+      Khi bật, giao diện web truy cập được mà không cần đăng nhập. Chỉ dùng trên
+      mạng tin cậy.
+network:
+  3000/tcp: Giao diện web (không cần Home Assistant)

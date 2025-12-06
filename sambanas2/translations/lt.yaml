@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT atnaujinimų kanalas
+    description: >-
+      Pasirinkite, kaip SRAT (Samba REST Administration Tool) atnaujinamas:
+      none, release, prerelease arba develop.
+  log_level:
+    name: Žurnalo lygis
+    description: >-
+      Nustatykite priedo žurnalų išsamumą (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Išjungti SRAT autentifikavimą
+    description: >-
+      Įjungus, žiniatinklio sąsaja prieinama be prisijungimo. Naudokite tik
+      patikimuose tinkluose.
+network:
+  3000/tcp: Žiniatinklio sąsaja (be Home Assistant)

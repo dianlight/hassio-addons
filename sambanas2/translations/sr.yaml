@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: Канал ажурирања SRAT
+    description: >-
+      Изаберите како се SRAT (Samba REST Administration Tool) ажурира: none,
+      release, prerelease или develop.
+  log_level:
+    name: Ниво логовања
+    description: >-
+      Подесите детаљност логова додатка (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Искључи SRAT аутентикацију
+    description: >-
+      Када је укључено, веб интерфејс је доступан без пријаве. Користите само у
+      поузданим мрежама.
+network:
+  3000/tcp: Веб интерфејс (без Home Assistant)

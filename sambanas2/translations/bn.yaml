@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT আপডেট চ্যানেল
+    description: >-
+      SRAT (Samba REST Administration Tool) কীভাবে আপডেট হবে তা বেছে নিন:
+      none, release, prerelease বা develop.
+  log_level:
+    name: লগ স্তর
+    description: >-
+      অ্যাড-অন লগের বিশদ মাত্রা ঠিক করুন (trace, debug, info, notice, warning,
+      error, fatal)।
+  leave_front_door_open:
+    name: SRAT প্রমাণীকরণ বন্ধ করুন
+    description: >-
+      সক্রিয় থাকলে ওয়েব ইন্টারফেস লগইন ছাড়াই প্রবেশযোগ্য। শুধুমাত্র বিশ্বস্ত
+      নেটওয়ার্কে ব্যবহার করুন।
+network:
+  3000/tcp: ওয়েব ইন্টারফেস (Home Assistant ছাড়া)

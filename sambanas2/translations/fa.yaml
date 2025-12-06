@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: کانال به‌روزرسانی SRAT
+    description: >-
+      انتخاب کنید SRAT (Samba REST Administration Tool) چگونه به‌روزرسانی
+      شود: none، release، prerelease یا develop.
+  log_level:
+    name: سطح لاگ
+    description: >-
+      دقت لاگ‌های افزونه را تنظیم کنید (trace، debug، info، notice، warning،
+      error، fatal).
+  leave_front_door_open:
+    name: غیرفعال کردن احراز هویت SRAT
+    description: >-
+      با فعال‌سازی، رابط وب بدون ورود در دسترس است. فقط در شبکه‌های مطمئن
+      استفاده کنید.
+network:
+  3000/tcp: رابط وب (بدون Home Assistant)

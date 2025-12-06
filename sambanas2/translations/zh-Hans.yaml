@@ -1,0 +1,18 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT 更新通道
+    description: >-
+      选择 SRAT (Samba REST Administration Tool) 的更新方式：none、release、
+      prerelease 或 develop。
+  log_level:
+    name: 日志级别
+    description: >-
+      设置附加组件日志的详细程度（trace、debug、info、notice、warning、error、
+      fatal）。
+  leave_front_door_open:
+    name: 禁用 SRAT 认证
+    description: >-
+      启用后，网页界面无需登录即可访问。仅在可信网络中使用。
+network:
+  3000/tcp: Web 界面（无需 Home Assistant）

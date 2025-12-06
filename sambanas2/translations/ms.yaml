@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: Saluran kemas kini SRAT
+    description: >-
+      Pilih cara SRAT (Samba REST Administration Tool) dikemas kini: none,
+      release, prerelease atau develop.
+  log_level:
+    name: Tahap log
+    description: >-
+      Tetapkan perincian log add-on (trace, debug, info, notice, warning, error,
+      fatal).
+  leave_front_door_open:
+    name: Nyahdaya pengesahan SRAT
+    description: >-
+      Apabila diaktifkan, antara muka web boleh diakses tanpa log masuk. Guna
+      hanya pada rangkaian dipercayai.
+network:
+  3000/tcp: Antara muka web (tanpa Home Assistant)
