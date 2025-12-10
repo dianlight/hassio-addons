@@ -17,7 +17,7 @@ jobs:
       # Output BR_PROJECT and CURRENT_BRANCH_NAME if they were needed by the next job and not easily re-derivable.
       # For this specific split, the next job can re-derive GITHUB_REF or use github.head_ref.
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           submodules: true
 
