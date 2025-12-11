@@ -25,13 +25,13 @@ INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=
 # No default for INTERFACES. If empty, wsdd2 will listen on all interfaces.
 
 # --- Argument Construction ---
-WSDD2_ARGS="-b vendor:homeassistant,model:sambanas2 -w"
+WSDD2_ARGS="-b vendor:homeassistant,model:sambanas2"
 
 if [ -n "$WORKGROUP" ]; then
   WSDD2_ARGS="${WSDD2_ARGS} -G ${WORKGROUP}"
 fi
 if [ -n "$NETBIOS_NAME" ]; then
-  WSDD2_ARGS="${WSDD2_ARGS} -H ${NETBIOS_NAME}"
+  WSDD2_ARGS="${WSDD2_ARGS} -H ${NETBIOS_NAME} -N ${NETBIOS_NAME}"
 fi
 
 # Adds the specified interfaces, one by one.

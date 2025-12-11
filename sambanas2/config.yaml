@@ -13,8 +13,12 @@ startup: application
 watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
+  3702/udp: 3702
+  5357/tcp: 5357
 ports_description:
   3000/tcp: Web interface
+  3702/udp: WS Discovery (ZeroConf)
+  5357/tcp: Wsdapi interface
 ingress: true
 ingress_port: 0 # For add-ons on host network
 ingress_entry: index.html
@@ -49,7 +53,7 @@ schema:
   srat_update_channel: list(none|release|prerelease|develop)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
-image: dianlight/{arch}-addon-sambanas2
+#image: dianlight/{arch}-addon-sambanas2
 #services:
 #  - mqtt:want
 udev: true

@@ -18,8 +18,9 @@ The following table compares the major functionalities available in SambaNAS and
 | CIFS Volume Exporting              |    ✔️     |    ✔️      |
 | NFS Volume Exporting               |    ❌     |  🚧 Soon   |
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
-| WSDD and WSDD2 Integration         |    ✔️     |    ✔️ wsdd2 only      |
-| Samba over QUIC Support               |  ❌  |  🚧 Soon   |
+| WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
+| WSDD-Native                       |    ❌     |    ✔️     |
+| Samba over QUIC Support            |    ❌     |  🚧 Soon   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
 | Enhanced mount flags management    |    ❌     |    ✔️      |

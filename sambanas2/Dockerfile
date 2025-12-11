@@ -8,41 +8,6 @@ ARG BUILD_VERSION
 ARG SAMBA_VERSION
 ARG HA_CLI_VERSION
 
-#ARG HDDTEMP_VERSION
-
-# hadolint ignore=DL3006
-FROM ${BUILD_FROM} AS builder_wsdd
-
-SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-
-# Install build dependencies in a single layer for better caching
-RUN apk add --no-cache \
-    make \
-    gcc \
-    libc-dev \
-    linux-headers \
-    build-base \
-    autoconf \
-    automake \
-    git \
-    wget \
-    patch
-
-ARG BUILD_ARCH
-
-# Build wsdd2 with optimizations
-RUN cd /tmp \
-    && wget -q -O wsdd2.tar.gz "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" \
-    && tar xzf wsdd2.tar.gz \
-    && cd wsdd2-master \
-    && wget -q -O gcc14.patch https://raw.githubusercontent.com/openwrt/packages/refs/heads/master/net/wsdd2/patches/010-gcc14.patch \
-    && patch -p1 < gcc14.patch \
-    && make -j"$(nproc)" \
-    && strip wsdd2 \
-    && mv wsdd2 /usr/sbin/ \
-    && cd / \
-    && rm -rf /tmp/wsdd2*
-
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM} AS quic_builder
@@ -163,6 +128,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
     && find /usr/local/samba -type f -executable -exec strip --strip-unneeded {} + 2>/dev/null || true \
     && rm -rf /tmp/samba-* \
     ; fi
+
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
@@ -194,7 +160,7 @@ ARG SRAT_VERSION
 ARG SAMBA_VERSION
 
 # Copy compiled binaries from builder stages
-COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/
+#COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/
 COPY --from=quic_builder /usr/local/quic/ /usr/local/quic/
 COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
 
@@ -287,6 +253,14 @@ RUN if [ "$BUILD_ARCH" != "armv7" ]; then \
     apk add --no-cache apfs-fuse \
     && ln -s /usr/sbin/apfs-fuse /usr/sbin/mount.apfs; \
     fi
+# Install wsdd for WS-Discovery support
+RUN wget -qO-  https://www.gershnik.com/alpine-repo/gershnik@hotmail.com-6643812b.rsa.pub \
+    | tee /etc/apk/keys/gershnik@hotmail.com-6643812b.rsa.pub >/dev/null && \
+    mkdir -p /etc/apk/repositories.d && \
+    echo "https://www.gershnik.com/alpine-repo/main" \
+    | tee /etc/apk/repositories.d/www.gershnik.com.list >/dev/null && \
+    apk update && \
+    apk add --no-cache wsdd-native
 
 # Download and install Home Assistant CLI
 RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
