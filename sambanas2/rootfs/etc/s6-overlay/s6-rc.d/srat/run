@@ -30,4 +30,5 @@ exec /usr/local/bin/srat-server \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
   $(bashio::config.equals 'srat_update_channel' 'develop' && echo " -update-file-path /config/srat-server") \
   -loglevel $(bashio::config 'log_level' 'info') \
+  -update-channel $(bashio::config 'srat_update_channel' 'none') \
   -ip-address $(bashio::addon.ip_address)
