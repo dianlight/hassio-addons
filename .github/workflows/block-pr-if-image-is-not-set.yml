@@ -11,34 +11,34 @@ jobs:
   updateBody:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-        with:
-          submodules: true
+        - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+          with:
+           submodules: true
 
-      - name: Extract branch name
-        shell: bash
-        run: |
-          TARGET_REF=""
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo ${{ github.base_ref }}
-            TARGET_REF="${{ github.base_ref }}"
-          else # For workflow_dispatch
-            TARGET_REF="${{ github.ref }}" # GITHUB_REF is deprecated, github.ref is preferred
-          fi
-          BASE_NAME=${TARGET_REF##*/}
-          # Remove any suffix starting with _ (e.g., my-addon_beta -> my-addon)
-          echo "BR_VERSION=${BASE_NAME%%_*}" >> "$GITHUB_OUTPUT"
-        id: extract_branch
+        - name: Extract branch name
+          shell: bash
+          run: |
+            TARGET_REF=""
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              echo ${{ github.base_ref }}
+              TARGET_REF="${{ github.base_ref }}"
+            else # For workflow_dispatch
+              TARGET_REF="${{ github.ref }}" # GITHUB_REF is deprecated, github.ref is preferred
+            fi
+            BASE_NAME=${TARGET_REF##*/}
+            # Remove any suffix starting with _ (e.g., my-addon_beta -> my-addon)
+            echo "BR_VERSION=${BASE_NAME%%_*}" >> "$GITHUB_OUTPUT"
+          id: extract_branch
 
-      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
-        id: read_action_js
-        with:
-          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+          id: read_action_js
+          with:
+            config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
 
-      - name: Check image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }}
-        if: ${{ steps.read_action_js.outputs.image == '' }}
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          script: |
-            core.setFailed('Image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }} is not set!')
+        - name: Check image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }}
+          if: ${{ steps.read_action_js.outputs.image == '' }}
+          uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+          with:
+            script: |
+                core.setFailed('Image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }} is not set!')

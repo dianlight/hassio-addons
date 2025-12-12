@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT uuenduskanal
+    description: >-
+      Vali, kuidas SRAT (Samba REST Administration Tool) end uuendab: none,
+      release, prerelease või develop.
+  log_level:
+    name: Logi tase
+    description: >-
+      Määra lisandmooduli logide detailsus (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Keela SRAT autentimine
+    description: >-
+      Kui lubatud, on veebiliides ligipääsetav ilma sisselogimiseta. Kasuta ainult
+      usaldusväärsetes võrkudes.
+network:
+  3000/tcp: Veebiliides (ilma Home Assistantita)
