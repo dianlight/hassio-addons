@@ -17,7 +17,6 @@
 - Remove HDIdle support (for now is added back in future releases)
 - Remove SMART capabilities (for now is added back in future releases)
 - Remove Avahi/mDNS support (due to side effects on some systems)
-- Remove WSDD support (due to instability)
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
