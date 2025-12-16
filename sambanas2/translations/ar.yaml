@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: قناة تحديث SRAT
+    description: >-
+      اختر كيفية تحديث SRAT (Samba REST Administration Tool): none، release،
+      prerelease أو develop.
+  log_level:
+    name: مستوى السجل
+    description: >-
+      اضبط تفصيل سجلات الإضافة (trace, debug, info, notice, warning, error,
+      fatal).
+  leave_front_door_open:
+    name: تعطيل مصادقة SRAT
+    description: >-
+      عند التمكين يصبح الواجهة متاحة بدون تسجيل دخول. استخدمه فقط في الشبكات
+      الموثوقة.
+network:
+  3000/tcp: واجهة ويب (دون Home Assistant)

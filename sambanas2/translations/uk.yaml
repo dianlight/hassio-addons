@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: Канал оновлення SRAT
+    description: >-
+      Виберіть, як SRAT (Samba REST Administration Tool) оновлюється: none,
+      release, prerelease або develop.
+  log_level:
+    name: Рівень журналу
+    description: >-
+      Встановіть деталізацію журналів додатка (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: Вимкнути автентифікацію SRAT
+    description: >-
+      Якщо ввімкнено, вебінтерфейс доступний без входу. Використовуйте лише в
+      довірених мережах.
+network:
+  3000/tcp: Вебінтерфейс (без Home Assistant)

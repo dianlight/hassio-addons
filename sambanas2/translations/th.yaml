@@ -1,0 +1,19 @@
+---
+configuration:
+  srat_update_channel:
+    name: ช่องอัปเดต SRAT
+    description: >-
+      เลือกวิธีที่ SRAT (Samba REST Administration Tool) อัปเดตตัวเอง: none,
+      release, prerelease หรือ develop
+  log_level:
+    name: ระดับบันทึก
+    description: >-
+      ตั้งค่าระดับรายละเอียดของบันทึกส่วนเสริม (trace, debug, info, notice,
+      warning, error, fatal)
+  leave_front_door_open:
+    name: ปิดการยืนยันตัวตน SRAT
+    description: >-
+      เมื่อเปิดใช้งาน อินเทอร์เฟซเว็บจะเข้าถึงได้โดยไม่ต้องล็อกอิน ใช้เฉพาะ
+      บนเครือข่ายที่เชื่อถือได้
+network:
+  3000/tcp: อินเทอร์เฟซเว็บ (ใช้โดยไม่มี Home Assistant)
