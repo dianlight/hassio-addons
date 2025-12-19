@@ -15,5 +15,11 @@ configuration:
     description: >-
       Ko je omogočeno, je spletni vmesnik dostopen brez prijave. Uporabljajte le
       v zaupanja vrednih omrežjih.
+  clean_upgrade_dir:
+    name: Počisti imenik za nadgradnjo
+    description: >-
+      Odstrani vse prenesene binarne posodobitve SRAT iz imenika podatkov dodatka.
+      Uporabite samo v nujnih primerih za čiščenje poškodovanih datotek posodobitev.
+      To dejanje je trajno in ga ni mogoče razveljaviti.
 network:
   3000/tcp: Spletni vmesnik (brez Home Assistant)

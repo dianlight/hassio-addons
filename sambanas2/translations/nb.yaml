@@ -15,5 +15,11 @@ configuration:
     description: >-
       Når aktivert er webgrensesnittet tilgjengelig uten innlogging. Bruk kun på
       betrodde nettverk.
+  clean_upgrade_dir:
+    name: Rydd oppgraderingsmappe
+    description: >-
+      Fjerner alle nedlastede SRAT-binære oppdateringer fra tilleggets datamappe.
+      Bruk kun i nødsituasjoner for å rydde ødelagte oppdateringsfiler. Denne
+      handlingen er permanent og kan ikke angres.
 network:
   3000/tcp: Webgrensesnitt (uten Home Assistant)

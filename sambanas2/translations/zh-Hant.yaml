@@ -14,5 +14,10 @@ configuration:
     name: 停用 SRAT 驗證
     description: >-
       啟用後，網頁介面可在無登入的情況下使用。僅在可信任的網路中使用。
+  clean_upgrade_dir:
+    name: 清理升級目錄
+    description: >-
+      從附加元件的資料目錄中刪除所有已下載的 SRAT 二進位更新。僅在緊急情況下
+      使用以清除損壞的更新檔案。此操作是永久性的且無法撤銷。
 network:
   3000/tcp: 網頁介面（無需 Home Assistant）

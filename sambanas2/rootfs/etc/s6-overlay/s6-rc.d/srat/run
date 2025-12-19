@@ -31,4 +31,5 @@ exec /usr/local/bin/srat-server \
   $(bashio::config.equals 'srat_update_channel' 'develop' && echo " -update-file-path /config/srat-server") \
   -loglevel $(bashio::config 'log_level' 'info') \
   -update-channel $(bashio::config 'srat_update_channel' 'none') \
-  -ip-address $(bashio::addon.ip_address)
+  -ip-address $(bashio::addon.ip_address) \
+  -upgrade-data-dir /data/upgrade

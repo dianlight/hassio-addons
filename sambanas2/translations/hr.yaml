@@ -15,5 +15,11 @@ configuration:
     description: >-
       Kad je omogućeno, web-sučelje je dostupno bez prijave. Koristite samo na
       pouzdanim mrežama.
+  clean_upgrade_dir:
+    name: Očisti direktorij nadogradnje
+    description: >-
+      Uklanja sve preuzete SRAT binarne ažuriranja iz direktorija podataka dodatka.
+      Koristite samo u hitnim situacijama za čišćenje oštećenih datoteka ažuriranja.
+      Ova radnja je trajna i ne može se poništiti.
 network:
   3000/tcp: Web sučelje (bez Home Assistant-a)

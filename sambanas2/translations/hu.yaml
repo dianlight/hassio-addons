@@ -15,5 +15,11 @@ configuration:
     description: >-
       Engedélyezéskor a webes felület bejelentkezés nélkül elérhető. Csak
       megbízható hálózatokon használja.
+  clean_upgrade_dir:
+    name: Frissítési könyvtár törlése
+    description: >-
+      Eltávolítja az összes letöltött SRAT bináris frissítést a kiegészítő
+      adatkönyvtárából. Csak vészhelyzetben használja a sérült frissítési fájlok
+      törléséhez. Ez a művelet végleges és nem vonható vissza.
 network:
   3000/tcp: Webes felület (Home Assistant nélkül)

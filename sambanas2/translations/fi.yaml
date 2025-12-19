@@ -15,5 +15,11 @@ configuration:
     description: >-
       Kun käytössä, verkkokäyttöliittymä on käytettävissä ilman kirjautumista.
       Käytä vain luotetuissa verkoissa.
+  clean_upgrade_dir:
+    name: Tyhjennä päivityshakemisto
+    description: >-
+      Poistaa kaikki ladatut SRAT-binääripäivitykset lisäosan datahakemistosta.
+      Käytä vain hätätilanteissa vioittuneiden päivitystiedostojen tyhjentämiseen.
+      Tämä toiminto on pysyvä eikä sitä voi peruuttaa.
 network:
   3000/tcp: Web-käyttöliittymä (ilman Home Assistantia)

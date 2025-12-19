@@ -15,5 +15,11 @@ configuration:
     description: >-
       Po włączeniu interfejs WWW jest dostępny bez logowania. Używaj tylko w
       zaufanych sieciach.
+  clean_upgrade_dir:
+    name: Wyczyść katalog aktualizacji
+    description: >-
+      Usuwa wszystkie pobrane aktualizacje binarne SRAT z katalogu danych dodatku.
+      Używaj tylko w sytuacjach awaryjnych do czyszczenia uszkodzonych plików
+      aktualizacji. Ta akcja jest trwała i nieodwracalna.
 network:
   3000/tcp: Interfejs WWW (bez Home Assistant)

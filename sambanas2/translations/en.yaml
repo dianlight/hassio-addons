@@ -15,5 +15,11 @@ configuration:
     description: >-
       When enabled, the web interface is accessible without login. Only use this
       on trusted networks.
+  clean_upgrade_dir:
+    name: Clean upgrade directory
+    description: >-
+      Removes all downloaded SRAT binary updates from the add-on's data directory.
+      Use only in emergency situations to clear corrupted update files. This action
+      is permanent and cannot be undone.
 network:
   3000/tcp: Web interface (to use without Home Assistant)

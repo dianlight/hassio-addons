@@ -45,7 +45,7 @@ check_certificate_validity() {
   fi
   
   # Check if certificate matches the expected FQDN
-  local cert_cn=$(openssl x509 -noout -subject -in "${cert_file}" 2>/dev/null | sed -n 's/.*CN = \(.*\)/\1/p')
+  local cert_cn=$(openssl x509 -noout -subject -in "${cert_file}" 2>/dev/null | sed -n 's/.*CN=\(.*\)/\1/p')
   if [ "${cert_cn}" != "${expected_fqdn}" ]; then
     bashio::log.info "Certificate CN '${cert_cn}' does not match expected FQDN '${expected_fqdn}'"
     return 1
@@ -87,6 +87,9 @@ if [ $? -ne 0 ]; then
   rm -f "${KEY_FILE}"
   exit 1
 fi
+
+# Check if certificate generation was successful
+openssl x509 -noout -subject -in "${CERT_FILE}"
 
 # Set appropriate permissions
 chmod 600 "${KEY_FILE}"

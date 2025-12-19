@@ -15,5 +15,11 @@ configuration:
     description: >-
       När aktiverat är webbgränssnittet tillgängligt utan inloggning. Använd bara
       på betrodda nätverk.
+  clean_upgrade_dir:
+    name: Rensa uppgraderingsmapp
+    description: >-
+      Tar bort alla nedladdade SRAT-binära uppdateringar från tilläggets datamapp.
+      Använd endast i nödsituationer för att rensa skadade uppdateringsfiler.
+      Denna åtgärd är permanent och kan inte ångras.
 network:
   3000/tcp: Webbgränssnitt (utan Home Assistant)

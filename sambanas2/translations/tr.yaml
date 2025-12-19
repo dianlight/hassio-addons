@@ -15,5 +15,11 @@ configuration:
     description: >-
       Etkinleştirildiğinde web arayüzüne giriş yapmadan erişilebilir. Yalnızca
       güvenilir ağlarda kullanın.
+  clean_upgrade_dir:
+    name: Güncelleme dizinini temizle
+    description: >-
+      Eklentinin veri dizininden indirilen tüm SRAT ikili güncellemelerini kaldırır.
+      Yalnızca acil durumlarda bozuk güncelleme dosyalarını temizlemek için kullanın.
+      Bu işlem kalıcıdır ve geri alınamaz.
 network:
   3000/tcp: Web arayüzü (Home Assistant olmadan kullanın)

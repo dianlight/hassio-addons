@@ -15,5 +15,11 @@ configuration:
     description: >-
       Apabila diaktifkan, antara muka web boleh diakses tanpa log masuk. Guna
       hanya pada rangkaian dipercayai.
+  clean_upgrade_dir:
+    name: Bersihkan direktori naik taraf
+    description: >-
+      Membuang semua kemas kini binari SRAT yang dimuat turun dari direktori data
+      add-on. Gunakan hanya dalam situasi kecemasan untuk membersihkan fail kemas
+      kini yang rosak. Tindakan ini kekal dan tidak boleh dibatalkan.
 network:
   3000/tcp: Antara muka web (tanpa Home Assistant)

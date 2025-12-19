@@ -15,5 +15,11 @@ configuration:
     description: >-
       Când este activată, interfața web este accesibilă fără autentificare.
       Folosiți doar în rețele de încredere.
+  clean_upgrade_dir:
+    name: Curățați directorul de actualizare
+    description: >-
+      Elimină toate actualizările binare SRAT descărcate din directorul de date al
+      add-on-ului. Utilizați doar în situații de urgență pentru a șterge fișierele
+      de actualizare corupte. Această acțiune este permanentă și nu poate fi anulată.
 network:
   3000/tcp: Interfață web (fără Home Assistant)

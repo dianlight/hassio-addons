@@ -137,8 +137,6 @@ Each level automatically includes log messages from more severe levels (e.g., `d
 
 SRAT (Samba REST Administration Tool) is a new system designed to provide a simplified user interface for configuring Samba. It has been developed specifically for this add-on within Home Assistant but can also be used in other contexts.
 
-Currently in alpha development, SRAT is designed to become the preferred system for configuring and using this add-on, eventually replacing YAML configuration.
-
 Setting this option to `release`, `prerelease`, or `develop` enables automatic updates for SRAT (Samba REST Administration Tool) on the chosen channel:
 
 - `none`: No automatic updates (default)
@@ -146,7 +144,19 @@ Setting this option to `release`, `prerelease`, or `develop` enables automatic u
 - `prerelease`: Beta/pre-release versions
 - `develop`: Development versions (experimental, use with caution; not available in release builds)
 
+⚠️ **Important**: When you select `release`, `prerelease`, or `develop`, SRAT updates are downloaded and installed automatically. These updates are persistent and stored in the add-on's data directory.
+
+If you switch to `none`, any previously downloaded updates in the data directory will be ignored but not removed. To clean up the directory and remove old downloads, use the `clean_upgrade_dir` option.
+
 Defaults to `none`.
+
+### Option: `clean_upgrade_dir` (optional)
+
+When enabled (set to `true`), this option removes all downloaded binary updates from the add-on's data directory. Use this only in emergency situations if you need to clear out old or corrupted SRAT update files.
+
+⚠️ **Warning**: This action is permanent and cannot be undone. Only enable this if you fully understand the consequences.
+
+Defaults to `false`.
 
 ### Option: `leave_front_door_open` (optional)
 

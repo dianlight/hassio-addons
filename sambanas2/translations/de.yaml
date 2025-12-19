@@ -15,5 +15,11 @@ configuration:
     description: >-
       Wenn aktiviert, ist die Weboberfläche ohne Anmeldung zugänglich. Nur in
       vertrauenswürdigen Netzwerken verwenden.
+  clean_upgrade_dir:
+    name: Upgrade-Verzeichnis bereinigen
+    description: >-
+      Entfernt alle heruntergeladenen SRAT-Binär-Updates aus dem Datenverzeichnis
+      des Add-ons. Nur in Notfällen verwenden, um beschädigte Update-Dateien zu
+      löschen. Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden.
 network:
   3000/tcp: Weboberfläche (ohne Home Assistant)

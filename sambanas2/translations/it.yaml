@@ -15,5 +15,11 @@ configuration:
     description: >-
       Se attivato, l'interfaccia web è accessibile senza login. Usare solo su
       reti fidate.
+  clean_upgrade_dir:
+    name: Pulisci directory di aggiornamento
+    description: >-
+      Rimuove tutti gli aggiornamenti binari SRAT scaricati dalla directory dati
+      dell'add-on. Usare solo in situazioni di emergenza per eliminare file di
+      aggiornamento corrotti. Questa azione è permanente e irreversibile.
 network:
   3000/tcp: Interfaccia web (senza Home Assistant)

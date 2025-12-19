@@ -15,5 +15,11 @@ configuration:
     description: >-
       Wanneer geaktiveer, is die webkoppelvlak toeganklik sonder aanmelding.
       Gebruik dit net op vertroude netwerke.
+  clean_upgrade_dir:
+    name: Maak opgradering gids skoon
+    description: >-
+      Verwyder alle afgelaaide SRAT binêre opdaterings uit die byvoegsel se data
+      gids. Gebruik slegs in noodgevalle om korrupte opdateringslêers skoon te maak.
+      Hierdie aksie is permanent en kan nie ongedaan gemaak word nie.
 network:
   3000/tcp: Webkoppelvlak (sonder Home Assistant)

@@ -15,5 +15,11 @@ configuration:
     description: >-
       Po zapnutí je webové rozhranie dostupné bez prihlásenia. Používajte len v
       dôveryhodných sieťach.
+  clean_upgrade_dir:
+    name: Vyčistiť zložku aktualizácií
+    description: >-
+      Odstráni všetky stiahnuté binárne aktualizácie SRAT z dátovej zložky doplnku.
+      Používajte len v núdzových situáciách na vyčistenie poškodených aktualizačných
+      súborov. Táto akcia je trvalá a nedá sa vrátiť späť.
 network:
   3000/tcp: Webové rozhranie (bez Home Assistant)

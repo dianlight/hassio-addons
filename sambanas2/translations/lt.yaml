@@ -15,5 +15,11 @@ configuration:
     description: >-
       Įjungus, žiniatinklio sąsaja prieinama be prisijungimo. Naudokite tik
       patikimuose tinkluose.
+  clean_upgrade_dir:
+    name: Išvalyti atnaujinimo katalogą
+    description: >-
+      Pašalina visus atsisiųstus SRAT dvejetainių failų atnaujinimus iš priedo
+      duomenų katalogo. Naudokite tik ekstremaliose situacijose, kad išvalytumėte
+      sugadintus atnaujinimo failus. Šis veiksmas yra galutinis ir negalimas atšaukti.
 network:
   3000/tcp: Žiniatinklio sąsaja (be Home Assistant)

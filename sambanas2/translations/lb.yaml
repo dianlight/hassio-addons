@@ -15,5 +15,11 @@ configuration:
     description: >-
       Wann aktiv, ass d'Web-Interface ouni Login zougänglech. Nëmmen op
       vertrauenswürdege Netzwierker benotzen.
+  clean_upgrade_dir:
+    name: Upgrade-Verzeechnes botzen
+    description: >-
+      Läscht all erofgelueden SRAT Binär-Aktualiséierungen aus dem Daten-Verzeechnes
+      vum Add-on. Benotzt nëmmen an Noutfall-Situatiounen fir korrupte Aktualiséierungs-
+      Fichieren ze botzen. Dës Aktioun ass permanent a kann net réckgängeg gemaach ginn.
 network:
   3000/tcp: Web-Interface (ouni Home Assistant)

@@ -15,5 +15,11 @@ configuration:
     description: >-
       Al habilitarlo, la interfaz web es accesible sin inicio de sesión. Úsalo
       solo en redes de confianza.
+  clean_upgrade_dir:
+    name: Limpiar directorio de actualización
+    description: >-
+      Elimina todas las actualizaciones binarias de SRAT descargadas del directorio
+      de datos del complemento. Úsalo solo en situaciones de emergencia para limpiar
+      archivos de actualización corruptos. Esta acción es permanente e irreversible.
 network:
   3000/tcp: Interfaz web (sin Home Assistant)
