@@ -1,0 +1,66 @@
+# Pre-commit configuration for hassio-addons
+# This will help ensure documentation is updated when code changes
+
+repos:
+  - repo: local
+    hooks:
+      - id: check-documentation-updates
+        name: Check documentation updates
+        entry: bash
+        language: system
+        args:
+          - -c
+          - |
+            # Get list of changed files (excluding .md files)
+            changed_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(sambanas|sambanas2|plex|RPiMySensor|addon-plex)/' | grep -v '\.md$' || true)
+            
+            if [ -n "$changed_files" ]; then
+              echo "Code changes detected in projects. Please ensure documentation is updated:"
+              
+              # Extract unique project names
+              projects=$(echo "$changed_files" | cut -d'/' -f1 | sort -u)
+              
+              for project in $projects; do
+                echo "📋 For project '$project', consider updating:"
+                echo "   - $project/README.md (if features/installation changed)"
+                echo "   - $project/DOCS.md (if configuration changed)"
+                echo "   - $project/CHANGELOG.md (with your changes)"
+              done
+              
+              echo ""
+              echo "ℹ️  See .copilot-instructions.md for detailed guidelines"
+              echo "⚠️  Remember: Each project's documentation should be self-contained"
+              echo ""
+              
+              # Check if any .md files are staged
+              staged_md=$(git diff --cached --name-only | grep '\.md$' || true)
+              if [ -z "$staged_md" ]; then
+                echo "❌ No .md files staged for commit. Have you updated the documentation?"
+                echo "💡 Use 'git add' to stage your documentation updates"
+                exit 1
+              else
+                echo "✅ Documentation files staged:"
+                echo "$staged_md"
+              fi
+            fi
+        files: '^(sambanas|sambanas2|plex|RPiMySensor|addon-plex)/.*'
+        exclude: '\.md$'
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+        files: '\.ya?ml$'
+      - id: check-json
+        files: '\.json$'
+      - id: end-of-file-fixer
+        files: '\.md$'
+      - id: trailing-whitespace
+        files: '\.md$'
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        files: '\.md$'
