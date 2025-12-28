@@ -15,6 +15,11 @@ configuration:
     description: >-
       Al habilitarlo, la interfaz web es accesible sin inicio de sesión. Úsalo
       solo en redes de confianza.
+  disable_ipv6:
+    name: Desactivar pila IPv6
+    description: >-
+      Cuando está habilitado (predeterminado), el complemento desactiva IPv6 y
+      obliga a los servicios a usar solo IPv4. Establécelo en false para permitir IPv6.
   clean_upgrade_dir:
     name: Limpiar directorio de actualización
     description: >-

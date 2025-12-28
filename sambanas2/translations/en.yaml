@@ -15,6 +15,11 @@ configuration:
     description: >-
       When enabled, the web interface is accessible without login. Only use this
       on trusted networks.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: Clean upgrade directory
     description: >-

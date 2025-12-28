@@ -15,6 +15,11 @@ configuration:
     description: >-
       Khi bật, giao diện web truy cập được mà không cần đăng nhập. Chỉ dùng trên
       mạng tin cậy.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: Dọn dẹp thư mục nâng cấp
     description: >-

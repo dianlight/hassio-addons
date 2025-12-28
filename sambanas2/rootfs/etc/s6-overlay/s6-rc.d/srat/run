@@ -20,8 +20,7 @@ if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
 fi
 bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
 
-exec /usr/local/bin/srat-server \
-  -port $(bashio::addon.ingress_port) \
+SRAT_ARGS="-port $(bashio::addon.ingress_port) \
   $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
   $(bashio::config.true 'leave_front_door_open' || echo " -addon") \
   -db /config/config.db3 \
@@ -32,4 +31,18 @@ exec /usr/local/bin/srat-server \
   -loglevel $(bashio::config 'log_level' 'info') \
   -update-channel $(bashio::config 'srat_update_channel' 'none') \
   -ip-address $(bashio::addon.ip_address) \
-  -upgrade-data-dir /data/upgrade
+  -upgrade-data-dir /data/upgrade"
+  
+if bashio::config.true 'disable_ipv6'; then
+  help_text=$(/usr/local/bin/srat-server --help 2>&1 || true)
+  if echo "${help_text}" | grep -q -- '--ipv4-only'; then
+    SRAT_ARGS="${SRAT_ARGS} --ipv4-only"
+  elif echo "${help_text}" | grep -q -- ' -4'; then
+    SRAT_ARGS="${SRAT_ARGS} -4"
+  else
+    bashio::log.warning "wsddn IPv4-only flag not detected; relying on IPv6 sysctl disable"
+  fi
+fi
+
+exec /usr/local/bin/srat-server \
+  ${SRAT_ARGS}

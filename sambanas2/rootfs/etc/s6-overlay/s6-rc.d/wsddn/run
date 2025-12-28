@@ -44,6 +44,17 @@ if [ -n "$INTERFACES" ]; then
   done
 fi
 
+if bashio::config.true 'disable_ipv6'; then
+  help_text=$(wsddn --help 2>&1 || true)
+  if echo "${help_text}" | grep -q -- '--ipv4-only'; then
+    WSDDN_ARGS="${WSDDN_ARGS} --ipv4-only"
+  elif echo "${help_text}" | grep -q -- ' -4'; then
+    WSDDN_ARGS="${WSDDN_ARGS} -4"
+  else
+    bashio::log.warning "wsddn IPv4-only flag not detected; relying on IPv6 sysctl disable"
+  fi
+fi
+
 # Map the add-on's log level (trace|debug|info|notice|warning|error|fatal)
 # to wsdd2's debug level flags (-W).
 # The log_level is sourced from bashio::config 'log_level' (defaults to 'info').

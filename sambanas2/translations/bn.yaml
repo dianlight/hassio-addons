@@ -15,6 +15,11 @@ configuration:
     description: >-
       সক্রিয় থাকলে ওয়েব ইন্টারফেস লগইন ছাড়াই প্রবেশযোগ্য। শুধুমাত্র বিশ্বস্ত
       নেটওয়ার্কে ব্যবহার করুন।
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: আপগ্রেড ডিরেক্টরি পরিষ্কার করুন
     description: >-

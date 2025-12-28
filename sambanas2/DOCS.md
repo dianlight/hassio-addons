@@ -114,6 +114,7 @@ Example configuration with all available options and their default values:
 ```yaml
 srat_update_channel: none
 log_level: warning
+disable_ipv6: true
 leave_front_door_open: false
 ```
 
@@ -131,6 +132,14 @@ The `log_level` option controls the verbosity of log output from the add-on, whi
 - **fatal**: Shows critical failures that make the add-on unusable.
 
 Each level automatically includes log messages from more severe levels (e.g., `debug` also shows `info` messages). The default setting is `info`, which is recommended unless you are troubleshooting.
+
+
+### Option: `disable_ipv6` (optional)
+
+Controls whether the add-on uses IPv6 networking.
+
+- `true` (default): Disables the IPv6 stack inside the add-on and forces Samba services to bind only to IPv4. Recommended if you don't explicitly need IPv6.
+- `false`: Leaves IPv6 enabled for environments that require dual-stack access.
 
 
 ### Option: `srat_update_channel` (optional) **_Experimental_**

@@ -14,6 +14,11 @@ configuration:
     name: 停用 SRAT 驗證
     description: >-
       啟用後，網頁介面可在無登入的情況下使用。僅在可信任的網路中使用。
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: 清理升級目錄
     description: >-

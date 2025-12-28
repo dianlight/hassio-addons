@@ -15,6 +15,11 @@ configuration:
     description: >-
       Când este activată, interfața web este accesibilă fără autentificare.
       Folosiți doar în rețele de încredere.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: Curățați directorul de actualizare
     description: >-

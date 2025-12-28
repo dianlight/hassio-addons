@@ -15,6 +15,11 @@ configuration:
     description: >-
       Wanneer geaktiveer, is die webkoppelvlak toeganklik sonder aanmelding.
       Gebruik dit net op vertroude netwerke.
+    disable_ipv6:
+      name: Skakel IPv6-stapel af
+      description: >-
+        Wanneer geaktiveer (standaard), deaktiveer die byvoegsel IPv6 en
+        dwing dienste om net aan IPv4 te bind. Stel op vals om IPv6 toe te laat.
   clean_upgrade_dir:
     name: Maak opgradering gids skoon
     description: >-

@@ -15,6 +15,11 @@ configuration:
     description: >-
       Po zapnutí je webové rozhranie dostupné bez prihlásenia. Používajte len v
       dôveryhodných sieťach.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: Vyčistiť zložku aktualizácií
     description: >-

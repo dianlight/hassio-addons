@@ -15,6 +15,11 @@ configuration:
     description: >-
       عند التمكين يصبح الواجهة متاحة بدون تسجيل دخول. استخدمه فقط في الشبكات
       الموثوقة.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: تنظيف دليل الترقية
     description: >-

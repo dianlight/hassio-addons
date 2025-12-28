@@ -15,6 +15,11 @@ configuration:
     description: >-
       활성화하면 로그인 없이 웹 인터페이스에 접근할 수 있습니다. 신뢰할 수
       있는 네트워크에서만 사용하세요.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: 업그레이드 디렉토리 정리
     description: >-

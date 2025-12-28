@@ -15,6 +15,11 @@ configuration:
     description: >-
       Une fois activée, l'interface web est accessible sans connexion. À utiliser
       uniquement sur des réseaux de confiance.
+  disable_ipv6:
+    name: Désactiver la pile IPv6
+    description: >-
+      Lorsque activé (par défaut), le module désactive IPv6 et force les services
+      à utiliser uniquement IPv4. Mettez false pour autoriser IPv6.
   clean_upgrade_dir:
     name: Nettoyer le répertoire de mise à jour
     description: >-

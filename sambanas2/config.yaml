@@ -45,13 +45,15 @@ options:
   srat_update_channel: none
   log_level: warning
   leave_front_door_open: false
+  disable_ipv6: true
   clean_upgrade_dir: false
 schema:
   srat_update_channel: list(none|release|prerelease|develop)?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
+  disable_ipv6: bool?
   clean_upgrade_dir: bool?
-#image: dianlight/{arch}-addon-sambanas2
+image: dianlight/{arch}-addon-sambanas2
 udev: true
 #usb: true
 host_dbus: true

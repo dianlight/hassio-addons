@@ -15,6 +15,11 @@ configuration:
     description: >-
       Wenn aktiviert, ist die Weboberfläche ohne Anmeldung zugänglich. Nur in
       vertrauenswürdigen Netzwerken verwenden.
+  disable_ipv6:
+    name: IPv6-Stack deaktivieren
+    description: >-
+      Wenn aktiviert (Standard), deaktiviert das Add-on IPv6 und zwingt Dienste,
+      nur IPv4 zu verwenden. Auf false setzen, um IPv6 zu erlauben.
   clean_upgrade_dir:
     name: Upgrade-Verzeichnis bereinigen
     description: >-

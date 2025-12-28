@@ -22,10 +22,10 @@
 - Brand New icon and logo AI Generated
 - New option `srat_update_channel`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
 - New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
-- ~~Announce Samba service via Avahi/mDNS for better discovery~~ Remove for side effects
-- Support ~~WSDD and WSDD2~~ Wsdd-native for better Windows Discovery (Remove WSDD due to instability)
+- Support Wsdd-native for better Windows Discovery (Remove WSDD and WSDD2 due to instability)
 - Automatic modprobe for all kernel fs
 - Add ability to use Custom Samba Version - Custom Build Only 
+- Add new IPv6 disable option to disable IPv6 stack inside the addon (See [DOCS](DOCS.md) )
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon

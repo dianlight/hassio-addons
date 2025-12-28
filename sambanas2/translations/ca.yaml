@@ -15,6 +15,11 @@ configuration:
     description: >-
       Quan està activat, la interfície web és accessible sense iniciar sessió.
       Fes servir només en xarxes de confiança.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
   clean_upgrade_dir:
     name: Neteja el directori d'actualització
     description: >-
