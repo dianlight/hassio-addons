@@ -9,8 +9,8 @@ export ADDON_VERSION=$(bashio::addon.version)
 
 ipaddress=$(bashio::addon.ip_address)
 
-bashio::log.info "Wait Samba Server to going up..(max 60s)"
-bashio::net.wait_for 445 ${ipaddress/\/*/} 60
+#bashio::log.info "Wait Samba Server to going up..(max 60s)"
+#bashio::net.wait_for 445 ${ipaddress/\/*/} 60
 
 # Read hostname from API or setting default "hassio"
 HOSTNAME=$(bashio::info.hostname)
