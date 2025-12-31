@@ -1,0 +1,29 @@
+---
+configuration:
+  srat_update_channel:
+    name: ערוץ עדכוני SRAT
+    description: >-
+      בחרו כיצד SRAT (Samba REST Administration Tool) מעדכן את עצמו: none,
+      release, prerelease או develop.
+  log_level:
+    name: רמת יומן
+    description: >-
+      קבעו את רמת הפירוט של יומני ההרחבה (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: השבת אימות SRAT
+    description: >-
+      כאשר מופעל, הממשק זמין ללא התחברות. השתמשו רק ברשתות מהימנות.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: נקה ספריית שדרוגים
+    description: >-
+      מסיר את כל עדכוני הבינאריים של SRAT שהורדו מספריית הנתונים של ההרחבה.
+      השתמש רק במצבי חירום לניקוי קבצי עדכון פגומים. פעולה זו קבועה ולא ניתנת
+      לביטול.
+network:
+  3000/tcp: ממשק ווב (ללא Home Assistant)

@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT 更新チャネル
+    description: >-
+      SRAT (Samba REST Administration Tool) がどのように更新されるかを選択します:
+      none、release、prerelease、develop。
+  log_level:
+    name: ログレベル
+    description: >-
+      アドオンのログ詳細度を設定します (trace, debug, info, notice, warning,
+      error, fatal)。
+  leave_front_door_open:
+    name: SRAT 認証を無効化
+    description: >-
+      有効にすると、ログインなしで Web インターフェースにアクセスできます。
+      信頼できるネットワークでのみ使用してください。
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: アップグレードディレクトリをクリーン
+    description: >-
+      アドオンのデータディレクトリからダウンロードされたすべてのSRAT バイナリ
+      アップデートを削除します。破損したアップデートファイルをクリアする緊急
+      時にのみ使用してください。この操作は永久的で元に戻せません。
+network:
+  3000/tcp: Web インターフェース (Home Assistant なしで使用)

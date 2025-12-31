@@ -1,0 +1,102 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Initialize Samba SSL Certificates
+# Generates server.key and server.cert for Samba with the correct FQDN
+# Certificates are stored in /config and only regenerated if missing or invalid
+# ==============================================================================
+
+CERT_DIR="/config"
+KEY_FILE="${CERT_DIR}/server.key"
+CERT_FILE="${CERT_DIR}/server.cert"
+
+# Read hostname from API or use default
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
+fi
+
+# Try to get the domain from supervisor
+#DOMAIN=$(bashio::host.domain)
+#if bashio::var.is_empty "${DOMAIN}" || [ "${DOMAIN}" == "null" ]; then
+  DOMAIN="local"
+#fi
+
+FQDN="${HOSTNAME}.${DOMAIN}"
+bashio::log.info "Using FQDN: ${FQDN}"
+
+# Function to check if certificate is valid
+check_certificate_validity() {
+  local cert_file=$1
+  local expected_fqdn=$2
+  
+  # Check if certificate file exists
+  if [ ! -f "${cert_file}" ]; then
+    bashio::log.debug "Certificate file does not exist"
+    return 1
+  fi
+  
+  # Check if certificate is expired
+  if ! openssl x509 -checkend 86400 -noout -in "${cert_file}" 2>/dev/null; then
+    bashio::log.info "Certificate is expired or will expire within 24 hours"
+    return 1
+  fi
+  
+  # Check if certificate matches the expected FQDN
+  local cert_cn=$(openssl x509 -noout -subject -in "${cert_file}" 2>/dev/null | sed -n 's/.*CN=\(.*\)/\1/p')
+  if [ "${cert_cn}" != "${expected_fqdn}" ]; then
+    bashio::log.info "Certificate CN '${cert_cn}' does not match expected FQDN '${expected_fqdn}'"
+    return 1
+  fi
+  
+  bashio::log.debug "Certificate is valid and matches FQDN"
+  return 0
+}
+
+# Check if both key and certificate exist and are valid
+if [ -f "${KEY_FILE}" ] && [ -f "${CERT_FILE}" ]; then
+  if check_certificate_validity "${CERT_FILE}" "${FQDN}"; then
+    bashio::log.info "SSL certificates are valid and up to date"
+    exit 0
+  else
+    bashio::log.info "SSL certificates need to be regenerated"
+  fi
+else
+  bashio::log.info "SSL certificates not found, generating new ones"
+fi
+
+# Generate new private key and self-signed certificate
+bashio::log.info "Generating SSL certificate for ${FQDN}"
+
+# Generate private key
+openssl genrsa -out "${KEY_FILE}" 2048 2>/dev/null
+if [ $? -ne 0 ]; then
+  bashio::log.error "Failed to generate private key"
+  exit 1
+fi
+
+# Generate self-signed certificate valid for 10 years
+openssl req -new -x509 -key "${KEY_FILE}" -out "${CERT_FILE}" -days 3650 \
+  -subj "/C=US/ST=State/L=City/O=HomeAssistant/OU=SambaNAS/CN=${FQDN}" \
+  -addext "subjectAltName=DNS:${FQDN},DNS:${HOSTNAME},DNS:localhost" 2>/dev/null
+
+if [ $? -ne 0 ]; then
+  bashio::log.error "Failed to generate certificate"
+  rm -f "${KEY_FILE}"
+  exit 1
+fi
+
+# Check if certificate generation was successful
+openssl x509 -noout -subject -in "${CERT_FILE}"
+
+# Set appropriate permissions
+chmod 600 "${KEY_FILE}"
+chmod 644 "${CERT_FILE}"
+
+bashio::log.info "SSL certificates generated successfully"
+bashio::log.info "Certificate: ${CERT_FILE}"
+bashio::log.info "Private key: ${KEY_FILE}"
+
+exit 0

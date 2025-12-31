@@ -1,0 +1,48 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start srat service
+# ==============================================================================
+export HOSTNAME
+export ADDON_VERSION=$(bashio::addon.version)
+
+ipaddress=$(bashio::addon.ip_address)
+
+bashio::log.info "Wait Samba Server to going up..(max 60s)"
+bashio::net.wait_for 445 ${ipaddress/\/*/} 60
+
+# Read hostname from API or setting default "hassio"
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
+fi
+bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
+
+SRAT_ARGS="-port $(bashio::addon.ingress_port) \
+  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
+  $(bashio::config.true 'leave_front_door_open' || echo " -addon") \
+  -db /config/config.db3 \
+  -out /etc/samba/smb.conf \
+  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
+  $(bashio::config.equals 'srat_update_channel' 'develop' && echo " -update-file-path /config/upgrade/srat-server") \
+  -loglevel $(bashio::config 'log_level' 'info') \
+  -update-channel $(bashio::config 'srat_update_channel' 'none') \
+  -ip-address $(bashio::addon.ip_address) \
+  -upgrade-data-dir /data/upgrade"
+  
+if bashio::config.true 'disable_ipv6'; then
+  help_text=$(/usr/local/bin/srat-server --help 2>&1 || true)
+  if echo "${help_text}" | grep -q -- '--ipv4-only'; then
+    SRAT_ARGS="${SRAT_ARGS} --ipv4-only"
+  elif echo "${help_text}" | grep -q -- ' -4'; then
+    SRAT_ARGS="${SRAT_ARGS} -4"
+  else
+    bashio::log.warning "wsddn IPv4-only flag not detected; relying on IPv6 sysctl disable"
+  fi
+fi
+
+exec /usr/local/bin/srat-server \
+  ${SRAT_ARGS}

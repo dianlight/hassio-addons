@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT frissítési csatorna
+    description: >-
+      Válassza ki, hogyan frissüljön a SRAT (Samba REST Administration Tool):
+      none, release, prerelease vagy develop.
+  log_level:
+    name: Naplózási szint
+    description: >-
+      Állítsa be a kiegészítő naplóinak részletességét (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: SRAT-hitelesítés kikapcsolása
+    description: >-
+      Engedélyezéskor a webes felület bejelentkezés nélkül elérhető. Csak
+      megbízható hálózatokon használja.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Frissítési könyvtár törlése
+    description: >-
+      Eltávolítja az összes letöltött SRAT bináris frissítést a kiegészítő
+      adatkönyvtárából. Csak vészhelyzetben használja a sérült frissítési fájlok
+      törléséhez. Ez a művelet végleges és nem vonható vissza.
+network:
+  3000/tcp: Webes felület (Home Assistant nélkül)
