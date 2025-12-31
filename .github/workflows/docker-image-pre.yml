@@ -85,23 +85,43 @@ jobs:
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }}
         id: version_set
-        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
-          path: version
-          set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }} # Use the fully constructed version string
-          get: true
-          # append: true is removed as 'set' now provides the complete desired value
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml"
+          NEW_VERSION="${{ steps.prepare_name_and_version_suffix.outputs.FINAL_VERSION_TO_SET }}"
+          
+          # Get current value before modification
+          OLD_VERSION=$(yq '.version' "$CONFIG_FILE")
+          echo "value_old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+          
+          # Set new version
+          yq -i ".version = \"$NEW_VERSION\"" "$CONFIG_FILE"
+          
+          # Get new value after modification
+          NEW_VALUE=$(yq '.version' "$CONFIG_FILE")
+          echo "value_new=$NEW_VALUE" >> "$GITHUB_OUTPUT"
+          
+          echo "Updated version from '$OLD_VERSION' to '$NEW_VALUE'"
 
       - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}
         id: betaname_set
-        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml # File path remains the same
-          path: name
-          set: ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }} # Set the prepared name
-          get: true
-          # append: true is removed because 'set' is now providing the complete, desired value
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml"
+          NEW_NAME="${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}"
+          
+          # Get current value before modification
+          OLD_NAME=$(yq '.name' "$CONFIG_FILE")
+          echo "value_old=$OLD_NAME" >> "$GITHUB_OUTPUT"
+          
+          # Set new name
+          yq -i ".name = \"$NEW_NAME\"" "$CONFIG_FILE"
+          
+          # Get new value after modification
+          NEW_VALUE=$(yq '.name' "$CONFIG_FILE")
+          echo "value_new=$NEW_VALUE" >> "$GITHUB_OUTPUT"
+          
+          echo "Updated name from '$OLD_NAME' to '$NEW_VALUE'"
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         # uses: thzois/autobot@v1.0.3 # Replaced with gh CLI commands
