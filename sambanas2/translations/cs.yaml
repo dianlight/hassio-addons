@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: Kanál aktualizací SRAT
+    description: >-
+      Zvolte, jak se SRAT (Samba REST Administration Tool) aktualizuje: none,
+      release, prerelease nebo develop.
+  log_level:
+    name: Úroveň logování
+    description: >-
+      Nastavte podrobnost logů doplňku (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Vypnout ověřování SRAT
+    description: >-
+      Při povolení je webové rozhraní dostupné bez přihlášení. Používejte jen v
+      důvěryhodných sítích.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Vyčistit složku aktualizací
+    description: >-
+      Odebere všechny stažené binární aktualizace SRAT ze složky dat doplňku.
+      Používejte pouze v nouzových situacích k vyčištění poškozených aktualizačních
+      souborů. Tato akce je trvalá a nelze ji vrátit zpět.
+network:
+  3000/tcp: Webové rozhraní (bez Home Assistant)

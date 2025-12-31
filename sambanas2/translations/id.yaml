@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: Saluran pembaruan SRAT
+    description: >-
+      Pilih bagaimana SRAT (Samba REST Administration Tool) memperbarui dirinya:
+      none, release, prerelease, atau develop.
+  log_level:
+    name: Tingkat log
+    description: >-
+      Atur tingkat verbositas log add-on (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Nonaktifkan autentikasi SRAT
+    description: >-
+      Saat diaktifkan, antarmuka web bisa diakses tanpa login. Gunakan hanya di
+      jaringan tepercaya.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Bersihkan direktori pembaruan
+    description: >-
+      Menghapus semua pembaruan biner SRAT yang diunduh dari direktori data add-on.
+      Gunakan hanya dalam situasi darurat untuk membersihkan file pembaruan yang
+      rusak. Tindakan ini permanen dan tidak dapat dibatalkan.
+network:
+  3000/tcp: Antarmuka web (tanpa Home Assistant)

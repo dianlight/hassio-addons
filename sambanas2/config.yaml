@@ -1,0 +1,76 @@
+---
+name: Samba NAS2
+version: 2025.12.0
+slug: sambanas2
+description: Expose Home Assistant disc with SMB/CIFS
+url: https://github.com/dianlight/hassio-addons/tree/master/sambanas2
+arch:
+  - aarch64
+  - amd64
+startup: application
+#webui: http://[HOST]:[PORT:3000]/static/index.html
+#watchdog: http://[HOST]:[PORT:3000]/api/status   # Tema porta dinamica
+watchdog: tcp://[HOST]:[PORT:445]
+ports:
+  3000/tcp: null
+  3702/udp: 3702
+  5357/tcp: 5357
+ports_description:
+  3000/tcp: Web interface
+  3702/udp: WS Discovery (ZeroConf)
+  5357/tcp: Wsdapi interface
+ingress: true
+ingress_port: 0 # For add-ons on host network
+ingress_entry: index.html
+ingress_stream: true
+panel_icon: mdi:folder-network
+panel_title: Samba NAS2
+panel_admin: true
+boot: auto
+init: false
+hassio_api: true
+hassio_role: admin
+host_network: true
+map:
+  - homeassistant_config:rw
+  - addon_config:rw
+  - ssl:rw
+  - all_addon_configs:rw
+  - addons:rw
+  - share:rw
+  - backup:rw
+  - media:rw
+options:
+  srat_update_channel: none
+  log_level: warning
+  leave_front_door_open: false
+  disable_ipv6: true
+  clean_upgrade_dir: false
+schema:
+  srat_update_channel: list(none|release|prerelease)?
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
+  leave_front_door_open: bool?
+  disable_ipv6: bool?
+  clean_upgrade_dir: bool?
+image: dianlight/{arch}-addon-sambanas2
+udev: true
+#usb: true
+host_dbus: true
+kernel_modules: true
+privileged:
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - SYS_RESOURCE
+  - SYS_MODULE
+full_access: true
+devicetree: false
+apparmor: true
+host_ipc: true
+advanced: true
+homeassistant: 2025.8.0
+backup: hot
+auth_api: true
+homeassistant_api: true
+timeout: 120
+#breaking_versions:
+#  - 12.5.0-nas # Version with SRAT enabled as first source of configuration

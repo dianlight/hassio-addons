@@ -1,0 +1,11 @@
+---
+build_from:
+  aarch64: ghcr.io/hassio-addons/base:19.0.0
+  amd64: ghcr.io/hassio-addons/base:19.0.0
+#cosign:
+#  #base_identity: https://github.com/home-assistant/builder/.*
+#  identity: https://github.com/dianlight/hassio-addons/.*
+args:
+  HA_CLI_VERSION: "4.44.0"
+  SRAT_VERSION: "2025.12.0-dev.10"
+  SAMBA_VERSION: "distribution" #"4.23.1" # Use "distribution" to use precompiled packages

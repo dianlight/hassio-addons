@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT uuenduskanal
+    description: >-
+      Vali, kuidas SRAT (Samba REST Administration Tool) end uuendab: none,
+      release, prerelease või develop.
+  log_level:
+    name: Logi tase
+    description: >-
+      Määra lisandmooduli logide detailsus (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Keela SRAT autentimine
+    description: >-
+      Kui lubatud, on veebiliides ligipääsetav ilma sisselogimiseta. Kasuta ainult
+      usaldusväärsetes võrkudes.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Puhasta uuenduskataloog
+    description: >-
+      Eemaldab kõik allalaaditud SRAT binaarsed uuendused lisandmooduli andmekataloogi.
+      Kasuta ainult hädaolukordades, et puhastada rikutud uuendusfaile. See toiming
+      on püsiv ja seda ei saa tagasi võtta.
+network:
+  3000/tcp: Veebiliides (ilma Home Assistantita)

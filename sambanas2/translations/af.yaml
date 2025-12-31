@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT-bywerkingskanaal
+    description: >-
+      Kies hoe SRAT (Samba REST Administration Tool) homself bywerk: none,
+      release, prerelease of develop.
+  log_level:
+    name: Logvlak
+    description: >-
+      Stel die geselsheid van die byvoegsel se logs in (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: Skakel SRAT-verifikasie af
+    description: >-
+      Wanneer geaktiveer, is die webkoppelvlak toeganklik sonder aanmelding.
+      Gebruik dit net op vertroude netwerke.
+    disable_ipv6:
+      name: Skakel IPv6-stapel af
+      description: >-
+        Wanneer geaktiveer (standaard), deaktiveer die byvoegsel IPv6 en
+        dwing dienste om net aan IPv4 te bind. Stel op vals om IPv6 toe te laat.
+  clean_upgrade_dir:
+    name: Maak opgradering gids skoon
+    description: >-
+      Verwyder alle afgelaaide SRAT binêre opdaterings uit die byvoegsel se data
+      gids. Gebruik slegs in noodgevalle om korrupte opdateringslêers skoon te maak.
+      Hierdie aksie is permanent en kan nie ongedaan gemaak word nie.
+network:
+  3000/tcp: Webkoppelvlak (sonder Home Assistant)

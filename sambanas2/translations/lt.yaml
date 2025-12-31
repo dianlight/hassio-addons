@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT atnaujinimų kanalas
+    description: >-
+      Pasirinkite, kaip SRAT (Samba REST Administration Tool) atnaujinamas:
+      none, release, prerelease arba develop.
+  log_level:
+    name: Žurnalo lygis
+    description: >-
+      Nustatykite priedo žurnalų išsamumą (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Išjungti SRAT autentifikavimą
+    description: >-
+      Įjungus, žiniatinklio sąsaja prieinama be prisijungimo. Naudokite tik
+      patikimuose tinkluose.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Išvalyti atnaujinimo katalogą
+    description: >-
+      Pašalina visus atsisiųstus SRAT dvejetainių failų atnaujinimus iš priedo
+      duomenų katalogo. Naudokite tik ekstremaliose situacijose, kad išvalytumėte
+      sugadintus atnaujinimo failus. Šis veiksmas yra galutinis ir negalimas atšaukti.
+network:
+  3000/tcp: Žiniatinklio sąsaja (be Home Assistant)

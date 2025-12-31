@@ -1,0 +1,30 @@
+---
+configuration:
+  srat_update_channel:
+    name: Kênh cập nhật SRAT
+    description: >-
+      Chọn cách SRAT (Samba REST Administration Tool) tự cập nhật: none,
+      release, prerelease hoặc develop.
+  log_level:
+    name: Mức ghi log
+    description: >-
+      Đặt độ chi tiết log của add-on (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Tắt xác thực SRAT
+    description: >-
+      Khi bật, giao diện web truy cập được mà không cần đăng nhập. Chỉ dùng trên
+      mạng tin cậy.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Dọn dẹp thư mục nâng cấp
+    description: >-
+      Xóa tất cả các bản cập nhật nhị phân SRAT đã tải xuống khỏi thư mục dữ liệu
+      của add-on. Chỉ sử dụng trong trường hợp khẩn cấp để xóa các tệp cập nhật bị
+      hỏng. Hành động này là vĩnh viễn và không thể hoàn tác.
+network:
+  3000/tcp: Giao diện web (không cần Home Assistant)
