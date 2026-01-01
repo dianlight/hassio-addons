@@ -1,0 +1,15 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start socat service (openport)
+# ==============================================================================
+
+if bashio::var.has_value "$(bashio::addon.port 3000)"; then
+  bashio::log.warning "$(figlet -p -f big -w 600 'ALLERT!')"
+  bashio::log.warning "Addon OPEN ACCESS PORT port is set to  $(bashio::addon.port 3000)->$(bashio::addon.ingress_port)"
+  exec socat TCP-LISTEN:$(bashio::addon.port 3000),fork TCP:127.0.0.1:$(bashio::addon.ingress_port)
+else
+  exec sleep infinity
+fi
+

@@ -1,0 +1,21 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start nmbd service
+# ==============================================================================
+# Add QUIC library to library path if it exists
+if [ -d "/usr/local/quic/lib" ]; then
+  export LD_LIBRARY_PATH="/usr/local/quic/lib:${LD_LIBRARY_PATH}"
+fi
+
+export PATH="/usr/local/samba/bin:/usr/local/samba/sbin:$PATH"
+
+# -c: Check if NetBIOS name resolution is responding
+exec s6-notifyoncheck -c "nmblookup -A 127.0.0.1" \
+    /usr/sbin/nmbd -F --no-process-group --debug-stdout <&-
+
+#exec nmbd \
+#  --foreground \
+#  --debug-stdout \
+#  --no-process-group

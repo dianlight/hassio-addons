@@ -1,0 +1,11 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Take down the S6 supervision tree based on service exit code
+# ==============================================================================
+if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
+  bashio::log.warning "avahi crashed, halting add-on"
+  exec /run/s6/basedir/bin/halt
+fi
+
+bashio::log.info "avahi stopped"
