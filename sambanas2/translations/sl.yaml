@@ -5,6 +5,12 @@ configuration:
     description: >-
       Izberite, kako se SRAT (Samba REST Administration Tool) posodablja: none,
       release, prerelease ali develop.
+  auto_update:
+    name: Samodejne posodobitve
+    description: >-
+      Samodejno prenesi in namesti posodobitve SRAT, ko so na voljo na izbranem
+      posodobitvenim kanalu. Zahteva, da je srat_update_channel nastavljen na
+      kaj drugega kot 'none'.
   log_level:
     name: Raven beleženja
     description: >-
@@ -16,10 +22,10 @@ configuration:
       Ko je omogočeno, je spletni vmesnik dostopen brez prijave. Uporabljajte le
       v zaupanja vrednih omrežjih.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: Onemogoči IPv6 sklad
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Ko je omogočeno (privzeto), dodatek onemogoči IPv6 in prisili storitve,
+      da se vežejo samo na IPv4. Nastavite na false za omogočanje IPv6.
   clean_upgrade_dir:
     name: Počisti imenik za nadgradnjo
     description: >-

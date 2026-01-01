@@ -5,6 +5,12 @@ configuration:
     description: >-
       Изберете как SRAT (Samba REST Administration Tool) се обновява: none,
       release, prerelease или develop.
+  auto_update:
+    name: Автоматични актуализации
+    description: >-
+      Автоматично изтегляне и инсталиране на SRAT актуализации, когато са налични
+      в избрания канал за актуализации. Изисква srat_update_channel да е зададен
+      на нещо различно от 'none'.
   log_level:
     name: Ниво на журналите
     description: >-
@@ -16,10 +22,10 @@ configuration:
       При включване уеб интерфейсът е достъпен без вход. Използвайте само в
       доверени мрежи.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: Деактивиране на IPv6 стек
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Когато е активирано (по подразбиране), добавката деактивира IPv6 и принудава
+      услугите да се свързват само с IPv4. Задайте false, за да разрешите IPv6.
   clean_upgrade_dir:
     name: Изчисти директорията за актуализация
     description: >-

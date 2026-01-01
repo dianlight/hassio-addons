@@ -5,6 +5,12 @@ configuration:
     description: >-
       Elige cómo se actualiza SRAT (Samba REST Administration Tool): none,
       release, prerelease o develop.
+  auto_update:
+    name: Actualizaciones automáticas
+    description: >-
+      Descargar e instalar automáticamente las actualizaciones de SRAT cuando
+      estén disponibles en el canal de actualización seleccionado. Requiere que
+      srat_update_channel esté configurado en algo distinto a 'none'.
   log_level:
     name: Nivel de registro
     description: >-

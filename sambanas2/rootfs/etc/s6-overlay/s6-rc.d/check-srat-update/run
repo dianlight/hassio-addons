@@ -125,7 +125,7 @@ fi
 
 if bashio::config.has_value 'srat_update_channel'; then
   srat_channel_value=$(bashio::config 'srat_update_channel')
-  if [[ "${srat_channel_value}" != "none" ]]; then
+  if [[ "${srat_channel_value}" != "none" ]] && bashio::config.true 'auto_update'; then
     # Determine upgrade directory based on channel
     if [[ "${srat_channel_value}" == "develop" ]]; then
       upgrade_dir="/config/upgrade"

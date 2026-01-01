@@ -5,6 +5,12 @@ configuration:
     description: >-
       Kies hoe SRAT (Samba REST Administration Tool) homself bywerk: none,
       release, prerelease of develop.
+  auto_update:
+    name: Outomatiese bywerkings
+    description: >-
+      Laai outomaties SRAT-bywerkings af en installeer dit wanneer beskikbaar
+      op die gekose bywerkingskanaal. Vereis dat srat_update_channel ingestel
+      word op iets anders as 'none'.
   log_level:
     name: Logvlak
     description: >-
@@ -15,11 +21,11 @@ configuration:
     description: >-
       Wanneer geaktiveer, is die webkoppelvlak toeganklik sonder aanmelding.
       Gebruik dit net op vertroude netwerke.
-    disable_ipv6:
-      name: Skakel IPv6-stapel af
-      description: >-
-        Wanneer geaktiveer (standaard), deaktiveer die byvoegsel IPv6 en
-        dwing dienste om net aan IPv4 te bind. Stel op vals om IPv6 toe te laat.
+  disable_ipv6:
+    name: Deaktiveer IPv6-stapel
+    description: >-
+      Wanneer geaktiveer (verstek), deaktiveer die byvoegsel IPv6 en dwing dienste
+      om slegs aan IPv4 te bind. Stel op vals om IPv6 toe te laat.
   clean_upgrade_dir:
     name: Maak opgradering gids skoon
     description: >-

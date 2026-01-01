@@ -5,6 +5,11 @@ configuration:
     description: >-
       בחרו כיצד SRAT (Samba REST Administration Tool) מעדכן את עצמו: none,
       release, prerelease או develop.
+  auto_update:
+    name: עדכונים אוטומטיים
+    description: >-
+      הורדה והתקנה אוטומטית של עדכוני SRAT כאשר זמינים בערוץ העדכונים הנבחר.
+      דורש הגדרת srat_update_channel למשהו שונה מ-'none'.
   log_level:
     name: רמת יומן
     description: >-
@@ -15,10 +20,10 @@ configuration:
     description: >-
       כאשר מופעל, הממשק זמין ללא התחברות. השתמשו רק ברשתות מהימנות.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: השבת ערימת IPv6
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      כאשר מופעל (ברירת מחדל), התוסף משבית את IPv6 ומאלץ שירותים להתחבר רק ל-IPv4.
+      הגדר ל-false כדי לאפשר IPv6.
   clean_upgrade_dir:
     name: נקה ספריית שדרוגים
     description: >-

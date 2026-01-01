@@ -5,6 +5,12 @@ configuration:
     description: >-
       Válassza ki, hogyan frissüljön a SRAT (Samba REST Administration Tool):
       none, release, prerelease vagy develop.
+  auto_update:
+    name: Automatikus frissítések
+    description: >-
+      SRAT frissítések automatikus letöltése és telepítése, ha elérhetők a
+      kiválasztott frissítési csatornán. Megköveteli, hogy a srat_update_channel
+      a 'none'-tól eltérő értékre legyen állítva.
   log_level:
     name: Naplózási szint
     description: >-
@@ -16,10 +22,11 @@ configuration:
       Engedélyezéskor a webes felület bejelentkezés nélkül elérhető. Csak
       megbízható hálózatokon használja.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: IPv6 verem letiltása
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Amikor engedélyezett (alapértelmezett), a bővítmény letiltja az IPv6-ot és
+      a szolgáltatásokat arra kényszeríti, hogy csak IPv4-hez kötődjenek. Állítsa
+      false-ra az IPv6 engedélyezéséhez.
   clean_upgrade_dir:
     name: Frissítési könyvtár törlése
     description: >-

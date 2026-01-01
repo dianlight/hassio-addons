@@ -5,6 +5,12 @@ configuration:
     description: >-
       选择 SRAT (Samba REST Administration Tool) 的更新方式：none、release、
       prerelease 或 develop。
+  auto_update:
+    name: Automatic updates
+    description: >-
+      Automatically download and install SRAT updates when available on the
+      selected update channel. Requires srat_update_channel to be set to
+      something other than 'none'.
   log_level:
     name: 日志级别
     description: >-
@@ -15,10 +21,9 @@ configuration:
     description: >-
       启用后，网页界面无需登录即可访问。仅在可信网络中使用。
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: 禁用 IPv6 堆栈
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      启用时（默认），插件将禁用 IPv6 并强制服务仅绑定到 IPv4。设置为 false 以允许 IPv6。
   clean_upgrade_dir:
     name: 清理升级目录
     description: >-

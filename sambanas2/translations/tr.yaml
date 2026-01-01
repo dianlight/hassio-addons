@@ -5,6 +5,12 @@ configuration:
     description: >-
       SRAT (Samba REST Administration Tool) nasıl güncellenecek: none, release,
       prerelease veya develop.
+  auto_update:
+    name: Automatic updates
+    description: >-
+      Automatically download and install SRAT updates when available on the
+      selected update channel. Requires srat_update_channel to be set to
+      something other than 'none'.
   log_level:
     name: Günlük seviyesi
     description: >-
@@ -16,10 +22,10 @@ configuration:
       Etkinleştirildiğinde web arayüzüne giriş yapmadan erişilebilir. Yalnızca
       güvenilir ağlarda kullanın.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: IPv6 yığınını devre dışı bırak
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Etkinleştirildiğinde (varsayılan), eklenti IPv6'yı devre dışı bırakır ve
+      hizmetleri yalnızca IPv4'e bağlanmaya zorlar. IPv6'ya izin vermek için false olarak ayarlayın.
   clean_upgrade_dir:
     name: Güncelleme dizinini temizle
     description: >-

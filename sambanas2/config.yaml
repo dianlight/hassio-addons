@@ -43,12 +43,14 @@ map:
   - media:rw
 options:
   srat_update_channel: none
+  auto_update: true
   log_level: warning
   leave_front_door_open: false
   disable_ipv6: true
   clean_upgrade_dir: false
 schema:
   srat_update_channel: list(none|release|prerelease|develop)?
+  auto_update: bool?
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   leave_front_door_open: bool?
   disable_ipv6: bool?

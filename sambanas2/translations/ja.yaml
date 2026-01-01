@@ -5,6 +5,11 @@ configuration:
     description: >-
       SRAT (Samba REST Administration Tool) がどのように更新されるかを選択します:
       none、release、prerelease、develop。
+  auto_update:
+    name: 自動更新
+    description: >-
+      選択した更新チャネルで利用可能な場合、SRAT の更新を自動的にダウンロードして
+      インストールします。srat_update_channel を 'none' 以外に設定する必要があります。
   log_level:
     name: ログレベル
     description: >-
@@ -16,10 +21,10 @@ configuration:
       有効にすると、ログインなしで Web インターフェースにアクセスできます。
       信頼できるネットワークでのみ使用してください。
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: IPv6スタックを無効化
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      有効にすると（デフォルト）、アドオンは IPv6 を無効にし、サービスを IPv4 のみに
+      バインドするよう強制します。IPv6 を許可するには false に設定してください。
   clean_upgrade_dir:
     name: アップグレードディレクトリをクリーン
     description: >-

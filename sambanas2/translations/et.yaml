@@ -5,6 +5,12 @@ configuration:
     description: >-
       Vali, kuidas SRAT (Samba REST Administration Tool) end uuendab: none,
       release, prerelease või develop.
+  auto_update:
+    name: Automaatsed uuendused
+    description: >-
+      SRAT-i uuenduste automaatne allalaadimine ja installimine, kui need on
+      valitud uuenduskanalil saadaval. Nõuab, et srat_update_channel oleks
+      seatud millelegi muule kui 'none'.
   log_level:
     name: Logi tase
     description: >-
@@ -16,10 +22,10 @@ configuration:
       Kui lubatud, on veebiliides ligipääsetav ilma sisselogimiseta. Kasuta ainult
       usaldusväärsetes võrkudes.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: Keela IPv6 virn
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Kui lubatud (vaikimisi), keelab lisandmoodul IPv6 ja sunnib teenuseid
+      seonduma ainult IPv4-ga. Määra väärtuseks false, et lubada IPv6.
   clean_upgrade_dir:
     name: Puhasta uuenduskataloog
     description: >-

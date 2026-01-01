@@ -21,6 +21,7 @@
 ###  ✨ Features
 - Brand New icon and logo AI Generated
 - New option `srat_update_channel`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
+- New option `auto_update` (default: true) to automatically download and install SRAT updates
 - New UI (SRAT) to read and control the addon. (See [SRAT Repository](https://github.com/dianlight/srat) )
 - Support Wsdd-native for better Windows Discovery (Remove WSDD and WSDD2 due to instability)
 - Automatic modprobe for all kernel fs

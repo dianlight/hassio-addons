@@ -113,6 +113,7 @@ Example configuration with all available options and their default values:
 
 ```yaml
 srat_update_channel: none
+auto_update: true
 log_level: warning
 disable_ipv6: true
 leave_front_door_open: false
@@ -132,6 +133,18 @@ The `log_level` option controls the verbosity of log output from the add-on, whi
 - **fatal**: Shows critical failures that make the add-on unusable.
 
 Each level automatically includes log messages from more severe levels (e.g., `debug` also shows `info` messages). The default setting is `info`, which is recommended unless you are troubleshooting.
+
+
+### Option: `auto_update` (optional)
+
+Controls whether SRAT updates are automatically downloaded and installed when a new version is available on the selected update channel.
+
+- `true` (default): Automatically download and install SRAT updates when available
+- `false`: Do not automatically download or install updates (manual updates only)
+
+This option works in conjunction with `srat_update_channel`. When `auto_update` is set to `true` and `srat_update_channel` is set to anything other than `none`, the add-on will check for and automatically install updates from the selected channel. If `auto_update` is `false`, updates will not be downloaded or applied automatically, even if an update channel is configured.
+
+Defaults to `true`.
 
 
 ### Option: `disable_ipv6` (optional)

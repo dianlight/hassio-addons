@@ -5,6 +5,12 @@ configuration:
     description: >-
       Chọn cách SRAT (Samba REST Administration Tool) tự cập nhật: none,
       release, prerelease hoặc develop.
+  auto_update:
+    name: Cập nhật tự động
+    description: >-
+      Tự động tải xuống và cài đặt các bản cập nhật SRAT khi có sẵn trên kênh
+      cập nhật đã chọn. Yêu cầu srat_update_channel được đặt thành giá trị khác
+      'none'.
   log_level:
     name: Mức ghi log
     description: >-
@@ -16,10 +22,10 @@ configuration:
       Khi bật, giao diện web truy cập được mà không cần đăng nhập. Chỉ dùng trên
       mạng tin cậy.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: Vô hiệu hóa ngăn xếp IPv6
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      Khi được bật (mặc định), add-on vô hiệu hóa IPv6 và buộc các dịch vụ chỉ
+      liên kết với IPv4. Đặt thành false để cho phép IPv6.
   clean_upgrade_dir:
     name: Dọn dẹp thư mục nâng cấp
     description: >-

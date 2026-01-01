@@ -5,6 +5,11 @@ configuration:
     description: >-
       SRAT (Samba REST Administration Tool)가 업데이트되는 방식을 선택하세요:
       none, release, prerelease 또는 develop.
+  auto_update:
+    name: 자동 업데이트
+    description: >-
+      선택한 업데이트 채널에서 사용 가능한 경우 SRAT 업데이트를 자동으로 다운로드하고
+      설치합니다. srat_update_channel이 'none'이 아닌 다른 값으로 설정되어야 합니다.
   log_level:
     name: 로그 수준
     description: >-
@@ -16,10 +21,10 @@ configuration:
       활성화하면 로그인 없이 웹 인터페이스에 접근할 수 있습니다. 신뢰할 수
       있는 네트워크에서만 사용하세요.
   disable_ipv6:
-    name: Disable IPv6 stack
+    name: IPv6 스택 비활성화
     description: >-
-      When enabled (default), the add-on disables IPv6 and forces services to
-      bind to IPv4 only. Set to false to allow IPv6.
+      활성화되면(기본값), 애드온은 IPv6을 비활성화하고 서비스가 IPv4에만 바인딩되도록
+      강제합니다. IPv6을 허용하려면 false로 설정하세요.
   clean_upgrade_dir:
     name: 업그레이드 디렉토리 정리
     description: >-
