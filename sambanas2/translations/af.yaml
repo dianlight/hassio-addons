@@ -32,5 +32,14 @@ configuration:
       Verwyder alle afgelaaide SRAT binêre opdaterings uit die byvoegsel se data
       gids. Gebruik slegs in noodgevalle om korrupte opdateringslêers skoon te maak.
       Hierdie aksie is permanent en kan nie ongedaan gemaak word nie.
+  factory_reset:
+    name: Fabrieksherstel
+    description: >-
+      ⚠️ GEVAAR - DESTRUKTIEWE AKSIE ⚠️ Voer 'n volledige fabrieksherstel uit deur
+      die SQL-databasis, alle konfigurasies, instellings en opdateringleers te verwyder.
+      Dit sal permanent alle Samba-deel konfigurasies, gebruikersrekeninge, wagwoorde
+      en aangepaste instellings uitvee. Die byvoegsel sal met verstek instellings
+      herbegin. Hierdie aksie is onomkeerbaar en kan nie ongedaan gemaak word nie.
+      Gebruik met uiterste versigtigheid.
 network:
   3000/tcp: Webkoppelvlak (sonder Home Assistant)

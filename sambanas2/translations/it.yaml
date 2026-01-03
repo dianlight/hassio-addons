@@ -32,5 +32,14 @@ configuration:
       Rimuove tutti gli aggiornamenti binari SRAT scaricati dalla directory dati
       dell'add-on. Usare solo in situazioni di emergenza per eliminare file di
       aggiornamento corrotti. Questa azione è permanente e irreversibile.
+  factory_reset:
+    name: Ripristino di fabbrica
+    description: >-
+      ⚠️ PERICOLO - AZIONE DISTRUTTIVA ⚠️ Esegue un ripristino completo di fabbrica
+      eliminando il database SQL, tutte le configurazioni, le impostazioni e i file
+      di aggiornamento. Questo cancellerà permanentemente tutte le configurazioni
+      di condivisione Samba, gli account utente, le password e le impostazioni personalizzate.
+      L'add-on si riavvierà con le impostazioni predefinite. Questa azione è irreversibile
+      e non può essere annullata. Utilizzare con estrema cautela.
 network:
   3000/tcp: Interfaccia web (senza Home Assistant)

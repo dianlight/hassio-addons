@@ -32,5 +32,14 @@ configuration:
       Membuang semua kemas kini binari SRAT yang dimuat turun dari direktori data
       add-on. Gunakan hanya dalam situasi kecemasan untuk membersihkan fail kemas
       kini yang rosak. Tindakan ini kekal dan tidak boleh dibatalkan.
+  factory_reset:
+    name: Tetapan semula kilang
+    description: >-
+      ⚠️ BAHAYA - TINDAKAN PEMUSNAH ⚠️ Melakukan tetapan semula kilang lengkap
+      dengan memadam pangkalan data SQL, semua konfigurasi, tetapan dan fail kemas kini.
+      Ini akan memadam secara kekal semua konfigurasi perkongsian Samba, akaun pengguna,
+      kata laluan dan tetapan tersuai. Tambahan akan dimulakan semula dengan tetapan
+      lalai. Tindakan ini tidak boleh diterbalikkan dan tidak boleh dibatalkan. Gunakan
+      dengan berhati-hati.
 network:
   3000/tcp: Antara muka web (tanpa Home Assistant)

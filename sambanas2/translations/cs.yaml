@@ -32,5 +32,13 @@ configuration:
       Odebere všechny stažené binární aktualizace SRAT ze složky dat doplňku.
       Používejte pouze v nouzových situacích k vyčištění poškozených aktualizačních
       souborů. Tato akce je trvalá a nelze ji vrátit zpět.
+  factory_reset:
+    name: Tovární reset
+    description: >-
+      ⚠️ NEBEZPEČÍ - DESTRUKTIVNÍ AKCE ⚠️ Provádí kompletní tovární reset smazáním
+      SQL databáze, všech konfigurací, nastavení a souborů aktualizací. Tímto
+      trvale smažete všechny konfigurace sdílení Samba, uživatelské účty, hesla
+      a vlastní nastavení. Doplněk se restartuje s výchozím nastavením. Tato akce
+      je nevratná a nelze ji vrátit zpět. Používejte s maximální opatrností.
 network:
   3000/tcp: Webové rozhraní (bez Home Assistant)

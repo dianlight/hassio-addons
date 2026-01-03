@@ -32,5 +32,14 @@ configuration:
       Pašalina visus atsisiųstus SRAT dvejetainių failų atnaujinimus iš priedo
       duomenų katalogo. Naudokite tik ekstremaliose situacijose, kad išvalytumėte
       sugadintus atnaujinimo failus. Šis veiksmas yra galutinis ir negalimas atšaukti.
+  factory_reset:
+    name: Gamyklinis atstatymas
+    description: >-
+      ⚠️ PAVOJUS - NAIKINAMA VEIKLA ⚠️ Atlieka visišką gamyklinį atstatymą ištrinant
+      SQL duomenų bazę, visas konfigūracijas, nustatymus ir atnaujinimo failus.
+      Tai nuolat ištrins visas Samba bendrinimo konfigūracijas, vartotojų paskyras,
+      slaptažodžius ir pasirinktinius nustatymus. Priedas bus paleistas iš naujo su
+      numatytaisiais nustatymais. Šis veiksmas yra neatitaisomas ir negali būti
+      atliktas atšauktas. Naudokite su didelės atsargumo.
 network:
   3000/tcp: Žiniatinklio sąsaja (be Home Assistant)

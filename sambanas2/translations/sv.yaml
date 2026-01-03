@@ -32,5 +32,14 @@ configuration:
       Tar bort alla nedladdade SRAT-binära uppdateringar från tilläggets datamapp.
       Använd endast i nödsituationer för att rensa skadade uppdateringsfiler.
       Denna åtgärd är permanent och kan inte ångras.
+  factory_reset:
+    name: Fabriksåterställning
+    description: >-
+      ⚠️ FARA - DESTRUKTIV ÅTGÄRD ⚠️ Utför en fullständig fabriksåterställning
+      genom att radera SQL-databasen, alla konfigurationer, inställningar och uppdateringsfiler.
+      Detta kommer permanent radera alla Samba-delningskonfigurationer, användarkonton,
+      lösenord och anpassade inställningar. Tillägget kommer att startas om med
+      standardinställningar. Denna åtgärd är irreversibel och kan inte ångras. Använd
+      med extrem försiktighet.
 network:
   3000/tcp: Webbgränssnitt (utan Home Assistant)

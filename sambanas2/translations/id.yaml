@@ -32,5 +32,14 @@ configuration:
       Menghapus semua pembaruan biner SRAT yang diunduh dari direktori data add-on.
       Gunakan hanya dalam situasi darurat untuk membersihkan file pembaruan yang
       rusak. Tindakan ini permanen dan tidak dapat dibatalkan.
+  factory_reset:
+    name: Reset pabrik
+    description: >-
+      ⚠️ BAHAYA - TINDAKAN DESTRUKTIF ⚠️ Melakukan reset pabrik lengkap dengan
+      menghapus database SQL, semua konfigurasi, pengaturan, dan file pembaruan.
+      Ini akan menghapus secara permanen semua konfigurasi berbagi Samba, akun
+      pengguna, kata sandi, dan pengaturan khusus. Add-on akan dimulai ulang dengan
+      pengaturan default. Tindakan ini tidak dapat dibatalkan dan tidak dapat dikembalikan.
+      Gunakan dengan sangat hati-hati.
 network:
   3000/tcp: Antarmuka web (tanpa Home Assistant)

@@ -32,5 +32,14 @@ configuration:
       Poistaa kaikki ladatut SRAT-binääripäivitykset lisäosan datahakemistosta.
       Käytä vain hätätilanteissa vioittuneiden päivitystiedostojen tyhjentämiseen.
       Tämä toiminto on pysyvä eikä sitä voi peruuttaa.
+  factory_reset:
+    name: Tehdasasetusten palautus
+    description: >-
+      ⚠️ VAARA - TUHOAVA TOIMINTO ⚠️ Suorittaa täydellisen tehdasasetusten palautuksen
+      poistamalla SQL-tietokannan, kaikki määritykset, asetukset ja päivitystiedostot.
+      Tämä poistaa pysyvästi kaikki Samba-jakojen määritykset, käyttäjätilit,
+      salasanat ja mukautetut asetukset. Lisäosa käynnistyy uudelleen oletusasetuksilla.
+      Tämä toiminto on peruuttamaton eikä sitä voi kumota. Käytä äärimmäisellä
+      varovaisuudella.
 network:
   3000/tcp: Web-käyttöliittymä (ilman Home Assistantia)

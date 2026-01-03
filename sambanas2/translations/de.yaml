@@ -32,5 +32,14 @@ configuration:
       Entfernt alle heruntergeladenen SRAT-Binär-Updates aus dem Datenverzeichnis
       des Add-ons. Nur in Notfällen verwenden, um beschädigte Update-Dateien zu
       löschen. Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden.
+  factory_reset:
+    name: Werksreset
+    description: >-
+      ⚠️ GEFAHR - DESTRUKTIVE AKTION ⚠️ Führt einen vollständigen Werksreset durch,
+      indem die SQL-Datenbank, alle Konfigurationen, Einstellungen und Update-Dateien
+      gelöscht werden. Dadurch werden dauerhaft alle Samba-Freigabekonfigurationen,
+      Benutzerkonten, Passwörter und benutzerdefinierten Einstellungen gelöscht.
+      Das Add-on wird mit Standardeinstellungen neu gestartet. Diese Aktion ist
+      irreversibel und kann nicht rückgängig gemacht werden. Mit äußerster Vorsicht verwenden.
 network:
   3000/tcp: Weboberfläche (ohne Home Assistant)

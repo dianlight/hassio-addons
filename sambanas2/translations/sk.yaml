@@ -32,5 +32,13 @@ configuration:
       Odstráni všetky stiahnuté binárne aktualizácie SRAT z dátovej zložky doplnku.
       Používajte len v núdzových situáciách na vyčistenie poškodených aktualizačných
       súborov. Táto akcia je trvalá a nedá sa vrátiť späť.
+  factory_reset:
+    name: Obnova na výrobné nastavenia
+    description: >-
+      ⚠️ NEBEZPEČENSTVO - DEŠTRUKTÍVNA AKCIA ⚠️ Vykoná úplnú obnovu na výrobné
+      nastavenia odstránením SQL databázy, všetkých konfigurácií, nastavení a súborov
+      aktualizácie. Tým trvalo vymažete všetky konfigurácie zdielania Samba, užívateľské
+      účty, heslá a vlastné nastavenia. Doplnok sa reštartuje s predvolenými nastaveniami.
+      Táto akcia je nezvratná a nemôže byť vrátená. Používajte s mimoriadnou opatrnosťou.
 network:
   3000/tcp: Webové rozhranie (bez Home Assistant)

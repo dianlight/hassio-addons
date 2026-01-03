@@ -32,5 +32,15 @@ configuration:
       Elimina todas las actualizaciones binarias de SRAT descargadas del directorio
       de datos del complemento. Úsalo solo en situaciones de emergencia para limpiar
       archivos de actualización corruptos. Esta acción es permanente e irreversible.
+  factory_reset:
+    name: Restablecimiento de fábrica
+    description: >-
+      ⚠️ PELIGRO - ACCIÓN DESTRUCTIVA ⚠️ Realiza un restablecimiento completo de
+      fábrica eliminando la base de datos SQL, todas las configuraciones, ajustes
+      y archivos de actualización. Esto eliminará permanentemente todas las
+      configuraciones de recursos compartidos de Samba, cuentas de usuario,
+      contraseñas y ajustes personalizados. El complemento se reiniciará con
+      la configuración predeterminada. Esta acción es irreversible y no se puede
+      deshacer. Usar con extrema precaución.
 network:
   3000/tcp: Interfaz web (sin Home Assistant)

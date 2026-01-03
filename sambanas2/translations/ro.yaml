@@ -32,5 +32,14 @@ configuration:
       Elimină toate actualizările binare SRAT descărcate din directorul de date al
       add-on-ului. Utilizați doar în situații de urgență pentru a șterge fișierele
       de actualizare corupte. Această acțiune este permanentă și nu poate fi anulată.
+  factory_reset:
+    name: Resetare din fabrică
+    description: >-
+      ⚠️ PERICOL - ACȚIUNE DESTRUCTIVĂ ⚠️ Efectuează o resetare completă din fabrică
+      prin ștergerea bazei de date SQL, a tuturor configurațiilor, setărilor și
+      fișierelor de actualizare. Aceasta va șterge permanent toate configurațiile
+      de partajare Samba, conturile de utilizator, parolele și setările personalizate.
+      Suplimentul va reporni cu setările implicite. Această acțiune este ireversibilă
+      și nu poate fi anulată. Utilizați cu prudență extremă.
 network:
   3000/tcp: Interfață web (fără Home Assistant)

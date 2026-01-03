@@ -32,5 +32,14 @@ configuration:
       Uklanja sve preuzete SRAT binarne ažuriranja iz direktorija podataka dodatka.
       Koristite samo u hitnim situacijama za čišćenje oštećenih datoteka ažuriranja.
       Ova radnja je trajna i ne može se poništiti.
+  factory_reset:
+    name: Tvorničko resetiranje
+    description: >-
+      ⚠️ OPASNOST - DESTRUKTIVNA RADNJA ⚠️ Izvršava potpuno tvorničko resetiranje
+      brisanjem SQL baze podataka, svih konfiguracija, postavki i datoteka ažuriranja.
+      Ovo će trajno izbrisati sve konfiguracije Samba dijeljenja, korisničke račune,
+      lozinke i prilagođene postavke. Dodatak će se ponovno pokrenuti sa zadanim
+      postavkama. Ova radnja je nepovratna i ne može se poništiti. Koristite s
+      krajnjim oprezom.
 network:
   3000/tcp: Web sučelje (bez Home Assistant-a)

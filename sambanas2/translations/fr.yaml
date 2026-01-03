@@ -32,5 +32,15 @@ configuration:
       Supprime toutes les mises à jour binaires SRAT téléchargées du répertoire
       de données de l'add-on. À utiliser uniquement en cas d'urgence pour effacer
       les fichiers de mise à jour corrompus. Cette action est permanente et irréversible.
+  factory_reset:
+    name: Réinitialisation d'usine
+    description: >-
+      ⚠️ DANGER - ACTION DESTRUCTIVE ⚠️ Effectue une réinitialisation complète
+      d'usine en supprimant la base de données SQL, toutes les configurations,
+      paramètres et fichiers de mise à jour. Cela effacera définitivement toutes
+      les configurations de partages Samba, comptes utilisateurs, mots de passe
+      et paramètres personnalisés. Le module redémarrera avec les paramètres par
+      défaut. Cette action est irréversible et ne peut pas être annulée. À utiliser
+      avec une extrême prudence.
 network:
   3000/tcp: Interface web (sans Home Assistant)

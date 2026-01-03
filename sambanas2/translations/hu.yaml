@@ -33,5 +33,14 @@ configuration:
       Eltávolítja az összes letöltött SRAT bináris frissítést a kiegészítő
       adatkönyvtárából. Csak vészhelyzetben használja a sérült frissítési fájlok
       törléséhez. Ez a művelet végleges és nem vonható vissza.
+  factory_reset:
+    name: Gyári visszaállítás
+    description: >-
+      ⚠️ VESZÉLY - PUSZTÍTÓ MŰVELET ⚠️ Teljes gyári visszaállítást hajt végre az
+      SQL adatbázis, az összes konfiguráció, beállítás és frissítési fájl törlésével.
+      Ez véglegesen törli az összes Samba megosztási konfigurációt, felhasználói
+      fiókot, jelszót és egyéni beállítást. A kiegészítő az alapértelmezett beállításokkal
+      indul újra. Ez a művelet visszafordíthatatlan és nem vonható vissza. Rendkívüli
+      óvatossággal használja.
 network:
   3000/tcp: Webes felület (Home Assistant nélkül)

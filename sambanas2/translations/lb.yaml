@@ -32,5 +32,14 @@ configuration:
       Läscht all erofgelueden SRAT Binär-Aktualiséierungen aus dem Daten-Verzeechnes
       vum Add-on. Benotzt nëmmen an Noutfall-Situatiounen fir korrupte Aktualiséierungs-
       Fichieren ze botzen. Dës Aktioun ass permanent a kann net réckgängeg gemaach ginn.
+  factory_reset:
+    name: Fabrikszorécksetzen
+    description: >-
+      ⚠️ GEFOR - DESTRUKTIV AKTIOUN ⚠️ Féiert e komplett Fabrikszorécksetzen duerch,
+      andeems d'SQL Datebank, all Configuratiounen, Astellungen an Update-Fichieren
+      geläscht ginn. Daat läscht permanent all Samba Share Configuratiounen, Benotzerkonten,
+      Passwäerder a personaliséiert Astellungen. Den Add-on geet mat Standardastellungen
+      nees lass. Dës Aktioun ass onréckgängeg a kann net réckgängeg gemaach ginn.
+      Benotzt mat extremer Virsiicht.
 network:
   3000/tcp: Web-Interface (ouni Home Assistant)

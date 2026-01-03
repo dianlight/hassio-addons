@@ -32,5 +32,14 @@ configuration:
       Odstrani vse prenesene binarne posodobitve SRAT iz imenika podatkov dodatka.
       Uporabite samo v nujnih primerih za čiščenje poškodovanih datotek posodobitev.
       To dejanje je trajno in ga ni mogoče razveljaviti.
+  factory_reset:
+    name: Tovarniška ponastavitev
+    description: >-
+      ⚠️ NEVARNOST - DESTRUKTIVNO DEJANJE ⚠️ Izvede popolno tovarniško ponastavitev
+      z brisanjem podatkovne baze SQL, vseh konfiguracij, nastavitev in datotek
+      posodobitev. To bo trajno izbrisalo vse konfiguracije souporabe Samba, uporabniške
+      račune, gesla in po meri prilagojene nastavitve. Dodatek se bo znova zagnal
+      z privzetimi nastavitvami. To dejanje je nepreklicno in ga ni mogoče razveljaviti.
+      Uporabite z izredno previdnostjo.
 network:
   3000/tcp: Spletni vmesnik (brez Home Assistant)

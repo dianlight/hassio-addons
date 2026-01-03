@@ -32,5 +32,14 @@ configuration:
       Noņem visus lejupielādētos SRAT bināros jauninājumus no papildinājuma datu
       direktorijas. Lietojiet tikai ārkārtas situācijās, lai notīrītu bojātus
       jaunināšanas failus. Šī darbība ir neatgriezeniska.
+  factory_reset:
+    name: Rūpnīcas atiestatīšana
+    description: >-
+      ⚠️ BRIESMAS - DESTRUKTĪVA DARBĪBA ⚠️ Veic pilnīgu rūpnīcas atiestatīšanu, dzēšot
+      SQL datubāzi, visas konfigurācijas, iestatījumus un atjauninājumu failus.
+      Tas pastāvīgi izdzēsīs visas Samba koplietojuma konfigurācijas, lietotāju kontus,
+      paroles un pielāgotus iestatījumus. Papildinājums tiks pārstartēts ar noklusējuma
+      iestatījumiem. Šī darbība ir neatgriezeniska un to nevar atsaukt. Izmantojiet
+      ar ārkārtēju pārsardzību.
 network:
   3000/tcp: Tīmekļa saskarne (bez Home Assistant)

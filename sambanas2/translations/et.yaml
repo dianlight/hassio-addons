@@ -32,5 +32,14 @@ configuration:
       Eemaldab kõik allalaaditud SRAT binaarsed uuendused lisandmooduli andmekataloogi.
       Kasuta ainult hädaolukordades, et puhastada rikutud uuendusfaile. See toiming
       on püsiv ja seda ei saa tagasi võtta.
+  factory_reset:
+    name: Tehaseseadete taastamine
+    description: >-
+      ⚠️ OHT - HÄVITAV TEGEVUS ⚠️ Teostab täieliku tehaseseadete taastamise, kustutades
+      SQL-andmebaasi, kõik konfiguratsioonid, seaded ja värskenduste failid. See
+      kustutab püsivalt kõik Samba jagamise konfiguratsioonid, kasutajakontod,
+      paroolid ja kohandatud seaded. Pistikprogramm taaskäivitub vaikeseadetega.
+      See tegevus on pöördumatu ja seda ei saa tagasi võtta. Kasutage äärmise
+      ettevaatusega.
 network:
   3000/tcp: Veebiliides (ilma Home Assistantita)

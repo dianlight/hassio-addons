@@ -32,5 +32,14 @@ configuration:
       Xóa tất cả các bản cập nhật nhị phân SRAT đã tải xuống khỏi thư mục dữ liệu
       của add-on. Chỉ sử dụng trong trường hợp khẩn cấp để xóa các tệp cập nhật bị
       hỏng. Hành động này là vĩnh viễn và không thể hoàn tác.
+  factory_reset:
+    name: Khôi phục cài đặt gốc
+    description: >-
+      ⚠️ NGUY HIỂM - HÀNH ĐỘNG PHÁ HỦY ⚠️ Thực hiện khôi phục cài đặt gốc hoàn toàn
+      bằng cách xóa cơ sở dữ liệu SQL, tất cả cấu hình, cài đặt và tệp cập nhật.
+      Điều này sẽ xóa vĩnh viễn tất cả cấu hình chia sẻ Samba, tài khoản người dùng,
+      mật khẩu và cài đặt tùy chỉnh. Tiện ích bổ sung sẽ khởi động lại với cài đặt
+      mặc định. Hành động này không thể đảo ngược và không thể hoàn tác. Sử dụng
+      với sự thận trọng tối đa.
 network:
   3000/tcp: Giao diện web (không cần Home Assistant)

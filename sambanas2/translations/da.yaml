@@ -32,5 +32,13 @@ configuration:
       Fjerner alle downloadede SRAT-binære opdateringer fra tilføjelsens datamappe.
       Brug kun i nødsituationer for at rydde beskadigede opdateringsfiler. Denne
       handling er permanent og kan ikke fortrydes.
+  factory_reset:
+    name: Fabriksnulstilling
+    description: >-
+      ⚠️ FARE - DESTRUKTIV HANDLING ⚠️ Udfører en komplet fabriksnulstilling ved
+      at slette SQL-databasen, alle konfigurationer, indstillinger og opdateringsfiler.
+      Dette vil permanent slette alle Samba-delkonfigurationer, brugerkonti, adgangskoder
+      og brugerdefinerede indstillinger. Tilføjelsen genstarter med standardindstillinger.
+      Denne handling er irreversibel og kan ikke fortrydes. Brug med ekstrem forsigtighed.
 network:
   3000/tcp: Webgrænseflade (uden Home Assistant)

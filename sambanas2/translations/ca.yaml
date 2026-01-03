@@ -33,5 +33,14 @@ configuration:
       de dades del complement. Utilitza només en situacions d'emergència per netejar
       fitxers d'actualització corromputs. Aquesta acció és permanent i no es pot
       desfer.
+  factory_reset:
+    name: Restabliment de fàbrica
+    description: >-
+      ⚠️ PERILL - ACCIÓ DESTRUCTIVA ⚠️ Realitza un restabliment complet de fàbrica
+      eliminant la base de dades SQL, totes les configuracions, paràmetres i fitxers
+      d'actualització. Això esborrarà permanentment totes les configuracions de
+      comparticions Samba, comptes d'usuari, contrasenyes i configuracions personalitzades.
+      El complement es reiniciarà amb la configuració predeterminada. Aquesta acció
+      és irreversible i no es pot desfer. Utilitzeu amb extrema precaució.
 network:
   3000/tcp: Interfície web (sense Home Assistant)

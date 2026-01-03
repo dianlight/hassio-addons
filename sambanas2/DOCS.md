@@ -117,6 +117,7 @@ auto_update: true
 log_level: warning
 disable_ipv6: true
 leave_front_door_open: false
+factory_reset: false
 ```
 
 **Note**: All configuration options are optional. Only specify options when you want to change the default value.
@@ -177,6 +178,33 @@ Defaults to `none`.
 When enabled (set to `true`), this option removes all downloaded binary updates from the add-on's data directory. Use this only in emergency situations if you need to clear out old or corrupted SRAT update files.
 
 ⚠️ **Warning**: This action is permanent and cannot be undone. Only enable this if you fully understand the consequences.
+
+Defaults to `false`.
+
+### Option: `factory_reset` (optional)
+
+⚠️ **DANGER - DESTRUCTIVE ACTION** ⚠️
+
+When enabled (set to `true`), this option performs a complete factory reset of the add-on by:
+
+1. **Deleting the SQL database** (`/config/config.db3`) and all database backups
+2. **Removing all SRAT configurations and settings**
+3. **Cleaning the upgrade directory** (same as enabling `clean_upgrade_dir`)
+4. **Resetting itself to `false`** after completion
+
+This will **permanently delete**:
+- All Samba share configurations
+- All user accounts and passwords
+- All custom settings and preferences
+- The entire SRAT database
+- All downloaded update files
+
+After the factory reset:
+- The add-on will restart with completely default settings
+- You will need to reconfigure everything from scratch
+- All previous configurations will be lost and cannot be recovered
+
+🔴 **USE WITH EXTREME CAUTION**: This action is irreversible. Make sure you have backups of any important configurations before enabling this option.
 
 Defaults to `false`.
 
