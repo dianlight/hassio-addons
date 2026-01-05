@@ -1,6 +1,6 @@
 # Changelog
 
-## 2025.12.0-dev [ 🚧 Unreleased ]
+## 2026.1.0-dev [ 🚧 Unreleased ]
 
 ### 🙏 Thanks
 
@@ -10,12 +10,11 @@
 ### 🚨 Notes
 - This has been a big refactor to make the addon more efficient and use less resources. Some features have been removed or changed to improve stability and performance. Some will be added back in future releases.
 - ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
-- ***If you need SMART capabilities or HDIdle support don't update and wait next releases.***
+- ***If you need HDIdle support don't update and wait next releases.***
 
 #### 💥 Breaking Changes
 - Remove support to armv7 architecture
 - Remove HDIdle support (for now is added back in future releases)
-- Remove SMART capabilities (for now is added back in future releases)
 - Remove Avahi/mDNS support (due to side effects on some systems)
 
 ###  ✨ Features
