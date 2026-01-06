@@ -53,9 +53,62 @@ jobs:
               fi
           id: extract_branch
 
+        - name: Read config.yaml version for validation
+          id: read_config_for_validation
+          uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+          with:
+            config: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
+            # This action reads all top-level keys, 'version' will be steps.read_config_for_validation.outputs.version
 
-          
-                
+        - name: Validate CHANGELOG.md and config.yaml version consistency
+          shell: bash
+          run: |
+            ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
+            CONFIG_FILE_PATH="./$ADDON_DIR/config.yaml"
+            CHANGELOG_FILE_PATH="./$ADDON_DIR/CHANGELOG.md"
+
+            CONFIG_VERSION="${{ steps.read_config_for_validation.outputs.version }}"
+
+            echo "Addon directory: $ADDON_DIR"
+            echo "Config file path: $CONFIG_FILE_PATH"
+            echo "Changelog file path: $CHANGELOG_FILE_PATH"
+
+            if [ -z "$CONFIG_VERSION" ]; then
+              echo "Error: 'version' key not found or empty in $CONFIG_FILE_PATH."
+              exit 1
+            fi
+            echo "Version from config.yaml: $CONFIG_VERSION"
+
+            if [ ! -f "$CHANGELOG_FILE_PATH" ]; then
+              echo "Error: $CHANGELOG_FILE_PATH not found."
+              exit 1
+            fi
+
+            # Get the first line starting with '## ' and extract the version.
+            # Handles '## 1.2.3', '## [1.2.3]', '## v1.2.3', '## [v1.2.3]', including pre-release suffixes.
+            CHANGELOG_VERSION_LINE=$(grep -m 1 '^## ' "$CHANGELOG_FILE_PATH")
+            if [ -z "$CHANGELOG_VERSION_LINE" ]; then
+              echo "Error: No version line found in $CHANGELOG_FILE_PATH (expected a line starting with '## ' like '## 1.2.3')."
+              exit 1
+            fi
+            CHANGELOG_VERSION=$(echo "$CHANGELOG_VERSION_LINE" | sed -E -n 's/^##\s*\[?v?([0-9]+\.[0-9]+\.[0-9]+[^]\s]*)\]?.*/\1/p')
+
+            if [ -z "$CHANGELOG_VERSION" ]; then
+              echo "Error: Could not extract version from CHANGELOG.md line: $CHANGELOG_VERSION_LINE"
+              echo "Expected format like '## 1.2.3' or '## [v1.2.3]' or '## 1.2.3-beta1'."
+              exit 1
+            fi
+            echo "Latest version from $CHANGELOG_FILE_PATH: $CHANGELOG_VERSION"
+
+            if [ "$CONFIG_VERSION" == "$CHANGELOG_VERSION" ]; then
+              echo "Versions match: config.yaml ($CONFIG_VERSION) and CHANGELOG.md ($CHANGELOG_VERSION)."
+            else
+              echo "Error: Version mismatch!"
+              echo "config.yaml version: $CONFIG_VERSION"
+              echo "CHANGELOG.md version: $CHANGELOG_VERSION"
+              exit 1
+            fi
+
         - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon
           uses: home-assistant/builder@master
           env:

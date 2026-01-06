@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT Aktualiséierungskanal
+    description: >-
+      Wielt wéi SRAT (Samba REST Administration Tool) sech aktualiséiert: none,
+      release, prerelease oder develop.
+  auto_update:
+    name: Automatesch Aktualiséierungen
+    description: >-
+      SRAT Aktualiséierungen automatesch eroflueden an installéieren wann se op
+      dem ausgewielten Aktualiséierungskanal verfügbar sinn. Erfuerdert datt
+      srat_update_channel op eppes anescht wéi 'none' agestallt ass.
+  log_level:
+    name: Log-Niveau
+    description: >-
+      Setzt d'Verbositéit vun den Add-on-Logger (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: SRAT-Authentifikatioun desaktivéieren
+    description: >-
+      Wann aktiv, ass d'Web-Interface ouni Login zougänglech. Nëmmen op
+      vertrauenswürdege Netzwierker benotzen.
+  disable_ipv6:
+    name: IPv6-Stack desaktivéieren
+    description: >-
+      Wann aktivéiert (Standard), desaktivéiert den Add-on IPv6 a zwéngt Servicer
+      sech nëmme mat IPv4 ze verbinden. Setzt op false fir IPv6 z'erlaaben.
+  clean_upgrade_dir:
+    name: Upgrade-Verzeechnes botzen
+    description: >-
+      Läscht all erofgelueden SRAT Binär-Aktualiséierungen aus dem Daten-Verzeechnes
+      vum Add-on. Benotzt nëmmen an Noutfall-Situatiounen fir korrupte Aktualiséierungs-
+      Fichieren ze botzen. Dës Aktioun ass permanent a kann net réckgängeg gemaach ginn.
+  factory_reset:
+    name: Fabrikszorécksetzen
+    description: >-
+      ⚠️ GEFOR - DESTRUKTIV AKTIOUN ⚠️ Féiert e komplett Fabrikszorécksetzen duerch,
+      andeems d'SQL Datebank, all Configuratiounen, Astellungen an Update-Fichieren
+      geläscht ginn. Daat läscht permanent all Samba Share Configuratiounen, Benotzerkonten,
+      Passwäerder a personaliséiert Astellungen. Den Add-on geet mat Standardastellungen
+      nees lass. Dës Aktioun ass onréckgängeg a kann net réckgängeg gemaach ginn.
+      Benotzt mat extremer Virsiicht.
+network:
+  3000/tcp: Web-Interface (ouni Home Assistant)

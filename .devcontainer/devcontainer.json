@@ -9,7 +9,12 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["timonwong.shellcheck", "esbenp.prettier-vscode"],
+      "extensions": [
+        "timonwong.shellcheck",
+        "esbenp.prettier-vscode",
+        "google.geminicodeassist",
+        "github.vscode-github-actions"
+      ],
       "settings": {
         "terminal.integrated.profiles.linux": {
           "zsh": {

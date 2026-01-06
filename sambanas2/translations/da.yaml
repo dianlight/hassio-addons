@@ -1,0 +1,44 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT-opdateringskanal
+    description: >-
+      Vælg hvordan SRAT (Samba REST Administration Tool) opdaterer sig: none,
+      release, prerelease eller develop.
+  auto_update:
+    name: Automatiske opdateringer
+    description: >-
+      Download og installer automatisk SRAT-opdateringer, når de er tilgængelige
+      på den valgte opdateringskanal. Kræver at srat_update_channel er sat til
+      noget andet end 'none'.
+  log_level:
+    name: Logniveau
+    description: >-
+      Angiv detaljeringsgrad for add-on-logger (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: Deaktiver SRAT-godkendelse
+    description: >-
+      Når aktiveret er webgrænsefladen tilgængelig uden login. Brug kun på
+      betroede netværk.
+  disable_ipv6:
+    name: Deaktiver IPv6-stak
+    description: >-
+      Når aktiveret (standard), deaktiverer tilføjelsen IPv6 og tvinger tjenester
+      til kun at binde til IPv4. Indstil til falsk for at tillade IPv6.
+  clean_upgrade_dir:
+    name: Ryd opdateringsmappe
+    description: >-
+      Fjerner alle downloadede SRAT-binære opdateringer fra tilføjelsens datamappe.
+      Brug kun i nødsituationer for at rydde beskadigede opdateringsfiler. Denne
+      handling er permanent og kan ikke fortrydes.
+  factory_reset:
+    name: Fabriksnulstilling
+    description: >-
+      ⚠️ FARE - DESTRUKTIV HANDLING ⚠️ Udfører en komplet fabriksnulstilling ved
+      at slette SQL-databasen, alle konfigurationer, indstillinger og opdateringsfiler.
+      Dette vil permanent slette alle Samba-delkonfigurationer, brugerkonti, adgangskoder
+      og brugerdefinerede indstillinger. Tilføjelsen genstarter med standardindstillinger.
+      Denne handling er irreversibel og kan ikke fortrydes. Brug med ekstrem forsigtighed.
+network:
+  3000/tcp: Webgrænseflade (uden Home Assistant)

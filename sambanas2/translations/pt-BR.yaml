@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: Canal de atualização do SRAT
+    description: >-
+      Escolha como o SRAT (Samba REST Administration Tool) se atualiza: none,
+      release, prerelease ou develop.
+  auto_update:
+    name: Automatic updates
+    description: >-
+      Automatically download and install SRAT updates when available on the
+      selected update channel. Requires srat_update_channel to be set to
+      something other than 'none'.
+  log_level:
+    name: Nível de log
+    description: >-
+      Defina a verbosidade dos logs do add-on (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: Desativar autenticação do SRAT
+    description: >-
+      Quando ativado, a interface web fica acessível sem login. Use somente em
+      redes confiáveis.
+  disable_ipv6:
+    name: Desativar pilha IPv6
+    description: >-
+      Quando ativado (padrão), o add-on desativa IPv6 e força os serviços a
+      vincular apenas ao IPv4. Defina como false para permitir IPv6.
+  clean_upgrade_dir:
+    name: Limpar diretório de atualização
+    description: >-
+      Remove todas as atualizações binárias do SRAT baixadas do diretório de dados
+      do add-on. Use apenas em situações de emergência para limpar arquivos de
+      atualização corrompidos. Esta ação é permanente e irreversível.
+  factory_reset:
+    name: Restauração de fábrica
+    description: >-
+      ⚠️ PERIGO - AÇÃO DESTRUTIVA ⚠️ Executa uma restauração completa de fábrica
+      excluindo o banco de dados SQL, todas as configurações, ajustes e arquivos de
+      atualização. Isso apagará permanentemente todas as configurações de compartilhamento
+      Samba, contas de usuário, senhas e configurações personalizadas. O complemento
+      será reiniciado com as configurações padrão. Esta ação é irreversível e não
+      pode ser desfeita. Use com extrema cautela.
+network:
+  3000/tcp: Interface web (sem Home Assistant)
