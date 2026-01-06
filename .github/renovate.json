@@ -49,7 +49,7 @@
         "//build.yaml$/"
       ],
       "matchStrings": [
-        "HA_CLI_VERSION[=:]\\s*[\"']?(?<currentValue>.+?)[\"']?\\s*"
+        "HA_CLI_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "home-assistant/cli",
@@ -61,7 +61,7 @@
         "//build.yaml$/"
       ],
       "matchStrings": [
-        "SRAT_VERSION[=:]\\s*[\"']?(?<currentValue>.+?)[\"']?\\s*"
+        "SRAT_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "dianlight/srat",
