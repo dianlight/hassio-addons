@@ -38,14 +38,28 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^sambanas2/build\\.yaml$"
+        "//Dockerfile$/",
+        "//build.yaml$/"
       ],
       "matchStrings": [
         "SRAT_VERSION:\\s*[\"']?(?<currentValue>.*?)[\"']?\\s*$"
       ],
       "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "dianlight/srat"
-    }    
+      "depNameTemplate": "home-assistant/cli",
+      "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "//build.yaml$/"
+      ],
+      "matchStrings": [
+        "SRAT_VERSION=[\"']?(?<currentValue>.+?)[\"']?\\s+"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "dianlight/srat",
+      "versioningTemplate": "loose"
+    }
   ],
   "packageRules": [
     {
@@ -130,7 +144,8 @@
       ],
       "matchPackageNames": [
         "dianlight/srat"
-      ]
-    }    
+      ],
+      "allowedVersions": ">0.0.0-0"
+    }
   ]
 }
