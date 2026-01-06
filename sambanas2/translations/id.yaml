@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: Saluran pembaruan SRAT
+    description: >-
+      Pilih bagaimana SRAT (Samba REST Administration Tool) memperbarui dirinya:
+      none, release, prerelease, atau develop.
+  auto_update:
+    name: Pembaruan otomatis
+    description: >-
+      Unduh dan instal pembaruan SRAT secara otomatis saat tersedia di saluran
+      pembaruan yang dipilih. Memerlukan srat_update_channel disetel ke sesuatu
+      selain 'none'.
+  log_level:
+    name: Tingkat log
+    description: >-
+      Atur tingkat verbositas log add-on (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Nonaktifkan autentikasi SRAT
+    description: >-
+      Saat diaktifkan, antarmuka web bisa diakses tanpa login. Gunakan hanya di
+      jaringan tepercaya.
+  disable_ipv6:
+    name: Nonaktifkan tumpukan IPv6
+    description: >-
+      Saat diaktifkan (default), add-on menonaktifkan IPv6 dan memaksa layanan
+      untuk mengikat hanya ke IPv4. Setel ke false untuk mengizinkan IPv6.
+  clean_upgrade_dir:
+    name: Bersihkan direktori pembaruan
+    description: >-
+      Menghapus semua pembaruan biner SRAT yang diunduh dari direktori data add-on.
+      Gunakan hanya dalam situasi darurat untuk membersihkan file pembaruan yang
+      rusak. Tindakan ini permanen dan tidak dapat dibatalkan.
+  factory_reset:
+    name: Reset pabrik
+    description: >-
+      ⚠️ BAHAYA - TINDAKAN DESTRUKTIF ⚠️ Melakukan reset pabrik lengkap dengan
+      menghapus database SQL, semua konfigurasi, pengaturan, dan file pembaruan.
+      Ini akan menghapus secara permanen semua konfigurasi berbagi Samba, akun
+      pengguna, kata sandi, dan pengaturan khusus. Add-on akan dimulai ulang dengan
+      pengaturan default. Tindakan ini tidak dapat dibatalkan dan tidak dapat dikembalikan.
+      Gunakan dengan sangat hati-hati.
+network:
+  3000/tcp: Antarmuka web (tanpa Home Assistant)

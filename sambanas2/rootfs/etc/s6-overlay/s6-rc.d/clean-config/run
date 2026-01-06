@@ -1,0 +1,18 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Remove deprecated config options 
+# ==============================================================================
+bashio::log.debug  "-> Clean config ..."
+
+options=$(bashio::addon.options)
+old_keys='enable_smart hdd_idle_seconds'
+for old_key in ${old_keys}; do
+  if bashio::jq.exists "${options}" ".${old_key}"; then
+      bashio::log.info "Removing deprecated option ${old_key}"
+      bashio::addon.option "${old_key}"
+  fi
+done
+bashio::log.debug  "-> Clean Done."
+

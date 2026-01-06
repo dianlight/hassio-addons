@@ -1,19 +1,19 @@
 name: PR Chack if Image is set in config
 
 on:
-    pull_request:
-        branches:
-          - 'prerelease/**'
-        types: [ synchronize, opened ]
-    workflow_dispatch:
+  pull_request:
+    branches:
+      - "prerelease/**"
+    types: [synchronize, opened]
+  workflow_dispatch:
 
 jobs:
   updateBody:
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
           with:
-                submodules: true
+           submodules: true
 
         - name: Extract branch name
           shell: bash
@@ -31,14 +31,14 @@ jobs:
           id: extract_branch
 
         - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          uses: pietrobolcato/action-read-yaml@1.1.0
+          uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
           id: read_action_js
           with:
             config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
 
         - name: Check image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }}
           if: ${{ steps.read_action_js.outputs.image == '' }}
-          uses: actions/github-script@v7.0.1
+          uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
           with:
             script: |
                 core.setFailed('Image in yaml config of ${{ steps.extract_branch.outputs.BR_VERSION }} is not set!')

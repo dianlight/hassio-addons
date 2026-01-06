@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT-päivityskanava
+    description: >-
+      Valitse miten SRAT (Samba REST Administration Tool) päivittyy: none,
+      release, prerelease tai develop.
+  auto_update:
+    name: Automaattiset päivitykset
+    description: >-
+      Lataa ja asenna SRAT-päivitykset automaattisesti, kun niitä on saatavilla
+      valitulla päivityskanavalla. Edellyttää, että srat_update_channel on
+      asetettu johonkin muuhun kuin 'none'.
+  log_level:
+    name: Lokitaso
+    description: >-
+      Aseta lisäosan lokien tarkkuus (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Poista SRAT-todennus käytöstä
+    description: >-
+      Kun käytössä, verkkokäyttöliittymä on käytettävissä ilman kirjautumista.
+      Käytä vain luotetuissa verkoissa.
+  disable_ipv6:
+    name: Poista IPv6-pino käytöstä
+    description: >-
+      Kun käytössä (oletus), lisäosa poistaa IPv6:n käytöstä ja pakottaa palvelut
+      sitoutumaan vain IPv4:ään. Aseta arvoksi false salliaksesi IPv6.
+  clean_upgrade_dir:
+    name: Tyhjennä päivityshakemisto
+    description: >-
+      Poistaa kaikki ladatut SRAT-binääripäivitykset lisäosan datahakemistosta.
+      Käytä vain hätätilanteissa vioittuneiden päivitystiedostojen tyhjentämiseen.
+      Tämä toiminto on pysyvä eikä sitä voi peruuttaa.
+  factory_reset:
+    name: Tehdasasetusten palautus
+    description: >-
+      ⚠️ VAARA - TUHOAVA TOIMINTO ⚠️ Suorittaa täydellisen tehdasasetusten palautuksen
+      poistamalla SQL-tietokannan, kaikki määritykset, asetukset ja päivitystiedostot.
+      Tämä poistaa pysyvästi kaikki Samba-jakojen määritykset, käyttäjätilit,
+      salasanat ja mukautetut asetukset. Lisäosa käynnistyy uudelleen oletusasetuksilla.
+      Tämä toiminto on peruuttamaton eikä sitä voi kumota. Käytä äärimmäisellä
+      varovaisuudella.
+network:
+  3000/tcp: Web-käyttöliittymä (ilman Home Assistantia)

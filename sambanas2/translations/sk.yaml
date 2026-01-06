@@ -1,0 +1,44 @@
+---
+configuration:
+  srat_update_channel:
+    name: Kanál aktualizácií SRAT
+    description: >-
+      Vyberte, ako sa SRAT (Samba REST Administration Tool) aktualizuje: none,
+      release, prerelease alebo develop.
+  auto_update:
+    name: Automatické aktualizácie
+    description: >-
+      Automaticky sťahovať a inštalovať aktualizácie SRAT, keď sú k dispozícii
+      na vybranom kanáli aktualizácií. Vyžaduje nastavenie srat_update_channel
+      na inú hodnotu ako 'none'.
+  log_level:
+    name: Úroveň logovania
+    description: >-
+      Nastavte podrobnosť logov doplnku (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Vypnúť overovanie SRAT
+    description: >-
+      Po zapnutí je webové rozhranie dostupné bez prihlásenia. Používajte len v
+      dôveryhodných sieťach.
+  disable_ipv6:
+    name: Zakázať IPv6 zásobník
+    description: >-
+      Keď je povolené (predvolené), doplnok zakáže IPv6 a prinúti služby,
+      aby sa viazali len na IPv4. Nastavte na false pre povolenie IPv6.
+  clean_upgrade_dir:
+    name: Vyčistiť zložku aktualizácií
+    description: >-
+      Odstráni všetky stiahnuté binárne aktualizácie SRAT z dátovej zložky doplnku.
+      Používajte len v núdzových situáciách na vyčistenie poškodených aktualizačných
+      súborov. Táto akcia je trvalá a nedá sa vrátiť späť.
+  factory_reset:
+    name: Obnova na výrobné nastavenia
+    description: >-
+      ⚠️ NEBEZPEČENSTVO - DEŠTRUKTÍVNA AKCIA ⚠️ Vykoná úplnú obnovu na výrobné
+      nastavenia odstránením SQL databázy, všetkých konfigurácií, nastavení a súborov
+      aktualizácie. Tým trvalo vymažete všetky konfigurácie zdielania Samba, užívateľské
+      účty, heslá a vlastné nastavenia. Doplnok sa reštartuje s predvolenými nastaveniami.
+      Táto akcia je nezvratná a nemôže byť vrátená. Používajte s mimoriadnou opatrnosťou.
+network:
+  3000/tcp: Webové rozhranie (bez Home Assistant)

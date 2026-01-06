@@ -1,0 +1,95 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# Startup script for wsddn
+# Dynamically reads parameters from smb.conf including interfaces and log level
+#
+echo "Configuring and starting wsddn..."
+
+SMB_CONF="/etc/samba/smb.conf"
+
+if [ ! -f "$SMB_CONF" ]; then
+  echo "Fatal: Samba config file not found at ${SMB_CONF}!"
+  exit 1
+fi
+
+# --- Parameter Extraction (Robust method with testparm) ---
+#WORKGROUP=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*workgroup\s*=' | awk '{print $3}') || true
+#NETBIOS_NAME=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*netbios name\s*=' | awk '{print $4}') || true
+LOG_LEVEL=$(bashio::config 'log_level' 'info')
+INTERFACES=$(testparm -s "${SMB_CONF}" 2>/dev/null | grep -i '^\s*interfaces\s*=' | sed 's/^\s*interfaces\s*=\s*//') || true
+
+# --- Default Values ---
+#: "${WORKGROUP:=WORKGROUP}"
+#: "${NETBIOS_NAME:=$(hostname -s)}"
+# No default for INTERFACES. If empty, wsdd2 will listen on all interfaces.
+
+# --- Argument Construction ---
+WSDDN_ARGS="-H :NETBIOS: --user wsddn --smb-conf ${SMB_CONF} --metadata /etc/wsddn/metadata.xml"
+
+#if [ -n "$WORKGROUP" ]; then
+#  WSDDN_ARGS="${WSDDN_ARGS} -G ${WORKGROUP}"
+#fi
+#if [ -n "$NETBIOS_NAME" ]; then
+#  WSDDN_ARGS="${WSDDN_ARGS} -H ${NETBIOS_NAME} -N ${NETBIOS_NAME}"
+#fi
+
+# Adds the specified interfaces, one by one.
+# The shell for loop automatically iterates over space-separated elements.
+if [ -n "$INTERFACES" ]; then
+  for iface in $INTERFACES; do
+    if [[ "${iface}" != "lo" ]]; then
+      WSDDN_ARGS="${WSDDN_ARGS} -i ${iface}"
+    fi
+  done
+fi
+
+if bashio::config.true 'disable_ipv6'; then
+  help_text=$(wsddn --help 2>&1 || true)
+  if echo "${help_text}" | grep -q -- '--ipv4-only'; then
+    WSDDN_ARGS="${WSDDN_ARGS} --ipv4-only"
+  elif echo "${help_text}" | grep -q -- ' -4'; then
+    WSDDN_ARGS="${WSDDN_ARGS} -4"
+  else
+    bashio::log.warning "wsddn IPv4-only flag not detected; relying on IPv6 sysctl disable"
+  fi
+fi
+
+# Map the add-on's log level (trace|debug|info|notice|warning|error|fatal)
+# to wsdd2's debug level flags (-W).
+# The log_level is sourced from bashio::config 'log_level' (defaults to 'info').
+case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to lowercase for robust matching
+"trace")
+  WSDDN_ARGS="${WSDDN_ARGS} --log-level 6"
+  ;;
+"debug")
+  WSDDN_ARGS="${WSDDN_ARGS} --log-level 5"
+  ;;
+"info")
+  WSDDN_ARGS="${WSDDN_ARGS} --log-level 4"
+  ;;
+"notice")
+   WSDDN_ARGS="${WSDDN_ARGS} --log-level 3"
+  ;;
+"warning")
+   WSDDN_ARGS="${WSDDN_ARGS} --log-level 2"
+  ;;
+"error" | "fatal")
+   WSDDN_ARGS="${WSDDN_ARGS} --log-level 1"
+  ;;
+*)
+  bashio::log.warning "wsddn: Unknown log_level '${LOG_LEVEL}'. Defaulting wsddn to --log-level 4."
+  ;;
+esac
+
+echo "Starting wsddn with arguments:${WSDDN_ARGS}"
+
+# --- Esecuzione ---
+#case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in
+#"notice" | "warning" | "error" | "fatal")
+#  exec wsddn ${WSDDN_ARGS} >/dev/null
+#  ;;
+#*)
+  exec wsddn ${WSDDN_ARGS}
+#  ;;
+#esac

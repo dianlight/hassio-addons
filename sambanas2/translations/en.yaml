@@ -1,99 +1,44 @@
 ---
 configuration:
-  username:
-    name: Username
+  srat_update_channel:
+    name: SRAT update channel
     description: >-
-      The username you would like to use to authenticate with the Samba server.
-  password:
-    name: Password
+      Choose how SRAT (Samba REST Administration Tool) updates itself: none,
+      release, prerelease, or develop.
+  auto_update:
+    name: Automatic updates
     description: >-
-      The password that goes with the username configured for authentication.
-  workgroup:
-    name: Workgroup
-    description: Change WORKGROUP to reflect your network needs.
-  local_master:
-    name: Local master
-    description: Enable to try and become a local master browser on a subnet.
-  enabled_shares:
-    name: >-
-      Enabled Shares - allowed values are:
-      addons, addon_configs, backup, config, media, share, or ssl.
+      Automatically download and install SRAT updates when available on the
+      selected update channel. Requires srat_update_channel to be set to
+      something other than 'none'.
+  log_level:
+    name: Log level
     description: >-
-      List of file shares to make available.
-      Adding a share requires typing its name to add it.
-      The listed values are the only allowed values.
-      The configuration cannot be saved if any non-allowed value is in the list.
-  compatibility_mode:
-    name: Enable Compatibility Mode
+      Set the verbosity for the add-on logs (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Disable SRAT authentication
     description: >-
-      Enable this to use old legacy Samba protocols on the Samba add-on.
-  veto_files:
-    name: Veto Files
-    description: List of files that are neither visible nor accessible.
-  allow_hosts:
-    name: Allowed Hosts
-    description: List of hosts/networks allowed to access the shared folders.
-  automount:
-    name: Enable Automatic Mount
-    description: Automatic mount and expose all labeled disk.
-  moredisks:
-    name: List of labeled disk to mount
-    description: List of disks or partitions label to search and share. It is also possible to use the disk id if you prepend the name with `id:`
-  available_disks_log:
-    name: Enable discovered disk log
-    description: Enable the log of found labeled disk. Usefull for initial configuration.
-  medialibrary:
-    name: Configure the mount in media path
-    description: Enable the visibility of `moredisk` on /media path.
-  recyle_bin_enabled:
-    name: Enable recyle_bin on share
-    description: Allow client SO to use Recycle Bin functionality on share
-  wsdd:
-    name: Enable the use of external WSDD daemon
-    description: Setting this option to `true` will enable the use of wsdd over internal samba system.
-  wsdd2:
-    name: Enable the use of Netgear WSDD daemon
-    description: Setting this option to `true` will enable the use of wsdd2 over wsdd. Set to true if you have trouble to see the disk on Windows 11+
-  hdd_idle_seconds:
-    name: Set the timeout for hd-idle demon
-    description: Idle time in seconds for all disks. Setting this value to 0 will never spin down the disk(s).
-  enable_smart:
-    name: Enable SMART on all disks
-    description: Enable automatic offline testing every four hours, and enable autosaving of SMART Attributes.
-  multi_channel:
-    name: Enable Samba Multichannel support
-    description:
-      Multi-Channel is an SMB3 protocol feature that allows the client
-      to bind multiple transport connections into one authenticated
-      SMB session. This allows for increased fault tolerance and
-      throughput. The client chooses transport connections as reported
-      by the server and also chooses over which of the bound transport
-      connections to send traffic. I/O operations for a given file
-      handle can span multiple network connections this way.
-      An SMB multi-channel session will be valid as long as at least
-      one of its channels are up.
-  mqtt_nexgen_entities:
-    name: Enable the use of nexgen MQTT implementation
-    description: Setting this option to `true` will expose mqtt new entities. This is a refactor that allow to use less CPU.
-  mqtt_enable:
-    name: Enable the exposition of disk information via MQTT
-    description: Setting this option to `true` will enable the use of mqtt to send disks status data.
-  autodiscovery:
-      name: "Autodiscovery options"
-  disable_discovery:
-      name: Enable the automatic MQTT messages
-      description: Setting this option to `true` will disable the sending of Auto Discovery MQTT messages. You need to configure MQTT sensors manually
-  other_users:
-    name: List of other user to create
-    description: Create more use for SMB/CIFS access
-  acl:
-    name: Access Lists
-    description: SMB/CIFS share access lists
-  interfaces:
-    name: network interfaces
-    description: List of network interface to bind
-  bind_all_interfaces:
-    name: Enable the use of all network interfaces
-    description: Force Samba to bind on all network interface. This is usefull for pseudo-ethernet devices like TailScale
+      When enabled, the web interface is accessible without login. Only use this
+      on trusted networks.
+  disable_ipv6:
+    name: Disable IPv6 stack
+    description: >-
+      When enabled (default), the add-on disables IPv6 and forces services to
+      bind to IPv4 only. Set to false to allow IPv6.
+  clean_upgrade_dir:
+    name: Clean upgrade directory
+    description: >-
+      Removes all downloaded SRAT binary updates from the add-on's data directory.
+      Use only in emergency situations to clear corrupted update files. This action
+      is permanent and cannot be undone.
+  factory_reset:
+    name: Factory reset
+    description: >-
+      ⚠️ DANGER - DESTRUCTIVE ACTION ⚠️ Performs a complete factory reset by deleting
+      the SQL database, all configurations, settings, and update files. This will
+      permanently erase all Samba share configurations, user accounts, passwords,
+      and custom settings. The add-on will restart with default settings. This action
+      is irreversible and cannot be undone. Use with extreme caution.
 network:
   3000/tcp: Web interface (to use without Home Assistant)

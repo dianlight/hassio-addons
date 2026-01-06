@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: Kanał aktualizacji SRAT
+    description: >-
+      Wybierz, jak SRAT (Samba REST Administration Tool) ma się aktualizować:
+      none, release, prerelease lub develop.
+  auto_update:
+    name: Automatyczne aktualizacje
+    description: >-
+      Automatyczne pobieranie i instalowanie aktualizacji SRAT, gdy są dostępne
+      na wybranym kanale aktualizacji. Wymaga ustawienia srat_update_channel na
+      wartość inną niż 'none'.
+  log_level:
+    name: Poziom logowania
+    description: >-
+      Ustaw szczegółowość logów dodatku (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Wyłącz uwierzytelnianie SRAT
+    description: >-
+      Po włączeniu interfejs WWW jest dostępny bez logowania. Używaj tylko w
+      zaufanych sieciach.
+  disable_ipv6:
+    name: Wyłącz stos IPv6
+    description: >-
+      Gdy włączone (domyślnie), dodatek wyłącza IPv6 i zmusza usługi do
+      wiązania się tylko z IPv4. Ustaw na false, aby zezwolić na IPv6.
+  clean_upgrade_dir:
+    name: Wyczyść katalog aktualizacji
+    description: >-
+      Usuwa wszystkie pobrane aktualizacje binarne SRAT z katalogu danych dodatku.
+      Używaj tylko w sytuacjach awaryjnych do czyszczenia uszkodzonych plików
+      aktualizacji. Ta akcja jest trwała i nieodwracalna.
+  factory_reset:
+    name: Resetowanie do ustawień fabrycznych
+    description: >-
+      ⚠️ NIEBEZPIECZEŃSTWO - DESTRUKCYJNA AKCJA ⚠️ Wykonuje całkowite resetowanie
+      do ustawień fabrycznych przez usunięcie bazy danych SQL, wszystkich konfiguracji,
+      ustawień i plików aktualizacji. Spowoduje to trwałe usunięcie wszystkich konfiguracji
+      udziałów Samba, kont użytkowników, haseł i niestandardowych ustawień. Dodatek
+      zostanie uruchomiony ponownie z domyślnymi ustawieniami. Ta akcja jest nieodwracalna
+      i nie można jej cofnąć. Używaj z najwyższą ostrożnością.
+network:
+  3000/tcp: Interfejs WWW (bez Home Assistant)

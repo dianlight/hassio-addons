@@ -1,0 +1,42 @@
+---
+configuration:
+  srat_update_channel:
+    name: ערוץ עדכוני SRAT
+    description: >-
+      בחרו כיצד SRAT (Samba REST Administration Tool) מעדכן את עצמו: none,
+      release, prerelease או develop.
+  auto_update:
+    name: עדכונים אוטומטיים
+    description: >-
+      הורדה והתקנה אוטומטית של עדכוני SRAT כאשר זמינים בערוץ העדכונים הנבחר.
+      דורש הגדרת srat_update_channel למשהו שונה מ-'none'.
+  log_level:
+    name: רמת יומן
+    description: >-
+      קבעו את רמת הפירוט של יומני ההרחבה (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: השבת אימות SRAT
+    description: >-
+      כאשר מופעל, הממשק זמין ללא התחברות. השתמשו רק ברשתות מהימנות.
+  disable_ipv6:
+    name: השבת ערימת IPv6
+    description: >-
+      כאשר מופעל (ברירת מחדל), התוסף משבית את IPv6 ומאלץ שירותים להתחבר רק ל-IPv4.
+      הגדר ל-false כדי לאפשר IPv6.
+  clean_upgrade_dir:
+    name: נקה ספריית שדרוגים
+    description: >-
+      מסיר את כל עדכוני הבינאריים של SRAT שהורדו מספריית הנתונים של ההרחבה.
+      השתמש רק במצבי חירום לניקוי קבצי עדכון פגומים. פעולה זו קבועה ולא ניתנת
+      לביטול.
+  factory_reset:
+    name: איפוס לברירת מחדל
+    description: >-
+      ⚠️ סכנה - פעולה הרסנית ⚠️ מבצע איפוס מלא לברירת מחדל על ידי מחיקת מסד
+      הנתונים SQL, כל התצורות, ההגדרות וקבצי העדכון. פעולה זו תמחק לצמיתות את
+      כל תצורות השיתוף של Samba, חשבונות המשתמשים, הסיסמאות וההגדרות המותאמות
+      אישית. התוסף יופעל מחדש עם הגדרות ברירת המחדל. פעולה זו היא בלתי הפיכה
+      ולא ניתן לבטלה. השתמש בזהירות רבה.
+network:
+  3000/tcp: ממשק ווב (ללא Home Assistant)

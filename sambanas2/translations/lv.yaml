@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT atjaunināšanas kanāls
+    description: >-
+      Izvēlieties, kā SRAT (Samba REST Administration Tool) atjauninās sevi:
+      none, release, prerelease vai develop.
+  auto_update:
+    name: Automātiskie atjauninājumi
+    description: >-
+      Automātiski lejupielādēt un instalēt SRAT atjauninājumus, kad tie ir pieejami
+      izvēlētajā atjaunināšanas kanālā. Nepieciešams iestatīt srat_update_channel
+      uz kaut ko citu nekā 'none'.
+  log_level:
+    name: Žurnāla līmenis
+    description: >-
+      Iestatiet papildinājuma žurnālu detalizāciju (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: Atspējot SRAT autentifikāciju
+    description: >-
+      Kad ieslēgts, tīmekļa saskarne ir pieejama bez pieteikšanās. Lietojiet tikai
+      uzticamos tīklos.
+  disable_ipv6:
+    name: Atspējot IPv6 kaudzi
+    description: >-
+      Kad iespējots (noklusējums), papildinājums atspējo IPv6 un piespiež pakalpojumus
+      saistīties tikai ar IPv4. Iestatiet uz false, lai atļautu IPv6.
+  clean_upgrade_dir:
+    name: Notīrīt jaunināšanas direktoriju
+    description: >-
+      Noņem visus lejupielādētos SRAT bināros jauninājumus no papildinājuma datu
+      direktorijas. Lietojiet tikai ārkārtas situācijās, lai notīrītu bojātus
+      jaunināšanas failus. Šī darbība ir neatgriezeniska.
+  factory_reset:
+    name: Rūpnīcas atiestatīšana
+    description: >-
+      ⚠️ BRIESMAS - DESTRUKTĪVA DARBĪBA ⚠️ Veic pilnīgu rūpnīcas atiestatīšanu, dzēšot
+      SQL datubāzi, visas konfigurācijas, iestatījumus un atjauninājumu failus.
+      Tas pastāvīgi izdzēsīs visas Samba koplietojuma konfigurācijas, lietotāju kontus,
+      paroles un pielāgotus iestatījumus. Papildinājums tiks pārstartēts ar noklusējuma
+      iestatījumiem. Šī darbība ir neatgriezeniska un to nevar atsaukt. Izmantojiet
+      ar ārkārtēju pārsardzību.
+network:
+  3000/tcp: Tīmekļa saskarne (bez Home Assistant)

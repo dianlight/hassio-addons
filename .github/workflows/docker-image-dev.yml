@@ -9,19 +9,20 @@ on:
 permissions:
   pull-requests: write # Required for creating pull requests
   contents: write # Required for committing changes and pushing to the repository
+  packages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest # Specifies the runner environment
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4 # Checks out the repository code
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           submodules: true # Also checks out git submodules if any
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3 # Logs into DockerHub using provided credentials
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -34,7 +35,7 @@ jobs:
         # and sets it as a step output named BR_VERSION.
 
       - name: 👓 Read config.yaml
-        uses: pietrobolcato/action-read-yaml@1.1.0 # Reads values from a YAML file
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0 # Reads values from a YAML file
         id: read_action_js # Assigns an ID to reference its outputs
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
@@ -87,32 +88,57 @@ jobs:
 
       - name: ✍🏼 Set version in config.yaml
         id: version_set # This ID is used by subsequent steps for value_old
-        uses: endaft/action-yamler@v1.1.1 # Action to modify YAML files
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          path: version
-          set: ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}
-          get: true # Captures the version value before this 'set' operation
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
+          NEW_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
+          
+          # Get current value before modification
+          OLD_VERSION=$(yq '.version' "$CONFIG_FILE")
+          echo "value_old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+          
+          # Set new version
+          yq -i ".version = \"$NEW_VERSION\"" "$CONFIG_FILE"
+          
+          # Get new value after modification
+          NEW_VALUE=$(yq '.version' "$CONFIG_FILE")
+          echo "value_new=$NEW_VALUE" >> "$GITHUB_OUTPUT"
+          
+          echo "Updated version from '$OLD_VERSION' to '$NEW_VALUE'"
 
       - name: ✍🏼 Set name in config.yaml
-        uses: endaft/action-yamler@v1.1.1
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          path: name
-          set: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
+          NEW_NAME="${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}"
+          
+          # Get current value before modification
+          OLD_NAME=$(yq '.name' "$CONFIG_FILE")
+          
+          # Set new name
+          yq -i ".name = \"$NEW_NAME\"" "$CONFIG_FILE"
+          
+          echo "Updated name from '$OLD_NAME' to '$NEW_NAME'"
 
       - name: ✍🏼 Set image in config.yaml
-        uses: endaft/action-yamler@v1.1.1
-        with:
-          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          path: image
-          set: ${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
+          NEW_IMAGE="${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}"
+          
+          # Get current value before modification
+          OLD_IMAGE=$(yq '.image' "$CONFIG_FILE")
+          
+          # Set new image
+          yq -i ".image = \"$NEW_IMAGE\"" "$CONFIG_FILE"
+          
+          echo "Updated image from '$OLD_IMAGE' to '$NEW_IMAGE'"
           # The image field will be set to the DockerHub repository (e.g., dianlight/myaddon-alpha)
           # The 'home-assistant/builder' will then tag this image with the 'version' from config.yaml.
 
       - name: Run Addon custom scripts
         # Only run this step if the scripts directory exists for the current addon
-        if: -d "${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/scripts"
+        if: ${{ hashFiles(format('{0}/{1}/scripts', github.workspace, steps.extract_branch.outputs.BR_VERSION)) != '' }}
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
         shell: bash
@@ -140,7 +166,7 @@ jobs:
           done
 
       - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
-        uses: home-assistant/builder@2025.03.0 # Home Assistant Add-on builder action
+        uses: home-assistant/builder@master #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:
@@ -153,7 +179,7 @@ jobs:
 
       - name: Create Merge Release Branch
         # Only run this step if the scripts directory exists for the current addon
-        if: -d "${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/scripts"
+        if: ${{ hashFiles(format('{0}/{1}/scripts', github.workspace, steps.extract_branch.outputs.BR_VERSION)) != '' }}
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
         shell: bash
