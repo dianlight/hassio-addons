@@ -6,6 +6,6 @@ build_from:
 #  #base_identity: https://github.com/home-assistant/builder/.*
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
-  HA_CLI_VERSION: "4.44.0"
+  HA_CLI_VERSION: "4.45.0"
   SRAT_VERSION: "2026.1.0-dev.2"
   SAMBA_VERSION: "distribution" #"4.23.1" # Use "distribution" to use precompiled packages
