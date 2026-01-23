@@ -27,11 +27,10 @@ SRAT_ARGS="-port $(bashio::addon.ingress_port) \
   -out /etc/samba/smb.conf \
   -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
-  $(bashio::config.equals 'srat_update_channel' 'develop' && echo " -update-file-path /config/upgrade/srat-server") \
   -loglevel $(bashio::config 'log_level' 'info') \
   -update-channel $(bashio::config 'srat_update_channel' 'none') \
   -ip-address $(bashio::addon.ip_address) \
-  -upgrade-data-dir /data/upgrade"
+  -upgrade-data-dir $(bashio::config.equals 'srat_update_channel' 'develop' && echo '/config/upgrade' || echo '/data/upgrade')"
 
 # Check if --auto-update flag is supported and add it if auto_update is true
 if bashio::config.true 'auto_update'; then

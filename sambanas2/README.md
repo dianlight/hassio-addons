@@ -4,7 +4,7 @@ The next generation addon for
 share your disks over the network using Windows file sharing.
 
 
-![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] ![Supports armv7 Architecture][armv7-shield]
+![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] 
 
 <!--
 [![Stargazers repo roster for @dianlight/hassio-addons](https://raw.githubusercontent.com/dianlight/hassio-addons/master/.github/stars2.svg)](https://github.com/dianlight/hassio-addons/stargazers)
