@@ -246,6 +246,7 @@ RUN apk add --no-cache \
     ethtool \
     erofs-utils \
     squashfs-tools \
+    nfs-utils \
     ngtcp2 
 
 # Install APFS support (not available for armv7)

@@ -1,0 +1,50 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ============================================================================
+# Initialize NFS server prerequisites
+# - Verify kernel nfsd support
+# - Mount rpc_pipefs and nfsd pseudo filesystems when available
+# - Remove nfs-utils if the kernel lacks server support to avoid startup loops
+# ============================================================================
+set -euo pipefail
+
+has_nfsd_support() {
+  grep -qw nfsd /proc/filesystems
+}
+
+ensure_nfsd_available() {
+  if has_nfsd_support; then
+    return 0
+  fi
+
+  if command -v modprobe >/dev/null; then
+    modprobe nfsd 2>/dev/null || true
+  fi
+
+  has_nfsd_support
+}
+
+if ! ensure_nfsd_available; then
+  bashio::log.warning "Kernel does not provide NFS server support; removing nfs-utils and skipping NFS setup."
+
+  if apk info -e nfs-utils >/dev/null 2>&1; then
+    apk del --no-network nfs-utils || apk del nfs-utils || true
+  fi
+
+  exit 0
+fi
+
+mkdir -p /run/rpc_pipefs /proc/fs/nfsd
+
+if ! mountpoint -q /run/rpc_pipefs; then
+  bashio::log.info "Mounting rpc_pipefs for NFS services"
+  mount -t rpc_pipefs sunrpc /run/rpc_pipefs
+fi
+
+if ! mountpoint -q /proc/fs/nfsd; then
+  bashio::log.info "Mounting nfsd pseudo filesystem"
+  mount -t nfsd nfsd /proc/fs/nfsd
+fi
+
+bashio::log.info "Kernel NFS server support detected; NFS pseudo filesystems are ready"

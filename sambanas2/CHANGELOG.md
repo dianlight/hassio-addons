@@ -27,6 +27,7 @@
 - Automatic modprobe for all kernel fs
 - Add ability to use Custom Samba Version - Custom Build Only 
 - Add new IPv6 disable option to disable IPv6 stack inside the addon (See [DOCS](DOCS.md) )
+- Experimental NFS server support via s6; exports auto-managed by SRAT for Media/Backup/Share share types (internal HA-addon use only)
 
 ### 🏗 Chore
 - Fork SambaNas to the new SambaNas2 addon

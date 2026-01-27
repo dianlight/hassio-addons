@@ -57,7 +57,7 @@ schema:
   disable_ipv6: bool?
   clean_upgrade_dir: bool?
   factory_reset: bool?
-image: dianlight/{arch}-addon-sambanas2
+#image: dianlight/{arch}-addon-sambanas2
 udev: true
 #usb: true
 host_dbus: true

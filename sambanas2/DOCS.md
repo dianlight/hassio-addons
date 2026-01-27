@@ -16,7 +16,7 @@ The following table compares the major functionalities available in SambaNAS and
 |------------------------------------|:--------:|:---------:|
 | **Network Sharing** | | |
 | CIFS Volume Exporting              |    ✔️     |    ✔️      |
-| NFS Volume Exporting               |    ❌     |  🚧 Soon   |
+| NFS Volume Exporting               |    ❌     |  ✔️ (experimental / internal HA-addon use only) |
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
@@ -106,6 +106,28 @@ This add-on exposes the following directories over SMB (Samba):
 | `media`         | Local media files storage.                                           |
 | `share`         | Shared data between add-ons and Home Assistant. |
 | `ssl`           | SSL certificates storage.                                       |
+
+## NFS exports (experimental)
+
+NFS services run under s6 supervision and the exports file is **automatically managed by SRAT** for internal Home Assistant communication.
+
+- SRAT (Samba REST Administration Tool) generates and maintains the `/etc/exports` file based on your share configuration in the web interface.
+- NFS exports are **limited to internal use** between Home Assistant and this add-on only.
+- Only the following share types can be exported via NFS: **Media**, **Backup**, and **Share**.
+- The NFS server waits for the exports file to be generated before starting.
+
+**How to enable NFS exports:**
+
+1. Access the SRAT web interface (Samba NAS 2 in your sidebar)
+2. Configure NFS export options for Media, Backup, or Share share types
+3. SRAT will automatically generate the appropriate `/etc/exports` configuration
+4. The NFS server will detect the changes and apply them automatically
+
+**Notes:**
+- NFS exports are **only** available for the following share types: `Media`, `Backup`, and `Share`
+- NFS is intended for internal communication between Home Assistant and the add-on, not for external network access
+- This is an experimental feature; please test carefully before relying on it in production
+- Changes made through SRAT are applied automatically without requiring an add-on restart
 
 ## Configuration
 
