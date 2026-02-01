@@ -11,19 +11,33 @@ export ADDON_VERSION=$(bashio::addon.version)
 extract_version_from_binary() {
   local bin="$1"
   local ver
-  if ! command -v objdump >/dev/null 2>&1; then
-    bashio::log.warning "objdump not found; cannot extract version from ${bin}"
-    return 1
+  local meta_line extracted_json
+  
+  # Try strings method first
+  if command -v strings >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    meta_line=$(strings -a "${bin}" | grep -oE 'SRAT_METADATA:\{[^}]*\}' | head -1)
+    
+    if [ -n "${meta_line}" ]; then
+      extracted_json=$(echo "${meta_line}" | grep -oE '\{[^}]+\}')
+      ver=$(echo "${extracted_json}" | jq -r '.version' 2>/dev/null)
+      
+      if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then
+        echo "${ver}"
+        return 0
+      fi
+    fi
   fi
-  # Collapse output to one line, then pull the JSON version value
-  #ver=$(objdump -s --section .note.metadata "$bin" 2>/dev/null \
-  #  | tr -d '\n' \
-  #  | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
-  ver=$(readelf -p .note.metadata "$bin" 2>/dev/null | grep -o '{"version":.*}' | jq .version -r 2>/dev/null)  
-  if [[ -z "$ver" ]]; then
-    return 1
+  
+  # Fallback to readelf method
+  if command -v readelf >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    ver=$(readelf -p .note.metadata "${bin}" 2>/dev/null | grep -o '{"version":.*}' | jq .version -r 2>/dev/null)
+    if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then
+      echo "${ver}"
+      return 0
+    fi
   fi
-  echo "$ver"
+  
+  return 1
 }
 
 # Validate semver, allow optional leading 'v'
