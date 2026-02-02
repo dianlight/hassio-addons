@@ -7,7 +7,7 @@
 bashio::log.debug  "-> Clean config ..."
 
 options=$(bashio::addon.options)
-old_keys='enable_smart hdd_idle_seconds'
+old_keys='enable_smart hdd_idle_second update_srat_onstart'
 for old_key in ${old_keys}; do
   if bashio::jq.exists "${options}" ".${old_key}"; then
       bashio::log.info "Removing deprecated option ${old_key}"
