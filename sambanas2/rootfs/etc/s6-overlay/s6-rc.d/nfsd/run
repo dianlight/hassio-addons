@@ -10,7 +10,7 @@ set -euo pipefail
 EXPORTS_FILE="${EXPORTS_FILE:-/etc/exports}"
 NFS_THREADS="${NFS_THREADS:-8}"
 NFS_ENABLE_VERSIONS="${NFS_ENABLE_VERSIONS:-4 4.1 4.2}"
-NFS_DISABLE_VERSIONS="${NFS_DISABLE_VERSIONS:-2 3}"
+NFS_DISABLE_VERSIONS="${NFS_DISABLE_VERSIONS:-3}"
 STATD_PID_FILE="/run/nfsd.statd.pid"
 IDMAPD_PID_FILE="/run/nfsd.idmapd.pid"
 
@@ -77,6 +77,7 @@ read -r -a NFS_VERSION_FLAGS <<<"$(build_nfsd_version_flags)"
 
 while true; do
   bashio::log.info "Starting rpc.nfsd (threads=${NFS_THREADS}) enable=[${NFS_ENABLE_VERSIONS}] disable=[${NFS_DISABLE_VERSIONS}]"
+  bashio::log.debug "NFS version flags: ${NFS_VERSION_FLAGS[@]}"
 
   if ! rpc.nfsd "${NFS_THREADS}" "${NFS_VERSION_FLAGS[@]}"; then
     bashio::log.error "rpc.nfsd failed to start (threads=${NFS_THREADS}); retrying in 10s."
