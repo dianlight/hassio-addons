@@ -247,9 +247,9 @@ RUN apk add --no-cache \
     erofs-utils \
     squashfs-tools \
     f2fs-tools \
-    gfs2-utils \
+    #    gfs2-utils \
     nfs-utils \
-    reiserfsprogs \
+    # reiserfsprogs \
     dosfstools \
     hfsprogs \
     ngtcp2 
@@ -276,12 +276,12 @@ RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/do
 # Download and install SRAT
 RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
     if [ "${BUILD_ARCH}" = "amd64" ]; then \
-        SRAT_ARCH_SUFFIX="x86_64"; \
+    SRAT_ARCH_SUFFIX="x86_64"; \
     fi; \
     curl -fsSL -o /tmp/srat.zip "https://github.com/dianlight/srat/releases/download/${SRAT_VERSION}/srat_${SRAT_ARCH_SUFFIX}.zip" \
     && unzip -o /tmp/srat.zip -d /usr/local/bin/ \
     && if [ ! -f /usr/local/bin/srat-server ] || [ ! -f /usr/local/bin/srat-cli ]; then \
-        echo "Error: srat-server or srat-cli not found after unzip"; exit 1; \
+    echo "Error: srat-server or srat-cli not found after unzip"; exit 1; \
     fi \
     && chmod a+x /usr/local/bin/srat* \
     && rm -f /tmp/srat.zip
