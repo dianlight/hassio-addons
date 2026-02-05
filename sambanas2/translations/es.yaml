@@ -1,0 +1,46 @@
+---
+configuration:
+  srat_update_channel:
+    name: Canal de actualización de SRAT
+    description: >-
+      Elige cómo se actualiza SRAT (Samba REST Administration Tool): none,
+      release, prerelease o develop.
+  auto_update:
+    name: Actualizaciones automáticas
+    description: >-
+      Descargar e instalar automáticamente las actualizaciones de SRAT cuando
+      estén disponibles en el canal de actualización seleccionado. Requiere que
+      srat_update_channel esté configurado en algo distinto a 'none'.
+  log_level:
+    name: Nivel de registro
+    description: >-
+      Define la verbosidad de los registros del add-on (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: Desactivar la autenticación de SRAT
+    description: >-
+      Al habilitarlo, la interfaz web es accesible sin inicio de sesión. Úsalo
+      solo en redes de confianza.
+  disable_ipv6:
+    name: Desactivar pila IPv6
+    description: >-
+      Cuando está habilitado (predeterminado), el complemento desactiva IPv6 y
+      obliga a los servicios a usar solo IPv4. Establécelo en false para permitir IPv6.
+  clean_upgrade_dir:
+    name: Limpiar directorio de actualización
+    description: >-
+      Elimina todas las actualizaciones binarias de SRAT descargadas del directorio
+      de datos del complemento. Úsalo solo en situaciones de emergencia para limpiar
+      archivos de actualización corruptos. Esta acción es permanente e irreversible.
+  factory_reset:
+    name: Restablecimiento de fábrica
+    description: >-
+      ⚠️ PELIGRO - ACCIÓN DESTRUCTIVA ⚠️ Realiza un restablecimiento completo de
+      fábrica eliminando la base de datos SQL, todas las configuraciones, ajustes
+      y archivos de actualización. Esto eliminará permanentemente todas las
+      configuraciones de recursos compartidos de Samba, cuentas de usuario,
+      contraseñas y ajustes personalizados. El complemento se reiniciará con
+      la configuración predeterminada. Esta acción es irreversible y no se puede
+      deshacer. Usar con extrema precaución.
+network:
+  3000/tcp: Interfaz web (sin Home Assistant)

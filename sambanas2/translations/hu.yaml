@@ -1,0 +1,46 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT frissítési csatorna
+    description: >-
+      Válassza ki, hogyan frissüljön a SRAT (Samba REST Administration Tool):
+      none, release, prerelease vagy develop.
+  auto_update:
+    name: Automatikus frissítések
+    description: >-
+      SRAT frissítések automatikus letöltése és telepítése, ha elérhetők a
+      kiválasztott frissítési csatornán. Megköveteli, hogy a srat_update_channel
+      a 'none'-tól eltérő értékre legyen állítva.
+  log_level:
+    name: Naplózási szint
+    description: >-
+      Állítsa be a kiegészítő naplóinak részletességét (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: SRAT-hitelesítés kikapcsolása
+    description: >-
+      Engedélyezéskor a webes felület bejelentkezés nélkül elérhető. Csak
+      megbízható hálózatokon használja.
+  disable_ipv6:
+    name: IPv6 verem letiltása
+    description: >-
+      Amikor engedélyezett (alapértelmezett), a bővítmény letiltja az IPv6-ot és
+      a szolgáltatásokat arra kényszeríti, hogy csak IPv4-hez kötődjenek. Állítsa
+      false-ra az IPv6 engedélyezéséhez.
+  clean_upgrade_dir:
+    name: Frissítési könyvtár törlése
+    description: >-
+      Eltávolítja az összes letöltött SRAT bináris frissítést a kiegészítő
+      adatkönyvtárából. Csak vészhelyzetben használja a sérült frissítési fájlok
+      törléséhez. Ez a művelet végleges és nem vonható vissza.
+  factory_reset:
+    name: Gyári visszaállítás
+    description: >-
+      ⚠️ VESZÉLY - PUSZTÍTÓ MŰVELET ⚠️ Teljes gyári visszaállítást hajt végre az
+      SQL adatbázis, az összes konfiguráció, beállítás és frissítési fájl törlésével.
+      Ez véglegesen törli az összes Samba megosztási konfigurációt, felhasználói
+      fiókot, jelszót és egyéni beállítást. A kiegészítő az alapértelmezett beállításokkal
+      indul újra. Ez a művelet visszafordíthatatlan és nem vonható vissza. Rendkívüli
+      óvatossággal használja.
+network:
+  3000/tcp: Webes felület (Home Assistant nélkül)

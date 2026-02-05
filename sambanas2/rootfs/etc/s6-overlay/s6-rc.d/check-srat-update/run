@@ -1,0 +1,162 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start srat-cli service
+# ==============================================================================
+export HOSTNAME
+export ADDON_VERSION=$(bashio::addon.version)
+
+# Extract version from .note.metadata using objdump
+extract_version_from_binary() {
+  local bin="$1"
+  local ver
+  local meta_line extracted_json
+  
+  # Try strings method first
+  if command -v strings >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    meta_line=$(strings -a "${bin}" | grep -oE 'SRAT_METADATA:\{[^}]*\}' | head -1)
+    
+    if [ -n "${meta_line}" ]; then
+      extracted_json=$(echo "${meta_line}" | grep -oE '\{[^}]+\}')
+      ver=$(echo "${extracted_json}" | jq -r '.version' 2>/dev/null)
+      
+      if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then
+        echo "${ver}"
+        return 0
+      fi
+    fi
+  fi
+  
+  # Fallback to readelf method
+  if command -v readelf >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    ver=$(readelf -p .note.metadata "${bin}" 2>/dev/null | grep -o '{"version":.*}' | jq .version -r 2>/dev/null)
+    if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then
+      echo "${ver}"
+      return 0
+    fi
+  fi
+  
+  return 1
+}
+
+# Validate semver, allow optional leading 'v'
+is_semver_valid() {
+  local v="$1"
+  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z\.-]+)?$ ]]
+}
+
+# Normalize version: strip leading 'v'
+normalize_version() {
+  local v="$1"
+  echo "${v#v}"
+}
+
+# Return 0 if v_new > v_old according to sort -V (best effort)
+is_version_newer() {
+  local v_old="$1"
+  local v_new="$2"
+  local newest
+  newest=$(printf "%s\n%s\n" "$v_old" "$v_new" | sort -V | tail -n1)
+  [[ "$newest" == "$v_new" && "$v_new" != "$v_old" ]]
+}
+
+# For each provided binary path, if a newer one exists in upgrade_dir, replace it
+upgrade_binaries_if_newer() {
+  local upgrade_dir="${1:-.}"
+  shift || true
+  mkdir -p "$upgrade_dir"
+
+  local src_bin base upg_bin src_ver upg_ver src_ver_n upg_ver_n
+  for src_bin in "$@"; do
+    # Skip if glob didn't match anything
+    [ -e "$src_bin" ] || continue
+    base=$(basename "$src_bin")
+    upg_bin="${upgrade_dir}/${base}"
+    if [ ! -f "$upg_bin" ]; then
+      continue
+    fi
+
+    src_ver=$(extract_version_from_binary "$src_bin") || {
+      bashio::log.warning "Cannot read version from ${src_bin}; initializing to force upgrade"
+      src_ver="2000.01.01"  # Force upgrade if source version can't be read
+    }
+    upg_ver=$(extract_version_from_binary "$upg_bin") || {
+      bashio::log.warning "Cannot read version from ${upg_bin}; skipping"
+      continue
+    }
+
+    if ! is_semver_valid "$src_ver"; then
+      bashio::log.warning "Invalid semver in source (${src_bin}): ${src_ver}; skipping"
+      continue
+    fi
+    if ! is_semver_valid "$upg_ver"; then
+      bashio::log.warning "Invalid semver in upgrade (${upg_bin}): ${upg_ver}; skipping"
+      continue
+    fi
+
+    src_ver_n=$(normalize_version "$src_ver")
+    upg_ver_n=$(normalize_version "$upg_ver")
+
+    if is_version_newer "$src_ver_n" "$upg_ver_n"; then
+      if cp -f "$upg_bin" "$src_bin"; then
+        chmod 0755 "$src_bin" || true
+        bashio::log.info "Upgraded ${base} from ${src_ver_n} to ${upg_ver_n}"
+      else
+        bashio::log.warning "Failed to overwrite ${src_bin} with ${upg_bin}"
+      fi
+    fi
+  done
+}
+
+
+
+
+# Read hostname from API or setting default "hassio"
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
+fi
+bashio::log.info "Hostname: ${HOSTNAME}"
+
+# Clean upgrade directory if requested
+if bashio::config.true 'clean_upgrade_dir'; then
+  bashio::log.info "Cleaning upgrade directory as requested..."
+  if [ -d "/data/upgrade" ]; then
+    bashio::log.info "Removing all files from /data/upgrade/"
+    rm -rf /data/upgrade/*
+    bashio::log.info "Upgrade directory cleaned successfully"
+  else
+    bashio::log.info "Upgrade directory does not exist, creating it"
+    mkdir -p /data/upgrade
+  fi
+  
+  # Reset the config to false
+  bashio::addon.option 'clean_upgrade_dir' false || \
+    bashio::log.warning "Could not reset clean_upgrade_dir to false"
+fi
+
+if bashio::config.has_value 'srat_update_channel'; then
+  srat_channel_value=$(bashio::config 'srat_update_channel')
+  if [[ "${srat_channel_value}" != "none" ]] && bashio::config.true 'auto_update'; then
+    # Determine upgrade directory based on channel
+    if [[ "${srat_channel_value}" == "develop" ]]; then
+      upgrade_dir="/config/upgrade"
+    else
+      upgrade_dir="/data/upgrade"
+    fi
+
+    # Before checking for online upgrades, check local upgrade binaries
+    upgrade_binaries_if_newer "$upgrade_dir" /usr/local/bin/srat-*
+
+    /usr/local/bin/srat-cli \
+      -loglevel "$(bashio::config 'log_level' 'info')" \
+      -upgrade-data-dir "$upgrade_dir" \
+      upgrade \
+      -channel "${srat_channel_value}"
+  fi
+fi
+
+# After checking for online upgrades, check local /data/upgrade binaries
+upgrade_binaries_if_newer "/data/upgrade" /usr/local/bin/srat-*

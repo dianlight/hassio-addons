@@ -1,0 +1,39 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT 更新通道
+    description: >-
+      选择 SRAT (Samba REST Administration Tool) 的更新方式：none、release、
+      prerelease 或 develop。
+  auto_update:
+    name: Automatic updates
+    description: >-
+      Automatically download and install SRAT updates when available on the
+      selected update channel. Requires srat_update_channel to be set to
+      something other than 'none'.
+  log_level:
+    name: 日志级别
+    description: >-
+      设置附加组件日志的详细程度（trace、debug、info、notice、warning、error、
+      fatal）。
+  leave_front_door_open:
+    name: 禁用 SRAT 认证
+    description: >-
+      启用后，网页界面无需登录即可访问。仅在可信网络中使用。
+  disable_ipv6:
+    name: 禁用 IPv6 堆栈
+    description: >-
+      启用时（默认），插件将禁用 IPv6 并强制服务仅绑定到 IPv4。设置为 false 以允许 IPv6。
+  clean_upgrade_dir:
+    name: 清理升级目录
+    description: >-
+      从附加组件的数据目录中删除所有已下载的 SRAT 二进制更新。仅在紧急情况下
+      使用以清除损坏的更新文件。此操作是永久性的且无法撤消。
+  factory_reset:
+    name: 恢复出厂设置
+    description: >-
+      ⚠️ 危险 - 破坏性操作 ⚠️ 通过删除 SQL 数据库、所有配置、设置和更新文件来执行完整的
+      恢复出厂设置。这将永久删除所有 Samba 共享配置、用户帐户、密码和自定义设置。
+      插件将使用默认设置重新启动。此操作不可逆且无法撤消。请极其谨慎使用。
+network:
+  3000/tcp: Web 界面（无需 Home Assistant）
