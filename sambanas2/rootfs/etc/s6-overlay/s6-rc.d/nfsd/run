@@ -28,6 +28,25 @@ build_nfsd_version_flags() {
   printf '%s\n' "${flags[@]}"
 }
 
+mountd_debug_level() {
+  local level
+
+  level="$(bashio::config 'log_level' 'info')"
+  case "${level}" in
+    trace) echo 7 ;;
+    debug) echo 6 ;;
+    info) echo 5 ;;
+    notice) echo 4 ;;
+    warning) echo 3 ;;
+    error) echo 2 ;;
+    fatal) echo 1 ;;
+    *)
+      bashio::log.warning "rpc.mountd: Unknown log_level '${level}'; defaulting to warning."
+      echo 3
+      ;;
+  esac
+}
+
 ensure_rpcbind() {
   if pgrep -x rpcbind >/dev/null; then
     return
@@ -93,5 +112,8 @@ while true; do
   fi
 
   bashio::log.info "NFS services started using ${EXPORTS_FILE}"
-  exec rpc.mountd -F --manage-gids
+  MOUNTD_DEBUG_LEVEL="$(mountd_debug_level)"
+  bashio::log.debug "rpc.mountd debug level: ${MOUNTD_DEBUG_LEVEL}"
+  exec s6-notifyoncheck -c "showmount -e localhost >/dev/null 2>&1" \
+    rpc.mountd -F --manage-gids -d "${MOUNTD_DEBUG_LEVEL}"
 done
