@@ -1,0 +1,46 @@
+---
+configuration:
+  srat_update_channel:
+    name: Canal d'actualització SRAT
+    description: >-
+      Tria com s'actualitza SRAT (Samba REST Administration Tool): none,
+      release, prerelease o develop.
+  auto_update:
+    name: Actualitzacions automàtiques
+    description: >-
+      Descarregar i instal·lar automàticament les actualitzacions de SRAT quan
+      estiguin disponibles al canal d'actualització seleccionat. Requereix que
+      srat_update_channel estigui configurat amb un valor diferent de 'none'.
+  log_level:
+    name: Nivell de registre
+    description: >-
+      Defineix la verbositat dels registres del complement (trace, debug, info,
+      notice, warning, error, fatal).
+  leave_front_door_open:
+    name: Desactiva l'autenticació de SRAT
+    description: >-
+      Quan està activat, la interfície web és accessible sense iniciar sessió.
+      Fes servir només en xarxes de confiança.
+  disable_ipv6:
+    name: Desactivar pila IPv6
+    description: >-
+      Quan està activat (per defecte), el complement desactiva IPv6 i obliga els
+      serveis a vincular-se només a IPv4. Estableix a fals per permetre IPv6.
+  clean_upgrade_dir:
+    name: Neteja el directori d'actualització
+    description: >-
+      Elimina totes les actualitzacions binàries de SRAT descarregades del directori
+      de dades del complement. Utilitza només en situacions d'emergència per netejar
+      fitxers d'actualització corromputs. Aquesta acció és permanent i no es pot
+      desfer.
+  factory_reset:
+    name: Restabliment de fàbrica
+    description: >-
+      ⚠️ PERILL - ACCIÓ DESTRUCTIVA ⚠️ Realitza un restabliment complet de fàbrica
+      eliminant la base de dades SQL, totes les configuracions, paràmetres i fitxers
+      d'actualització. Això esborrarà permanentment totes les configuracions de
+      comparticions Samba, comptes d'usuari, contrasenyes i configuracions personalitzades.
+      El complement es reiniciarà amb la configuració predeterminada. Aquesta acció
+      és irreversible i no es pot desfer. Utilitzeu amb extrema precaució.
+network:
+  3000/tcp: Interfície web (sense Home Assistant)
