@@ -29,7 +29,7 @@ if ! ensure_nfsd_available; then
   bashio::log.warning "Kernel does not provide NFS server support; removing nfs-utils and skipping NFS setup."
 
   if apk info -e nfs-utils >/dev/null 2>&1; then
-    apk del --no-network nfs-utils || apk del nfs-utils || true
+    apk del --no-cache --no-network nfs-utils || apk del --no-cache  nfs-utils || true
   fi
 
   exit 0
