@@ -115,7 +115,7 @@ jobs:
                 CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
           with:
                 args: |
-                    --all \
+                    --amd64 --aarch64 \
                     --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
                     --docker-hub dianlight \
                     --cosign

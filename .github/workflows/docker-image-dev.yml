@@ -171,7 +171,7 @@ jobs:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
         with:
           args: |
-            --all \
+            --amd64 --aarch64 \
             --version ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }} \
             --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
             --no-latest \
