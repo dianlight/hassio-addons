@@ -13,6 +13,7 @@ NFS_ENABLE_VERSIONS="${NFS_ENABLE_VERSIONS:-4 4.1 4.2}"
 NFS_DISABLE_VERSIONS="${NFS_DISABLE_VERSIONS:-3}"
 STATD_PID_FILE="/run/nfsd.statd.pid"
 IDMAPD_PID_FILE="/run/nfsd.idmapd.pid"
+NFSDCLD_PID_FILE="/run/nfsd.nfsdcld.pid"
 
 build_nfsd_version_flags() {
   NFS_VERSION_FLAGS=()
@@ -74,8 +75,22 @@ start_idmapd() {
   fi
 
   bashio::log.info "Starting rpc.idmapd"
-  rpc.idmapd -f &
+  rpc.idmapd -f -p /run/rpc_pipefs  &
   echo "$!" >"${IDMAPD_PID_FILE}"
+}
+
+start_nfsdcld() {
+  if ! command -v nfsdcld >/dev/null; then
+    return
+  fi
+
+  if pgrep -x nfsdcld >/dev/null; then
+    return
+  fi
+
+  bashio::log.info "Starting nfsdcld"
+  nfsdcld -F  -p /run/rpc_pipefs &
+  echo "$!" >"${NFSDCLD_PID_FILE}"
 }
 
 if [ ! -s "${EXPORTS_FILE}" ]; then
@@ -89,6 +104,7 @@ done
 ensure_rpcbind
 start_statd
 start_idmapd
+start_nfsdcld
 
 build_nfsd_version_flags
 
