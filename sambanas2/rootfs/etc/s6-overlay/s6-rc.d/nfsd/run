@@ -15,17 +15,15 @@ STATD_PID_FILE="/run/nfsd.statd.pid"
 IDMAPD_PID_FILE="/run/nfsd.idmapd.pid"
 
 build_nfsd_version_flags() {
-  local flags=()
+  NFS_VERSION_FLAGS=()
 
   for version in ${NFS_DISABLE_VERSIONS}; do
-    flags+=("-N" "${version}")
+    NFS_VERSION_FLAGS+=("-N" "${version}")
   done
 
   for version in ${NFS_ENABLE_VERSIONS}; do
-    flags+=("-V" "${version}")
+    NFS_VERSION_FLAGS+=("-V" "${version}")
   done
-
-  printf '%s\n' "${flags[@]}"
 }
 
 mountd_debug_level() {
@@ -92,7 +90,7 @@ ensure_rpcbind
 start_statd
 start_idmapd
 
-read -r -a NFS_VERSION_FLAGS <<<"$(build_nfsd_version_flags)"
+build_nfsd_version_flags
 
 while true; do
   bashio::log.info "Starting rpc.nfsd (threads=${NFS_THREADS}) enable=[${NFS_ENABLE_VERSIONS}] disable=[${NFS_DISABLE_VERSIONS}]"
