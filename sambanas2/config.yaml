@@ -9,7 +9,7 @@ arch:
   - amd64
 startup: application
 #webui: http://[HOST]:[PORT:3000]/static/index.html
-watchdog: http://[HOST]:[PORT:3000]/api/status   # Tema porta dinamica
+#watchdog: http://[HOST]:[PORT:3000]/api/status   # Tema porta dinamica
 #watchdog: tcp://[HOST]:[PORT:445]
 ports:
   3000/tcp: null
