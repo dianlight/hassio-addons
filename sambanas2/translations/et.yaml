@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT uuenduskanal
+    description: >-
+      Vali, kuidas SRAT (Samba REST Administration Tool) end uuendab: none,
+      release, prerelease või develop.
+  auto_update:
+    name: Automaatsed uuendused
+    description: >-
+      SRAT-i uuenduste automaatne allalaadimine ja installimine, kui need on
+      valitud uuenduskanalil saadaval. Nõuab, et srat_update_channel oleks
+      seatud millelegi muule kui 'none'.
+  log_level:
+    name: Logi tase
+    description: >-
+      Määra lisandmooduli logide detailsus (trace, debug, info, notice, warning,
+      error, fatal).
+  leave_front_door_open:
+    name: Keela SRAT autentimine
+    description: >-
+      Kui lubatud, on veebiliides ligipääsetav ilma sisselogimiseta. Kasuta ainult
+      usaldusväärsetes võrkudes.
+  disable_ipv6:
+    name: Keela IPv6 virn
+    description: >-
+      Kui lubatud (vaikimisi), keelab lisandmoodul IPv6 ja sunnib teenuseid
+      seonduma ainult IPv4-ga. Määra väärtuseks false, et lubada IPv6.
+  clean_upgrade_dir:
+    name: Puhasta uuenduskataloog
+    description: >-
+      Eemaldab kõik allalaaditud SRAT binaarsed uuendused lisandmooduli andmekataloogi.
+      Kasuta ainult hädaolukordades, et puhastada rikutud uuendusfaile. See toiming
+      on püsiv ja seda ei saa tagasi võtta.
+  factory_reset:
+    name: Tehaseseadete taastamine
+    description: >-
+      ⚠️ OHT - HÄVITAV TEGEVUS ⚠️ Teostab täieliku tehaseseadete taastamise, kustutades
+      SQL-andmebaasi, kõik konfiguratsioonid, seaded ja värskenduste failid. See
+      kustutab püsivalt kõik Samba jagamise konfiguratsioonid, kasutajakontod,
+      paroolid ja kohandatud seaded. Pistikprogramm taaskäivitub vaikeseadetega.
+      See tegevus on pöördumatu ja seda ei saa tagasi võtta. Kasutage äärmise
+      ettevaatusega.
+network:
+  3000/tcp: Veebiliides (ilma Home Assistantita)

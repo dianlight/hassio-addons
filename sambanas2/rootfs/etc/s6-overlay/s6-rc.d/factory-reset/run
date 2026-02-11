@@ -1,0 +1,64 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Factory Reset - Delete SQL database and all configuration
+# ==============================================================================
+
+# Check if factory_reset is enabled
+if bashio::config.true 'factory_reset'; then
+  bashio::log.blue "╔══════════════════════════════════════════════════════════════════════════════╗"
+  bashio::log.red  "║                                                                              ║"
+  bashio::log.red  "║                       ⚠️  FACTORY RESET IN PROGRESS  ⚠️                       ║"
+  bashio::log.red  "║                                                                              ║"
+  bashio::log.red  "║  This will DELETE all Samba NAS2 configurations, settings, and databases!    ║"
+  bashio::log.red  "║                                                                              ║"
+  bashio::log.blue "╚══════════════════════════════════════════════════════════════════════════════╝"
+  
+  bashio::log.warning "Starting factory reset process..."
+  
+  # Delete SQL database
+  if [ -f "/config/config.db3" ]; then
+    bashio::log.warning "Deleting SQL database: /config/config.db3"
+    rm -f /config/config.db3
+    bashio::log.info "SQL database deleted successfully"
+  else
+    bashio::log.info "SQL database does not exist, skipping deletion"
+  fi
+  
+  # Delete any database or related files
+  if [ -d "/config" ]; then
+    bashio::log.warning "Cleaning up database files..."
+    rm -f /config/config.db3-* 2>/dev/null || true
+    rm -f /config/*.db3 2>/dev/null || true
+    bashio::log.info "Database files cleaned"
+  fi
+
+  # Delete any certificate files
+  if [ -d "/config" ]; then
+    bashio::log.warning "Cleaning up certificate files..."
+    rm -f /config/server.{cert,key} 2>/dev/null || true
+    bashio::log.info "Certificate files cleaned"
+  fi
+  
+  # Set clean_upgrade_dir to true so check-srat-update will clean it
+  bashio::log.info "Setting clean_upgrade_dir to true for upgrade directory cleanup..."
+  bashio::addon.option 'clean_upgrade_dir' true || \
+    bashio::log.warning "Could not set clean_upgrade_dir to true"
+  
+  # Reset factory_reset flag to false
+  bashio::log.info "Resetting factory_reset flag to false..."
+  bashio::addon.option 'factory_reset' false || \
+    bashio::log.warning "Could not reset factory_reset to false"
+  
+  bashio::log.blue  "╔══════════════════════════════════════════════════════════════════════════════╗"
+  bashio::log.green "║                                                                              ║"
+  bashio::log.green "║                      ✅  FACTORY RESET COMPLETED  ✅                         ║"
+  bashio::log.green "║                                                                              ║"
+  bashio::log.green "║  All configurations, settings, and databases have been deleted.              ║"
+  bashio::log.green "║  The add-on will now start with default settings.                            ║"
+  bashio::log.green "║                                                                              ║"
+  bashio::log.blue  "╚══════════════════════════════════════════════════════════════════════════════╝"
+else
+  bashio::log.debug "Factory reset not requested, skipping..."
+fi

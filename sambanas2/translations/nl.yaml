@@ -1,0 +1,45 @@
+---
+configuration:
+  srat_update_channel:
+    name: SRAT-updatekanaal
+    description: >-
+      Kies hoe SRAT (Samba REST Administration Tool) zichzelf bijwerkt: none,
+      release, prerelease of develop.
+  auto_update:
+    name: Automatische updates
+    description: >-
+      SRAT-updates automatisch downloaden en installeren wanneer beschikbaar op
+      het geselecteerde updatekanaal. Vereist dat srat_update_channel is ingesteld
+      op iets anders dan 'none'.
+  log_level:
+    name: Logniveau
+    description: >-
+      Stel de detailgraad van de add-on-logs in (trace, debug, info, notice,
+      warning, error, fatal).
+  leave_front_door_open:
+    name: SRAT-authenticatie uitschakelen
+    description: >-
+      Als ingeschakeld is de webinterface toegankelijk zonder login. Gebruik
+      alleen op vertrouwde netwerken.
+  disable_ipv6:
+    name: IPv6-stack uitschakelen
+    description: >-
+      Wanneer ingeschakeld (standaard), schakelt de add-on IPv6 uit en dwingt
+      services om alleen aan IPv4 te binden. Zet op false om IPv6 toe te staan.
+  clean_upgrade_dir:
+    name: Upgrade-directory opschonen
+    description: >-
+      Verwijdert alle gedownloade SRAT binaire updates uit de gegevensdirectory
+      van de add-on. Gebruik alleen in noodsituaties om corrupte update-bestanden
+      op te schonen. Deze actie is permanent en onherroepelijk.
+  factory_reset:
+    name: Fabrieksinstellingen herstellen
+    description: >-
+      ⚠️ GEVAAR - DESTRUCTIEVE ACTIE ⚠️ Voert een volledige fabrieksinstellingen
+      herstel uit door de SQL-database, alle configuraties, instellingen en updatebestanden
+      te verwijderen. Dit zal permanent alle Samba-share configuraties, gebruikersaccounts,
+      wachtwoorden en aangepaste instellingen wissen. De add-on zal opnieuw opstarten
+      met standaardinstellingen. Deze actie is onomkeerbaar en kan niet ongedaan
+      worden gemaakt. Gebruik met uiterste voorzichtigheid.
+network:
+  3000/tcp: Webinterface (zonder Home Assistant)
