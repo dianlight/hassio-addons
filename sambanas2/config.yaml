@@ -17,7 +17,7 @@ ports:
   5357/tcp: 5357
 ports_description:
   3000/tcp: Web interface
-  3702/udp: WS Discovery (ZeroConf)
+  3702/udp: WS Discovery for auto-discovery in Home Assistant
   5357/tcp: Wsdapi interface
 ingress: true
 ingress_port: 0 # For add-ons on host network
@@ -26,6 +26,7 @@ ingress_stream: true
 panel_icon: mdi:folder-network
 panel_title: Samba NAS2
 panel_admin: true
+discovery: ["srat"]
 
 boot: auto
 init: false
