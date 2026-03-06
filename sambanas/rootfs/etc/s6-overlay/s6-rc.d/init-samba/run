@@ -6,6 +6,9 @@
 # ==============================================================================
 declare password
 declare username
+declare config_username
+declare samba_username
+declare username_has_space=false
 declare -a interfaces=()
 export HOSTNAME
 
@@ -43,13 +46,29 @@ fi
 bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 bashio::log.info "Docker Interface: $(bashio::network 'network.info.docker.inerface' '.docker.interface') $(bashio::network 'network.info.docker.network' '.docker.address')"
 
+# Use an internal Samba username when the configured username contains spaces.
+config_username=$(bashio::config 'username')
+samba_username=$(printf '%s' "${config_username}" | tr '[:space:]' '_')
+if [[ "${config_username}" =~ [[:space:]] ]]; then
+    username_has_space=true
+    {
+        printf '%s = "%s"\n' "${samba_username}" "${config_username//\"/\\\"}"
+    } >/etc/samba/smbusers
+else
+    rm -f /etc/samba/smbusers
+fi
+
 # Generate Samba configuration.
 touch /tmp/local_mount
 if [[ ! -e /tmp/local_mount.json ]]; then
     echo "{}" >/tmp/local_mount.json
 fi
 
-jq ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
+jq \
+    --arg username "${samba_username}" \
+    --argjson username_has_space "${username_has_space}" \
+    --argjson moredisks "$(jq -R -s -c 'split("\n") | map(select(length > 0)) | map(ltrimstr("/"))' </tmp/local_mount)" \
+    ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = \$moredisks | .username = \$username | .username_has_space = \$username_has_space" /data/options.json |
     tee /config/bootconfig.json |
     tempio \
         -template /usr/share/tempio/smb.gtpl \
@@ -74,7 +93,7 @@ function addSambaUser() { # $1 username $2 password
 }
 
 # Init user
-username=$(bashio::config 'username')
+username=${samba_username}
 password=$(bashio::config 'password')
 addSambaUser "${username}" "${password}"
 
