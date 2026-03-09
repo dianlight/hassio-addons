@@ -1,5 +1,11 @@
 # Changelog
 
+## 12.5.1-nas1
+
+### 🩹 BugFix
+
+- Add support for Windows usernames with spaces by always creating the Samba username map
+
 ## 12.5.0-nas [ Maintenance Mode ]
 
 ### ✨ Features 
