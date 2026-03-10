@@ -35,5 +35,13 @@ configuration:
       ⚠️ 危险 - 破坏性操作 ⚠️ 通过删除 SQL 数据库、所有配置、设置和更新文件来执行完整的
       恢复出厂设置。这将永久删除所有 Samba 共享配置、用户帐户、密码和自定义设置。
       插件将使用默认设置重新启动。此操作不可逆且无法撤消。请极其谨慎使用。
+  use_external_kernel_modules:
+    name: Use external kernel modules (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
+      modules from https://github.com/dianlight/hasos_more_modules matching your
+      board, architecture, and kernel version, and loads them into the kernel.
+      Modules are stored in /config/extra_modules. Already downloaded modules are
+      reused. Missing or incompatible modules produce a warning, not an error.
 network:
   3000/tcp: Web 界面（无需 Home Assistant）

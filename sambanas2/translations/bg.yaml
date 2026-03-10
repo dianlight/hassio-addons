@@ -41,5 +41,13 @@ configuration:
       потребителски акаунти, пароли и персонализирани настройки. Добавката ще се
       рестартира с настройки по подразбиране. Това действие е необратимо и не може
       да бъде отменено. Използвайте с изключителна предпазливост.
+  use_external_kernel_modules:
+    name: Use external kernel modules (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
+      modules from https://github.com/dianlight/hasos_more_modules matching your
+      board, architecture, and kernel version, and loads them into the kernel.
+      Modules are stored in /config/extra_modules. Already downloaded modules are
+      reused. Missing or incompatible modules produce a warning, not an error.
 network:
   3000/tcp: Уеб интерфейс (без Home Assistant)

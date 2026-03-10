@@ -140,6 +140,7 @@ log_level: warning
 disable_ipv6: true
 leave_front_door_open: false
 factory_reset: false
+use_external_kernel_modules: false
 ```
 
 **Note**: All configuration options are optional. Only specify options when you want to change the default value.
@@ -239,6 +240,38 @@ It does not grant guest access to SMB shares. Access to your Samba shares contin
 ⚠️ **Security Warning**: Enabling this option exposes the administration UI without login. Anyone on your network could change settings, manage users, and modify shares. Enable only on trusted, isolated networks and only if you fully understand the risk.
 
 Defaults to `false` (authentication required for SRAT).
+
+### Option: `use_external_kernel_modules` (optional) ⚠️ _Experimental_ — _Advanced Users Only_
+
+When enabled (set to `true`), this option downloads extra kernel modules from
+[https://github.com/dianlight/hasos_more_modules](https://github.com/dianlight/hasos_more_modules)
+GitHub releases that match your board, architecture, and kernel version, then loads them into
+the running kernel.
+
+**How it works:**
+
+1. At add-on startup the `modprobe` service checks whether a matching release asset exists on
+   GitHub (matching your board, CPU architecture, and exact kernel version).
+2. If a matching archive is found and has **not already been downloaded**, it is saved to
+   `/config/extra_modules/`.
+3. If the archive is **already present** in `/config/extra_modules/`, it is reused — no network
+   request is made.
+4. The archive is extracted and every `.ko` file found inside is loaded with `insmod`/`modprobe`.
+5. Modules that cannot be loaded (e.g., already built-in, incompatible, or simply absent)
+   generate a **warning** in the log — startup is **not** blocked.
+
+**Notes:**
+
+- This feature requires internet access from within the add-on container to reach GitHub.
+- Extra modules are stored persistently in `/config/extra_modules/` and survive restarts.
+- A factory reset (`factory_reset: true`) will remove the `/config/extra_modules/` directory.
+- If no matching modules are available for your combination of board / arch / kernel version,
+  a warning is logged and the add-on continues normally.
+
+⚠️ **Warning**: Loading third-party kernel modules can affect system stability. Only enable this
+option if you understand the implications and trust the module source.
+
+Defaults to `false`.
 
 ## Support
 

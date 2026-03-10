@@ -39,5 +39,13 @@ configuration:
       비밀번호 및 사용자 지정 설정을 영구적으로 지웁니다. 추가 기능은 기본 설정으로
       다시 시작됩니다. 이 작업은 되돌릴 수 없으며 취소할 수 없습니다. 극도로
       조심해서 사용하십시오.
+  use_external_kernel_modules:
+    name: Use external kernel modules (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
+      modules from https://github.com/dianlight/hasos_more_modules matching your
+      board, architecture, and kernel version, and loads them into the kernel.
+      Modules are stored in /config/extra_modules. Already downloaded modules are
+      reused. Missing or incompatible modules produce a warning, not an error.
 network:
   3000/tcp: 웹 인터페이스 (Home Assistant 없이 사용)

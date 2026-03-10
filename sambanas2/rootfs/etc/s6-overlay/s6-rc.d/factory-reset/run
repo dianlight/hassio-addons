@@ -40,6 +40,13 @@ if bashio::config.true 'factory_reset'; then
     rm -f /config/server.{cert,key} 2>/dev/null || true
     bashio::log.info "Certificate files cleaned"
   fi
+
+  # Delete downloaded extra kernel modules
+  if [ -d "/config/extra_modules" ]; then
+    bashio::log.warning "Removing downloaded extra kernel modules directory..."
+    rm -rf /config/extra_modules
+    bashio::log.info "Extra kernel modules directory removed"
+  fi
   
   # Set clean_upgrade_dir to true so check-srat-update will clean it
   bashio::log.info "Setting clean_upgrade_dir to true for upgrade directory cleanup..."
