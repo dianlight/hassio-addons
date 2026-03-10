@@ -42,13 +42,13 @@ configuration:
       Suplimentul va reporni cu setările implicite. Această acțiune este ireversibilă
       și nu poate fi anulată. Utilizați cu prudență extremă.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: Utilizați module externe de nucleu (Experimental)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ EXPERIMENTAL - NUMAI PENTRU UTILIZATORI AVANSAȚI ⚠️ Când este activat,
+      descarcă module suplimentare de nucleu de la
+      https://github.com/dianlight/hasos_more_modules care corespund versiunii HAOS și
+      plăcii dvs. și le încarcă în nucleu. Fiecare modul este un fișier .ko.xz separat
+      stocat în /config/extra_modules. Modulele deja descărcate sunt reutilizate.
+      Modulele lipsă sau incompatibile generează un avertisment, nu o eroare.
 network:
   3000/tcp: Interfață web (fără Home Assistant)

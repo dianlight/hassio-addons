@@ -41,13 +41,13 @@ configuration:
       účty, heslá a vlastné nastavenia. Doplnok sa reštartuje s predvolenými nastaveniami.
       Táto akcia je nezvratná a nemôže byť vrátená. Používajte s mimoriadnou opatrnosťou.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: Použiť externé moduly jadra (Experimentálne)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ EXPERIMENTÁLNE - IBA PRE POKROČILÝCH POUŽÍVATEĽOV ⚠️ Ak je povolené, stiahne
+      dodatočné moduly jadra z https://github.com/dianlight/hasos_more_modules
+      zodpovedajúce vašej verzii HAOS a doske a načíta ich do jadra. Každý modul je
+      samostatný súbor .ko.xz uložený v /config/extra_modules. Už stiahnuté moduly sa
+      znovu použijú. Chýbajúce alebo nekompatibilné moduly vygenerujú varovanie, nie
+      chybu.
 network:
   3000/tcp: Webové rozhranie (bez Home Assistant)

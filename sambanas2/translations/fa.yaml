@@ -42,13 +42,8 @@ configuration:
       مجدد می‌شود. این اقدام غیرقابل بازگشت است و نمی‌توان آن را لغو کرد.
       با احتیاط فوق‌العاده استفاده کنید.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: استفاده از ماژول‌های هسته خارجی (آزمایشی)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ آزمایشی - فقط برای کاربران پیشرفته ⚠️ در صورت فعال‌سازی، ماژول‌های هسته اضافی از https://github.com/dianlight/hasos_more_modules که با نسخه HAOS و برد شما مطابقت دارند دانلود شده و در هسته بارگذاری می‌شوند. هر ماژول یک فایل .ko.xz جداگانه ذخیره‌شده در /config/extra_modules است. ماژول‌های از قبل دانلود شده مجدداً استفاده می‌شوند. ماژول‌های مفقود یا ناسازگار یک هشدار تولید می‌کنند، نه خطا.
 network:
   3000/tcp: رابط وب (بدون Home Assistant)

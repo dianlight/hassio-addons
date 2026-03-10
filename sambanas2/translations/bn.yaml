@@ -41,13 +41,8 @@ configuration:
       ক্রিয়াটি অপরিবর্তনীয় এবং পূর্বাবস্থায় ফেরানো যাবে না। অত্যন্ত সতর্কতার
       সাথে ব্যবহার করুন।
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: বাহ্যিক কার্নেল মডিউল ব্যবহার করুন (পরীক্ষামূলক)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ পরীক্ষামূলক - শুধুমাত্র উন্নত ব্যবহারকারীদের জন্য ⚠️ সক্ষম হলে, https://github.com/dianlight/hasos_more_modules থেকে আপনার HAOS সংস্করণ এবং বোর্ডের সাথে মিলে এমন অতিরিক্ত কার্নেল মডিউল ডাউনলোড করে কার্নেলে লোড করে। প্রতিটি মডিউল /config/extra_modules-এ সংরক্ষিত একটি পৃথক .ko.xz ফাইল। ইতিমধ্যে ডাউনলোড করা মডিউলগুলি পুনরায় ব্যবহার করা হয়। অনুপস্থিত বা অসামঞ্জস্যপূর্ণ মডিউলগুলি একটি সতর্কতা তৈরি করে, ত্রুটি নয়।
 network:
   3000/tcp: ওয়েব ইন্টারফেস (Home Assistant ছাড়া)

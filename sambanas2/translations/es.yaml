@@ -43,13 +43,13 @@ configuration:
       la configuración predeterminada. Esta acción es irreversible y no se puede
       deshacer. Usar con extrema precaución.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: Usar módulos de núcleo externos (Experimental)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ EXPERIMENTAL - SOLO PARA USUARIOS AVANZADOS ⚠️ Cuando se activa, descarga
+      módulos de núcleo adicionales de https://github.com/dianlight/hasos_more_modules
+      que coinciden con su versión HAOS y placa, y los carga en el núcleo. Cada módulo
+      es un archivo .ko.xz separado almacenado en /config/extra_modules. Los módulos
+      ya descargados se reutilizan. Los módulos ausentes o incompatibles generan una
+      advertencia, no un error.
 network:
   3000/tcp: Interfaz web (sin Home Assistant)

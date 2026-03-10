@@ -43,13 +43,13 @@ configuration:
       El complement es reiniciarà amb la configuració predeterminada. Aquesta acció
       és irreversible i no es pot desfer. Utilitzeu amb extrema precaució.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: Usa mòduls de nucli externs (Experimental)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ EXPERIMENTAL - NOMÉS PER A USUARIS AVANÇATS ⚠️ Quan s'activa, descarrega
+      mòduls de nucli addicionals de https://github.com/dianlight/hasos_more_modules
+      que coincideixen amb la vostra versió HAOS i placa, i els carrega al nucli. Cada
+      mòdul és un fitxer .ko.xz separat emmagatzemat a /config/extra_modules. Els
+      mòduls ja descarregats es reutilitzen. Els mòduls absents o incompatibles
+      generen un avís, no un error.
 network:
   3000/tcp: Interfície web (sense Home Assistant)

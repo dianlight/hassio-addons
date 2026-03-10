@@ -42,13 +42,13 @@ configuration:
       са подразумеваним подешавањима. Ова акција је неповратна и не може се
       поништити. Користите са изузетном опрезношћу.
   use_external_kernel_modules:
-    name: Use external kernel modules (Experimental)
+    name: Коришћење спољних модула језгра (Експериментално)
     description: >-
-      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
-      modules from https://github.com/dianlight/hasos_more_modules matching your
-      HAOS version and board, and loads them into the kernel. Each module is a
-      separate .ko.xz file stored in /config/extra_modules. Already downloaded
-      modules are reused. Missing or incompatible modules produce a warning, not
-      an error.
+      ⚠️ ЕКСПЕРИМЕНТАЛНО - САМО ЗА НАПРЕДНЕ КОРИСНИКЕ ⚠️ Када је омогућено, преузима
+      додатне модуле језгра са https://github.com/dianlight/hasos_more_modules који
+      одговарају вашој верзији HAOS и плочи, и учитава их у језгро. Сваки модул је
+      посебна .ko.xz датотека сачувана у /config/extra_modules. Већ преузети модули се
+      поново користе. Недостајући или некомпатибилни модули генеришу упозорење, не
+      грешку.
 network:
   3000/tcp: Веб интерфејс (без Home Assistant)
