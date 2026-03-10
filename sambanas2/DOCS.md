@@ -245,19 +245,20 @@ Defaults to `false` (authentication required for SRAT).
 
 When enabled (set to `true`), this option downloads extra kernel modules from
 [https://github.com/dianlight/hasos_more_modules](https://github.com/dianlight/hasos_more_modules)
-GitHub releases that match your board, architecture, and kernel version, then loads them into
-the running kernel.
+GitHub releases that match your HAOS version and board, then loads them into the running kernel.
 
 **How it works:**
 
-1. At add-on startup the `modprobe` service checks whether a matching release asset exists on
-   GitHub (matching your board, CPU architecture, and exact kernel version).
-2. If a matching archive is found and has **not already been downloaded**, it is saved to
-   `/config/extra_modules/`.
-3. If the archive is **already present** in `/config/extra_modules/`, it is reused — no network
-   request is made.
-4. The archive is extracted and every `.ko` file found inside is loaded with `insmod`/`modprobe`.
-5. Modules that cannot be loaded (e.g., already built-in, incompatible, or simply absent)
+1. At add-on startup the `modprobe` service fetches the GitHub release whose tag matches your
+   current **HAOS version** (e.g., `17.1`).
+2. All assets whose name ends with `_{haos_version}_{board}.ko.xz` (e.g.,
+   `nfsd_17.1_generic_x86_64.ko.xz`) are downloaded to `/config/extra_modules/`.
+3. Each `.ko.xz` file is individually decompressed (`xz -d`) to produce a `.ko` file in the
+   same directory.
+4. If a `.ko` file is **already present** in `/config/extra_modules/`, that asset is skipped —
+   no network request is made for it.
+5. Every `.ko` file is loaded via `insmod`/`modprobe`.
+6. Modules that cannot be loaded (e.g., already built-in, incompatible, or missing dependencies)
    generate a **warning** in the log — startup is **not** blocked.
 
 **Notes:**
@@ -265,8 +266,8 @@ the running kernel.
 - This feature requires internet access from within the add-on container to reach GitHub.
 - Extra modules are stored persistently in `/config/extra_modules/` and survive restarts.
 - A factory reset (`factory_reset: true`) will remove the `/config/extra_modules/` directory.
-- If no matching modules are available for your combination of board / arch / kernel version,
-  a warning is logged and the add-on continues normally.
+- If no release exists for your HAOS version, or no modules match your board, a warning is
+  logged and the add-on continues normally.
 
 ⚠️ **Warning**: Loading third-party kernel modules can affect system stability. Only enable this
 option if you understand the implications and trust the module source.

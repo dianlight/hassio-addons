@@ -25,98 +25,74 @@ bashio::log.blue "--------------------------------------------------------------
 if bashio::config.true 'use_external_kernel_modules'; then
     bashio::log.info "External kernel modules support enabled (experimental)..."
 
-    KERNEL_VERSION=$(uname -r)
-    ARCH=$(uname -m)
+    HAOS_VERSION=$(bashio::os.version)
+    BOARD=$(bashio::os.board)
     EXTRA_MODULES_DIR="/config/extra_modules"
     mkdir -p "${EXTRA_MODULES_DIR}"
 
-    # Get board name from device tree if available
-    BOARD=""
-    if [ -f "/proc/device-tree/model" ]; then
-        BOARD=$(tr -d '\0' </proc/device-tree/model \
-            | tr '[:upper:]' '[:lower:]' \
-            | sed 's/[^a-z0-9]/_/g' \
-            | sed 's/__*/_/g' \
-            | sed 's/^_//;s/_$//')
-    fi
+    bashio::log.info "Looking for extra modules: haos_version=${HAOS_VERSION} board=${BOARD}"
 
-    bashio::log.info "Looking for extra modules: kernel=${KERNEL_VERSION} arch=${ARCH} board=${BOARD:-generic}"
-
-    RELEASES_URL="https://api.github.com/repos/dianlight/hasos_more_modules/releases"
+    RELEASE_URL="https://api.github.com/repos/dianlight/hasos_more_modules/releases/tags/${HAOS_VERSION}"
     CURL_ERR=$(mktemp)
-    if ! RELEASE_DATA=$(curl -sf --max-time 30 "${RELEASES_URL}" 2>"${CURL_ERR}"); then
-        bashio::log.warning "Could not fetch release information from GitHub for extra kernel modules ($(cat "${CURL_ERR}" | head -1))"
+    if ! RELEASE_DATA=$(curl -sf --max-time 30 "${RELEASE_URL}" 2>"${CURL_ERR}"); then
+        bashio::log.warning "No release found for HAOS ${HAOS_VERSION} in hasos_more_modules ($(cat "${CURL_ERR}" | head -1))"
         RELEASE_DATA=""
     fi
     rm -f "${CURL_ERR}"
 
     if [ -n "${RELEASE_DATA}" ]; then
-        MATCHING_URL=""
-        BOARD_MATCH_URL=""
+        # Collect all asset URLs matching this HAOS version and board
+        # Asset naming: {module_name}_{haos_version}_{board}.ko.xz
+        MATCH_SUFFIX="_${HAOS_VERSION}_${BOARD}.ko.xz"
+        MATCHED_COUNT=0
 
-        # Iterate assets to find best match for kernel version and arch
         while IFS= read -r asset_url; do
             asset_name=$(basename "${asset_url}")
-            if echo "${asset_name}" | grep -qF "${KERNEL_VERSION}" \
-               && echo "${asset_name}" | grep -qF "${ARCH}"; then
-                # Prefer board-specific match if board is known
-                if [ -n "${BOARD}" ] && echo "${asset_name}" | grep -qi "${BOARD}"; then
-                    BOARD_MATCH_URL="${asset_url}"
-                    break
-                fi
-                # Keep first generic match as fallback
-                if [ -z "${MATCHING_URL}" ]; then
-                    MATCHING_URL="${asset_url}"
-                fi
-            fi
-        done < <(echo "${RELEASE_DATA}" | jq -r '.[].assets[].browser_download_url' 2>/dev/null)
+            # Match assets ending with _{HAOS_VERSION}_{BOARD}.ko.xz
+            if [[ "${asset_name}" == *"${MATCH_SUFFIX}" ]]; then
+                # Derive the target .ko filename by stripping .xz
+                ko_name="${asset_name%.xz}"
+                ko_path="${EXTRA_MODULES_DIR}/${ko_name}"
 
-        # Prefer board-specific match over generic
-        if [ -n "${BOARD_MATCH_URL}" ]; then
-            MATCHING_URL="${BOARD_MATCH_URL}"
-        fi
+                MATCHED_COUNT=$((MATCHED_COUNT + 1))
 
-        if [ -n "${MATCHING_URL}" ]; then
-            ASSET_NAME=$(basename "${MATCHING_URL}")
-            DOWNLOAD_PATH="${EXTRA_MODULES_DIR}/${ASSET_NAME}"
-
-            if [ -f "${DOWNLOAD_PATH}" ]; then
-                bashio::log.info "Extra kernel modules already downloaded: ${ASSET_NAME}"
-            else
-                bashio::log.info "Downloading extra kernel modules: ${ASSET_NAME}"
-                CURL_DL_ERR=$(mktemp)
-                if curl -sfL --max-time 120 "${MATCHING_URL}" -o "${DOWNLOAD_PATH}" 2>"${CURL_DL_ERR}"; then
-                    bashio::log.info "Downloaded extra kernel modules: ${ASSET_NAME}"
+                if [ -f "${ko_path}" ]; then
+                    bashio::log.info "Extra module already present, skipping download: ${ko_name}"
                 else
-                    bashio::log.warning "Failed to download extra kernel modules from ${MATCHING_URL} ($(cat "${CURL_DL_ERR}" | head -1))"
-                    rm -f "${DOWNLOAD_PATH}"
-                    DOWNLOAD_PATH=""
+                    bashio::log.info "Downloading extra kernel module: ${asset_name}"
+                    xz_path="${EXTRA_MODULES_DIR}/${asset_name}"
+                    CURL_DL_ERR=$(mktemp)
+                    if curl -sfL --max-time 60 "${asset_url}" -o "${xz_path}" 2>"${CURL_DL_ERR}"; then
+                        XZ_ERR=$(mktemp)
+                        if xz -d "${xz_path}" 2>"${XZ_ERR}"; then
+                            bashio::log.info "Decompressed: ${ko_name}"
+                        else
+                            bashio::log.warning "Failed to decompress ${asset_name}: $(cat "${XZ_ERR}" | head -1) - skipping"
+                            rm -f "${xz_path}"
+                        fi
+                        rm -f "${XZ_ERR}"
+                    else
+                        bashio::log.warning "Failed to download ${asset_name} ($(cat "${CURL_DL_ERR}" | head -1)) - skipping"
+                        rm -f "${xz_path}"
+                    fi
+                    rm -f "${CURL_DL_ERR}"
                 fi
-                rm -f "${CURL_DL_ERR}"
-            fi
 
-            if [ -f "${DOWNLOAD_PATH}" ]; then
-                EXTRACT_DIR="${EXTRA_MODULES_DIR}/.extracted_$(echo "${ASSET_NAME}" | sed 's/[^a-zA-Z0-9._-]/_/g')"
-                mkdir -p "${EXTRACT_DIR}"
-                TAR_ERR=$(mktemp)
-                if tar -xzf "${DOWNLOAD_PATH}" -C "${EXTRACT_DIR}" 2>"${TAR_ERR}" \
-                   || tar -xf "${DOWNLOAD_PATH}" -C "${EXTRACT_DIR}" 2>>"${TAR_ERR}"; then
-                    while IFS= read -r -d '' ko_file; do
-                        mod_name=$(basename "${ko_file}" .ko)
-                        bashio::log.info "Loading extra kernel module: ${mod_name}"
-                        MOD_ERR=$(mktemp)
-                        insmod "${ko_file}" 2>"${MOD_ERR}" \
-                            || modprobe "${mod_name}" 2>"${MOD_ERR}" \
-                            || bashio::log.warning "Could not load module ${mod_name}: $(cat "${MOD_ERR}" | head -1) - skipping"
-                        rm -f "${MOD_ERR}"
-                    done < <(find "${EXTRACT_DIR}" -name "*.ko" -print0 2>/dev/null)
-                else
-                    bashio::log.warning "Failed to extract extra kernel modules archive: ${ASSET_NAME} ($(cat "${TAR_ERR}" | head -1))"
+                # Load the module if the .ko is present
+                if [ -f "${ko_path}" ]; then
+                    mod_name="${ko_name%.ko}"
+                    bashio::log.info "Loading extra kernel module: ${mod_name}"
+                    MOD_ERR=$(mktemp)
+                    insmod "${ko_path}" 2>"${MOD_ERR}" \
+                        || modprobe "${mod_name}" 2>"${MOD_ERR}" \
+                        || bashio::log.warning "Could not load module ${mod_name}: $(cat "${MOD_ERR}" | head -1) - skipping"
+                    rm -f "${MOD_ERR}"
                 fi
-                rm -f "${TAR_ERR}"
             fi
-        else
-            bashio::log.warning "No extra kernel modules found for kernel=${KERNEL_VERSION} arch=${ARCH} board=${BOARD:-generic}"
+        done < <(echo "${RELEASE_DATA}" | jq -r '.assets[].browser_download_url' 2>/dev/null)
+
+        if [ "${MATCHED_COUNT}" -eq 0 ]; then
+            bashio::log.warning "No extra kernel modules found for haos_version=${HAOS_VERSION} board=${BOARD}"
         fi
     fi
 fi
