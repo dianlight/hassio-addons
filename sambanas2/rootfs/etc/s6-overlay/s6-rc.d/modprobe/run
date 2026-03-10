@@ -13,12 +13,6 @@ for mod in $MOD_FS; do
     modprobe "$mod" ||:
 done
 
-fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
-bashio::log.blue "------------------------------------------------------------------------------------------------------"
-bashio::log.green "System Supported fs: ${fstypes}"
-if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
-bashio::log.blue "------------------------------------------------------------------------------------------------------"
-
 # ==============================================================================
 # Download and load extra kernel modules from GitHub (experimental)
 # ==============================================================================
@@ -96,5 +90,11 @@ if bashio::config.true 'use_external_kernel_modules'; then
         fi
     fi
 fi
+
+fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
+bashio::log.blue "------------------------------------------------------------------------------------------------------"
+bashio::log.green "System Supported fs: ${fstypes}"
+if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
+bashio::log.blue "------------------------------------------------------------------------------------------------------"
 
 bashio::log.debug  "-> Done."
