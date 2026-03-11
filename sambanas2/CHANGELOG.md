@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.2.0-dev [ 🚧 Unreleased ]
+## 2026.3.0-dev [ 🚧 Unreleased ]
 
 ### 🙏 Thanks
 
@@ -19,6 +19,8 @@
 
 ###  ✨ Features
 - Brand New icon and logo AI Generated
+- New option `use_external_kernel_modules` (default: false) to downloads extra kernel modules from
+[https://github.com/dianlight/hasos_more_modules](https://github.com/dianlight/hasos_more_modules) (See [DOCS](DOCS.md) )
 - New option `srat_update_channel`to manage SRAT Update (EXPERIMENTAL [DOCS](DOCS.md) )
 - New option `auto_update` (default: true) to automatically download and install SRAT updates
 - New option `factory_reset` (default: false) to delete all configurations, settings, and database (See [DOCS](DOCS.md) )

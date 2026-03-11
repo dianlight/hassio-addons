@@ -20,6 +20,7 @@ The following table compares the major functionalities available in SambaNAS and
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
+| Avahi/mDNS Support                 |    ✔️     |    🚧 Soon (via component)     |
 | Samba over QUIC Support            |    ❌     |  🚧 Soon   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
@@ -42,8 +43,8 @@ The following table compares the major functionalities available in SambaNAS and
 | HA Native API Integration          |    ❌     |    ✔️      |
 | Component Integration              |    ❌     |  🚧 Soon   |
 | **Disk Management** | | |
-| SMART Monitoring                  |    ✔️     |    🚧 Soon      |
-| SMART Test Support                      |    ❌     |    🚧 Soon      |
+| SMART Monitoring                  |    ✔️     |    ✔️    |
+| SMART Test Support                      |    ❌     |    ✔️   |
 | Disk Spindown Support              |    ✔️     |    🚧 Soon      |
 | Per Disk Spindown Support              |    ❌     |    🚧 Soon      |
 | **Filesystem Support** | | |
@@ -51,6 +52,9 @@ The following table compares the major functionalities available in SambaNAS and
 | Advanced XFS Support | ❌ | 🚧 Soon  |
 | Advanced BTRFS Support | ❌ | 🚧 Soon  |
 | Advanced ZFS Support                       |    ❌     |    🚧 Soon   |
+| **Other Features** | | |
+| External Kernel Modules Support                     |    ❌     |    ✔️ (experimental) |
+
 
 > ✔️ = Supported  ❌ = Not Supported  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
 
@@ -59,7 +63,7 @@ The following table compares the major functionalities available in SambaNAS and
 **Requirements:**
 - Home Assistant 2025.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
-- Supported architectures: armv7, aarch64, amd64
+- Supported architectures: ~~armv7,~~ aarch64, amd64
 
 Follow these steps to get the add-on installed on your system:
 
