@@ -7,5 +7,6 @@ build_from:
 #  identity: https://github.com/dianlight/hassio-addons/.*
 args:
   HA_CLI_VERSION: "4.45.0"
-  SRAT_VERSION: "2026.3.0-dev.0"
-  SAMBA_VERSION: "distribution" #"4.23.1" # Use "distribution" to use precompiled packages
+  SRAT_VERSION: "2026.3.0-dev.1"
+  #SAMBA_VERSION: "distribution" # Use "distribution" to use precompiled packages
+  SAMBA_VERSION: "4.23.6" # Use "distribution" to use precompiled packages
