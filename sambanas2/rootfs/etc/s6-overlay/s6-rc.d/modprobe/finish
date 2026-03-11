@@ -1,0 +1,31 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Unload external kernel modules loaded by modprobe run script
+# ==============================================================================
+if bashio::config.true 'use_external_kernel_modules'; then
+    bashio::log.info "Unloading external kernel modules..."
+
+    EXTRA_MODULES_DIR="/config/extra_modules"
+
+    if [ -d "${EXTRA_MODULES_DIR}" ]; then
+        # Iterate over all .ko files in reverse order to respect potential dependencies
+        while IFS= read -r ko_path; do
+            ko_name=$(basename "${ko_path}")
+            mod_name="${ko_name%.ko}"
+            if lsmod | grep -q "^${mod_name} "; then
+                bashio::log.info "Unloading extra kernel module: ${mod_name}"
+                MOD_ERR=$(mktemp)
+                if ! rmmod "${mod_name}" 2>"${MOD_ERR}"; then
+                    bashio::log.warning "Could not unload module ${mod_name}: $(cat "${MOD_ERR}") - skipping"
+                fi
+                rm -f "${MOD_ERR}"
+            else
+                bashio::log.debug "Module not loaded, skipping: ${mod_name}"
+            fi
+        done < <(find "${EXTRA_MODULES_DIR}" -maxdepth 1 -name "*.ko" | sort -r)
+    fi
+
+    bashio::log.info "External kernel modules unloaded."
+fi

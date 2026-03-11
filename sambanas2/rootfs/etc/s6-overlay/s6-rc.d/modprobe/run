@@ -7,9 +7,10 @@
 bashio::log.debug  "-> Loading kernel modules..."
 
 # Load necessary modules
-MOD_FS=$(ls "/lib/modules/$(uname -r)/kernel/fs")
+MOD_TO_LOAD=$(ls "/lib/modules/$(uname -r)/kernel/fs")
+MOD_TO_LOAD="${MOD_TO_LOAD} udp_tunnel ip6_udp_tunnel"
 
-for mod in $MOD_FS; do
+for mod in $MOD_TO_LOAD; do
     modprobe "$mod" ||:
 done
 
@@ -20,7 +21,7 @@ if bashio::config.true 'use_external_kernel_modules'; then
     bashio::log.info "External kernel modules support enabled (experimental)..."
 
     HAOS_VERSION=$(bashio::os.version)
-    BOARD=$(bashio::os.board)
+    BOARD=$(bashio::os.board | tr '-' '_')
     EXTRA_MODULES_DIR="/config/extra_modules"
     mkdir -p "${EXTRA_MODULES_DIR}"
 
@@ -78,8 +79,8 @@ if bashio::config.true 'use_external_kernel_modules'; then
                     bashio::log.info "Loading extra kernel module: ${mod_name}"
                     MOD_ERR=$(mktemp)
                     insmod "${ko_path}" 2>"${MOD_ERR}" \
-                        || modprobe "${mod_name}" 2>"${MOD_ERR}" \
-                        || bashio::log.warning "Could not load module ${mod_name}: $(cat "${MOD_ERR}" | head -1) - skipping"
+                        || modprobe "${mod_name}" 2>>"${MOD_ERR}" \
+                        || bashio::log.warning "Could not load module ${mod_name}: $(cat "${MOD_ERR}") - skipping"
                     rm -f "${MOD_ERR}"
                 fi
             fi
