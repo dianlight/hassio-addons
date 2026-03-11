@@ -252,7 +252,8 @@ RUN apk add --no-cache \
     # reiserfsprogs \
     dosfstools \
     hfsprogs \
-    ngtcp2 
+    ngtcp2 \
+    xz
 
 # Install APFS support (not available for armv7)
 # hadolint ignore=DL3018
