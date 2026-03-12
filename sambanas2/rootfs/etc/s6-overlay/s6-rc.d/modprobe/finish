@@ -10,10 +10,14 @@ if bashio::config.true 'use_external_kernel_modules'; then
     EXTRA_MODULES_DIR="/config/extra_modules"
 
     if [ -d "${EXTRA_MODULES_DIR}" ]; then
-        # Iterate over all .ko files in reverse order to respect potential dependencies
+        # Iterate over all module files in reverse order to respect potential dependencies
         while IFS= read -r ko_path; do
             ko_name=$(basename "${ko_path}")
-            mod_name="${ko_name%.ko}"
+            mod_name="$(modinfo -F name "${ko_path}" 2>/dev/null || true)"
+            if [ -z "${mod_name}" ]; then
+                mod_name="${ko_name%.ko}"
+                mod_name="${mod_name%.xz}"
+            fi
             if lsmod | grep -q "^${mod_name} "; then
                 bashio::log.info "Unloading extra kernel module: ${mod_name}"
                 MOD_ERR=$(mktemp)
@@ -24,7 +28,7 @@ if bashio::config.true 'use_external_kernel_modules'; then
             else
                 bashio::log.debug "Module not loaded, skipping: ${mod_name}"
             fi
-        done < <(find "${EXTRA_MODULES_DIR}" -maxdepth 1 -name "*.ko" | sort -r)
+        done < <(find "${EXTRA_MODULES_DIR}" -maxdepth 1 \( -name "*.ko" -o -name "*.ko.xz" \) | sort -r)
     fi
 
     bashio::log.info "External kernel modules unloaded."

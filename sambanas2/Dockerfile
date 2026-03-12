@@ -264,13 +264,14 @@ RUN apk add --no-cache \
     dosfstools \
     hfsprogs \
     ngtcp2 \
-    xz
+    xz \
     ngtcp2  \
+    kmod \
     && apk add --no-cache \
     --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
     --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
     zfs
-    
+
 
 # Install APFS support (not available for armv7)
 # hadolint ignore=DL3018
