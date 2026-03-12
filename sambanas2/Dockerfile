@@ -57,7 +57,7 @@ SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN mkdir -p /usr/local/samba
 
 # Install Samba build dependencies only if we need to compile Samba
-RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
+RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ "$SAMBA_VERSION" != "edge" ]; then \
     apk add --no-cache \
     build-base \
     python3-dev \
@@ -171,6 +171,17 @@ RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
     samba-server \
     samba-client \
     openssl; \
+    elif [ "$SAMBA_VERSION" = "edge" ]; then \
+    # Add Alpine edge repository and install Samba from edge branch \
+    echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories \
+    && echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && apk add --no-cache \
+    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+    samba-common-tools \
+    samba-server \
+    samba-client \
+    openssl; \
     else \
     # Install runtime dependencies for compiled Samba \
     apk add --no-cache \
@@ -254,6 +265,12 @@ RUN apk add --no-cache \
     hfsprogs \
     ngtcp2 \
     xz
+    ngtcp2  \
+    && apk add --no-cache \
+    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+    zfs
+    
 
 # Install APFS support (not available for armv7)
 # hadolint ignore=DL3018

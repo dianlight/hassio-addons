@@ -8,5 +8,4 @@ build_from:
 args:
   HA_CLI_VERSION: "4.45.0"
   SRAT_VERSION: "2026.3.0-dev.1"
-  #SAMBA_VERSION: "distribution" # Use "distribution" to use precompiled packages
-  SAMBA_VERSION: "4.23.6" # Use "distribution" to use precompiled packages
+  SAMBA_VERSION: "edge" #"4.23.1" # Use "distribution" or "edge" to use precompiled packages from version or edge branch
