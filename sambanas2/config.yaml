@@ -15,10 +15,14 @@ ports:
   3000/tcp: null
   3702/udp: 3702
   5357/tcp: 5357
+  443/udp: 443
+  445/tcp: 445
 ports_description:
   3000/tcp: Web interface
   3702/udp: WS Discovery for auto-discovery in Home Assistant
   5357/tcp: Wsdapi interface
+  443/udp: SMB over QUIC
+  445/tcp: SMB/CIFS
 ingress: true
 ingress_port: 0 # For add-ons on host network
 ingress_entry: index.html

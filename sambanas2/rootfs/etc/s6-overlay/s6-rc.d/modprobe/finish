@@ -18,16 +18,17 @@ if bashio::config.true 'use_external_kernel_modules'; then
                 mod_name="${ko_name%.ko}"
                 mod_name="${mod_name%.xz}"
             fi
-            if lsmod | grep -q "^${mod_name} "; then
-                bashio::log.info "Unloading extra kernel module: ${mod_name}"
-                MOD_ERR=$(mktemp)
-                if ! rmmod "${mod_name}" 2>"${MOD_ERR}"; then
-                    bashio::log.warning "Could not unload module ${mod_name}: $(cat "${MOD_ERR}") - skipping"
+            bashio::log.info "Unloading extra kernel module: '${mod_name}'"
+            MOD_ERR=$(mktemp)
+            if ! modprobe -r "${mod_name}" 2>"${MOD_ERR}"; then
+                mod_err_message="$(cat "${MOD_ERR}")"
+                if grep -qi "is not currently loaded" "${MOD_ERR}"; then
+                    bashio::log.debug "Module not loaded, skipping: '${mod_name}'"
+                else
+                    bashio::log.warning "Could not unload module '${mod_name}': ${mod_err_message} - skipping"
                 fi
-                rm -f "${MOD_ERR}"
-            else
-                bashio::log.debug "Module not loaded, skipping: ${mod_name}"
             fi
+            rm -f "${MOD_ERR}"
         done < <(find "${EXTRA_MODULES_DIR}" -maxdepth 1 \( -name "*.ko" -o -name "*.ko.xz" \) | sort -r)
     fi
 
