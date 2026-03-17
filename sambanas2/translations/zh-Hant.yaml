@@ -35,5 +35,9 @@ configuration:
       ⚠️ 危險 - 破壞性操作 ⚠️ 透過刪除 SQL 資料庫、所有設定、配置和更新檔案來執行完整的
       恢復原廠設定。這將永久刪除所有 Samba 共用設定、使用者帳戶、密碼和自訂設定。
       附加元件將使用預設設定重新啟動。此操作不可逆且無法復原。請極度謹慎使用。
+  use_external_kernel_modules:
+    name: 使用外部核心模組（實驗性）
+    description: >-
+      ⚠️ 實驗性 - 僅限進階使用者 ⚠️ 啟用後，從 https://github.com/dianlight/hasos_more_modules 下載與您的 HAOS 版本和主機板相符的額外核心模組，並將其載入核心。每個模組是一個單獨的 .ko.xz 檔案，儲存在 /config/extra_modules 中。已下載的模組會被重複使用。遺失或不相容的模組會產生警告，而不是錯誤。
 network:
   3000/tcp: 網頁介面（無需 Home Assistant）

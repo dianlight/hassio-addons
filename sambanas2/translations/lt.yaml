@@ -41,5 +41,14 @@ configuration:
       slaptažodžius ir pasirinktinius nustatymus. Priedas bus paleistas iš naujo su
       numatytaisiais nustatymais. Šis veiksmas yra neatitaisomas ir negali būti
       atliktas atšauktas. Naudokite su didelės atsargumo.
+  use_external_kernel_modules:
+    name: Naudoti išorinius branduolio modulius (Eksperimentinis)
+    description: >-
+      ⚠️ EKSPERIMENTINIS - TIK PAŽENGUSIEMS VARTOTOJAMS ⚠️ Kai įjungta, atsisiunčia
+      papildomus branduolio modulius iš
+      https://github.com/dianlight/hasos_more_modules atitinkančius jūsų HAOS versiją
+      ir plokštę, ir juos įkelia į branduolį. Kiekvienas modulis yra atskiras .ko.xz
+      failas, saugomas /config/extra_modules. Jau atsisiųsti moduliai naudojami
+      pakartotinai. Trūkstami ar nesuderinami moduliai sukuria įspėjimą, o ne klaidą.
 network:
   3000/tcp: Žiniatinklio sąsaja (be Home Assistant)

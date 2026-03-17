@@ -41,5 +41,14 @@ configuration:
       en aangepaste instellings uitvee. Die byvoegsel sal met verstek instellings
       herbegin. Hierdie aksie is onomkeerbaar en kan nie ongedaan gemaak word nie.
       Gebruik met uiterste versigtigheid.
+  use_external_kernel_modules:
+    name: Gebruik eksterne kernelmodules (Eksperimenteel)
+    description: >-
+      ⚠️ EKSPERIMENTEEL - SLEGS VIR GEVORDERDE GEBRUIKERS ⚠️ Wanneer geaktiveer, laai
+      ekstra kernelmodules af van https://github.com/dianlight/hasos_more_modules wat
+      ooreenstem met jou HAOS-weergawe en bord, en laai dit in die kernel. Elke module
+      is 'n aparte .ko.xz-lêer wat in /config/extra_modules gestoor word. Reeds
+      afgelaaide modules word hergebruik. Ontbrekende of onversoenbare modules gee 'n
+      waarskuwing, nie 'n fout nie.
 network:
   3000/tcp: Webkoppelvlak (sonder Home Assistant)

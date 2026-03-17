@@ -6,12 +6,137 @@
 # ==============================================================================
 bashio::log.debug  "-> Loading kernel modules..."
 
-# Load necessary modules
-MOD_FS=$(ls /lib/modules/$(uname -r)/kernel/fs)
+KERNEL_RELEASE=$(uname -r)
+BASE_MODULES_DIR="/lib/modules/${KERNEL_RELEASE}"
+EXTRA_MODULES_DIR="/config/extra_modules"
 
-for mod in $MOD_FS; do
-    modprobe "$mod" ||:
+# ==============================================================================
+# Download and load extra kernel modules from GitHub (experimental)
+# ==============================================================================
+if bashio::config.true 'use_external_kernel_modules'; then
+    bashio::log.info "External kernel modules support enabled (experimental)..."
+
+    HAOS_VERSION=$(bashio::os.version)
+    BOARD=$(bashio::os.board | tr '-' '_')
+    mkdir -p "${EXTRA_MODULES_DIR}"
+
+    bashio::log.info "Looking for extra modules: haos_version=${HAOS_VERSION} board=${BOARD}"
+
+    RELEASE_URL="https://api.github.com/repos/dianlight/hasos_more_modules/releases/tags/${HAOS_VERSION}"
+    CURL_ERR=$(mktemp)
+    if ! RELEASE_DATA=$(curl -sf --max-time 30 "${RELEASE_URL}" 2>"${CURL_ERR}"); then
+        bashio::log.warning "No release found for HAOS ${HAOS_VERSION} in hasos_more_modules ($(cat "${CURL_ERR}" | head -1))"
+        RELEASE_DATA=""
+    fi
+    rm -f "${CURL_ERR}"
+
+    if [ -n "${RELEASE_DATA}" ]; then
+        # Collect all asset URLs matching this HAOS version and board
+        # Asset naming: {module_name}_{haos_version}_{board}.ko.xz
+        MATCH_SUFFIX="_${HAOS_VERSION}_${BOARD}.ko.xz"
+        MATCHED_COUNT=0
+
+        while IFS= read -r asset_url; do
+            asset_name=$(basename "${asset_url}")
+            # Match assets ending with _{HAOS_VERSION}_{BOARD}.ko.xz
+            if [[ "${asset_name}" == *"${MATCH_SUFFIX}" ]]; then
+                module_name="${asset_name%${MATCH_SUFFIX}}"
+                xz_name="${module_name}.ko.xz"
+                xz_path="${EXTRA_MODULES_DIR}/${xz_name}"
+
+                MATCHED_COUNT=$((MATCHED_COUNT + 1))
+
+                if [ -f "${xz_path}" ]; then
+                    bashio::log.info "Extra module already present, skipping download: ${xz_name}"
+                else
+                    bashio::log.info "Downloading extra kernel module: ${asset_name}"
+                    CURL_DL_ERR=$(mktemp)
+                    if curl -sfL --max-time 60 "${asset_url}" -o "${xz_path}" 2>"${CURL_DL_ERR}"; then
+                        bashio::log.info "Downloaded: ${xz_name}"
+                    else
+                        bashio::log.warning "Failed to download ${asset_name} ($(cat "${CURL_DL_ERR}" | head -1)) - skipping"
+                        rm -f "${xz_path}"
+                    fi
+                    rm -f "${CURL_DL_ERR}"
+                fi
+            fi
+        done < <(echo "${RELEASE_DATA}" | jq -r '.assets[].browser_download_url' 2>/dev/null)
+
+        if [ "${MATCHED_COUNT}" -eq 0 ]; then
+            bashio::log.warning "No extra kernel modules found for haos_version=${HAOS_VERSION} board=${BOARD}"
+        fi
+    fi
+fi
+
+# Build a temporary virtual modules tree that merges system modules and extra modules.
+VIRTUAL_ROOT=$(mktemp -d)
+VIRTUAL_MODULES_DIR="${VIRTUAL_ROOT}/lib/modules/${KERNEL_RELEASE}"
+mkdir -p "${VIRTUAL_MODULES_DIR}"
+
+cleanup_virtual_modules() {
+    rm -rf "${VIRTUAL_ROOT}"
+}
+trap cleanup_virtual_modules EXIT
+
+for item in "${BASE_MODULES_DIR}"/*; do
+    [ -e "${item}" ] || continue
+    ln -s "${item}" "${VIRTUAL_MODULES_DIR}/$(basename "${item}")"
 done
+
+mkdir -p "${VIRTUAL_MODULES_DIR}/extra"
+for extra_mod in "${EXTRA_MODULES_DIR}"/*.ko "${EXTRA_MODULES_DIR}"/*.ko.xz "${EXTRA_MODULES_DIR}"/*.ko.gz "${EXTRA_MODULES_DIR}"/*.ko.zst; do
+    [ -f "${extra_mod}" ] || continue
+    ln -sf "${extra_mod}" "${VIRTUAL_MODULES_DIR}/extra/$(basename "${extra_mod}")"
+done
+
+declare -a MODULES_TO_LOAD
+while IFS= read -r module_name; do
+    MODULES_TO_LOAD+=("${module_name}")
+done < <(find -L "${VIRTUAL_MODULES_DIR}/kernel/fs" -type f \( -name '*.ko' -o -name '*.ko.xz' -o -name '*.ko.gz' -o -name '*.ko.zst' \) | sed -E 's|.*/||; s/\.ko(\.(xz|gz|zst))?$//' | sort -u)
+
+while IFS= read -r module_name; do
+    MODULES_TO_LOAD+=("${module_name}")
+done < <(find -L "${VIRTUAL_MODULES_DIR}/extra" -type f \( -name '*.ko' -o -name '*.ko.xz' -o -name '*.ko.gz' -o -name '*.ko.zst' \) | sed -E 's|.*/||; s/\.ko(\.(xz|gz|zst))?$//' | sort -u)
+
+#MODULES_TO_LOAD+=("udp_tunnel" "ip6_udp_tunnel")
+
+declare -a UNIQUE_MODULES
+for module_name in "${MODULES_TO_LOAD[@]}"; do
+    [ -n "${module_name}" ] || continue
+    if [[ " ${UNIQUE_MODULES[*]} " != *" ${module_name} "* ]]; then
+        UNIQUE_MODULES+=("${module_name}")
+    fi
+done
+
+if ! depmod -b "${VIRTUAL_ROOT}" "${KERNEL_RELEASE}"; then
+    bashio::log.warning "depmod failed for virtual module tree; module dependency resolution may be incomplete"
+fi
+
+module_is_loaded() {
+    lsmod | grep -q "^$1 "
+}
+
+log_module_status() {
+    bashio::log.info "[$1] $2"
+}
+
+ICON_OK=$'\033[32m✓\033[0m'
+ICON_FAIL=$'\033[31m✗\033[0m'
+ICON_ALREADY=$'\033[33m•\033[0m'
+
+if [ "${#UNIQUE_MODULES[@]}" -gt 0 ]; then
+    bashio::log.info "Loading kernel modules (${#UNIQUE_MODULES[@]} modules)..."
+
+    for module_name in "${UNIQUE_MODULES[@]}"; do
+        if module_is_loaded "${module_name}"; then
+            log_module_status "${ICON_ALREADY}" "${module_name}"
+        elif modprobe -d "${VIRTUAL_ROOT}" -S "${KERNEL_RELEASE}" "${module_name}"; then
+            log_module_status "${ICON_OK}" "${module_name}"
+        else
+            bashio::log.warning "[${ICON_FAIL}] ${module_name}"
+        fi
+    done
+fi
 
 fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
 bashio::log.blue "------------------------------------------------------------------------------------------------------"

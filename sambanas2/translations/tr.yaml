@@ -41,5 +41,14 @@ configuration:
       ve özel ayarları kalıcı olarak silecektir. Eklenti varsayılan ayarlarla yeniden
       başlayacaktır. Bu eylem geri alınamaz ve geri döndürülemez. Son derece dikkatli
       kullanın.
+  use_external_kernel_modules:
+    name: Harici çekirdek modülleri kullan (Deneysel)
+    description: >-
+      ⚠️ DENEYSEL - YALNIZCA GELİŞMİŞ KULLANICILAR İÇİN ⚠️ Etkinleştirildiğinde,
+      https://github.com/dianlight/hasos_more_modules adresinden HAOS sürümünüz ve
+      kartınızla eşleşen ek çekirdek modüllerini indirir ve çekirdeğe yükler. Her
+      modül, /config/extra_modules içinde saklanan ayrı bir .ko.xz dosyasıdır. Zaten
+      indirilen modüller yeniden kullanılır. Eksik veya uyumsuz modüller hata değil,
+      uyarı oluşturur.
 network:
   3000/tcp: Web arayüzü (Home Assistant olmadan kullanın)

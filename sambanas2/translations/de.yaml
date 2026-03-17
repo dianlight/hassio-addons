@@ -41,5 +41,14 @@ configuration:
       Benutzerkonten, Passwörter und benutzerdefinierten Einstellungen gelöscht.
       Das Add-on wird mit Standardeinstellungen neu gestartet. Diese Aktion ist
       irreversibel und kann nicht rückgängig gemacht werden. Mit äußerster Vorsicht verwenden.
+  use_external_kernel_modules:
+    name: Externe Kernel-Module verwenden (Experimentell)
+    description: >-
+      ⚠️ EXPERIMENTELL - NUR FÜR ERFAHRENE BENUTZER ⚠️ Wenn aktiviert, werden
+      zusätzliche Kernel-Module von https://github.com/dianlight/hasos_more_modules
+      heruntergeladen, die zu Ihrer HAOS-Version und Ihrem Board passen, und in den
+      Kernel geladen. Jedes Modul ist eine separate .ko.xz-Datei in
+      /config/extra_modules. Bereits heruntergeladene Module werden wiederverwendet.
+      Fehlende oder inkompatible Module erzeugen eine Warnung, keinen Fehler.
 network:
   3000/tcp: Weboberfläche (ohne Home Assistant)

@@ -41,5 +41,14 @@ configuration:
       paroles un pielāgotus iestatījumus. Papildinājums tiks pārstartēts ar noklusējuma
       iestatījumiem. Šī darbība ir neatgriezeniska un to nevar atsaukt. Izmantojiet
       ar ārkārtēju pārsardzību.
+  use_external_kernel_modules:
+    name: Izmantot ārējos kodola moduļus (Eksperimentāls)
+    description: >-
+      ⚠️ EKSPERIMENTĀLS - TIKAI PIEREDZĒJUŠIEM LIETOTĀJIEM ⚠️ Kad iespējots,
+      lejupielādē papildu kodola moduļus no
+      https://github.com/dianlight/hasos_more_modules, kas atbilst jūsu HAOS versijai
+      un platei, un ielādē tos kodolā. Katrs modulis ir atsevišķs .ko.xz fails, kas
+      saglabāts /config/extra_modules. Jau lejupielādētie moduļi tiek izmantoti
+      atkārtoti. Trūkstošie vai nesaderīgie moduļi ģenerē brīdinājumu, nevis kļūdu.
 network:
   3000/tcp: Tīmekļa saskarne (bez Home Assistant)

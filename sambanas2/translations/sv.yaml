@@ -41,5 +41,14 @@ configuration:
       lösenord och anpassade inställningar. Tillägget kommer att startas om med
       standardinställningar. Denna åtgärd är irreversibel och kan inte ångras. Använd
       med extrem försiktighet.
+  use_external_kernel_modules:
+    name: Använd externa kärnmoduler (Experimentell)
+    description: >-
+      ⚠️ EXPERIMENTELL - ENBART FÖR AVANCERADE ANVÄNDARE ⚠️ När aktiverat laddas extra
+      kärnmoduler ner från https://github.com/dianlight/hasos_more_modules som matchar
+      din HAOS-version och ditt kort, och laddas in i kärnan. Varje modul är en
+      separat .ko.xz-fil lagrad i /config/extra_modules. Redan nedladdade moduler
+      återanvänds. Saknade eller inkompatibla moduler genererar en varning, inte ett
+      fel.
 network:
   3000/tcp: Webbgränssnitt (utan Home Assistant)

@@ -40,5 +40,14 @@ configuration:
       trvale smažete všechny konfigurace sdílení Samba, uživatelské účty, hesla
       a vlastní nastavení. Doplněk se restartuje s výchozím nastavením. Tato akce
       je nevratná a nelze ji vrátit zpět. Používejte s maximální opatrností.
+  use_external_kernel_modules:
+    name: Použít externí moduly jádra (Experimentální)
+    description: >-
+      ⚠️ EXPERIMENTÁLNÍ - POUZE PRO POKROČILÉ UŽIVATELE ⚠️ Pokud je povoleno, stáhne
+      další moduly jádra z https://github.com/dianlight/hasos_more_modules
+      odpovídající vaší verzi HAOS a desce a načte je do jádra. Každý modul je
+      samostatný soubor .ko.xz uložený v /config/extra_modules. Již stažené moduly
+      jsou znovu použity. Chybějící nebo nekompatibilní moduly vytvoří varování,
+      nikoli chybu.
 network:
   3000/tcp: Webové rozhraní (bez Home Assistant)

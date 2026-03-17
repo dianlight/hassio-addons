@@ -42,5 +42,14 @@ configuration:
       fiókot, jelszót és egyéni beállítást. A kiegészítő az alapértelmezett beállításokkal
       indul újra. Ez a művelet visszafordíthatatlan és nem vonható vissza. Rendkívüli
       óvatossággal használja.
+  use_external_kernel_modules:
+    name: Külső kernelmodulok használata (Kísérleti)
+    description: >-
+      ⚠️ KÍSÉRLETI - CSAK HALADÓ FELHASZNÁLÓKNAK ⚠️ Ha engedélyezve van, letölti a
+      https://github.com/dianlight/hasos_more_modules oldalról az HAOS-verziójához és
+      lapjához illeszkedő extra kernelmodulokat, és betölti azokat a kernelbe. Minden
+      modul egy külön .ko.xz fájl, amely a /config/extra_modules könyvtárban van
+      tárolva. A már letöltött modulok újra felhasználásra kerülnek. A hiányzó vagy
+      inkompatibilis modulok figyelmeztetést, nem hibát okoznak.
 network:
   3000/tcp: Webes felület (Home Assistant nélkül)

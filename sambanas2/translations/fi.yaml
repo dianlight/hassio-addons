@@ -41,5 +41,15 @@ configuration:
       salasanat ja mukautetut asetukset. Lisäosa käynnistyy uudelleen oletusasetuksilla.
       Tämä toiminto on peruuttamaton eikä sitä voi kumota. Käytä äärimmäisellä
       varovaisuudella.
+  use_external_kernel_modules:
+    name: Käytä ulkoisia ytimen moduuleja (Kokeellinen)
+    description: >-
+      ⚠️ KOKEELLINEN - VAIN KOKENEILLE KÄYTTÄJILLE ⚠️ Kun käytössä, ladataan
+      ylimääräisiä ytimen moduuleja osoitteesta
+      https://github.com/dianlight/hasos_more_modules HAOS-versiosi ja levysi mukaan
+      ja ladataan ne ytimeen. Jokainen moduuli on erillinen .ko.xz-tiedosto, joka on
+      tallennettu hakemistoon /config/extra_modules. Jo ladatut moduulit käytetään
+      uudelleen. Puuttuvat tai yhteensopimattomat moduulit tuottavat varoituksen, ei
+      virhettä.
 network:
   3000/tcp: Web-käyttöliittymä (ilman Home Assistantia)

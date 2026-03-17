@@ -41,5 +41,14 @@ configuration:
       račune, gesla in po meri prilagojene nastavitve. Dodatek se bo znova zagnal
       z privzetimi nastavitvami. To dejanje je nepreklicno in ga ni mogoče razveljaviti.
       Uporabite z izredno previdnostjo.
+  use_external_kernel_modules:
+    name: Uporabi zunanje module jedra (Eksperimentalno)
+    description: >-
+      ⚠️ EKSPERIMENTALNO - SAMO ZA NAPREDNE UPORABNIKE ⚠️ Ko je omogočeno, prenese
+      dodatne module jedra iz https://github.com/dianlight/hasos_more_modules, ki
+      ustrezajo vaši različici HAOS in plošči, ter jih naloži v jedro. Vsak modul je
+      ločena datoteka .ko.xz shranjena v /config/extra_modules. Že preneseni moduli se
+      ponovno uporabijo. Manjkajoči ali nezdružljivi moduli ustvarijo opozorilo, ne
+      napako.
 network:
   3000/tcp: Spletni vmesnik (brez Home Assistant)

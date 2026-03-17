@@ -42,5 +42,14 @@ configuration:
       comparticions Samba, comptes d'usuari, contrasenyes i configuracions personalitzades.
       El complement es reiniciarà amb la configuració predeterminada. Aquesta acció
       és irreversible i no es pot desfer. Utilitzeu amb extrema precaució.
+  use_external_kernel_modules:
+    name: Usa mòduls de nucli externs (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - NOMÉS PER A USUARIS AVANÇATS ⚠️ Quan s'activa, descarrega
+      mòduls de nucli addicionals de https://github.com/dianlight/hasos_more_modules
+      que coincideixen amb la vostra versió HAOS i placa, i els carrega al nucli. Cada
+      mòdul és un fitxer .ko.xz separat emmagatzemat a /config/extra_modules. Els
+      mòduls ja descarregats es reutilitzen. Els mòduls absents o incompatibles
+      generen un avís, no un error.
 network:
   3000/tcp: Interfície web (sense Home Assistant)

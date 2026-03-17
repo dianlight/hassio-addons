@@ -40,5 +40,13 @@ configuration:
       Dette vil permanent slette alle Samba-delkonfigurationer, brugerkonti, adgangskoder
       og brugerdefinerede indstillinger. Tilføjelsen genstarter med standardindstillinger.
       Denne handling er irreversibel og kan ikke fortrydes. Brug med ekstrem forsigtighed.
+  use_external_kernel_modules:
+    name: Brug eksterne kernemodeller (Eksperimentel)
+    description: >-
+      ⚠️ EKSPERIMENTEL - KUN FOR AVANCEREDE BRUGERE ⚠️ Når aktiveret, downloades
+      ekstra kernemodeller fra https://github.com/dianlight/hasos_more_modules, der
+      matcher din HAOS-version og dit board, og indlæses i kernen. Hvert modul er en
+      separat .ko.xz-fil gemt i /config/extra_modules. Allerede downloadede moduler
+      genbruges. Manglende eller inkompatible moduler giver en advarsel, ikke en fejl.
 network:
   3000/tcp: Webgrænseflade (uden Home Assistant)

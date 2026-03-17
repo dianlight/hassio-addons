@@ -41,5 +41,15 @@ configuration:
       paroolid ja kohandatud seaded. Pistikprogramm taaskäivitub vaikeseadetega.
       See tegevus on pöördumatu ja seda ei saa tagasi võtta. Kasutage äärmise
       ettevaatusega.
+  use_external_kernel_modules:
+    name: Kasuta väliseid tuumamooduleid (Eksperimentaalne)
+    description: >-
+      ⚠️ EKSPERIMENTAALNE - AINULT KOGENUD KASUTAJATELE ⚠️ Lubamise korral laaditakse
+      alla lisatuum mooduleid aadressilt
+      https://github.com/dianlight/hasos_more_modules, mis vastavad teie HAOS-i
+      versioonile ja plaadile, ning laaditakse need tuuma. Iga moodul on eraldi
+      .ko.xz-fail, mis on salvestatud asukohta /config/extra_modules. Juba
+      allalaaditud mooduleid kasutatakse uuesti. Puuduvad või ühildumatud moodulid
+      annavad hoiatuse, mitte vea.
 network:
   3000/tcp: Veebiliides (ilma Home Assistantita)

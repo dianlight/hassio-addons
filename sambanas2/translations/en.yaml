@@ -40,5 +40,14 @@ configuration:
       permanently erase all Samba share configurations, user accounts, passwords,
       and custom settings. The add-on will restart with default settings. This action
       is irreversible and cannot be undone. Use with extreme caution.
+  use_external_kernel_modules:
+    name: Use external kernel modules (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - ADVANCED USERS ONLY ⚠️ When enabled, downloads extra kernel
+      modules from https://github.com/dianlight/hasos_more_modules matching your
+      HAOS version and board, and loads them into the kernel. Each module is a
+      separate .ko.xz file stored in /config/extra_modules. Already downloaded
+      modules are reused. Missing or incompatible modules produce a warning, not
+      an error.
 network:
   3000/tcp: Web interface (to use without Home Assistant)

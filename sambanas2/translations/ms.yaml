@@ -41,5 +41,15 @@ configuration:
       kata laluan dan tetapan tersuai. Tambahan akan dimulakan semula dengan tetapan
       lalai. Tindakan ini tidak boleh diterbalikkan dan tidak boleh dibatalkan. Gunakan
       dengan berhati-hati.
+  use_external_kernel_modules:
+    name: Gunakan modul kernel luaran (Eksperimental)
+    description: >-
+      ⚠️ EKSPERIMENTAL - HANYA UNTUK PENGGUNA LANJUTAN ⚠️ Apabila diaktifkan, memuat
+      turun modul kernel tambahan daripada
+      https://github.com/dianlight/hasos_more_modules yang sepadan dengan versi HAOS
+      dan papan anda, dan memuatnya ke dalam kernel. Setiap modul ialah fail .ko.xz
+      berasingan yang disimpan dalam /config/extra_modules. Modul yang telah dimuat
+      turun digunakan semula. Modul yang hilang atau tidak serasi menghasilkan amaran,
+      bukan ralat.
 network:
   3000/tcp: Antara muka web (tanpa Home Assistant)

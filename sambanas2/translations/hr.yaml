@@ -41,5 +41,14 @@ configuration:
       lozinke i prilagođene postavke. Dodatak će se ponovno pokrenuti sa zadanim
       postavkama. Ova radnja je nepovratna i ne može se poništiti. Koristite s
       krajnjim oprezom.
+  use_external_kernel_modules:
+    name: Koristi vanjske module jezgre (Eksperimentalno)
+    description: >-
+      ⚠️ EKSPERIMENTALNO - SAMO ZA NAPREDNE KORISNIKE ⚠️ Kada je omogućeno, preuzima
+      dodatne module jezgre s https://github.com/dianlight/hasos_more_modules koji
+      odgovaraju vašoj verziji HAOS-a i ploči, te ih učitava u jezgru. Svaki modul je
+      zasebna .ko.xz datoteka pohranjena u /config/extra_modules. Već preuzeti moduli
+      se ponovo koriste. Nedostajući ili nekompatibilni moduli generiraju upozorenje,
+      ne pogrešku.
 network:
   3000/tcp: Web sučelje (bez Home Assistant-a)

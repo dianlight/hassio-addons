@@ -41,5 +41,14 @@ configuration:
       di condivisione Samba, gli account utente, le password e le impostazioni personalizzate.
       L'add-on si riavvierà con le impostazioni predefinite. Questa azione è irreversibile
       e non può essere annullata. Utilizzare con estrema cautela.
+  use_external_kernel_modules:
+    name: Usa moduli kernel esterni (Sperimentale)
+    description: >-
+      ⚠️ SPERIMENTALE - SOLO PER UTENTI AVANZATI ⚠️ Se abilitato, scarica moduli
+      kernel aggiuntivi da https://github.com/dianlight/hasos_more_modules
+      corrispondenti alla versione HAOS e alla scheda, e li carica nel kernel. Ogni
+      modulo è un file .ko.xz separato memorizzato in /config/extra_modules. I moduli
+      già scaricati vengono riutilizzati. I moduli mancanti o incompatibili generano
+      un avviso, non un errore.
 network:
   3000/tcp: Interfaccia web (senza Home Assistant)

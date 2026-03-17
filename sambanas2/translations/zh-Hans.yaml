@@ -35,5 +35,9 @@ configuration:
       ⚠️ 危险 - 破坏性操作 ⚠️ 通过删除 SQL 数据库、所有配置、设置和更新文件来执行完整的
       恢复出厂设置。这将永久删除所有 Samba 共享配置、用户帐户、密码和自定义设置。
       插件将使用默认设置重新启动。此操作不可逆且无法撤消。请极其谨慎使用。
+  use_external_kernel_modules:
+    name: 使用外部内核模块（实验性）
+    description: >-
+      ⚠️ 实验性 - 仅限高级用户 ⚠️ 启用后，从 https://github.com/dianlight/hasos_more_modules 下载与您的 HAOS 版本和主板匹配的额外内核模块，并将其加载到内核中。每个模块是一个单独的 .ko.xz 文件，存储在 /config/extra_modules 中。已下载的模块会被重用。缺失或不兼容的模块会产生警告，而不是错误。
 network:
   3000/tcp: Web 界面（无需 Home Assistant）

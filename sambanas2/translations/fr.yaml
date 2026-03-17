@@ -42,5 +42,15 @@ configuration:
       et paramètres personnalisés. Le module redémarrera avec les paramètres par
       défaut. Cette action est irréversible et ne peut pas être annulée. À utiliser
       avec une extrême prudence.
+  use_external_kernel_modules:
+    name: Utiliser des modules noyau externes (Expérimental)
+    description: >-
+      ⚠️ EXPÉRIMENTAL - RÉSERVÉ AUX UTILISATEURS AVANCÉS ⚠️ Lorsqu'activé, télécharge
+      des modules noyau supplémentaires depuis
+      https://github.com/dianlight/hasos_more_modules correspondant à votre version
+      HAOS et carte, puis les charge dans le noyau. Chaque module est un fichier
+      .ko.xz séparé stocké dans /config/extra_modules. Les modules déjà téléchargés
+      sont réutilisés. Les modules manquants ou incompatibles génèrent un
+      avertissement, pas une erreur.
 network:
   3000/tcp: Interface web (sans Home Assistant)

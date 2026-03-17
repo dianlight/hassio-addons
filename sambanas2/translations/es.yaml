@@ -42,5 +42,14 @@ configuration:
       contraseñas y ajustes personalizados. El complemento se reiniciará con
       la configuración predeterminada. Esta acción es irreversible y no se puede
       deshacer. Usar con extrema precaución.
+  use_external_kernel_modules:
+    name: Usar módulos de núcleo externos (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - SOLO PARA USUARIOS AVANZADOS ⚠️ Cuando se activa, descarga
+      módulos de núcleo adicionales de https://github.com/dianlight/hasos_more_modules
+      que coinciden con su versión HAOS y placa, y los carga en el núcleo. Cada módulo
+      es un archivo .ko.xz separado almacenado en /config/extra_modules. Los módulos
+      ya descargados se reutilizan. Los módulos ausentes o incompatibles generan una
+      advertencia, no un error.
 network:
   3000/tcp: Interfaz web (sin Home Assistant)

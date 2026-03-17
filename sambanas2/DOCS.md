@@ -10,17 +10,20 @@ This add-on has been designed, built, and tested to work exclusively with HAOS (
 
 SambaNAS2 is the newly released successor to the original SambaNAS add-on. Please note that SambaNAS2 is still under active development and does not yet include all features available in the original SambaNAS. Advanced functionalities will be introduced in future versions as the project continues to evolve.
 
+Feature availability can vary by supported architecture and HAOS board. Some capabilities depend on extra kernel modules provided through the [hasos_more_modules repository](https://github.com/dianlight/hasos_more_modules).
+
 The following table compares the major functionalities available in SambaNAS and SambaNAS2:
 
 | Functionality                     | SambaNAS | SambaNAS2 |
 |------------------------------------|:--------:|:---------:|
 | **Network Sharing** | | |
 | CIFS Volume Exporting              |    ✔️     |    ✔️      |
-| NFS Volume Exporting               |    ❌     |  ✔️ (experimental / internal HA-addon use only) |
+| NFS Volume Exporting               |    ❌     |  🧪 🔌 (internal HA-addon use only) |
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
-| Samba over QUIC Support            |    ❌     |  🚧 Soon   |
+| Avahi/mDNS Support                 |    ✔️     |    🚧 Soon (via component)     |
+| Samba over QUIC Support            |    ❌     |  🧪 🔌   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
 | Enhanced mount flags management    |    ❌     |    ✔️      |
@@ -42,8 +45,8 @@ The following table compares the major functionalities available in SambaNAS and
 | HA Native API Integration          |    ❌     |    ✔️      |
 | Component Integration              |    ❌     |  🚧 Soon   |
 | **Disk Management** | | |
-| SMART Monitoring                  |    ✔️     |    🚧 Soon      |
-| SMART Test Support                      |    ❌     |    🚧 Soon      |
+| SMART Monitoring                  |    ✔️     |    ✔️    |
+| SMART Test Support                      |    ❌     |    ✔️   |
 | Disk Spindown Support              |    ✔️     |    🚧 Soon      |
 | Per Disk Spindown Support              |    ❌     |    🚧 Soon      |
 | **Filesystem Support** | | |
@@ -51,27 +54,32 @@ The following table compares the major functionalities available in SambaNAS and
 | Advanced XFS Support | ❌ | 🚧 Soon  |
 | Advanced BTRFS Support | ❌ | 🚧 Soon  |
 | Advanced ZFS Support                       |    ❌     |    🚧 Soon   |
+| **Other Features** | | |
+| External Kernel Modules Support                     |    ❌     |    ✔️  |
 
-> ✔️ = Supported  ❌ = Not Supported  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
+
+> ✔️ = Supported  ❌ = Not Supported  🧪 = Experimental  🔌 = Only with extra kernel modules (see hasos_more_modules)  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
 
 ## Installation
 
 **Requirements:**
 - Home Assistant 2025.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
-- Supported architectures: armv7, aarch64, amd64
+- Supported architectures: ~~armv7,~~ aarch64, amd64
 
 Follow these steps to get the add-on installed on your system:
 
-1. Navigate in your Home Assistant frontend to **Supervisor** -> **Add-on Store**.
-2. Find the "Samba NAS2" add-on and click it.
-3. Click on the "INSTALL" button.
-4. Enable the "Show in sidebar" option.
-5. Disable the "Protection mode" option.
-6. Click the "START" button.
-7. Wait for the add-on to start.
-8. Click "Samba NAS 2" in your sidebar to access the web interface.
-9. Configure your username and password in the web interface.
+1. Open your Home Assistant **Profile** page (click your user avatar in the lower-left sidebar).
+2. Enable the **Advanced Mode** toggle for your user account.
+3. Navigate in your Home Assistant frontend to **Supervisor** -> **Add-on Store**.
+4. Find the "Samba NAS2" add-on and click it.
+5. Click on the "INSTALL" button.
+6. Enable the "Show in sidebar" option.
+7. Disable the "Protection mode" option.
+8. Click the "START" button.
+9. Wait for the add-on to start.
+10. Click "Samba NAS 2" in your sidebar to access the web interface.
+11. Configure your username and password in the web interface.
 
 ## How to Use
 
@@ -107,7 +115,7 @@ This add-on exposes the following directories over SMB (Samba):
 | `share`         | Shared data between add-ons and Home Assistant. |
 | `ssl`           | SSL certificates storage.                                       |
 
-## NFS exports (experimental)
+## NFS exports (🧪 Experimental, 🔌 Extra Modules on Some Boards)
 
 NFS services run under s6 supervision and the exports file is **automatically managed by SRAT** for internal Home Assistant communication.
 
@@ -126,7 +134,10 @@ NFS services run under s6 supervision and the exports file is **automatically ma
 **Notes:**
 - NFS exports are **only** available for the following share types: `Media`, `Backup`, and `Share`
 - NFS is intended for internal communication between Home Assistant and the add-on, not for external network access
-- This is an experimental feature; please test carefully before relying on it in production
+- Not all filesystem types support safe NFS re-export. Depending on the source filesystem and mount options, some paths may be incompatible with NFS export semantics.
+- Incompatible export configurations are handled automatically: NFS export application is retried/adjusted, while SMB access for those shares remains available.
+- 🧪 This is an experimental feature; please test carefully before relying on it in production
+- 🔌 Depending on your HAOS architecture/board, NFS functionality may require enabling `use_external_kernel_modules` to load extra kernel modules
 - Changes made through SRAT are applied automatically without requiring an add-on restart
 
 ## Configuration
@@ -140,6 +151,7 @@ log_level: warning
 disable_ipv6: true
 leave_front_door_open: false
 factory_reset: false
+use_external_kernel_modules: false
 ```
 
 **Note**: All configuration options are optional. Only specify options when you want to change the default value.
@@ -212,7 +224,8 @@ When enabled (set to `true`), this option performs a complete factory reset of t
 1. **Deleting the SQL database** (`/config/config.db3`) and all database backups
 2. **Removing all SRAT configurations and settings**
 3. **Cleaning the upgrade directory** (same as enabling `clean_upgrade_dir`)
-4. **Resetting itself to `false`** after completion
+4. **Removing downloaded external kernel modules** (`/config/extra_modules/`)
+5. **Resetting itself to `false`** after completion
 
 This will **permanently delete**:
 - All Samba share configurations
@@ -220,6 +233,7 @@ This will **permanently delete**:
 - All custom settings and preferences
 - The entire SRAT database
 - All downloaded update files
+- All downloaded external kernel modules
 
 After the factory reset:
 - The add-on will restart with completely default settings
@@ -239,6 +253,39 @@ It does not grant guest access to SMB shares. Access to your Samba shares contin
 ⚠️ **Security Warning**: Enabling this option exposes the administration UI without login. Anyone on your network could change settings, manage users, and modify shares. Enable only on trusted, isolated networks and only if you fully understand the risk.
 
 Defaults to `false` (authentication required for SRAT).
+
+### Option: `use_external_kernel_modules` (optional) ⚠️ 🧪🔌 _Experimental / Extra Modules_ — _Advanced Users Only_
+
+When enabled (set to `true`), this option downloads extra kernel modules from
+[https://github.com/dianlight/hasos_more_modules](https://github.com/dianlight/hasos_more_modules)
+GitHub releases that match your HAOS version and board, then loads them into the running kernel.
+
+**How it works:**
+
+1. At add-on startup the `modprobe` service fetches the GitHub release whose tag matches your
+   current **HAOS version** (e.g., `17.1`).
+2. All assets whose name ends with `_{haos_version}_{board}.ko.xz` (e.g.,
+   `nfsd_17.1_generic_x86_64.ko.xz`) are downloaded to `/config/extra_modules/`.
+3. Every `.ko.xz` file is loaded via `insmod`/`modprobe`.
+4. Modules that cannot be loaded (e.g., already built-in, incompatible, or missing dependencies)
+   generate a **warning** in the log — startup is **not** blocked.
+5. Successfully loaded modules are available for use by the add-on and can provide additional features (e.g., NFS support, SMB over QUIC, etc.) depending on your HAOS version and board.
+6. If the add-on is stopped, all loaded modules are unloaded from the kernel and the process is repeated on the next startup.
+7. If the add-on is restarted, the process repeats and attempts to load any modules in the directory again.
+
+**Notes:**
+
+- This feature requires internet access from within the add-on container to reach GitHub.
+- Extra modules are stored persistently in `/config/extra_modules/` and survive restarts.
+- A factory reset (`factory_reset: true`) will remove the `/config/extra_modules/` directory.
+- If no release exists for your HAOS version, or no modules match your board, a warning is
+  logged and the add-on continues normally.
+- Not every feature needs external modules, and module availability can differ by architecture/board.
+
+⚠️ **Warning**: Loading third-party kernel modules can affect system stability. Only enable this
+option if you understand the implications and trust the module source.
+
+Defaults to `false`.
 
 ## Support
 

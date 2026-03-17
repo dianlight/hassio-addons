@@ -39,5 +39,9 @@ configuration:
       비밀번호 및 사용자 지정 설정을 영구적으로 지웁니다. 추가 기능은 기본 설정으로
       다시 시작됩니다. 이 작업은 되돌릴 수 없으며 취소할 수 없습니다. 극도로
       조심해서 사용하십시오.
+  use_external_kernel_modules:
+    name: 외부 커널 모듈 사용 (실험적)
+    description: >-
+      ⚠️ 실험적 - 고급 사용자 전용 ⚠️ 활성화하면 https://github.com/dianlight/hasos_more_modules에서 HAOS 버전과 보드에 맞는 추가 커널 모듈을 다운로드하여 커널에 로드합니다. 각 모듈은 /config/extra_modules에 저장된 별도의 .ko.xz 파일입니다. 이미 다운로드된 모듈은 재사용됩니다. 누락되거나 호환되지 않는 모듈은 오류가 아닌 경고를 생성합니다.
 network:
   3000/tcp: 웹 인터페이스 (Home Assistant 없이 사용)

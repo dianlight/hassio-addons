@@ -41,5 +41,13 @@ configuration:
       Samba, contas de usuário, senhas e configurações personalizadas. O complemento
       será reiniciado com as configurações padrão. Esta ação é irreversível e não
       pode ser desfeita. Use com extrema cautela.
+  use_external_kernel_modules:
+    name: Usar módulos de kernel externos (Experimental)
+    description: >-
+      ⚠️ EXPERIMENTAL - APENAS PARA USUÁRIOS AVANÇADOS ⚠️ Quando ativado, baixa
+      módulos de kernel extras de https://github.com/dianlight/hasos_more_modules que
+      correspondem à sua versão HAOS e placa, e os carrega no kernel. Cada módulo é um
+      arquivo .ko.xz separado armazenado em /config/extra_modules. Módulos já baixados
+      são reutilizados. Módulos ausentes ou incompatíveis geram um aviso, não um erro.
 network:
   3000/tcp: Interface web (sem Home Assistant)

@@ -41,5 +41,14 @@ configuration:
       Passwäerder a personaliséiert Astellungen. Den Add-on geet mat Standardastellungen
       nees lass. Dës Aktioun ass onréckgängeg a kann net réckgängeg gemaach ginn.
       Benotzt mat extremer Virsiicht.
+  use_external_kernel_modules:
+    name: Extern Kernel-Moduler benotzen (Experimentell)
+    description: >-
+      ⚠️ EXPERIMENTELL - NÄR FIR ERFUERENE BENOTZER ⚠️ Wann aktivéiert, ginn
+      zousätzlech Kernel-Moduler vun https://github.com/dianlight/hasos_more_modules
+      erof gelueden, déi zu Ärer HAOS-Versioun a Ärem Board passen, a ginn an de
+      Kernel gelueden. All Modul ass eng separat .ko.xz-Datei, déi an
+      /config/extra_modules gespäichert ass. Scho erof gelueden Moduler gi rëmbenotzt.
+      Fehlend oder inkompatibel Moduler produzéieren eng Warnung, keen Fehler.
 network:
   3000/tcp: Web-Interface (ouni Home Assistant)
