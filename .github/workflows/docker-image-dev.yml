@@ -9,47 +9,50 @@ on:
 permissions:
   pull-requests: write # Required for creating pull requests
   contents: write # Required for committing changes and pushing to the repository
-  packages: write
-  id-token: write
+  #packages: write # Required for pushing Docker images to the registry
+  #id-token: write # Required for authentication with 'gh' CLI when creating pull requests
+
+env:
+  REGISTRY: docker.io
+  REGISTRY_PREFIX: docker.io/dianlight
+  ARCHITECTURES: '["aarch64"]'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest # Specifies the runner environment
+  init:
+    name: Initialize build
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      br_version: ${{ steps.extract_branch.outputs.BR_VERSION }}
+      version: ${{ steps.version_set.outputs.value_new }}
+      name: ${{ steps.read_config.outputs.name }}
+      description: ${{ steps.read_config.outputs.description }}
+      image: ${{ steps.read_config.outputs.image }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          submodules: true # Also checks out git submodules if any
-
-      - name: Login to DockerHub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          submodules: true
 
       - name: Extract branch name
         id: extract_branch # Assigns an ID to this step to reference its outputs
         shell: bash
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-        # Extracts the branch name (e.g., 'myaddon' from 'devrelease/myaddon')
-        # and sets it as a step output named BR_VERSION.
 
-      - name: 👓 Read config.yaml
-        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0 # Reads values from a YAML file
-        id: read_action_js # Assigns an ID to reference its outputs
+      - name: 👓 Read config.yaml ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+        id: read_config
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          # Reads 'name' and 'version' (and potentially 'image') from the config.yaml
-          # These will be available as steps.read_action_js.outputs.name, .version, .image
 
       - name: Prepare Version, Name, and Image for YAML
         id: prepare_yaml_values # Assigns an ID to reference its outputs
         shell: bash
         run: |
-          CURRENT_VERSION_FROM_FILE="${{ steps.read_action_js.outputs.version }}"
-          CURRENT_NAME_FROM_FILE="${{ steps.read_action_js.outputs.name }}"
+          CURRENT_VERSION_FROM_FILE="${{ steps.read_config.outputs.version }}"
+          CURRENT_NAME_FROM_FILE="${{ steps.read_config.outputs.name }}"
           # Get the current image from config.yaml, or an empty string if not found/commented
-          CURRENT_IMAGE_FROM_FILE="${{ steps.read_action_js.outputs.image }}"
+          CURRENT_IMAGE_FROM_FILE="${{ steps.read_config.outputs.image }}"
 
           FINAL_VERSION_BASE="$CURRENT_VERSION_FROM_FILE"
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
@@ -165,17 +168,96 @@ jobs:
             fi
           done
 
-      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
-        uses: home-assistant/builder@master #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
         with:
-          args: |
-            --amd64 --aarch64 \
-            --version ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }} \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --no-latest \
-            --docker-hub dianlight
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: addon-${{ steps.extract_branch.outputs.BR_VERSION }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
+
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: init
+    if: needs.init.outputs.image != ''
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: true
+
+      - name: Read BUILD_FROM for ${{ matrix.arch }}
+        id: build_from
+        shell: bash
+        run: |
+          BUILD_FROM=$(yq -r '.build_from.${{ matrix.arch }}' ${{ needs.init.outputs.br_version }}/build.yaml)
+          echo "value=${BUILD_FROM}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish ${{ needs.init.outputs.br_version }} Addon ${{ needs.init.outputs.version }}
+        uses: home-assistant/builder/actions/build-image@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
+        with:
+          arch: ${{ matrix.arch }}
+          container-registry: ${{ env.REGISTRY }}
+          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ needs.init.outputs.version }}
+          push: "true"
+          version: ${{ needs.init.outputs.version }}
+          context: ${{ needs.init.outputs.br_version }}
+          build-args: |
+            BUILD_FROM=${{ steps.build_from.outputs.value }}
+            BUILD_NAME=${{ needs.init.outputs.name }}
+            BUILD_DESCRIPTION=${{ needs.init.outputs.description }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_REPOSITORY=${{ github.repository }}
+          cosign: "false"
+
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [init, build]
+    if: needs.init.outputs.image != ''
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry: ${{ env.REGISTRY }}
+          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          image-name: addon-${{ needs.init.outputs.br_version }}
+          image-tags: |
+            ${{ needs.init.outputs.version }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
+          cosign: "false"
+
+  pull-request:
+    name: Create pull request
+    needs: [init, build]
+    if: needs.init.outputs.image != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: true
 
       - name: Create Merge Release Branch
         # Only run this step if the scripts directory exists for the current addon
