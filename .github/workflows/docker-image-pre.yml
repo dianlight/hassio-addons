@@ -53,20 +53,14 @@ jobs:
             
       - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
         if: false
-        uses: home-assistant/builder/actions/build-image@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
+        uses: home-assistant/builder@master
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
-          arch: aarch64
-          container-registry: docker.io
-          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          image: docker.io/dianlight/aarch64-addon-${{ steps.extract_branch.outputs.BR_PROJECT }}
-          image-tags: |
-            ${{ steps.version_set.outputs.value_new }}
-            latest
-          push: "true"
-          version: ${{ steps.version_set.outputs.value_new }}
-          context: ${{ steps.extract_branch.outputs.BR_PROJECT }}
-          cosign: "false"
+          args: |
+            --all \
+            --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
+            --docker-hub dianlight
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         uses: thzois/autobot@2a6c1da57ea7beb1cdea3049b070977379c6dd2e # v1.0.3

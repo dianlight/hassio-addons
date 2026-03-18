@@ -10,32 +10,26 @@ permissions:
   pull-requests: write
   contents: write
 
-env:
-  REGISTRY: docker.io
-  REGISTRY_PREFIX: docker.io/dianlight
-  ARCHITECTURES: '["aarch64"]'
-
 jobs:
-  init:
-    name: Initialize build
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
-      br_version: ${{ steps.extract_branch.outputs.BR_VERSION }}
-      version: ${{ steps.version_set.outputs.value_new }}
-      name: ${{ steps.read_config.outputs.name }}
-      description: ${{ steps.read_config.outputs.description }}
-      image: ${{ steps.read_config.outputs.image }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           submodules: true
 
+      - name: Login to DockerHub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Extract branch name
         shell: bash
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
         id: extract_branch
+
 
       - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_VERSION }}
         id: version_set
@@ -49,104 +43,23 @@ jobs:
 
       - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
         uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
-        id: read_config
+        id: read_action_js
         with:
-          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
 
-      - name: Get build matrix
-        id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
+      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
+        uses: home-assistant/builder@6cb4fd3d1338b6e22d0958a4bcb53e0965ea63b4 # 2026.02.1
+        if: ${{ steps.read_action_js.outputs.image != '' }}
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
         with:
-          architectures: ${{ env.ARCHITECTURES }}
-          image-name: addon-${{ steps.extract_branch.outputs.BR_VERSION }}
-          registry-prefix: ${{ env.REGISTRY_PREFIX }}
-
-  build:
-    name: Build ${{ matrix.arch }} image
-    needs: init
-    if: needs.init.outputs.image != ''
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
-
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          submodules: true
-
-      - name: Read BUILD_FROM for ${{ matrix.arch }}
-        id: build_from
-        shell: bash
-        run: |
-          BUILD_FROM=$(yq -r '.build_from.${{ matrix.arch }}' ${{ needs.init.outputs.br_version }}/build.yaml)
-          echo "value=${BUILD_FROM}" >> "$GITHUB_OUTPUT"
-
-      - name: Publish ${{ needs.init.outputs.br_version }} Addon ${{ needs.init.outputs.version }}
-        uses: home-assistant/builder/actions/build-image@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
-        with:
-          arch: ${{ matrix.arch }}
-          container-registry: ${{ env.REGISTRY }}
-          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          image: ${{ matrix.image }}
-          image-tags: |
-            ${{ needs.init.outputs.version }}
-            latest
-          push: "true"
-          version: ${{ needs.init.outputs.version }}
-          context: ${{ needs.init.outputs.br_version }}
-          build-args: |
-            BUILD_FROM=${{ steps.build_from.outputs.value }}
-            BUILD_NAME=${{ needs.init.outputs.name }}
-            BUILD_DESCRIPTION=${{ needs.init.outputs.description }}
-            BUILD_REF=${{ github.sha }}
-            BUILD_REPOSITORY=${{ github.repository }}
-          cosign: "false"
-
-  manifest:
-    name: Publish multi-arch manifest
-    needs: [init, build]
-    if: needs.init.outputs.image != ''
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      packages: write
-
-    steps:
-      - name: Publish multi-arch manifest
-        uses: home-assistant/builder/actions/publish-multi-arch-manifest@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          container-registry: ${{ env.REGISTRY }}
-          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
-          image-name: addon-${{ needs.init.outputs.br_version }}
-          image-tags: |
-            ${{ needs.init.outputs.version }}
-            latest
-          registry-prefix: ${{ env.REGISTRY_PREFIX }}
-          cosign: "false"
-
-  pull-request:
-    name: Create pull request
-    needs: [init, build]
-    if: needs.init.outputs.image != ''
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
-
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          submodules: true
+          args: |
+            --aarch64 \
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+            --docker-hub dianlight
 
       - name: pull-request
+        if: ${{ steps.read_action_js.outputs.image != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -156,11 +69,25 @@ jobs:
           set -x
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
+          #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
+          #  git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
+          #git restore .
+          #git clean -f
+          #git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
+          #  gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*" --body-file -
+          #git fetch origin master    
+          #gh pr create --base "prerelease2/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \ 
+          #  --title "Releasing ${{ github.ref }} into prerelease" \ 
+          #  --fill \
+          #  --head "${{ github.ref }}"
+          #  --template "pull_request_template.md"
+          #  --draft
+          #  
           git fetch origin master ${BRANCH_NAME}   
-          git branch -f "prerelease/${{ needs.init.outputs.br_version }}_${{ needs.init.outputs.version }}" "origin/master"
-          git push -f origin  "prerelease/${{ needs.init.outputs.br_version }}_${{ needs.init.outputs.version }}"
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master"
+          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
           gh pr create \
-            --base "prerelease/${{ needs.init.outputs.br_version }}_${{ needs.init.outputs.version }}" \
+            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --head "${BRANCH_NAME}" \
-            --title "Releasing ${BRANCH_NAME} into prerelease ${{ needs.init.outputs.br_version }}_${{ needs.init.outputs.version }}" \
+            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
             --fill || :
