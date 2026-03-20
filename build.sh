@@ -14,7 +14,7 @@ elif [[ "${arch}x" == "x86_64x" ]]; then
   arch="amd64"
 fi
 
-echo "Running for arch ${arch} and '$@'"
+echo "Running for arch ${arch}"
 
 for addon in "$@"; do
   # Check id in addon there is config.yaml or config.json file
