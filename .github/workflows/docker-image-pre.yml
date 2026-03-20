@@ -105,6 +105,7 @@ jobs:
 
       - name: ✍🏼 BetaName ${{ steps.extract_branch.outputs.BR_PROJECT }} -> ${{ steps.prepare_name_and_version_suffix.outputs.FINAL_NAME_TO_SET }}
         id: betaname_set
+<<<<<<< mergerelease/sambanas2
         shell: bash
         run: |
           CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml"
@@ -122,6 +123,26 @@ jobs:
           echo "value_new=$NEW_VALUE" >> "$GITHUB_OUTPUT"
           
           echo "Updated name from '$OLD_NAME' to '$NEW_VALUE'"
+=======
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
+        with:
+          file: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
+          path: name
+          set: -β
+          get: true
+          append: true
+            
+      - name: Publish ${{ steps.extract_branch.outputs.BR_PROJECT }} Addon ${{ steps.version_set.outputs.value_new }}
+        if: false
+        uses: home-assistant/builder@master
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+        with:
+          args: |
+            --all \
+            --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
+            --docker-hub dianlight
+>>>>>>> prerelease/sambanas2_2026.3.0
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         # uses: thzois/autobot@v1.0.3 # Replaced with gh CLI commands

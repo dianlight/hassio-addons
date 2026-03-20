@@ -7,6 +7,7 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow
 
 permissions:
+<<<<<<< mergerelease/sambanas2
   pull-requests: write # Required for creating pull requests
   contents: write # Required for committing changes and pushing to the repository
   packages: write
@@ -15,6 +16,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest # Specifies the runner environment
+=======
+  pull-requests: write
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+>>>>>>> prerelease/sambanas2_2026.3.0
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -27,6 +36,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Login to DockerHub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Extract branch name
         id: extract_branch # Assigns an ID to this step to reference its outputs
         shell: bash
@@ -34,6 +49,7 @@ jobs:
         # Extracts the branch name (e.g., 'myaddon' from 'devrelease/myaddon')
         # and sets it as a step output named BR_VERSION.
 
+<<<<<<< mergerelease/sambanas2
       - name: 👓 Read config.yaml
         uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0 # Reads values from a YAML file
         id: read_action_js # Assigns an ID to reference its outputs
@@ -180,6 +196,38 @@ jobs:
       - name: Create Merge Release Branch
         # Only run this step if the scripts directory exists for the current addon
         if: ${{ hashFiles(format('{0}/{1}/scripts', github.workspace, steps.extract_branch.outputs.BR_VERSION)) != '' }}
+=======
+
+      - name: ✍🏼 version ${{ steps.extract_branch.outputs.BR_VERSION }}
+        id: version_set
+        uses: endaft/action-yamler@21971b2b391a33a3c97925f169f6b4b0bf68e43d # v1.1.1
+        with:
+          file: ./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+          path: version
+          set: .dev${{ github.run_number }}
+          get: true
+          append: true
+
+      - name: 👓 read-yaml-file ${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+        id: read_action_js
+        with:
+          config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml    
+
+      - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon ${{ steps.version_set.outputs.value_old }}
+        uses: home-assistant/builder@6cb4fd3d1338b6e22d0958a4bcb53e0965ea63b4 # 2026.02.1
+        if: ${{ steps.read_action_js.outputs.image != '' }}
+        env:
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+        with:
+          args: |
+            --aarch64 \
+            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
+            --docker-hub dianlight
+
+      - name: pull-request
+        if: ${{ steps.read_action_js.outputs.image != '' }}
+>>>>>>> prerelease/sambanas2_2026.3.0
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
         shell: bash
@@ -223,6 +271,7 @@ jobs:
 
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
+<<<<<<< mergerelease/sambanas2
 
           ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
           BASE_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
@@ -278,4 +327,27 @@ jobs:
             --base "${PR_BASE_BRANCH_NAME}" \
             --head "${PR_HEAD_BRANCH_NAME}" \
             --title "Releasing ${PR_HEAD_BRANCH_NAME} into ${PR_BASE_BRANCH_NAME}" \
+=======
+          #git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" HEAD && \
+          #  git push -u origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" || :
+          #git restore .
+          #git clean -f
+          #git log --left-right --graph --cherry-pick --oneline master...${GITHUB_REF} | \
+          #  gh pr create --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" --title "Releasing ${{ github.ref }} into prerelease" --body ":crown: *An automated PR*" --body-file -
+          #git fetch origin master    
+          #gh pr create --base "prerelease2/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \ 
+          #  --title "Releasing ${{ github.ref }} into prerelease" \ 
+          #  --fill \
+          #  --head "${{ github.ref }}"
+          #  --template "pull_request_template.md"
+          #  --draft
+          #  
+          git fetch origin master ${BRANCH_NAME}   
+          git branch -f "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" "origin/master"
+          git push -f origin  "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}"
+          gh pr create \
+            --base "prerelease/${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+            --head "${BRANCH_NAME}" \
+            --title "Releasing ${BRANCH_NAME} into prerelease ${{ steps.extract_branch.outputs.BR_VERSION }}_${{ steps.version_set.outputs.value_old }}" \
+>>>>>>> prerelease/sambanas2_2026.3.0
             --fill || :

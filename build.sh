@@ -14,7 +14,11 @@ elif [[ "${arch}x" == "x86_64x" ]]; then
   arch="amd64"
 fi
 
+<<<<<<< mergerelease/sambanas2
 echo "Running for arch ${arch} and '$@'"
+=======
+echo "Running for arch ${arch}"
+>>>>>>> prerelease/sambanas2_2026.3.0
 
 for addon in "$@"; do
   # Check id in addon there is config.yaml or config.json file
