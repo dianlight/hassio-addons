@@ -83,6 +83,6 @@ homeassistant: 2025.8.0
 backup: hot
 auth_api: true
 homeassistant_api: true
-#timeout: 120
+timeout: 300
 #breaking_versions:
 #  - 12.5.0-nas # Version with SRAT enabled as first source of configuration
