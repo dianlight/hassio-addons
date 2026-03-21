@@ -319,7 +319,7 @@ COPY rootfs /
 # Set executable permissions on s6-overlay scripts
 RUN find /etc/s6-overlay -type f -exec chmod a+x {} +
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5m --retries=3 \
     CMD smbcontrol smbd ping || exit 1
 
 # Labels
