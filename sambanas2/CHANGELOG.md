@@ -5,12 +5,17 @@
 ### 🙏 Thanks
 
 - Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supportes and soponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
+- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
 
 ### 🚨 Notes
+- This is a development version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
+- This version is only compatible with Home Assistant OS and Supervised installations, it is not compatible with Home Assistant Core or Container installations.
 - This has been a big refactor to make the addon more efficient and use less resources. Some features have been removed or changed to improve stability and performance. Some will be added back in future releases.
 - ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
 - ***If you need HDIdle support don't update and wait next releases.***
+- ***If you need Avahi/mDNS support don't update and wait next releases.***
+- ***If you are using armv7 architecture don't update and wait next releases.***
 
 #### 💥 Breaking Changes (from SambaNas addon)
 - New configuration format (See [DOCS](DOCS.md) )
