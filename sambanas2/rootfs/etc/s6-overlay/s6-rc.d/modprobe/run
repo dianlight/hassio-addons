@@ -35,8 +35,9 @@ if bashio::config.true 'use_external_kernel_modules'; then
         # Asset naming: {module_name}_{haos_version}_{board}.ko.xz
         MATCH_SUFFIX="_${HAOS_VERSION}_${BOARD}.ko.xz"
         MATCHED_COUNT=0
+        declare -a RELEASE_MODULES
 
-        while IFS= read -r asset_url; do
+        while IFS=$'\t' read -r asset_url asset_digest asset_updated; do
             asset_name=$(basename "${asset_url}")
             # Match assets ending with _{HAOS_VERSION}_{BOARD}.ko.xz
             if [[ "${asset_name}" == *"${MATCH_SUFFIX}" ]]; then
@@ -45,26 +46,70 @@ if bashio::config.true 'use_external_kernel_modules'; then
                 xz_path="${EXTRA_MODULES_DIR}/${xz_name}"
 
                 MATCHED_COUNT=$((MATCHED_COUNT + 1))
+                RELEASE_MODULES+=("${xz_name}")
 
+                needs_download=true
                 if [ -f "${xz_path}" ]; then
-                    bashio::log.info "Extra module already present, skipping download: ${xz_name}"
-                else
+                    # Prefer SHA256 digest comparison when available (GitHub API digest field)
+                    if [ -n "${asset_digest}" ] && [[ "${asset_digest}" == sha256:* ]]; then
+                        remote_sha256="${asset_digest#sha256:}"
+                        local_sha256=$(sha256sum "${xz_path}" | cut -d' ' -f1)
+                        if [ "${local_sha256}" = "${remote_sha256}" ]; then
+                            bashio::log.info "Extra module up-to-date (SHA256 match), skipping: ${xz_name}"
+                            needs_download=false
+                        else
+                            bashio::log.info "Extra module changed (SHA256 mismatch), re-downloading: ${xz_name}"
+                        fi
+                    elif [ -n "${asset_updated}" ]; then
+                        local_mtime=$(stat -c %Y "${xz_path}" 2>/dev/null || echo 0)
+                        remote_ts=$(date -d "${asset_updated}" +%s 2>/dev/null || echo 0)
+                        if [ "${remote_ts}" -le "${local_mtime}" ]; then
+                            bashio::log.info "Extra module up-to-date (date check), skipping: ${xz_name}"
+                            needs_download=false
+                        else
+                            bashio::log.info "Extra module has newer version available, re-downloading: ${xz_name}"
+                        fi
+                    else
+                        bashio::log.info "Extra module already present (no metadata to compare), skipping: ${xz_name}"
+                        needs_download=false
+                    fi
+                fi
+
+                if [ "${needs_download}" = true ]; then
                     bashio::log.info "Downloading extra kernel module: ${asset_name}"
                     CURL_DL_ERR=$(mktemp)
-                    if curl -sfL --max-time 60 "${asset_url}" -o "${xz_path}" 2>"${CURL_DL_ERR}"; then
+                    if curl -sfL --max-time 60 "${asset_url}" -o "${xz_path}.tmp" 2>"${CURL_DL_ERR}"; then
+                        mv "${xz_path}.tmp" "${xz_path}"
                         bashio::log.info "Downloaded: ${xz_name}"
                     else
                         bashio::log.warning "Failed to download ${asset_name} ($(cat "${CURL_DL_ERR}" | head -1)) - skipping"
-                        rm -f "${xz_path}"
+                        rm -f "${xz_path}.tmp"
                     fi
                     rm -f "${CURL_DL_ERR}"
                 fi
             fi
-        done < <(echo "${RELEASE_DATA}" | jq -r '.assets[].browser_download_url' 2>/dev/null)
+        done < <(echo "${RELEASE_DATA}" | jq -r '.assets[] | [.browser_download_url, (.digest // ""), .updated_at] | @tsv' 2>/dev/null)
 
         if [ "${MATCHED_COUNT}" -eq 0 ]; then
             bashio::log.warning "No extra kernel modules found for haos_version=${HAOS_VERSION} board=${BOARD}"
         fi
+
+        # Remove locally cached modules that are no longer present in the release
+        for local_mod in "${EXTRA_MODULES_DIR}"/*"${MATCH_SUFFIX}"; do
+            [ -f "${local_mod}" ] || continue
+            local_name=$(basename "${local_mod}")
+            found=false
+            for release_mod in "${RELEASE_MODULES[@]}"; do
+                if [ "${local_name}" = "${release_mod}" ]; then
+                    found=true
+                    break
+                fi
+            done
+            if [ "${found}" = false ]; then
+                bashio::log.info "Removing obsolete extra module (not in release): ${local_name}"
+                rm -f "${local_mod}"
+            fi
+        done
     fi
 fi
 
