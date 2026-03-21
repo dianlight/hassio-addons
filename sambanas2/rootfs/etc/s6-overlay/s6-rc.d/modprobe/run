@@ -187,6 +187,20 @@ fstypes=$(grep -v nodev </proc/filesystems | tr -d '\n')
 bashio::log.blue "------------------------------------------------------------------------------------------------------"
 bashio::log.green "System Supported fs: ${fstypes}"
 if grep -q fuseblk </proc/filesystems; then bashio::log.green "Supported fusefs: $(find /usr/sbin -name "mount*" | cut -c 17- | tr "\n" " " | sed s/fuse.//g)"; fi
+if grep -qw zfs </proc/filesystems; then
+    if command -v zpool >/dev/null 2>&1; then
+        zfs_version=$(zpool --version 2>/dev/null | head -n1)
+        if [ -n "${zfs_version}" ]; then
+            bashio::log.green "ZFS support: available (${zfs_version})"
+        else
+            bashio::log.green "ZFS support: available (kernel module detected)"
+        fi
+    else
+        bashio::log.green "ZFS support: available (kernel module detected)"
+    fi
+else
+    bashio::log.warning "ZFS support: not available"
+fi
 bashio::log.blue "------------------------------------------------------------------------------------------------------"
 
 bashio::log.debug  "-> Done."

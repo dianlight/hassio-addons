@@ -81,6 +81,20 @@ All integration tests passed!
 
 ## Other Test Scripts
 
+### ZFS Output Test (`test-zfs-support-output.sh`)
+
+Unit test for the ZFS support output logic used by `modprobe/run`.
+
+**What it tests:**
+- ZFS available with explicit `zpool` version output
+- ZFS available from kernel detection when `zpool` version is not available
+- ZFS unavailable when the filesystem entry is missing
+
+**Run it:**
+```bash
+./test-zfs-support-output.sh
+```
+
 ### `buildLocal.sh`
 Builds the add-on container image locally for testing.
 
@@ -100,6 +114,9 @@ To run both upgrade tests:
 
 # Integration tests (requires gcc + objdump)
 ./test-binary-upgrade-integration.sh
+
+# ZFS output unit test
+./test-zfs-support-output.sh
 ```
 
 ## CI/CD Integration
@@ -118,6 +135,8 @@ test:
       run: ./sambanas2/test/test-binary-upgrade.sh
     - name: Run integration tests
       run: ./sambanas2/test/test-binary-upgrade-integration.sh
+    - name: Run ZFS output tests
+      run: ./sambanas2/test/test-zfs-support-output.sh
 ```
 
 ## Manual Testing with Real Binaries
