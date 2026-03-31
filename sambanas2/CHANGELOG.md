@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.3.0-dev [ 🚧 Unreleased ]
+## 2026.3.0-rc [ 🚧 Unreleased ]
 
 ### 🙏 Thanks
 
@@ -8,7 +8,7 @@
 - Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
 
 ### 🚨 Notes
-- This is a development version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
 - This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
 - This version is only compatible with Home Assistant OS and Supervised installations, it is not compatible with Home Assistant Core or Container installations.
 - This has been a big refactor to make the addon more efficient and use less resources. Some features have been removed or changed to improve stability and performance. Some will be added back in future releases.
@@ -40,6 +40,5 @@
 ### 🏗 Chore
 
 ### 🐭 Features from SRAT [ 🚧 Unreleased ]
-
 
 [docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
