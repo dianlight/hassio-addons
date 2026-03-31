@@ -31,7 +31,6 @@ panel_icon: mdi:folder-network
 panel_title: Samba NAS2
 panel_admin: true
 discovery: ["srat"]
-
 boot: auto
 init: false
 hassio_api: true
