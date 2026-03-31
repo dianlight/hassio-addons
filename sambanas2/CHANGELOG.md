@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.3.0-rc [ 🚧 Unreleased ]
+## 2026.3.0-rc1
 
 ### 🙏 Thanks
 
