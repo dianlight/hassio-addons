@@ -267,11 +267,6 @@ RUN apk add --no-cache \
     xz \
     ngtcp2  \
     kmod \
-    && echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories \
-    && echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
-    && apk add --no-cache \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
     zfs \
     && apk upgrade --no-cache
 
