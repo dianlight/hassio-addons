@@ -17,15 +17,6 @@ if bashio::config.true 'factory_reset'; then
   
   bashio::log.warning "Starting factory reset process..."
   
-  # Delete SQL database
-  if [ -f "/config/config.db3" ]; then
-    bashio::log.warning "Deleting SQL database: /config/config.db3"
-    rm -f /config/config.db3
-    bashio::log.info "SQL database deleted successfully"
-  else
-    bashio::log.info "SQL database does not exist, skipping deletion"
-  fi
-  
   # Delete any database or related files
   if [ -d "/config" ]; then
     bashio::log.warning "Cleaning up database files..."
@@ -46,6 +37,13 @@ if bashio::config.true 'factory_reset'; then
     bashio::log.warning "Removing downloaded extra kernel modules directory..."
     rm -rf /config/extra_modules
     bashio::log.info "Extra kernel modules directory removed"
+  fi
+
+  # Delete upgrade directory to remove any downloaded updates
+  if [ -d "/config/upgrade" ]; then
+    bashio::log.warning "Removing upgrade directory to clean up any downloaded updates..."
+    rm -rf /config/upgrade
+    bashio::log.info "Upgrade directory removed"
   fi
   
   # Set clean_upgrade_dir to true so check-srat-update will clean it
