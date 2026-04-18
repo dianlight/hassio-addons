@@ -7,6 +7,9 @@
 # correct FQDN. The CA cert is stored as /config/ca.cert for client trust.
 # Certificates are stored in /config and only regenerated if missing or invalid
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "init-smbd/run failed at line ${LINENO} (exit code: ${?})"' ERR
 
 CERT_DIR="/ssl/sambanas/"
 CA_KEY_FILE="${CERT_DIR}/ca.key"
