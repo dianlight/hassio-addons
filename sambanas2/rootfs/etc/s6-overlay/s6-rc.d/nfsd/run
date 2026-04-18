@@ -107,7 +107,7 @@ while true; do
     continue
   fi
 
-  if ! exportfs -r; then
+  if ! exportfs -ar; then
     bashio::log.error "Failed to apply exports from ${EXPORTS_FILE}; retrying in 10s."
     rpc.nfsd 0 || true
     sleep 10
