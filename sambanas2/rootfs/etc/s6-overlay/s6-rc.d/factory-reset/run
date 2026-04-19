@@ -4,6 +4,9 @@
 # ==============================================================================
 # Factory Reset - Delete SQL database and all configuration
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "factory-reset/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 # Check if factory_reset is enabled
 if bashio::config.true 'factory_reset'; then
@@ -17,32 +20,34 @@ if bashio::config.true 'factory_reset'; then
   
   bashio::log.warning "Starting factory reset process..."
   
-  # Delete any database or related files
-  if [ -d "/config" ]; then
-    bashio::log.warning "Cleaning up database files..."
-    rm -f /config/config.db3-* 2>/dev/null || true
-    rm -f /config/*.db3 2>/dev/null || true
-    bashio::log.info "Database files cleaned"
-  fi
+  # Delete any database or related files (can be in /config or /data)
+  bashio::log.warning "Cleaning up database files..."
+  for db_dir in /config /data; do
+    if [ -d "${db_dir}" ]; then
+      rm -f "${db_dir}"/config.db3-* 2>/dev/null || true
+      rm -f "${db_dir}"/*.db3 2>/dev/null || true
+    fi
+  done
+  bashio::log.info "Database files cleaned"
 
   # Delete any certificate files
-  if [ -d "/config" ]; then
-    bashio::log.warning "Cleaning up certificate files..."
-    rm -f /config/server.{cert,key} 2>/dev/null || true
-    bashio::log.info "Certificate files cleaned"
-  fi
+  bashio::log.warning "Cleaning up certificate files..."
+  rm -f /config/server.{cert,key} 2>/dev/null || true
+  bashio::log.info "Certificate files cleaned"
+
 
   # Delete downloaded extra kernel modules
-  if [ -d "/config/extra_modules" ]; then
+  if [ -d "/data/extra_modules" ]; then
     bashio::log.warning "Removing downloaded extra kernel modules directory..."
-    rm -rf /config/extra_modules
+    rm -rf /data/extra_modules
     bashio::log.info "Extra kernel modules directory removed"
   fi
 
   # Delete upgrade directory to remove any downloaded updates
-  if [ -d "/config/upgrade" ]; then
+  # Note: config/upgrade is used for development/testing, data/upgrade is used in production for downloaded updates
+  if [ -d "/data/upgrade" ]; then
     bashio::log.warning "Removing upgrade directory to clean up any downloaded updates..."
-    rm -rf /config/upgrade
+    rm -rf /data/upgrade
     bashio::log.info "Upgrade directory removed"
   fi
   
