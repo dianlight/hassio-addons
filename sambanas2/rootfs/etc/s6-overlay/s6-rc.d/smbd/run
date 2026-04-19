@@ -1,0 +1,23 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start smbd service
+# ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "smbd/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
+# Add QUIC library to library path if it exists
+if [ -d "/usr/local/quic/lib" ]; then
+  export LD_LIBRARY_PATH="/usr/local/quic/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+fi
+
+export PATH="/usr/local/samba/bin:/usr/local/samba/sbin:$PATH"
+
+
+# exec ensures s6-notifyoncheck replaces the shell process
+# -c: The command to check health (smbclient listing shares)
+# smbd -F: Runs in foreground (mandatory for s6)
+exec s6-notifyoncheck -c "smbclient -L localhost -N" \
+    smbd -F --no-process-group --debug-stdout <&-  

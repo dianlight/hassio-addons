@@ -86,7 +86,7 @@ jobs:
           echo "Extracted base version: $FINAL_VERSION_BASE"
           
 
-      - name: ✍🏼 Set version in config.yaml
+      - name: ✍🏼 Set version in config.yaml --> ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}
         id: version_set # This ID is used by subsequent steps for value_old
         shell: bash
         run: |
@@ -106,7 +106,7 @@ jobs:
           
           echo "Updated version from '$OLD_VERSION' to '$NEW_VALUE'"
 
-      - name: ✍🏼 Set name in config.yaml
+      - name: ✍🏼 Set name in config.yaml --> ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
         shell: bash
         run: |
           CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
@@ -120,7 +120,7 @@ jobs:
           
           echo "Updated name from '$OLD_NAME' to '$NEW_NAME'"
 
-      - name: ✍🏼 Set image in config.yaml
+      - name: ✍🏼 Set image in config.yaml --> ${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}
         shell: bash
         run: |
           CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
@@ -165,7 +165,7 @@ jobs:
             fi
           done
 
-      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }}
+      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }} --> ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }}
         uses: home-assistant/builder@master #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
