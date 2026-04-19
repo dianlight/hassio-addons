@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.3.0-rc1 [ 🚧 Unreleased ]
+## 2026.4.0-rc2
 
 ### 🙏 Thanks
 
@@ -15,7 +15,19 @@
 - ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
 - ***If you need HDIdle support don't update and wait next releases.***
 - ***If you need Avahi/mDNS support don't update and wait next releases.***
-- ***If you are using armv7 architecture don't update and wait next releases.***
+- ***If you are using armv7 architecture don't update, the architecture is not supported.***
+
+### 🏗 Chore
+
+- General code refactor and cleanup
+- Update dependencies and base image
+- Add more logging and error handling
+- Add more documentation and examples
+- Add more tests and CI/CD pipelines
+
+### 🐭 Features from SRAT [ 🚧 Unreleased ]
+
+## 2026.3.0-rc1
 
 #### 💥 Breaking Changes (from SambaNas addon)
 - New configuration format (See [DOCS](DOCS.md) )
@@ -39,6 +51,5 @@
 
 ### 🏗 Chore
 
-### 🐭 Features from SRAT [ 🚧 Unreleased ]
 
 [docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
