@@ -4,6 +4,10 @@
 # ==============================================================================
 # Start srat service
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "srat/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
 export HOSTNAME
 export ADDON_VERSION=$(bashio::addon.version)
 

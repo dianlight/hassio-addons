@@ -4,6 +4,10 @@
 # ==============================================================================
 # Remove deprecated config options 
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "clean-config/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
 bashio::log.debug  "-> Clean config ..."
 
 options=$(bashio::addon.options)

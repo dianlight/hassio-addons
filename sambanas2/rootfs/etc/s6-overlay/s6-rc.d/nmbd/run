@@ -4,6 +4,10 @@
 # ==============================================================================
 # Start nmbd service
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "nmbd/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
 # Add QUIC library to library path if it exists
 if [ -d "/usr/local/quic/lib" ]; then
   export LD_LIBRARY_PATH="/usr/local/quic/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"

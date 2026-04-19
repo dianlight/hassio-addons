@@ -4,6 +4,9 @@
 # ==============================================================================
 # Start socat service (openport)
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "socat/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 if bashio::var.has_value "$(bashio::addon.port 3000)"; then
   bashio::log.warning "$(figlet -p -f big -w 600 'ALLERT!')"

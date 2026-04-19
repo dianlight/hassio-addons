@@ -6,13 +6,13 @@
 # ==============================================================================
 set -euo pipefail
 exec 2>&1
-trap 'bashio::log.error "modprobe/run failed at line ${LINENO} (exit code: ${?})"' ERR
+trap 'bashio::log.error "modprobe/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 bashio::log.debug  "-> Loading kernel modules..."
 
 KERNEL_RELEASE=$(uname -r)
 BASE_MODULES_DIR="/lib/modules/${KERNEL_RELEASE}"
-EXTRA_MODULES_DIR="/config/extra_modules"
+EXTRA_MODULES_DIR="/data/extra_modules"
 
 # ==============================================================================
 # Download and load extra kernel modules from GitHub (experimental)
@@ -202,7 +202,7 @@ if grep -qw zfs </proc/filesystems; then
     else
         bashio::log.green "ZFS support: available (kernel module detected)"
     fi
-fi
+fi || :
 bashio::log.blue "------------------------------------------------------------------------------------------------------"
 
 bashio::log.debug  "-> Done."

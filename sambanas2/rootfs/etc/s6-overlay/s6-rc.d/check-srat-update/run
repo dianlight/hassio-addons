@@ -4,6 +4,10 @@
 # ==============================================================================
 # Start srat-cli service
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "check-srat-update/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
 export HOSTNAME
 export ADDON_VERSION=$(bashio::addon.version)
 
@@ -18,7 +22,7 @@ extract_version_from_binary() {
     meta_line=$(strings -a "${bin}" | grep -oE 'SRAT_METADATA:\{[^}]*\}' | head -1)
     
     if [ -n "${meta_line}" ]; then
-      extracted_json=$(echo "${meta_line}" | grep -oE '\{[^}]+\}')
+      extracted_json=$(echo "${meta_line}" | grep -oE '\{[^}]+\}') || true
       ver=$(echo "${extracted_json}" | jq -r '.version' 2>/dev/null)
       
       if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then

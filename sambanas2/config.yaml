@@ -8,6 +8,7 @@ arch:
   - aarch64
   - amd64
 startup: application
+stage: experimental
 #webui: http://[HOST]:[PORT:3000]/static/index.html
 #watchdog: http://[HOST]:[PORT:3000]/api/status   # Tema porta dinamica
 #watchdog: tcp://[HOST]:[PORT:445]

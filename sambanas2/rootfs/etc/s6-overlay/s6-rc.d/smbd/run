@@ -4,6 +4,9 @@
 # ==============================================================================
 # Start smbd service
 # ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "smbd/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 # Add QUIC library to library path if it exists
 if [ -d "/usr/local/quic/lib" ]; then

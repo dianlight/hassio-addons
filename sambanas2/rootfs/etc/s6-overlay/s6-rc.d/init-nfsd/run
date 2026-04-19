@@ -29,6 +29,16 @@ ensure_nfsd_available() {
   has_nfsd_support
 }
 
+if [ "$(bashio::addon.protected)" == "true" ]; then 
+  bashio::log.warning "Protected mode does not provide NFS server support; removing nfs-utils and skipping NFS setup."
+
+  if apk info -e nfs-utils >/dev/null 2>&1; then
+    apk del --no-cache --no-network nfs-utils || apk del --no-cache  nfs-utils || true
+  fi
+
+  exit 0
+fi
+
 if ! ensure_nfsd_available; then
   bashio::log.warning "Kernel does not provide NFS server support; removing nfs-utils and skipping NFS setup."
 
@@ -41,7 +51,7 @@ fi
 
 # At this point, we have confirmed that the kernel supports nfsd. We can proceed with mounting the necessary pseudo filesystems for NFS operation.
 # To support root filesystem exports, we need to mount the NFS root image. This is required for NFSv4 exports that rely on a root filesystem image.
-mount -o loop /root/nfs_root.img /mnt
+modprobe loop && mount -o loop /root/nfs_root.img /mnt
 
 mkdir -p /run/rpc_pipefs /proc/fs/nfsd
 

@@ -4,12 +4,16 @@
 # Startup script for wsddn
 # Dynamically reads parameters from smb.conf including interfaces and log level
 #
-echo "Configuring and starting wsddn..."
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "wsddn/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
+bashio::log.info "Configuring and starting wsddn..."
 
 SMB_CONF="/etc/samba/smb.conf"
 
 if [ ! -f "$SMB_CONF" ]; then
-  echo "Fatal: Samba config file not found at ${SMB_CONF}!"
+  bashio::log.fatal "Samba config file not found at ${SMB_CONF}!"
   exit 1
 fi
 
@@ -82,7 +86,7 @@ case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in # Normalize to low
   ;;
 esac
 
-echo "Starting wsddn with arguments:${WSDDN_ARGS}"
+bashio::log.info "Starting wsddn with arguments:${WSDDN_ARGS}"
 
 # --- Esecuzione ---
 #case "$(echo "${LOG_LEVEL}" | tr '[:upper:]' '[:lower:]')" in
