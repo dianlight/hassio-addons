@@ -370,7 +370,7 @@ After BuildKit migration, the `config.yaml` mutation step still runs (it's indep
 ## Work Packages and Execution Detail
 
 ## WP0 - Baseline and Decision Capture
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 MCP and permissions needed:
 - MCP: none required for decision capture.
@@ -883,7 +883,7 @@ When to skip full fork:
 - If secure secret duplication is not possible and temporary canary tags in upstream are acceptable.
 
 ## Tracking Checklist
-- [ ] WP0 approved
+- [x] WP0 approved (2026-04-24)
 - [ ] WP0.5 complete
 - [ ] WP1 complete
 - [ ] WP2 complete
