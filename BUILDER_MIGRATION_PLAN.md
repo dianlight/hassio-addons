@@ -541,7 +541,7 @@ Exit criteria:
 - `mergerelease/<addon>` force-push step verified still functional.
 
 ## WP2 - Dockerfile Parity and Metadata Ownership
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 MCP and permissions needed:
 - MCP: repository information/search MCP, PR MCP.
@@ -880,7 +880,7 @@ When to skip full fork:
 - [x] WP0 approved (2026-04-24)
 - [x] WP0.5 complete (2026-04-24)
 - [x] WP1 complete (2026-04-24)
-- [ ] WP2 complete
+- [x] WP2 complete (2026-04-24)
 - [ ] WP3 complete
 - [ ] WP4 complete
 - [ ] WP5 complete
