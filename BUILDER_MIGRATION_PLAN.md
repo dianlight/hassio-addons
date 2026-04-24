@@ -388,7 +388,7 @@ Locked decisions:
 9. **Registry target — LOCKED: Option A (GHCR)**. Migrate from Docker Hub to `ghcr.io/dianlight/`. Auth via `GITHUB_TOKEN` with `packages: write` permission — no additional secrets needed. Breaking change for existing HA users (image URL changes from `docker.io/dianlight/...` to `ghcr.io/dianlight/...`, combined with image rename from decision #7). Both breaking changes documented together in CHANGELOG. `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets are no longer needed in CI after migration.
 
 ## WP0.5 - Rehearsal Branch Setup
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 > **Fork constraint (discovered 2026-04-24):** GitHub does not allow `dianlight` to fork `dianlight/hassio-addons` to the same account. The temporary fork strategy is replaced with a **dedicated migration branch** directly in the upstream repo. Isolation is maintained because `migration/*` branches do not match any CI trigger pattern (`devrelease/*`, `prerelease/*`, or PR-to-master), so no production workflow fires on push to the rehearsal branch.
 
@@ -878,7 +878,7 @@ When to skip full fork:
 
 ## Tracking Checklist
 - [x] WP0 approved (2026-04-24)
-- [ ] WP0.5 complete
+- [x] WP0.5 complete (2026-04-24)
 - [ ] WP1 complete
 - [ ] WP2 complete
 - [ ] WP3 complete
