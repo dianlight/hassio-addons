@@ -41,6 +41,15 @@ Planned MCP tool groups used in this migration:
   - read files/metadata
   - search tags/releases/commits for parity checks
 
+Additional automation path (non-MCP):
+- GitHub CLI via terminal automation (`gh`) can be used for GitHub operations when MCP is unavailable or limited.
+- Typical commands used in this plan:
+  - `gh repo fork <original-repo-url> --fork-name <new-name> --clone`
+  - `gh pr create ...`
+  - `gh pr edit ...`
+  - `gh pr list ...`
+  - `gh run list|view|rerun ...`
+
 Permissions and authorization required:
 - GitHub token scopes:
   - `repo` (code read/write and PR operations)
@@ -61,8 +70,13 @@ Permissions and authorization required:
   - CODEOWNERS/security/release approvals where branch protection requires them
   - final merge authorization on protected branches
 
+CLI prerequisites:
+- GitHub CLI installed on runner/workstation where automation is executed.
+- Authenticated gh session with required scopes (`gh auth status` must be healthy).
+
 Operational note:
 - If any permission above is missing, affected WP tasks are blocked and remain manual until access is granted.
+- Where MCP is not available, use GitHub CLI to keep tasks automated when permissions are present.
 
 ## Current State Analysis
 
@@ -235,6 +249,7 @@ Status: Not started
 
 MCP and permissions needed:
 - MCP: repository creation/branch MCP, PR MCP, GitHub Actions MCP.
+- CLI alternative: `gh` for fork/PR/workflow operations.
 - Permission:
   - token with `repo` + `workflow` scopes
   - write access to fork repo
@@ -252,7 +267,7 @@ Repository/branch model:
 - Final upstream integration branch: `migration/buildkit-final`
 
 Tasks:
-- [ ] Create and sync temporary fork from upstream `master`.
+- [ ] Create and sync temporary fork from upstream `master` (MCP or `gh repo fork <original-repo-url> --fork-name <new-name> --clone`).
 - [ ] Mirror only required CI secrets into the fork (least privilege).
 - [ ] Configure fork workflows to use non-production publish targets/tags.
 - [ ] Configure beta-repo PR automation in test mode to create draft PRs only (simulation safety gate).
@@ -273,6 +288,7 @@ Pre-flight authorization checklist (before first rehearsal run):
 - [ ] Fork repository created and writable by migration maintainers.
 - [ ] Required registry credentials are available for non-production namespace.
 - [ ] Fork GitHub secrets created manually and validated (minimum secret set only).
+- [ ] GitHub CLI is installed and authenticated (`gh auth status` is healthy).
 - [ ] Branch protection policy understood for upstream target branches.
 - [ ] Required manual approvers identified (CODEOWNERS/security/release).
 - [ ] Temporary publish namespace approved for canary rehearsal tags.
@@ -282,6 +298,44 @@ Pre-flight authorization checklist (before first rehearsal run):
   - pull request operations
   - GitHub Actions run inspection
 - [ ] Rollback owner assigned and rollback communication channel confirmed.
+
+GitHub CLI runbook (copy-paste, WP0.5 rehearsal):
+```bash
+# 0) Inputs
+ORIGINAL_REPO="https://github.com/dianlight/hassio-addons"
+FORK_NAME="hassio-addons-buildkit-migration"
+REHEARSAL_BRANCH="migration/buildkit-rehearsal"
+UPSTREAM_REMOTE_NAME="upstream"
+
+# 1) Verify gh authentication and scopes
+gh auth status
+
+# 2) Fork and clone (if repo folder is not already present)
+gh repo fork "$ORIGINAL_REPO" --fork-name "$FORK_NAME" --clone
+cd "$FORK_NAME"
+
+# 3) Ensure upstream remote exists and sync from upstream master
+git remote add "$UPSTREAM_REMOTE_NAME" "$ORIGINAL_REPO" 2>/dev/null || true
+git fetch "$UPSTREAM_REMOTE_NAME" --prune
+git checkout -B "$REHEARSAL_BRANCH" "$UPSTREAM_REMOTE_NAME/master"
+git push -u origin "$REHEARSAL_BRANCH"
+
+# 4) After applying migration edits, commit and push rehearsal branch
+git add .
+git commit -m "chore(buildkit): rehearsal migration changes" || true
+git push origin "$REHEARSAL_BRANCH"
+
+# 5) Validate workflow execution (list and inspect)
+gh run list --limit 20
+gh run view --log
+
+# 6) Beta-repo simulation rule: PRs must be draft-only during rehearsal
+# (Use --draft when creating PRs in beta repo automation paths.)
+gh pr create --draft --title "[rehearsal] BuildKit migration" --body "WP0.5 rehearsal" || true
+
+# 7) Verify PR draft state
+gh pr view --json isDraft,title,headRefName,baseRefName
+```
 
 Exit criteria:
 - Rehearsal start gate: all pre-flight authorization checklist items are completed.
@@ -293,6 +347,7 @@ Status: Not started
 
 MCP and permissions needed:
 - MCP: repository information/search MCP, PR MCP, GitHub Actions MCP.
+- CLI alternative: `gh` for PR and workflow operations.
 - Permission:
   - branch write + PR write permissions
   - workflow trigger/rerun permissions
@@ -418,6 +473,7 @@ Status: Not started
 
 MCP and permissions needed:
 - MCP: PR MCP, GitHub Actions MCP, branch management MCP.
+- CLI alternative: `gh` for branch, PR, and workflow checks.
 - Permission:
   - upstream branch push rights for migration branch
   - upstream PR creation/update rights
@@ -462,18 +518,18 @@ Legend:
 - Plan maintenance/document updates: `Autonomous`
 
 ### WP0.5 - Temporary fork rehearsal
-- Create fork repository: `Autonomous` via repository-creation MCP (`fork repository`).
+- Create fork repository: `Autonomous` via repository-creation MCP (`fork repository`) or GitHub CLI (`gh repo fork ...`).
 - Create rehearsal branches: `Autonomous` via branch MCP (`create branch`).
 - Sync from upstream and prepare rehearsal commits: `Autonomous`.
 - Configure fork secrets/tokens in GitHub settings: `Manual` (no secrets-management MCP exposed).
 - Configure non-production registry namespace values and workflow vars: `Hybrid` (agent edits files, human provides allowed targets/tokens).
-- Run workflow rehearsals and inspect results: `Autonomous` via GitHub Actions MCP (`list/get workflow runs/jobs/artifacts`).
+- Run workflow rehearsals and inspect results: `Autonomous` via GitHub Actions MCP (`list/get workflow runs/jobs/artifacts`) or GitHub CLI (`gh run ...`).
 - Approve go/no-go after evidence review: `Manual`.
 
 ### WP1 - CI BuildKit migration scaffold
 - Edit workflow YAMLs: `Autonomous`.
 - Create/update branches and commits: `Autonomous`.
-- Trigger workflow runs and inspect failures: `Autonomous` via GitHub Actions MCP.
+- Trigger workflow runs and inspect failures: `Autonomous` via GitHub Actions MCP or GitHub CLI (`gh run ...`).
 - Validate signing policy parity (organizational/security sign-off): `Manual`.
 
 ### WP2 - Dockerfile parity and metadata ownership
@@ -493,15 +549,15 @@ Legend:
 - Final cleanup approval gate: `Manual`.
 
 ### WP5 - Validation, rollout, rollback readiness
-- PR and branch validation runs: `Autonomous` via GitHub Actions MCP.
+- PR and branch validation runs: `Autonomous` via GitHub Actions MCP or GitHub CLI (`gh run ...`).
 - Artifact/log collection and parity report: `Autonomous`.
 - Production publish authorization: `Manual`.
 - Rollback decision if anomaly is found: `Manual`.
 
 ### WP6 - Upstream reintegration and merge
 - Replay validated commits to upstream branch: `Autonomous`.
-- Open/update upstream PR: `Autonomous` via PR MCP.
-- CI verification and status inspection: `Autonomous` via GitHub Actions MCP.
+- Open/update upstream PR: `Autonomous` via PR MCP or GitHub CLI (`gh pr create|edit|list`).
+- CI verification and status inspection: `Autonomous` via GitHub Actions MCP or GitHub CLI (`gh run ...`).
 - Required code-owner/security approvals and final merge click: `Manual`.
 
 ## Low-Risk Test Strategy (No-Risk-First)
