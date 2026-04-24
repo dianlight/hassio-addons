@@ -476,7 +476,7 @@ Exit criteria:
 - Validation evidence bundle is complete and approved for upstream reintegration.
 
 ## WP1 - CI BuildKit Migration Scaffold
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 MCP and permissions needed:
 - MCP: repository information/search MCP, PR MCP, GitHub Actions MCP.
@@ -500,7 +500,7 @@ Fallback (if HA composite actions are not suitable for any step):
 - `docker/setup-qemu-action@v3`, `docker/setup-buildx-action@v3`, `docker/login-action@v3`, `docker/build-push-action@v6`.
 
 Tasks:
-- [ ] Replace `home-assistant/builder@master` call with the three HA composite actions:
+- [x] Replace `home-assistant/builder@master` call with the three HA composite actions:
   1. **Extract arch list** from `config.yaml` before calling `prepare-multi-arch-matrix`:
      ```yaml
      - id: get_arch
@@ -509,25 +509,25 @@ Tasks:
   2. `prepare-multi-arch-matrix` with `architectures: ${{ steps.get_arch.outputs.architectures }}` and `image-name: addon-sambanas[2]`
   3. Matrix job calling `build-image` per arch with `push: ${{ inputs.publish }}`
   4. `publish-multi-arch-manifest` to create the multi-arch manifest (publish path only)
-- [ ] Keep all existing version/name mutation steps (`yq` version writes, `EXTRACTED_BASE_VERSION`) untouched and BEFORE the build step.
-- [ ] Pass to `build-image`:
+- [x] Keep all existing version/name mutation steps (`yq` version writes, `EXTRACTED_BASE_VERSION`) untouched and BEFORE the build step.
+- [x] Pass to `build-image`:
   - `arch` — from matrix output (HA convention: `amd64`, `aarch64`)
   - `image-name` — `addon-sambanas` or `addon-sambanas2`
-  - `registry-prefix` — `ghcr.io/dianlight` (or use default `ghcr.io/${{ github.repository_owner }}`)
+  - `registry-prefix` — `ghcr.io/dianlight`
   - `version` — mutated version (dev: `EXTRACTED_BASE_VERSION-dev.<run_number>`; PR: config version)
   - `build-args: BUILD_FROM=<per-arch base image>` — **only** remaining manual build arg
-  - `labels` — `io.hass.name=<yq output>\nio.hass.description=<yq output>\nio.hass.type=app`
+  - `labels` — `io.hass.name=...\nio.hass.description=...\nio.hass.type=app`
   - `container-registry-password: ${{ secrets.GITHUB_TOKEN }}` — GHCR auth (decision #9)
-  - `push: true` (publish paths) / `push: false` (dev build or PR validation)
-  - `cosign: true` for PR/prerelease publish jobs; `cosign: false` for dev workflow
-- [ ] **Do NOT add `--build-arg BUILD_ARCH`** — auto-injected by `build-image`.
-- [ ] **Do NOT add separate cosign steps** — `build-image` handles signing internally.
-- [ ] Set permissions `id-token: write` + `packages: write` on all jobs calling `build-image` with `push: true`.
-- [ ] Pass `container-registry-password: ${{ secrets.GITHUB_TOKEN }}` to `publish-multi-arch-manifest` as well.
-- [ ] Preserve `--no-latest` semantics: dev workflow uses versioned `image-tags` only; PR workflow includes `latest` tag.
-- [ ] Ensure prerelease beta-repo PR creation remains draft-only during rehearsal.
-- [ ] Remove `CAS_API_KEY` usage — codenotary attestation is not part of the HA signing flow.
-- [ ] Verify `mergerelease/<addon>` force-push step still works after migration.
+  - `push: true` on all publish paths
+  - `cosign: false` for dev workflow; default (true) for PR workflow
+- [x] **Do NOT add `--build-arg BUILD_ARCH`** — auto-injected by `build-image`.
+- [x] **Do NOT add separate cosign steps** — `build-image` handles signing internally.
+- [x] Set permissions `id-token: write` + `packages: write` on all jobs calling `build-image` with `push: true`.
+- [x] Pass `container-registry-password: ${{ secrets.GITHUB_TOKEN }}` to `publish-multi-arch-manifest` as well.
+- [x] Preserve `--no-latest` semantics: dev workflow uses versioned `image-tags` only; PR workflow includes `latest` tag.
+- [x] Ensure prerelease beta-repo PR creation remains draft-only during rehearsal.
+- [x] Remove `CAS_API_KEY` usage — codenotary attestation is not part of the HA signing flow.
+- [ ] Verify `mergerelease/<addon>` force-push step still works after migration. *(runtime verification — WP5)*
 
 Exit criteria:
 - No references to `home-assistant/builder@master` or `ghcr.io/home-assistant/*-builder`.
@@ -879,7 +879,7 @@ When to skip full fork:
 ## Tracking Checklist
 - [x] WP0 approved (2026-04-24)
 - [x] WP0.5 complete (2026-04-24)
-- [ ] WP1 complete
+- [x] WP1 complete (2026-04-24)
 - [ ] WP2 complete
 - [ ] WP3 complete
 - [ ] WP4 complete

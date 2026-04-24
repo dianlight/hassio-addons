@@ -3,39 +3,43 @@ name: Docker Image CI - Build Release
 on:
     pull_request:
         types: [ synchronize, ready_for_review ]
-        branches: 
+        branches:
             - master
     workflow_dispatch:
         inputs:
           addon:
-            description: 'Addon to build'     
+            description: 'Addon to build'
             required: true
             default: 'sambanas'
 
 permissions:
   pull-requests: write
+  packages: write
+  id-token: write
 
 jobs:
-    build:
+    setup:
+        name: Prepare
         if: github.event.pull_request.draft == false
         runs-on: ubuntu-latest
-
+        outputs:
+          build_matrix: ${{ steps.matrix.outputs.matrix }}
+          architectures: ${{ steps.extract_archs.outputs.architectures }}
+          image_name: ${{ steps.extract_archs.outputs.image_name }}
+          version: ${{ steps.read_config.outputs.version }}
+          addon_dir: ${{ steps.extract_branch.outputs.BR_PROJECT }}
+          name: ${{ steps.read_config.outputs.name }}
+          description: ${{ steps.read_config.outputs.description }}
+          build_from: ${{ steps.extract_build_from.outputs.BUILD_FROM }}
         steps:
         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
           with:
                 submodules: true
 
-        - name: Login to DockerHub
-          uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
-          with:
-                username: ${{ secrets.DOCKERHUB_USERNAME }}
-                password: ${{ secrets.DOCKERHUB_TOKEN }}
-
         - name: Extract branch name
           shell: bash
           run: |
               env
-              #echo ${{ github.head_ref || github.ref_name }}
               if [ -z "${{ github.event.inputs.addon }}" ]; then
                 if [ -z "${{ github.head_ref || github.ref_name }}" ]; then
                     export _GITHUB_REF=${GITHUB_REF}
@@ -47,18 +51,17 @@ jobs:
                 echo "BR_VERSION=${_GITHUB_REF##*/}" | tee -a "$GITHUB_OUTPUT"
                 echo "BR_PROJECT=$(TMP=${_GITHUB_REF##*/};echo ${TMP%%_*})" >> "$GITHUB_OUTPUT"
               else
-                echo "BR_VERSION from event"  
+                echo "BR_VERSION from event"
                 echo "BR_VERSION=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
                 echo "BR_PROJECT=${{ github.event.inputs.addon }}"  | tee -a "$GITHUB_OUTPUT"
               fi
           id: extract_branch
 
         - name: Read config.yaml version for validation
-          id: read_config_for_validation
+          id: read_config
           uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
           with:
             config: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
-            # This action reads all top-level keys, 'version' will be steps.read_config_for_validation.outputs.version
 
         - name: Validate CHANGELOG.md and config.yaml version consistency
           shell: bash
@@ -67,7 +70,7 @@ jobs:
             CONFIG_FILE_PATH="./$ADDON_DIR/config.yaml"
             CHANGELOG_FILE_PATH="./$ADDON_DIR/CHANGELOG.md"
 
-            CONFIG_VERSION="${{ steps.read_config_for_validation.outputs.version }}"
+            CONFIG_VERSION="${{ steps.read_config.outputs.version }}"
 
             echo "Addon directory: $ADDON_DIR"
             echo "Config file path: $CONFIG_FILE_PATH"
@@ -84,8 +87,6 @@ jobs:
               exit 1
             fi
 
-            # Get the first line starting with '## ' and extract the version.
-            # Handles '## 1.2.3', '## [1.2.3]', '## v1.2.3', '## [v1.2.3]', including pre-release suffixes.
             CHANGELOG_VERSION_LINE=$(grep -m 1 '^## ' "$CHANGELOG_FILE_PATH")
             if [ -z "$CHANGELOG_VERSION_LINE" ]; then
               echo "Error: No version line found in $CHANGELOG_FILE_PATH (expected a line starting with '## ' like '## 1.2.3')."
@@ -109,13 +110,76 @@ jobs:
               exit 1
             fi
 
-        - name: Publish ${{ steps.extract_branch.outputs.BR_VERSION }} Addon
-          uses: home-assistant/builder@master
-          env:
-                CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+        - name: Extract arch list
+          id: extract_archs
+          shell: bash
+          run: |
+            ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
+            ARCHS=$(yq e '.arch | @json' "${ADDON_DIR}/config.yaml")
+            echo "architectures=${ARCHS}" >> "$GITHUB_OUTPUT"
+            echo "image_name=addon-${ADDON_DIR}" >> "$GITHUB_OUTPUT"
+            echo "Architectures: ${ARCHS}"
+
+        - name: Extract BUILD_FROM
+          id: extract_build_from
+          shell: bash
+          run: |
+            ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
+            BUILD_FROM=$(yq e '.build_from.amd64' "${ADDON_DIR}/build.yaml")
+            echo "BUILD_FROM=${BUILD_FROM}" >> "$GITHUB_OUTPUT"
+            echo "BUILD_FROM: ${BUILD_FROM}"
+
+        - name: Prepare multi-arch matrix
+          id: matrix
+          uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
           with:
-                args: |
-                    --amd64 --aarch64 \
-                    --target ${{ steps.extract_branch.outputs.BR_PROJECT }} \
-                    --docker-hub dianlight \
-                    --cosign
+            architectures: ${{ steps.extract_archs.outputs.architectures }}
+            image-name: ${{ steps.extract_archs.outputs.image_name }}
+            registry-prefix: ghcr.io/dianlight
+
+    build:
+        name: Build ${{ matrix.arch }}
+        needs: setup
+        runs-on: ${{ matrix.os }}
+        strategy:
+          fail-fast: false
+          matrix: ${{ fromJSON(needs.setup.outputs.build_matrix) }}
+        steps:
+        - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+          with:
+                submodules: true
+                persist-credentials: false
+
+        - name: Build image
+          uses: home-assistant/builder/actions/build-image@2026.03.2
+          with:
+                arch: ${{ matrix.arch }}
+                container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+                context: ./${{ needs.setup.outputs.addon_dir }}
+                image: ${{ matrix.image }}
+                image-tags: |
+                  ${{ needs.setup.outputs.version }}
+                  latest
+                labels: |
+                  io.hass.type=app
+                  io.hass.name=${{ needs.setup.outputs.name }}
+                  io.hass.description=${{ needs.setup.outputs.description }}
+                build-args: BUILD_FROM=${{ needs.setup.outputs.build_from }}
+                push: true
+                version: ${{ needs.setup.outputs.version }}
+
+    manifest:
+        name: Publish multi-arch manifest
+        needs: [setup, build]
+        runs-on: ubuntu-latest
+        steps:
+        - name: Publish multi-arch manifest
+          uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+          with:
+                architectures: ${{ needs.setup.outputs.architectures }}
+                container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+                image-name: ${{ needs.setup.outputs.image_name }}
+                image-tags: |
+                  ${{ needs.setup.outputs.version }}
+                  latest
+                registry-prefix: ghcr.io/dianlight
