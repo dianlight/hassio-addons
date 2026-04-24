@@ -387,27 +387,28 @@ Locked decisions:
 8. **Arg name unification**: rename `sambanas/Dockerfile` `CLI_VERSION` to `HA_CLI_VERSION` to match `sambanas2` and Renovate tracking.
 9. **Registry target — LOCKED: Option A (GHCR)**. Migrate from Docker Hub to `ghcr.io/dianlight/`. Auth via `GITHUB_TOKEN` with `packages: write` permission — no additional secrets needed. Breaking change for existing HA users (image URL changes from `docker.io/dianlight/...` to `ghcr.io/dianlight/...`, combined with image rename from decision #7). Both breaking changes documented together in CHANGELOG. `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets are no longer needed in CI after migration.
 
-## WP0.5 - Temporary Fork Rehearsal
+## WP0.5 - Rehearsal Branch Setup
 Status: Not started
 
-MCP and permissions needed:
-- MCP: repository creation/branch MCP, PR MCP, GitHub Actions MCP.
-- CLI alternative: `gh` for fork/PR/workflow operations.
-- Permission:
-  - token with `repo` + `workflow` scopes
-  - write access to fork repo
-  - workflow run permissions in fork
-  - manual GitHub secrets setup in fork
-  - non-production registry push credentials
+> **Fork constraint (discovered 2026-04-24):** GitHub does not allow `dianlight` to fork `dianlight/hassio-addons` to the same account. The temporary fork strategy is replaced with a **dedicated migration branch** directly in the upstream repo. Isolation is maintained because `migration/*` branches do not match any CI trigger pattern (`devrelease/*`, `prerelease/*`, or PR-to-master), so no production workflow fires on push to the rehearsal branch.
+
+Permissions needed:
+- `gh` CLI with `repo` + `workflow` scopes (already confirmed)
+- Branch push rights to `dianlight/hassio-addons` (owner — confirmed)
+- `packages: write` via `GITHUB_TOKEN` for GHCR canary pushes (no extra secrets)
 
 Goal:
-- Create a temporary fork for low-risk migration rehearsal and complete all migration implementation/testing there before upstream reintegration.
+- Create `migration/buildkit-rehearsal` branch based on upstream `master`.
+- Cherry-pick migration plan commits from `devrelease/sambanas2` into the rehearsal branch so the plan document travels with the implementation work.
+- Implement all WP1–WP4 changes on this branch.
+- Trigger CI by temporarily adding `migration/*` to the dev workflow's branch trigger list (with canary tag override) for Phase 2/3 validation.
 
 Repository/branch model:
-- Upstream (source of truth): `dianlight/hassio-addons`
-- Temporary fork (rehearsal): `dianlight/hassio-addons-buildkit-migration` (name can vary)
-- Rehearsal branch in fork: `migration/buildkit-rehearsal`
-- Final upstream integration branch: `migration/buildkit-final`
+- Upstream (source of truth and rehearsal host): `dianlight/hassio-addons`
+- Rehearsal branch: `migration/buildkit-rehearsal` (based on `master`)
+- Final integration branch: `migration/buildkit-final` → PR to `master`
+
+> **WP6 blocker (discovered 2026-04-24):** `master` has `lock_branch: true` — no PR merges are currently possible. The final merge in WP6 will require temporarily unlocking `master` in repo Settings → Branches. Flag this before WP6 begins.
 
 Tasks:
 - [ ] Create and sync temporary fork from upstream `master` (MCP or `gh repo fork <original-repo-url> --fork-name <new-name> --clone`).
@@ -425,55 +426,48 @@ Tasks:
   - label parity notes
   - addon smoke test logs
 
-Pre-flight authorization checklist (before first rehearsal run):
-- [ ] GitHub token for automation is available with required scopes (`repo`, `workflow`, PR write).
-- [ ] Permission confirmed to trigger, rerun, and cancel workflows in fork and upstream.
-- [ ] Fork repository created and writable by migration maintainers.
-- [ ] Registry credentials confirmed: GHCR uses `GITHUB_TOKEN` — no additional secrets needed if fork has default GitHub Actions permissions. Verify `packages: write` is allowed in fork Actions settings.
-- [ ] Fork GitHub secrets created manually and validated (minimum secret set — GHCR requires no extra secrets beyond `GITHUB_TOKEN`).
-- [ ] GitHub CLI authenticated and healthy (`gh auth status` shows `repo` + `workflow` scopes).
-- [ ] Branch protection policy understood for upstream target branches.
-- [ ] Required manual approvers identified (CODEOWNERS/security/release).
-- [ ] Temporary publish namespace confirmed: canary images go to `ghcr.io/dianlight/<addon>:migration-canary-<run>`.
-- [ ] Beta-repo rehearsal policy confirmed: automation creates draft PRs only.
-- [ ] Rollback owner assigned and rollback communication channel confirmed.
+Pre-flight authorization checklist:
+- [x] GitHub CLI authenticated as `dianlight` with `repo` + `workflow` scopes (confirmed 2026-04-24).
+- [x] Branch push rights to `dianlight/hassio-addons` confirmed (repo owner).
+- [x] `migration/*` branches confirmed safe — do not trigger any CI workflow (`devrelease/*`, `prerelease/*`, or PR-to-master patterns only).
+- [x] Registry: GHCR via `GITHUB_TOKEN` — no additional secrets required. `packages: write` permission declared in job is sufficient.
+- [x] No CODEOWNERS file — 1 approving review required for master PRs (repo owner can self-approve after master is unlocked).
+- [x] Canary publish namespace confirmed: `ghcr.io/dianlight/<addon>:migration-canary-<run_number>`.
+- [x] Beta-repo (`dianlight/hassio-addons-beta`) PR creation: `pre.yml` has one path without `--draft` — must be fixed in WP1 before triggering any prerelease-path CI.
+- [ ] `master` branch unlock confirmed ready for WP6 (currently `lock_branch: true` — must be temporarily unlocked before final merge).
+- [ ] Rollback owner and communication channel confirmed (manual — assign before WP5).
 
-GitHub CLI runbook (copy-paste, WP0.5 rehearsal):
+GitHub CLI runbook (branch-based rehearsal):
 ```bash
-# 0) Inputs
-ORIGINAL_REPO="https://github.com/dianlight/hassio-addons"
-FORK_NAME="hassio-addons-buildkit-migration"
 REHEARSAL_BRANCH="migration/buildkit-rehearsal"
-UPSTREAM_REMOTE_NAME="upstream"
 
-# 1) Verify gh authentication and scopes
+# 1) Verify auth
 gh auth status
 
-# 2) Fork and clone (if repo folder is not already present)
-gh repo fork "$ORIGINAL_REPO" --fork-name "$FORK_NAME" --clone
-cd "$FORK_NAME"
+# 2) Create rehearsal branch from master
+git fetch origin master
+git checkout -B "$REHEARSAL_BRANCH" origin/master
 
-# 3) Ensure upstream remote exists and sync from upstream master
-git remote add "$UPSTREAM_REMOTE_NAME" "$ORIGINAL_REPO" 2>/dev/null || true
-git fetch "$UPSTREAM_REMOTE_NAME" --prune
-git checkout -B "$REHEARSAL_BRANCH" "$UPSTREAM_REMOTE_NAME/master"
+# 3) Cherry-pick migration plan commits from devrelease/sambanas2
+#    (only the planning docs — not the sambanas2 code changes)
+git cherry-pick 4da7afc 0d0d6c6 d43fd55 3b630ba 21346f2
+
+# 4) Push rehearsal branch to origin
 git push -u origin "$REHEARSAL_BRANCH"
 
-# 4) After applying migration edits, commit and push rehearsal branch
-git add .
-git commit -m "chore(buildkit): rehearsal migration changes" || true
+# 5) After applying WP1–WP4 edits, commit and push
+git add <changed-files>
+git commit -m "feat(buildkit): <wp-description>"
 git push origin "$REHEARSAL_BRANCH"
 
-# 5) Validate workflow execution (list and inspect)
-gh run list --limit 20
-gh run view --log
+# 6) For CI validation (Phase 2): temporarily add migration/* to dev workflow triggers,
+#    override image-tags to canary namespace, then push to trigger CI
+git push origin "$REHEARSAL_BRANCH"
+gh run list --repo dianlight/hassio-addons --branch "$REHEARSAL_BRANCH" --limit 10
+gh run view <run-id> --log
 
-# 6) Beta-repo simulation rule: PRs must be draft-only during rehearsal
-# (Use --draft when creating PRs in beta repo automation paths.)
-gh pr create --draft --title "[rehearsal] BuildKit migration" --body "WP0.5 rehearsal" || true
-
-# 7) Verify PR draft state
-gh pr view --json isDraft,title,headRefName,baseRefName
+# 7) Beta-repo PRs: always --draft during rehearsal
+gh pr create --draft --title "[migration-rehearsal] <description>" --body "..."
 ```
 
 Exit criteria:
