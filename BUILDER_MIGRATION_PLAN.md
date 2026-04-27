@@ -567,7 +567,7 @@ Exit criteria:
 - Both Dockerfiles use `HA_CLI_VERSION` consistently.
 
 ## WP3 - Config and Local Tooling Migration
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 MCP and permissions needed:
 - MCP: repository information/search MCP, PR MCP.
@@ -881,7 +881,7 @@ When to skip full fork:
 - [x] WP0.5 complete (2026-04-24)
 - [x] WP1 complete (2026-04-24)
 - [x] WP2 complete (2026-04-24)
-- [ ] WP3 complete
+- [x] WP3 complete (2026-04-24)
 - [ ] WP4 complete
 - [ ] WP5 complete
 - [ ] WP6 complete

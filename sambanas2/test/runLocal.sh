@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BUILD_ARCH="${BUILD_ARCH:-amd64}"
-IMAGE_TAG="ghcr.io/dianlight/addon-sambanas:local-${BUILD_ARCH}"
+IMAGE_TAG="ghcr.io/dianlight/addon-sambanas2:local-${BUILD_ARCH}"
 
 mkdir -p /tmp/my_test_data
 cp "$(dirname "$0")/options.json" /tmp/my_test_data

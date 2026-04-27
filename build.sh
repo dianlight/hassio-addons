@@ -1,66 +1,117 @@
 #!/bin/bash
+set -euo pipefail
 
-echo "Example For local Build use"
-echo "> check=no archs=--aarch64  ./build.sh sambanas"
-echo "> if lock remove codenaotary from build.yaml and unset CAS_API_KEY"
+echo "Example for local build:"
+echo "  check=no archs='aarch64' ./build.sh sambanas2"
+echo "  push=yes ./build.sh sambanas2   # push to GHCR after build"
 
-# Check for arch
-arch=$(arch)
-# use aarch64 on Apple M1
-if [[ "$(uname)x" == "Darwinx" && "${arch}x" == "arm64x" ]]; then
+# Detect host arch
+host_arch=$(uname -m)
+if [[ "$(uname)" == "Darwin" && "${host_arch}" == "arm64" ]]; then
   echo "MacOS on Apple M1 Detected!"
-  arch="aarch64"
-elif [[ "${arch}x" == "x86_64x" ]]; then
-  arch="amd64"
+  default_arch="aarch64"
+elif [[ "${host_arch}" == "x86_64" ]]; then
+  default_arch="amd64"
+else
+  default_arch="amd64"
 fi
 
-echo "Running for arch ${arch}"
+echo "Default arch: ${default_arch}"
+
+# Map HA arch name to Docker platform string
+arch_to_platform() {
+  case "$1" in
+    aarch64) echo "linux/arm64" ;;
+    amd64)   echo "linux/amd64" ;;
+    *)       echo "linux/$1" ;;
+  esac
+}
+
+# Ensure a buildx builder with multi-arch (QEMU) support exists
+setup_buildx() {
+  if ! docker buildx inspect multiarch-builder &>/dev/null; then
+    echo "Creating multiarch buildx builder..."
+    docker buildx create --name multiarch-builder --driver docker-container \
+      --buildkitd-flags '--allow-insecure-entitlement security.insecure' \
+      --use --bootstrap
+  else
+    docker buildx use multiarch-builder
+  fi
+}
 
 for addon in "$@"; do
-  # Check id in addon there is config.yaml or config.json file
-  if [ -f "${addon}/config.yaml" ]; then
-    echo "Found config.yaml for ${addon}"
+  # Locate config file
+  if [[ -f "${addon}/config.yaml" ]]; then
     config="${addon}/config.yaml"
     qv="yq"
-  elif [ -f "${addon}/config.json" ]; then
-    echo "Found config.json for ${addon}"
+  elif [[ -f "${addon}/config.json" ]]; then
     config="${addon}/config.json"
     qv="jq"
   else
-    echo "No config file found for ${addon}"
-    exit
+    echo "No config file found for ${addon}" >&2
+    exit 1
   fi
 
-  if [[ "$(${qv} -r '.image' ${config})" == 'null' ]]; then
-    echo "${ANSI_YELLOW}No build image set for ${addon}. Skip build!${ANSI_CLEAR}"
-    exit 0
+  # Skip addons without an image field
+  image_val=$("${qv}" -r '.image' "${config}")
+  if [[ "${image_val}" == "null" || -z "${image_val}" ]]; then
+    echo "No build image set for ${addon}. Skipping."
+    continue
   fi
 
-  env | grep -v -E "HOME|TERM|PWD|HOSTNAME|PATH|SHLVL|USER|GOROOT" >"./env_file"
+  # Lint Dockerfile unless check=no
+  if [[ "${check:-}" != "no" ]]; then
+    echo "Linting ${addon}/Dockerfile..."
+    hadolint -c "$(pwd)/${addon}/.hadolint.yaml" "$(pwd)/${addon}/Dockerfile"
+  fi
 
-  if [[ "${check}x" == "x" ]]; then
-    check=--docker-hub-check
+  # Determine target architectures
+  # Accepts: archs="amd64 aarch64" or archs="--amd64 --aarch64" (legacy compat)
+  if [[ -z "${archs:-}" ]]; then
+    mapfile -t build_archs < <("${qv}" -r '.arch[]' "${config}" | grep -E 'amd64|aarch64')
+    if [[ ${#build_archs[@]} -eq 0 ]]; then
+      build_archs=("${default_arch}")
+    fi
   else
-    check="--version latest --release latest --release-tag"
+    build_archs=()
+    for a in ${archs}; do
+      build_archs+=("${a#--}")
+    done
   fi
 
-  if [[ "${archs}x" == "x" ]]; then
-    archs=$(${qv} -r '.arch // ["armv7", "armhf", "amd64", "aarch64", "i386"] | [.[] | "--" + .] | join(" ")' ${config})
-  fi
-  echo "${ANSI_GREEN}Building ${addon} -> ${archs} ${ANSI_CLEAR}"
+  setup_buildx
 
-  # Momentary fix because CAS service don't respose. So no sign in local.
-  unset CAS_API_KEY
+  for arch in "${build_archs[@]}"; do
+    platform=$(arch_to_platform "${arch}")
 
-  ## Snapshot Different Projects Enrichment
-  ### Sambanas SRAT
-  #if [[ "${addon}" == "sambanas" ]]; then
-  #  cp -rv ../Sources/srat/backend/dist/* sambanas/rootfs/usr/local/bin
-  #fi
-  ## END
+    # Read per-arch BUILD_FROM from build.yaml; fall back to Dockerfile default
+    build_from_arg=""
+    if [[ -f "${addon}/build.yaml" ]]; then
+      bf=$(yq e ".build_from.${arch}" "${addon}/build.yaml" 2>/dev/null || true)
+      if [[ -n "${bf}" && "${bf}" != "null" ]]; then
+        build_from_arg="--build-arg BUILD_FROM=${bf}"
+      fi
+    fi
 
-  hadolint -c $(pwd)/${addon}/.hadolint.yaml $(pwd)/${addon}/Dockerfile &&
-    docker run --rm --privileged -v ~/.docker:/root/.docker_o -v $(pwd)/${addon}:/data --env-file "./env_file" ghcr.io/home-assistant/${arch}-builder:latest \
-      --docker-hub dianlight --docker-user ${DOCKER_USERNAME} --docker-password ${DOCKER_TOKEN} ${check} ${archs} -t /data
-  #--cosign
+    # Derive image name from config.yaml image field (strip registry prefix and arch segment)
+    image_name=$(echo "${image_val}" | sed 's|.*/||; s|{arch}-||')
+    image_tag="ghcr.io/dianlight/${image_name}:local-${arch}"
+
+    push_flag="--load"
+    if [[ "${push:-}" == "yes" ]]; then
+      push_flag="--push"
+    fi
+
+    echo "Building ${addon} [${arch} / ${platform}]..."
+    # shellcheck disable=SC2086
+    docker buildx build \
+      --platform "${platform}" \
+      --build-arg "BUILD_ARCH=${arch}" \
+      ${build_from_arg} \
+      --tag "${image_tag}" \
+      ${push_flag} \
+      "${addon}"
+
+    echo "Done: ${image_tag}"
+  done
 done
