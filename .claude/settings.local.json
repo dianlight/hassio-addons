@@ -15,7 +15,14 @@
       "Bash(cat sambanas2/test/buildLocal.sh)",
       "Bash(cat sambanas/test/runLocal.sh)",
       "Bash(cat sambanas2/test/runLocal.sh)",
-      "Bash(yq '.arch' sambanas/config.yaml)"
+      "Bash(yq '.arch' sambanas/config.yaml)",
+      "Bash(gh workflow *)",
+      "Bash(gh run *)",
+      "Bash(docker buildx *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d.get\\(k\\) for k in ['io.hass.name','io.hass.description','io.hass.type','io.hass.arch','io.hass.version','org.opencontainers.image.created']}, indent=2\\)\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); const keys=['io.hass.name','io.hass.description','io.hass.type','io.hass.arch','io.hass.version','org.opencontainers.image.created']; keys.forEach\\(k=>console.log\\(k+'='+d[k]\\)\\)\")",
+      "Bash(curl -s -H 'Authorization: Bearer __TRACKED_VAR__' https://ghcr.io/v2/dianlight/addon-sambanas2/tags/list)",
+      "Bash(curl --ssl-no-revoke -s -H 'Authorization: Bearer __TRACKED_VAR__' https://ghcr.io/v2/dianlight/addon-sambanas2/tags/list)"
     ]
   }
 }
