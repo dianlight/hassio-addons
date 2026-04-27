@@ -2,7 +2,7 @@ name: Docker Image CI - Build Release
 
 on:
     pull_request:
-        types: [ synchronize, ready_for_review ]
+        types: [ opened, synchronize, ready_for_review ]
         branches:
             - master
     workflow_dispatch:
