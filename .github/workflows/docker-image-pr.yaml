@@ -31,6 +31,7 @@ jobs:
           name: ${{ steps.read_config.outputs.name }}
           description: ${{ steps.read_config.outputs.description }}
           build_from: ${{ steps.extract_build_from.outputs.BUILD_FROM }}
+          has_addon: ${{ steps.check_addon.outputs.has_addon }}
         steps:
         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
           with:
@@ -57,13 +58,28 @@ jobs:
               fi
           id: extract_branch
 
+        - name: Check addon directory exists
+          id: check_addon
+          shell: bash
+          run: |
+            BR_PROJECT="${{ steps.extract_branch.outputs.BR_PROJECT }}"
+            if [ -f "${BR_PROJECT}/config.yaml" ]; then
+              echo "has_addon=true" >> "$GITHUB_OUTPUT"
+              echo "Addon directory found: ${BR_PROJECT}"
+            else
+              echo "has_addon=false" >> "$GITHUB_OUTPUT"
+              echo "No addon directory for '${BR_PROJECT}' — skipping addon-specific steps (non-addon branch)"
+            fi
+
         - name: Read config.yaml version for validation
           id: read_config
+          if: steps.check_addon.outputs.has_addon == 'true'
           uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
           with:
             config: ./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml
 
         - name: Validate CHANGELOG.md and config.yaml version consistency
+          if: steps.check_addon.outputs.has_addon == 'true'
           shell: bash
           run: |
             ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
@@ -112,6 +128,7 @@ jobs:
 
         - name: Extract arch list
           id: extract_archs
+          if: steps.check_addon.outputs.has_addon == 'true'
           shell: bash
           run: |
             ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
@@ -122,6 +139,7 @@ jobs:
 
         - name: Extract BUILD_FROM
           id: extract_build_from
+          if: steps.check_addon.outputs.has_addon == 'true'
           shell: bash
           run: |
             ADDON_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
@@ -131,6 +149,7 @@ jobs:
 
         - name: Prepare multi-arch matrix
           id: matrix
+          if: steps.check_addon.outputs.has_addon == 'true'
           uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
           with:
             architectures: ${{ steps.extract_archs.outputs.architectures }}
@@ -140,6 +159,7 @@ jobs:
     build:
         name: Build ${{ matrix.arch }}
         needs: setup
+        if: needs.setup.outputs.has_addon == 'true'
         runs-on: ${{ matrix.os }}
         strategy:
           fail-fast: false
@@ -171,6 +191,7 @@ jobs:
     manifest:
         name: Publish multi-arch manifest
         needs: [setup, build]
+        if: needs.setup.outputs.has_addon == 'true'
         runs-on: ubuntu-latest
         steps:
         - name: Publish multi-arch manifest
