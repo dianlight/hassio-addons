@@ -3,7 +3,19 @@
     "allow": [
       "WebFetch(domain:developers.home-assistant.io)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(grep -n \"^  [a-z].*:$\\\\|^jobs:\" .github/workflows/docker-image-dev.yml)",
+      "Bash(grep -n \"^    [a-z].*:$\\\\|^jobs:\" .github/workflows/docker-image-pr.yaml)",
+      "Read(//c/c/Users/uga06422/OneDrive - Unipol Gruppo S.P.A/Documenti/Sources/hassio-addons/**)",
+      "Bash(grep -n \"^ARG SAMBA_VERSION$\" sambanas2/Dockerfile)",
+      "Bash(cat sambanas/test/buildLocal.sh)",
+      "Bash(cat sambanas2/test/buildLocal.sh)",
+      "Bash(cat sambanas/test/runLocal.sh)",
+      "Bash(cat sambanas2/test/runLocal.sh)",
+      "Bash(yq '.arch' sambanas/config.yaml)"
     ]
   }
 }
