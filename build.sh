@@ -84,7 +84,7 @@ for addon in "$@"; do
   for arch in "${build_archs[@]}"; do
     platform=$(arch_to_platform "${arch}")
 
-    # Read per-arch BUILD_FROM from build.yaml; fall back to Dockerfile default
+    # If build.yaml is present (legacy), read per-arch BUILD_FROM; otherwise Dockerfile default applies
     build_from_arg=""
     if [[ -f "${addon}/build.yaml" ]]; then
       bf=$(yq e ".build_from.${arch}" "${addon}/build.yaml" 2>/dev/null || true)

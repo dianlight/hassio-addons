@@ -608,7 +608,7 @@ Exit criteria:
 - No `armv7` references remain in sambanas2 test scripts.
 
 ## WP4 - Dependency Cleanup
-Status: Not started
+Status: **Complete** (2026-04-24)
 
 MCP and permissions needed:
 - MCP: repository information/search MCP, PR MCP.
@@ -882,7 +882,7 @@ When to skip full fork:
 - [x] WP1 complete (2026-04-24)
 - [x] WP2 complete (2026-04-24)
 - [x] WP3 complete (2026-04-24)
-- [ ] WP4 complete
+- [x] WP4 complete (2026-04-24)
 - [ ] WP5 complete
 - [ ] WP6 complete
 
