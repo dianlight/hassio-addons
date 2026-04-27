@@ -119,7 +119,7 @@ jobs:
         shell: bash
         run: |
           ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
-          BUILD_FROM=$(yq e '.build_from.amd64' "${ADDON_DIR}/build.yaml")
+          BUILD_FROM=$(grep -m1 'ARG BUILD_FROM=' "${ADDON_DIR}/Dockerfile" | cut -d= -f2-)
           echo "BUILD_FROM=${BUILD_FROM}" >> "$GITHUB_OUTPUT"
           echo "BUILD_FROM: ${BUILD_FROM}"
 
