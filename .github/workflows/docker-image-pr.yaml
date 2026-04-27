@@ -92,7 +92,7 @@ jobs:
               echo "Error: No version line found in $CHANGELOG_FILE_PATH (expected a line starting with '## ' like '## 1.2.3')."
               exit 1
             fi
-            CHANGELOG_VERSION=$(echo "$CHANGELOG_VERSION_LINE" | sed -E -n 's/^##\s*\[?v?([0-9]+\.[0-9]+\.[0-9]+[^]\s]*)\]?.*/\1/p')
+            CHANGELOG_VERSION=$(echo "$CHANGELOG_VERSION_LINE" | sed -E -n 's/^##[[:space:]]*\[?v?([0-9]+\.[0-9]+\.[0-9]+[^][:space:]]*)\]?.*/\1/p')
 
             if [ -z "$CHANGELOG_VERSION" ]; then
               echo "Error: Could not extract version from CHANGELOG.md line: $CHANGELOG_VERSION_LINE"

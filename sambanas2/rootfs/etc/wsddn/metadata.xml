@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsx:Metadata
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+    xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" 
+    xmlns:wsdp="http://schemas.xmlsoap.org/ws/2006/02/devprof" 
+    xmlns:pnpx="http://schemas.microsoft.com/windows/pnpx/2005/10" 
+    xmlns:pub="http://schemas.microsoft.com/windows/pub/2005/07">
+<wsx:MetadataSection Dialect="http://schemas.xmlsoap.org/ws/2006/02/devprof/ThisDevice">
+    <wsdp:ThisDevice>
+        <wsdp:FriendlyName>$SMB_HOST_DESCRIPTION</wsdp:FriendlyName>
+        <wsdp:FirmwareVersion>1.0</wsdp:FirmwareVersion>
+        <wsdp:SerialNumber>1</wsdp:SerialNumber>
+    </wsdp:ThisDevice>
+</wsx:MetadataSection>
+<wsx:MetadataSection Dialect="http://schemas.xmlsoap.org/ws/2006/02/devprof/ThisModel">
+    <wsdp:ThisModel>
+        <wsdp:Manufacturer>Dianlight</wsdp:Manufacturer>
+        <wsdp:ModelName>SambaNAS2</wsdp:ModelName>
+        <wsdp:ModelNumber>1</wsdp:ModelNumber>
+        <pnpx:DeviceCategory>Computers</pnpx:DeviceCategory>
+    </wsdp:ThisModel>
+</wsx:MetadataSection>
+<wsx:MetadataSection Dialect="http://schemas.xmlsoap.org/ws/2006/02/devprof/Relationship">
+    <wsdp:Relationship Type="http://schemas.xmlsoap.org/ws/2006/02/devprof/host">
+        <wsdp:Host>
+            <wsa:EndpointReference>
+                <wsa:Address>$ENDPOINT_ID</wsa:Address>
+            </wsa:EndpointReference>
+            <wsdp:Types>pub:Computer</wsdp:Types>
+            <wsdp:ServiceId>$ENDPOINT_ID</wsdp:ServiceId>
+            <pub:Computer>$SMB_FULL_HOST_NAME</pub:Computer>
+        </wsdp:Host>
+    </wsdp:Relationship>
+</wsx:MetadataSection>
+</wsx:Metadata>
