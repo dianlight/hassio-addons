@@ -192,7 +192,7 @@ jobs:
           yq -i ".version = \"${{ needs.setup.outputs.base_version }}\"" "$CONFIG_FILE"
           echo "Updated version to ${{ needs.setup.outputs.base_version }}"
 
-      - name: ✍🏼 Set name in config.yaml
+      - name: ✍🏼 Set name in config.yaml --> ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
         shell: bash
         run: |
           CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
@@ -224,6 +224,7 @@ jobs:
               echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
             fi
           done
+
 
       - name: Create Merge Release Branch
         if: needs.setup.outputs.has_scripts == 'true'

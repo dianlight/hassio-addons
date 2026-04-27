@@ -1,0 +1,151 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - 'sambanas/**'
+      - 'sambanas2/**'
+      - 'plex/**'
+      - 'RPiMySensor/**'
+      - 'addon-plex/**'
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-documentation:
+    runs-on: ubuntu-latest
+    name: Validate Documentation Updates
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files: |
+            sambanas/**
+            sambanas2/**
+            plex/**
+            RPiMySensor/**
+            addon-plex/**
+          files_ignore: |
+            **/*.md
+            **/*.txt
+            **/*.yml
+            **/*.yaml
+
+      - name: Check for documentation updates
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          
+          # Extract project directories from changed files
+          projects=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | cut -d'/' -f1 | sort -u)
+          
+          echo "Affected projects: $projects"
+          
+          # Check if documentation files were also modified in the same PR
+          doc_check_failed=false
+          
+          for project in $projects; do
+            echo "Checking documentation for project: $project"
+            
+            # Check if any .md files in the project were modified
+            md_files_changed=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | grep "^$project/.*\.md$" || true)
+            
+            if [ -z "$md_files_changed" ]; then
+              echo "❌ ERROR: Changes detected in $project but no .md files were updated!"
+              echo "Please update the following files as needed:"
+              echo "  - $project/README.md"
+              echo "  - $project/DOCS.md (if it exists)"
+              echo "  - $project/CHANGELOG.md (if it exists)"
+              doc_check_failed=true
+            else
+              echo "✅ Documentation files updated for $project:"
+              echo "$md_files_changed"
+            fi
+          done
+          
+          if [ "$doc_check_failed" = true ]; then
+            echo ""
+            echo "📋 Documentation Update Requirements:"
+            echo "1. Update README.md if features, installation, or requirements changed"
+            echo "2. Update DOCS.md if configuration options or usage changed"
+            echo "3. Update CHANGELOG.md with a description of your changes"
+            echo "4. Ensure no cross-project references are introduced"
+            echo ""
+            echo "See .copilot-instructions.md for detailed guidelines."
+            exit 1
+          fi
+
+      - name: Validate markdown files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          # Check for cross-project references in documentation
+          echo "Checking for cross-project references..."
+          
+          cross_ref_found=false
+          projects=("sambanas" "sambanas2" "plex" "RPiMySensor" "addon-plex")
+          
+          for project in "${projects[@]}"; do
+            if [ -d "$project" ]; then
+              for md_file in "$project"/*.md; do
+                if [ -f "$md_file" ]; then
+                  for other_project in "${projects[@]}"; do
+                    if [ "$project" != "$other_project" ]; then
+                      # Check for references to other projects (excluding allowed sambanas->sambanas2 migration notes)
+                      if [ "$project" != "sambanas" ] || [ "$other_project" != "sambanas2" ]; then
+                        if grep -q "\b$other_project\b" "$md_file"; then
+                          echo "❌ Cross-project reference found in $md_file referencing $other_project"
+                          cross_ref_found=true
+                        fi
+                      fi
+                    fi
+                  done
+                fi
+              done
+            fi
+          done
+          
+          if [ "$cross_ref_found" = true ]; then
+            echo "❌ Cross-project references detected. Each project's documentation should be self-contained."
+            exit 1
+          else
+            echo "✅ No inappropriate cross-project references found."
+          fi
+
+      - name: Check documentation consistency
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Checking documentation consistency..."
+          
+          for project in sambanas sambanas2 plex RPiMySensor addon-plex; do
+            if [ -d "$project" ] && git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -q "^$project/"; then
+              echo "Validating $project documentation..."
+              
+              # Check if README.md exists
+              if [ ! -f "$project/README.md" ]; then
+                echo "❌ Missing README.md in $project"
+                exit 1
+              fi
+              
+              # Check README.md has required sections
+              if ! grep -q "^# " "$project/README.md"; then
+                echo "❌ $project/README.md missing main title"
+                exit 1
+              fi
+              
+              # Check for maintenance mode notice in sambanas
+              if [ "$project" = "sambanas" ]; then
+                if ! grep -q -i "maintenance mode" "$project/README.md"; then
+                  echo "❌ sambanas/README.md missing maintenance mode notice"
+                  exit 1
+                fi
+              fi
+              
+              echo "✅ $project documentation structure validated"
+            fi
+          done
