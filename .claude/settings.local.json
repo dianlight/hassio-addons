@@ -3,7 +3,18 @@
     "allow": [
       "WebFetch(domain:developers.home-assistant.io)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(awk '{print $1}')",
+      "Bash(git cherry-pick *)",
+      "Bash(git reset *)",
+      "Bash(GIT_EDITOR=true bash *)",
+      "Bash(git add *)",
+      "Bash(GIT_EDITOR=true git cherry-pick --continue)",
+      "Bash(git rm *)"
     ]
   }
 }
