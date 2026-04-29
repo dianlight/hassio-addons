@@ -13,142 +13,202 @@ permissions:
   id-token: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest # Specifies the runner environment
-
+  setup:
+    name: Prepare ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.matrix.outputs.matrix }}
+      architectures: ${{ steps.extract_archs.outputs.architectures }}
+      image_name: ${{ steps.extract_archs.outputs.image_name }}
+      build_version: ${{ steps.prepare_yaml_values.outputs.BUILD_VERSION }}
+      base_version: ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}
+      addon_dir: ${{ steps.extract_branch.outputs.BR_VERSION }}
+      name: ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
+      description: ${{ steps.read_config.outputs.description }}
+      build_from: ${{ steps.extract_build_from.outputs.BUILD_FROM }}
+      has_scripts: ${{ steps.check_scripts.outputs.has_scripts }}
+      has_image: ${{ steps.check_image.outputs.has_image }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          submodules: true # Also checks out git submodules if any
-
-      - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          submodules: true
 
       - name: Extract branch name
-        id: extract_branch # Assigns an ID to this step to reference its outputs
+        id: extract_branch
         shell: bash
         run: echo "BR_VERSION=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
-        # Extracts the branch name (e.g., 'myaddon' from 'devrelease/myaddon')
-        # and sets it as a step output named BR_VERSION.
 
-      - name: 👓 Read config.yaml
-        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0 # Reads values from a YAML file
-        id: read_action_js # Assigns an ID to reference its outputs
+      - name: Read config.yaml
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+        id: read_config
         with:
           config: ${{ github.workspace }}/${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml
-          # Reads 'name' and 'version' (and potentially 'image') from the config.yaml
-          # These will be available as steps.read_action_js.outputs.name, .version, .image
 
       - name: Prepare Version, Name, and Image for YAML
-        id: prepare_yaml_values # Assigns an ID to reference its outputs
+        id: prepare_yaml_values
         shell: bash
         run: |
-          CURRENT_VERSION_FROM_FILE="${{ steps.read_action_js.outputs.version }}"
-          CURRENT_NAME_FROM_FILE="${{ steps.read_action_js.outputs.name }}"
-          # Get the current image from config.yaml, or an empty string if not found/commented
-          CURRENT_IMAGE_FROM_FILE="${{ steps.read_action_js.outputs.image }}"
+          CURRENT_VERSION_FROM_FILE="${{ steps.read_config.outputs.version }}"
+          CURRENT_NAME_FROM_FILE="${{ steps.read_config.outputs.name }}"
+          CURRENT_IMAGE_FROM_FILE="${{ steps.read_config.outputs.image }}"
 
           FINAL_VERSION_BASE="$CURRENT_VERSION_FROM_FILE"
           FINAL_NAME="$CURRENT_NAME_FROM_FILE"
-          FINAL_IMAGE_TO_SET="$CURRENT_IMAGE_FROM_FILE"
-          
+
           if [[ "$FINAL_NAME" =~ ^(.*)-[β⍺]$ ]]; then
             FINAL_NAME=${BASH_REMATCH[1]}
           fi
 
-          # Check for .alpha.<N> suffix on version and adjust name/version base
           if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-alpha(\.([0-9]+))?$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -alpha.<N> from version
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}"
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-⍺$ ]]; then
-              FINAL_NAME="${FINAL_NAME}-⍺" # Add -⍺ to name
+              FINAL_NAME="${FINAL_NAME}-⍺"
             fi
-          # Check for .beta.<N> suffix on version and adjust name/version base
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-beta(\.([0-9]+))?$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -beta.<N> from version
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}"
             if [[ ! "$CURRENT_NAME_FROM_FILE" =~ \-β$ ]]; then
-              FINAL_NAME="${FINAL_NAME}-β" # Add -β to name
+              FINAL_NAME="${FINAL_NAME}-β"
             fi
-          # Check for .dev.<N> suffix on version (already handled by builder suffix)
           elif [[ "$CURRENT_VERSION_FROM_FILE" =~ ^(.*)-dev(\.([0-9]*))?$ ]]; then
-            FINAL_VERSION_BASE="${BASH_REMATCH[1]}" # Remove -dev.<N> from version
+            FINAL_VERSION_BASE="${BASH_REMATCH[1]}"
           fi
-          
+
           echo "FINAL_NAME_TO_SET=${FINAL_NAME}" >> "$GITHUB_OUTPUT"
-          echo "FINAL_IMAGE_TO_SET=${FINAL_IMAGE_TO_SET}" >> "$GITHUB_OUTPUT"
-          echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT" # Output the base version
+          echo "EXTRACTED_BASE_VERSION=${FINAL_VERSION_BASE}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_VERSION=${FINAL_VERSION_BASE}-dev.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
-          #Debugging output to verify values
           echo "Final name to set: $FINAL_NAME"
-          echo "Final image to set: $FINAL_IMAGE_TO_SET"
           echo "Extracted base version: $FINAL_VERSION_BASE"
-          
+          echo "Build version: ${FINAL_VERSION_BASE}-dev.${{ github.run_number }}"
 
-      - name: ✍🏼 Set version in config.yaml --> ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}
-        id: version_set # This ID is used by subsequent steps for value_old
+      - name: Check for scripts directory
+        id: check_scripts
         shell: bash
         run: |
-          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
-          NEW_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
-          
-          # Get current value before modification
-          OLD_VERSION=$(yq '.version' "$CONFIG_FILE")
-          echo "value_old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
-          
-          # Set new version
-          yq -i ".version = \"$NEW_VERSION\"" "$CONFIG_FILE"
-          
-          # Get new value after modification
-          NEW_VALUE=$(yq '.version' "$CONFIG_FILE")
-          echo "value_new=$NEW_VALUE" >> "$GITHUB_OUTPUT"
-          
-          echo "Updated version from '$OLD_VERSION' to '$NEW_VALUE'"
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          if [[ -d "${ADDON_DIR}/scripts" && -n "$(ls -A "${ADDON_DIR}/scripts" 2>/dev/null)" ]]; then
+            echo "has_scripts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_scripts=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: ✍🏼 Set name in config.yaml --> ${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}
+      - name: Check for image field
+        id: check_image
         shell: bash
         run: |
-          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
-          NEW_NAME="${{ steps.prepare_yaml_values.outputs.FINAL_NAME_TO_SET }}"
-          
-          # Get current value before modification
-          OLD_NAME=$(yq '.name' "$CONFIG_FILE")
-          
-          # Set new name
-          yq -i ".name = \"$NEW_NAME\"" "$CONFIG_FILE"
-          
-          echo "Updated name from '$OLD_NAME' to '$NEW_NAME'"
+          IMAGE="${{ steps.read_config.outputs.image }}"
+          if [[ -n "$IMAGE" ]]; then
+            echo "has_image=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_image=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: ✍🏼 Set image in config.yaml --> ${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}
+      - name: Extract arch list
+        id: extract_archs
         shell: bash
         run: |
-          CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_VERSION }}/config.yaml"
-          NEW_IMAGE="${{ steps.prepare_yaml_values.outputs.FINAL_IMAGE_TO_SET }}"
-          
-          # Get current value before modification
-          OLD_IMAGE=$(yq '.image' "$CONFIG_FILE")
-          
-          # Set new image
-          yq -i ".image = \"$NEW_IMAGE\"" "$CONFIG_FILE"
-          
-          echo "Updated image from '$OLD_IMAGE' to '$NEW_IMAGE'"
-          # The image field will be set to the DockerHub repository (e.g., dianlight/myaddon-alpha)
-          # The 'home-assistant/builder' will then tag this image with the 'version' from config.yaml.
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          ARCHS=$(yq e '.arch | @json' "${ADDON_DIR}/config.yaml")
+          echo "architectures=${ARCHS}" >> "$GITHUB_OUTPUT"
+          echo "image_name=addon-${ADDON_DIR}" >> "$GITHUB_OUTPUT"
+          echo "Architectures: ${ARCHS}"
+
+      - name: Extract BUILD_FROM
+        id: extract_build_from
+        shell: bash
+        run: |
+          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          BUILD_FROM=$(grep -m1 'ARG BUILD_FROM=' "${ADDON_DIR}/Dockerfile" | cut -d= -f2-)
+          echo "BUILD_FROM=${BUILD_FROM}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_FROM: ${BUILD_FROM}"
+
+      - name: Prepare multi-arch matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        with:
+          architectures: ${{ steps.extract_archs.outputs.architectures }}
+          image-name: ${{ steps.extract_archs.outputs.image_name }}
+          registry-prefix: ghcr.io/dianlight
+
+  build:
+    name: Build ${{ matrix.arch }}
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.build_matrix) }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.03.2
+        with:
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          context: ./${{ needs.setup.outputs.addon_dir }}
+          image: ${{ matrix.image }}
+          image-tags: ${{ needs.setup.outputs.build_version }}
+          labels: |
+            io.hass.type=app
+            io.hass.name=${{ needs.setup.outputs.name }}
+            io.hass.description=${{ needs.setup.outputs.description }}
+          build-args: BUILD_FROM=${{ needs.setup.outputs.build_from }}
+          push: true
+          cosign: false
+          version: ${{ needs.setup.outputs.build_version }}
+
+  manifest:
+    name: Publish manifest
+    needs: [setup, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        with:
+          architectures: ${{ needs.setup.outputs.architectures }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ needs.setup.outputs.image_name }}
+          image-tags: ${{ needs.setup.outputs.build_version }}
+          registry-prefix: ghcr.io/dianlight
+
+  post-build:
+    name: Create release branch
+    needs: [setup, manifest]
+    if: needs.setup.outputs.has_scripts == 'true' || needs.setup.outputs.has_image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: true
+
+      - name: ✍🏼 Set version in config.yaml
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
+          yq -i ".version = \"${{ needs.setup.outputs.base_version }}\"" "$CONFIG_FILE"
+          echo "Updated version to ${{ needs.setup.outputs.base_version }}"
+
+      - name: ✍🏼 Set name in config.yaml --> ${{ needs.setup.outputs.name }}
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
+          yq -i ".name = \"${{ needs.setup.outputs.name }}\"" "$CONFIG_FILE"
+          echo "Updated name to ${{ needs.setup.outputs.name }}"
 
       - name: Run Addon custom scripts
-        # Only run this step if the scripts directory exists for the current addon
-        if: ${{ hashFiles(format('{0}/{1}/scripts', github.workspace, steps.extract_branch.outputs.BR_VERSION)) != '' }}
+        if: needs.setup.outputs.has_scripts == 'true'
         env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         shell: bash
         run: |
-          set -x # Enable verbose output for debugging
+          set -x
 
-          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
+          ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
           SCRIPTS_DIR="${{ github.workspace }}/${ADDON_DIR}/scripts"
 
-          # Run scripts if the directory exists (already checked by 'if' condition)
           echo "Scripts directory '$SCRIPTS_DIR' found. Executing scripts..."
           find "$SCRIPTS_DIR" -type f -print0 | while IFS= read -r -d $'\0' SCRIPT_FILE; do
             echo "Executing script: $SCRIPT_FILE"
@@ -157,41 +217,27 @@ jobs:
             else
               bash "$SCRIPT_FILE"
             fi
-            
+
             SCRIPT_EXIT_CODE=$?
             if [ $SCRIPT_EXIT_CODE -ne 0 ]; then
               echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
-              # Continue to the next script even if one fails
             fi
           done
 
-      - name: Publish Home Assistant Addon ${{ steps.extract_branch.outputs.BR_VERSION }} --> ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }}
-        uses: home-assistant/builder@master #71885366c80f6ead6ae8c364b61d910e0dc5addc # 2025.03.0 # Home Assistant Add-on builder action
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }} # API key for artifact signing (if used by the builder)
-        with:
-          args: |
-            --amd64 --aarch64 \
-            --version ${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}-dev.${{ github.run_number }} \
-            --target ${{ steps.extract_branch.outputs.BR_VERSION }} \
-            --no-latest \
-            --docker-hub dianlight
 
       - name: Create Merge Release Branch
-        # Only run this step if the scripts directory exists for the current addon
-        if: ${{ hashFiles(format('{0}/{1}/scripts', github.workspace, steps.extract_branch.outputs.BR_VERSION)) != '' }}
+        if: needs.setup.outputs.has_scripts == 'true'
         env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         shell: bash
         run: |
-          set -x # Enable verbose output for debugging
+          set -x
 
           git config --global user.email "workflow-bot@github.com"
-          git config --global user.name "Prerelease Bot" # Using the same bot name for consistency
+          git config --global user.name "Prerelease Bot"
 
-          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
-          SCRIPTS_DIR="${{ github.workspace }}/${ADDON_DIR}/scripts"
-          MERGE_RELEASE_BRANCH="mergerelease/${ADDON_DIR}" # New branch name: mergerelease/<addon>
+          ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
+          MERGE_RELEASE_BRANCH="mergerelease/${ADDON_DIR}"
 
           echo "Add all changes to git staging area"
           git add .
@@ -210,37 +256,31 @@ jobs:
           fi
 
       - name: Create Pull Request
-        # This step runs if the 'image' field was initially NOT empty,
-        # indicating it's a "real" addon for which a PR is desired.
-        if: ${{ steps.read_action_js.outputs.image != '' }}
+        if: needs.setup.outputs.has_image == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication with 'gh' CLI
-          CURRENT_WORKFLOW_BRANCH: ${{ github.head_ref || github.ref_name }} # The current branch name (e.g., devrelease/myaddon)
-        continue-on-error: true # Allows the workflow to continue even if this step fails
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_WORKFLOW_BRANCH: ${{ github.head_ref || github.ref_name }}
+        continue-on-error: true
         shell: bash
         run: |
-          set -x # Enable verbose output for debugging
+          set -x
 
           git config --global user.email "workflow-bot@github.com"
           git config --global user.name "Prerelease Bot"
 
-          ADDON_DIR="${{ steps.extract_branch.outputs.BR_VERSION }}"
-          BASE_VERSION="${{ steps.prepare_yaml_values.outputs.EXTRACTED_BASE_VERSION }}"
-          # PR_BASE_BRANCH_NAME is the target branch for script commits and the PR base (e.g., prerelease/myaddon_1.0.0)
+          ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
+          BASE_VERSION="${{ needs.setup.outputs.base_version }}"
           PR_BASE_BRANCH_NAME="prerelease/${ADDON_DIR}_${BASE_VERSION}"
 
-          # Determine PR_HEAD_BRANCH_NAME: prefer mergerelease/* if it exists, else use devrelease/*
           MERGE_RELEASE_CHECK_BRANCH="mergerelease/${ADDON_DIR}"
-          PR_HEAD_BRANCH_NAME="${{ env.CURRENT_WORKFLOW_BRANCH }}" # Default to the current workflow branch
+          PR_HEAD_BRANCH_NAME="${{ env.CURRENT_WORKFLOW_BRANCH }}"
 
           echo "Checking if merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' exists..."
-          # Fetch the remote branch list and check for the merge release branch
           if git ls-remote --exit-code origin "${MERGE_RELEASE_CHECK_BRANCH}" &>/dev/null; then
             echo "Merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' exists. Using it as PR head."
             PR_HEAD_BRANCH_NAME="${MERGE_RELEASE_CHECK_BRANCH}"
           else
             echo "Merge release branch '${MERGE_RELEASE_CHECK_BRANCH}' does not exist. Using current workflow branch as PR head."
-            # PR_HEAD_BRANCH_NAME already defaults to CURRENT_WORKFLOW_BRANCH
           fi
 
           echo "Fetching origin master and head branch ${PR_HEAD_BRANCH_NAME}"
@@ -249,31 +289,27 @@ jobs:
           echo "Creating/resetting local branch '${PR_BASE_BRANCH_NAME}' from 'origin/master'"
           git branch -f "${PR_BASE_BRANCH_NAME}" "origin/master"
 
-          echo "Checking out branch '${PR_BASE_BRANCH_NAME}'"
-          git stash -u # Stash untracked files as well, to avoid conflicts
+          git stash -u
           git checkout "${PR_BASE_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to checkout branch ${PR_BASE_BRANCH_NAME}."
             exit 1
           fi
 
-          echo "Pushing branch '${PR_BASE_BRANCH_NAME}' to origin (with force)"
           git push -f origin "${PR_BASE_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to push branch ${PR_BASE_BRANCH_NAME}."
             exit 1
           fi
 
-          echo "Switching back to the determined head branch '${PR_HEAD_BRANCH_NAME}' for PR creation"
           git checkout "${PR_HEAD_BRANCH_NAME}"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to checkout back to branch ${PR_HEAD_BRANCH_NAME}."
             exit 1
           fi
-          git stash pop || true # Apply stashed changes back to the head branch, ignore errors if nothing stashed
+          git stash pop || true
 
           echo "Creating PR from '${PR_HEAD_BRANCH_NAME}' to '${PR_BASE_BRANCH_NAME}'"
-          # 'gh pr create' will create a PR; '|| :' prevents the step from failing if PR already exists
           gh pr create \
             --base "${PR_BASE_BRANCH_NAME}" \
             --head "${PR_HEAD_BRANCH_NAME}" \

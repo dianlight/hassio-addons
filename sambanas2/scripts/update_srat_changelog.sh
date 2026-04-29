@@ -2,7 +2,7 @@
 #
 # This script updates the CHANGELOG.md file by fetching the latest
 # changelog for the SRAT component from its own repository.
-# It finds the SRAT version from build.yaml, fetches the corresponding
+# It finds the SRAT version from the Dockerfile ARG default, fetches the corresponding
 # changelog, and then adds or replaces the SRAT section in the main
 # CHANGELOG.md.
 #
@@ -14,7 +14,7 @@ set -o pipefail
 # --- Configuration ---
 # Assumes the script is run from the addon root directory (e.g., 'sambanas2/').
 CHANGELOG_FILE="$(dirname "$0")/../CHANGELOG.md"
-BUILD_FILE="$(dirname "$0")/../build.yaml"
+DOCKERFILE="$(dirname "$0")/../Dockerfile"
 SRAT_REPO_URL="https://github.com/dianlight/srat"
 
 # The header for the section we are managing in CHANGELOG.md
@@ -23,15 +23,15 @@ SRAT_REPO_URL="https://github.com/dianlight/srat"
 SECTION_HEADER_REGEX="^### 🐭 Features from SRAT"
 
 # --- Pre-flight checks ---
-for cmd in yq curl awk sed grep; do
+for cmd in curl awk sed grep; do
     if ! command -v "$cmd" &>/dev/null; then
         echo "Error: Required command '$cmd' is not installed." >&2
         exit 1
     fi
 done
 
-if [ ! -f "$BUILD_FILE" ]; then
-    echo "Error: Build file '$BUILD_FILE' not found. Are you in the addon root directory?" >&2
+if [ ! -f "$DOCKERFILE" ]; then
+    echo "Error: Dockerfile '$DOCKERFILE' not found. Are you in the addon root directory?" >&2
     exit 1
 fi
 
@@ -42,12 +42,12 @@ fi
 
 echo "Starting SRAT changelog update process..."
 
-# 1. Get SRAT_VERSION from build.yaml
-echo "Reading SRAT version from '$BUILD_FILE'..."
-srat_version=$(yq e '.args.SRAT_VERSION' "$BUILD_FILE")
+# 1. Get SRAT_VERSION from Dockerfile ARG default
+echo "Reading SRAT version from '$DOCKERFILE'..."
+srat_version=$(grep -m1 'ARG SRAT_VERSION=' "$DOCKERFILE" | cut -d= -f2 | tr -d '"')
 
 if [ -z "$srat_version" ] || [ "$srat_version" = "null" ]; then
-    echo "Error: Could not read '.args.SRAT_VERSION' from '$BUILD_FILE'." >&2
+    echo "Error: Could not read 'ARG SRAT_VERSION=' from '$DOCKERFILE'." >&2
     exit 1
 fi
 echo "Found SRAT version: $srat_version"

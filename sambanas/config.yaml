@@ -6,7 +6,6 @@ description: Expose Home Assistant disc with SMB/CIFS
 url: https://github.com/dianlight/hassio-addons/tree/master/sambanas
 codenotary: lucio.tarantino@gmail.com
 arch:
-  - armv7
   - aarch64
   - amd64
 startup: initialize
@@ -113,7 +112,7 @@ schema:
   meaning_of_life: int?
   multi_channel: bool?
 
-image: dianlight/{arch}-addon-sambanas
+image: ghcr.io/dianlight/addon-sambanas
 services:
   - mqtt:want
 udev: true

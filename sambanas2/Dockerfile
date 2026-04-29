@@ -1,18 +1,18 @@
-ARG BUILD_FROM
-ARG BUILD_DATE
-ARG BUILD_DESCRIPTION
-ARG BUILD_NAME
-ARG BUILD_REF
-ARG BUILD_REPOSITORY
-ARG BUILD_VERSION
-ARG SAMBA_VERSION
-ARG HA_CLI_VERSION
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.1.0
+ARG BUILD_DATE=""
+ARG BUILD_DESCRIPTION=""
+ARG BUILD_NAME=""
+ARG BUILD_REF=""
+ARG BUILD_REPOSITORY="dianlight/hassio-addons"
+ARG BUILD_VERSION=""
+ARG SAMBA_VERSION=distribution
+ARG HA_CLI_VERSION=5.0.0
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM} AS quic_builder
 
-ARG SAMBA_VERSION
+ARG SAMBA_VERSION=distribution
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
@@ -49,7 +49,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM} AS samba_builder
 
-ARG SAMBA_VERSION
+ARG SAMBA_VERSION=distribution
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
@@ -154,10 +154,10 @@ ENV \
     TERM="xterm-256color"
 
 # Setup base
-ARG BUILD_ARCH
-ARG HA_CLI_VERSION
-ARG SRAT_VERSION
-ARG SAMBA_VERSION
+ARG BUILD_ARCH=amd64
+ARG HA_CLI_VERSION=5.0.0
+ARG SRAT_VERSION=2026.4.0-rc2
+ARG SAMBA_VERSION=distribution
 
 # Copy compiled binaries from builder stages
 #COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/

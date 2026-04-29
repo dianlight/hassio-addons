@@ -21,12 +21,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Extract branch name
         shell: bash
         run: |
@@ -247,6 +241,7 @@ jobs:
               --head "$TARGET_COMPARE_BRANCH" \
               --title "$PR_TITLE" \
               --label "$PR_LABEL" \
+              --draft \
               --body "" # Add an empty body or a simple message
             if [ $? -ne 0 ]; then
               echo "Error: Failed to create new PR."
