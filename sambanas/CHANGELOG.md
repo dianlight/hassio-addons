@@ -17,6 +17,26 @@
 
 ## 12.5.0-nas [ Maintenance Mode ]
 
+### 💥 Breaking Changes
+
+- **Container registry changed**: images are now published to `ghcr.io/dianlight/` (GitHub Container Registry) instead of `docker.io/dianlight/` (Docker Hub). The addon store URL in Home Assistant must be updated.
+- **Image renamed**: the per-architecture image prefix has been dropped. Old image: `dianlight/{arch}-addon-sambanas`. New image: `ghcr.io/dianlight/addon-sambanas`. The multi-arch manifest is resolved automatically.
+- **armv7 support removed**: the `armv7` architecture is no longer built or published. If you are running Home Assistant on an ARMv7 device, this addon will not receive further updates. Consider migrating to a 64-bit (aarch64) host or using [SambaNas 2](../sambanas2/README.md).
+
+### 🔄 Migration Notes
+
+Existing users must re-add the addon store after this change because the image location has moved:
+
+1. **Remove** the SambaNas addon from your Home Assistant instance (note: your configuration data under `/data` is preserved).
+2. **Remove** the old addon repository from Home Assistant → Settings → Add-ons → Add-on Store → ⋮ → Repositories.
+3. **Add** the updated repository URL: `https://github.com/dianlight/hassio-addons`
+4. **Re-install** SambaNas from the updated store entry.
+5. Your previously saved options and persistent data will be re-attached automatically.
+
+If you are pulling the image directly, update your image reference from `docker.io/dianlight/amd64-addon-sambanas:<tag>` to `ghcr.io/dianlight/addon-sambanas:<tag>`.
+
+> **Note**: SambaNas is in maintenance mode. Consider migrating to [SambaNas 2](../sambanas2/README.md) for active development and new features.
+
 ### ✨ Features
 
 ### 🚨 Important Notice Regarding SambaNas Addon Development
