@@ -6,6 +6,7 @@
 
 - **Container registry changed**: images are now published to `ghcr.io/dianlight/` (GitHub Container Registry) instead of `docker.io/dianlight/` (Docker Hub). The addon store URL in Home Assistant must be updated.
 - **Image renamed**: the per-architecture image prefix has been dropped. Old image: `dianlight/{arch}-addon-sambanas`. New image: `ghcr.io/dianlight/addon-sambanas`. The multi-arch manifest is resolved automatically.
+- **armv7 support removed**: the `armv7` architecture is no longer built or published. If you are running Home Assistant on an ARMv7 device, this addon will not receive further updates. Consider migrating to a 64-bit (aarch64) host or using [SambaNas 2](../sambanas2/README.md).
 
 ### 🔄 Migration Notes
 
