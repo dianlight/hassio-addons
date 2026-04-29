@@ -40,7 +40,6 @@ jobs:
         - name: Extract branch name
           shell: bash
           run: |
-              env
               if [ -z "${{ github.event.inputs.addon }}" ]; then
                 if [ -z "${{ github.head_ref || github.ref_name }}" ]; then
                     export _GITHUB_REF=${GITHUB_REF}

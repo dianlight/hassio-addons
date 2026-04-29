@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+(( BASH_VERSINFO[0] >= 4 )) || { echo "Error: bash 4+ required (macOS: brew install bash)" >&2; exit 1; }
+
 echo "Example for local build:"
 echo "  check=no archs='aarch64' ./build.sh sambanas2"
 echo "  push=yes ./build.sh sambanas2   # push to GHCR after build"

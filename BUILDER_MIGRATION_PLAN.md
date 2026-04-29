@@ -882,8 +882,8 @@ When to skip full fork:
 - [x] WP2 complete (2026-04-24)
 - [x] WP3 complete (2026-04-24)
 - [x] WP4 complete (2026-04-24)
-- [ ] WP5 complete
-- [ ] WP6 complete
+- [x] WP5 complete (2026-04-27)
+- [x] WP6 complete (2026-04-27)
 
 ## Suggested Execution Order
 1. WP0.5 temporary fork setup + rehearsal baseline
