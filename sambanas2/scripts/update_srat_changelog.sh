@@ -123,6 +123,19 @@ fi
 # 4. Process the extracted content: add one level to all markdown headers
 echo "Processing extracted content..."
 processed_content=$(echo "$changelog_section" | sed 's/^#/##/')
+# 4.1 add new at the end of change log section
+processed_content="${processed_content}\n\n"
+# 4.2 Remove 🙏 Thanks and 📅 Roadmap sections
+processed_content=$(echo "$processed_content" | awk '
+    BEGIN { in_thanks = 0; in_roadmap = 0 }
+    /^#### 🙏 Thanks/ { in_thanks = 1; next }
+    /^#### 📅 Roadmap/ { in_roadmap = 1; next }
+    /^#### / {
+        in_thanks = 0
+        in_roadmap = 0
+    }
+    !in_thanks && !in_roadmap { print }
+')
 
 # 5. Add or Replace the section in the main CHANGELOG.md
 TMP_CHANGELOG=$(mktemp)
