@@ -32,7 +32,6 @@ setup_buildx() {
   if ! docker buildx inspect multiarch-builder &>/dev/null; then
     echo "Creating multiarch buildx builder..."
     docker buildx create --name multiarch-builder --driver docker-container \
-      --buildkitd-flags '--allow-insecure-entitlement security.insecure' \
       --use --bootstrap
   else
     docker buildx use multiarch-builder
