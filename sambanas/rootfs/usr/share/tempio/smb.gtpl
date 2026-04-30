@@ -81,7 +81,7 @@
    # End PR#167
 
    path = /{{- if eq .share "config" }}homeassistant{{- else }}{{- .share }}{{- end }}
-   valid users = _ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
+   valid users =_ha_mount_user_ {{ .users|default .username|join " " }} {{ .ro_users|join " " }}
    {{ if .ro_users }}
    read list = {{ .ro_users|join " " }}
    {{ end }}
@@ -124,30 +124,26 @@
 {{- $disks := concat $dfdisk (compact .moredisks|default list) -}}
 {{- $root := . -}}
 {{- range $disk := $disks -}}
-        {{- $state := dict "acld" false "matched_dd" nil -}}
+        {{- $acld := false -}}
         {{- range $dd := $root.acl -}}
-                {{- $ndisk := $disk | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
-                {{- $aclshare := $dd.share | regexReplaceAll "[^A-Za-z0-9_/ ]" "_" | regexFind "[A-Za-z0-9_ ]+$" -}}
-                {{- if and (eq ($aclshare|upper) ($ndisk|upper)) (not (get $state "acld")) -}}
-                        {{- $_ := set $state "acld" true -}}
-                        {{- $_ := set $state "matched_dd" $dd -}}
-                {{- end -}}
-        {{- end -}}
-        {{- if get $state "acld" -}}
-                {{- $dd := get $state "matched_dd" -}}
-                {{- if not $dd.disabled -}}
-                        {{- $def := deepCopy $dd -}}
-                        {{- $_ := set $dd "share" $disk -}}
-                        {{- if has $disk $dfdisk -}}
+                {{- $ndisk := $disk | regexFind "[A-Za-z0-9_]+$" -}}
+                {{- if eq ($dd.share|upper) ($ndisk|upper) -}}
+                        {{- $def := deepCopy $dd }}
+                        {{- $acld = true -}}
+                        {{- if not $dd.disabled -}}
+                           {{- $_ := set $dd "share" $disk -}}
+                           {{- if has $disk $dfdisk -}}
                                 {{- $_ := set $def "timemachine" false -}}
                                 {{- $_ := set $def "usage" "" -}}
-                        {{- else -}}
+                           {{- else -}}
                                 {{- $_ := set $def "timemachine" true -}}
                                 {{- $_ := set $def "usage" "media" -}}
-                        {{- end }}
-                        {{- template "SHT" deepCopy $root | mergeOverwrite $def $dd -}}
+                           {{- end }}
+                           {{- template "SHT" deepCopy $root | mergeOverwrite $def $dd -}}
+                        {{- end -}}
                 {{- end -}}
-        {{- else -}}
+        {{- end -}}
+        {{- if not $acld -}}
                 {{- $dd := dict "share" $disk "timemachine" true -}}
                 {{- $_ := set $dd "usage" "media" -}}
                 {{- if has $disk $dfdisk -}}

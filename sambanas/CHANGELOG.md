@@ -1,43 +1,8 @@
 # Changelog
 
-## 12.5.0-nas2 [ Maintenance Mode ]
-
-### 🩹 BugFix
-- [x] Fix regression on unable to mount disks at startup if acl is not set [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
-- [x] Fix duplicate shares in smb.conf creation (variable scoping issue) [[#516](https://github.com/dianlight/hassio-addons/issues/516)]
-  - Fixed incorrect regex function call syntax in smb.gtpl template that caused share names to be generated incorrectly
-- [ ] Fix regression on unable to mount disks with special characters in label [[[#517](https://github.com/dianlight/hassio-addons/issues/517)]
-
-
-## 12.5.0-nas1 [ Maintenance Mode - **retired** ]
-
-### 🩹 BugFix
-
-- Fix ACL config not working as expected if disk label contains special characters [#442](https://github.com/dianlight/hassio-addons/issues/442)
-
 ## 12.5.0-nas [ Maintenance Mode ]
 
-### 💥 Breaking Changes
-
-- **Container registry changed**: images are now published to `ghcr.io/dianlight/` (GitHub Container Registry) instead of `docker.io/dianlight/` (Docker Hub). The addon store URL in Home Assistant must be updated.
-- **Image renamed**: the per-architecture image prefix has been dropped. Old image: `dianlight/{arch}-addon-sambanas`. New image: `ghcr.io/dianlight/addon-sambanas`. The multi-arch manifest is resolved automatically.
-- **armv7 support removed**: the `armv7` architecture is no longer built or published. If you are running Home Assistant on an ARMv7 device, this addon will not receive further updates. Consider migrating to a 64-bit (aarch64) host or using [SambaNas 2](../sambanas2/README.md).
-
-### 🔄 Migration Notes
-
-Existing users must re-add the addon store after this change because the image location has moved:
-
-1. **Remove** the SambaNas addon from your Home Assistant instance (note: your configuration data under `/data` is preserved).
-2. **Remove** the old addon repository from Home Assistant → Settings → Add-ons → Add-on Store → ⋮ → Repositories.
-3. **Add** the updated repository URL: `https://github.com/dianlight/hassio-addons`
-4. **Re-install** SambaNas from the updated store entry.
-5. Your previously saved options and persistent data will be re-attached automatically.
-
-If you are pulling the image directly, update your image reference from `docker.io/dianlight/amd64-addon-sambanas:<tag>` to `ghcr.io/dianlight/addon-sambanas:<tag>`.
-
-> **Note**: SambaNas is in maintenance mode. Consider migrating to [SambaNas 2](../sambanas2/README.md) for active development and new features.
-
-### ✨ Features
+### ✨ Features 
 
 ### 🚨 Important Notice Regarding SambaNas Addon Development
 
@@ -57,13 +22,11 @@ We encourage users interested in the latest features and improvements to keep an
 
 [Add our Hass.io BETA add-ons repository][beta-repository] to your Hass.io instance.
 
-### 🩹 BugFix
-
+###  🩹 BugFix
 - Fix issue [#283](https://github.com/dianlight/hassio-addons/issues/283)
 - Missing Apparmor's permissions [#354](https://github.com/dianlight/hassio-addons/issues/354)
 
 ### 🏗 Chore
-
 - Update Based Image to 17.2.5 (Alpine 3.21.3, Samba 4.20.6)
 - [Full Changelog from official addon 12.3.2][changelog_12.5.0]
   - Add the ability to enable and disable trying to become a local master browser on a subnet
