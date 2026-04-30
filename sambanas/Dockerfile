@@ -1,10 +1,10 @@
-ARG BUILD_FROM
-ARG BUILD_DATE
-ARG BUILD_DESCRIPTION
-ARG BUILD_NAME
-ARG BUILD_REF
-ARG BUILD_REPOSITORY
-ARG BUILD_VERSION
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.1.0
+ARG BUILD_DATE=""
+ARG BUILD_DESCRIPTION=""
+ARG BUILD_NAME=""
+ARG BUILD_REF=""
+ARG BUILD_REPOSITORY="dianlight/hassio-addons"
+ARG BUILD_VERSION=""
 
 #ARG HDDTEMP_VERSION
 
@@ -16,7 +16,7 @@ RUN apk add --no-cache make \
     gcc libc-dev linux-headers build-base autoconf automake git \
     python3-dev musl-dev poetry go lsblk eudev 
 
-ARG BUILD_ARCH
+ARG BUILD_ARCH=amd64
 
 RUN cd / && wget -q -O - "https://github.com/Netgear/wsdd2/archive/refs/heads/master.tar.gz" | tar zxvf - \
     && cd wsdd2-master \ 
@@ -59,8 +59,8 @@ ENV S6_KILL_GRACETIME=30000
 ENV S6_SYNC_DISKS=1
 
 # Setup base
-ARG BUILD_ARCH
-ARG CLI_VERSION
+ARG BUILD_ARCH=amd64
+ARG HA_CLI_VERSION=5.0.0
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
@@ -109,7 +109,7 @@ COPY --from=builder /wsdd2-master/wsdd2 /usr/sbin
 COPY --from=builder /root/.cache/pypoetry /root/.cache/pypoetry
 
 # HA API
-RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${CLI_VERSION}/ha_${BUILD_ARCH}" \
+RUN curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha 
 
 # SAMBA Config
