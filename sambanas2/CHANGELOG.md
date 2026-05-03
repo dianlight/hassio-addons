@@ -15,8 +15,6 @@
 - ***If you need HDIdle support don't update and wait future releases.***
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
 
-### 🐭 Features from SRAT
-
 ## 2026.5.0-rc5
 
 #### 🏗 Chore

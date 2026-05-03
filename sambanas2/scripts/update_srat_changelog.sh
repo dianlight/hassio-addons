@@ -137,37 +137,105 @@ processed_content=$(echo "$processed_content" | awk '
     !in_thanks && !in_roadmap { print }
 ')
 
-# 5. Add or Replace the section in the main CHANGELOG.md
+# 5. Check if SRAT version already exists in older "### 🐭 Features from SRAT" sections
+echo "Checking if SRAT version '$srat_version' already exists in older releases..."
+version_exists_in_older_releases=false
+
+# Extract all "### 🐭 Features from SRAT" sections from older releases (everything after the first H2)
+if grep -q "^## " "$CHANGELOG_FILE"; then
+    srat_sections_in_older_releases=$(awk '
+        BEGIN { first_h2_seen = 0; in_srat_section = 0 }
+        /^## / {
+            if (!first_h2_seen) {
+                first_h2_seen = 1
+                next
+            }
+            # We are now in older releases
+            in_srat_section = 0
+        }
+        first_h2_seen {
+            if (/^### 🐭 Features from SRAT/) {
+                in_srat_section = 1
+                print
+            } else if (/^### / && !/^### 🐭 Features from SRAT/) {
+                in_srat_section = 0
+            } else if (in_srat_section) {
+                print
+            }
+        }
+    ' "$CHANGELOG_FILE")
+    
+    if echo "$srat_sections_in_older_releases" | grep -q "$srat_version"; then
+        echo "Found SRAT version '$srat_version' in older 🐭 Features from SRAT sections. Skipping insertion/replacement."
+        version_exists_in_older_releases=true
+    fi
+fi
+
+# 6. Add or Replace the section only in the latest release (if version doesn't exist in older releases)
 TMP_CHANGELOG=$(mktemp)
 trap 'rm -f "$TMP_CHANGELOG"' EXIT
 
 echo "Updating '$CHANGELOG_FILE'..."
-if grep -q "$SECTION_HEADER_REGEX" "$CHANGELOG_FILE"; then
-    echo "SRAT section found, replacing content..."
-    # Use awk to find the section, replace it, and delete the old content.
-    awk -v header="$SECTION_HEADER" -v content="$processed_content" '
-        BEGIN { in_section = 0; replaced = 0 }
-        # Match the start of the section
-        /'"$SECTION_HEADER_REGEX"'/ {
-            if (!replaced) { print header; if (content) print content; replaced = 1 }
-            in_section = 1
-            next
+
+if [ "$version_exists_in_older_releases" = true ]; then
+    echo "SRAT version already exists in older releases. Not modifying latest release."
+    # If version exists in older releases, remove any empty SRAT section from latest release
+    awk '
+        BEGIN { release_count = 0; in_srat_section = 0; srat_section_empty = 1 }
+        /^## / {
+            release_count++
+            in_srat_section = 0
+            srat_section_empty = 1
         }
-        # Match the end of the section (another H2 or H3)
-        /^(##|###) / { in_section = 0 }
-        in_section { next } # Skip lines that are part of the old section
-        { print } # Print all other lines
+        /^### 🐭 Features from SRAT/ && release_count == 1 {
+            in_srat_section = 1
+            next  # Skip the header line
+        }
+        /^### / && release_count == 1 && in_srat_section {
+            in_srat_section = 0
+            srat_section_empty = 1
+        }
+        !in_srat_section { print }
     ' "$CHANGELOG_FILE" >"$TMP_CHANGELOG"
 else
-    echo "SRAT section not found, adding new section..."
-    # Use awk to add the new section after the first H2 header.
-    awk -v header="$SECTION_HEADER" -v content="$processed_content" '
-        { print }
-        # After printing the first H2 line, insert our block.
-        /^## / && !inserted {
-            print ""; print header; if (content) print content; inserted = 1
-        }
-    ' "$CHANGELOG_FILE" >"$TMP_CHANGELOG"
+    # Version does not exist in older releases, so add/replace it
+    # Check only within the latest release (content before the second H2 header)
+    latest_release_content=$(awk '/^## /{ if (++h2 == 2) exit } h2 == 1 { print }' "$CHANGELOG_FILE")
+    if echo "$latest_release_content" | grep -q "$SECTION_HEADER_REGEX"; then
+        echo "SRAT section found in latest release, replacing content..."
+        # Use awk to find and replace only in the first release section (before the second H2)
+        awk -v header="$SECTION_HEADER" -v content="$processed_content" '
+            BEGIN { in_section = 0; replaced = 0; release_count = 0 }
+            # Count H2 headers to identify the first release
+            /^## / {
+                release_count++
+                if (release_count > 1) { in_section = 0 } # Exit section modification after first H2
+            }
+            # Match the start of the section (only in the first release)
+            /'"$SECTION_HEADER_REGEX"'/ && release_count == 1 {
+                if (!replaced) { print header; if (content) print content; replaced = 1 }
+                in_section = 1
+                next
+            }
+            # Match the end of the section (another H3 or we hit the second H2)
+            /^(###|##) / && release_count == 1 { in_section = 0 }
+            in_section { next } # Skip lines that are part of the old section
+            { print } # Print all other lines
+        ' "$CHANGELOG_FILE" >"$TMP_CHANGELOG"
+    else
+        echo "SRAT section not found, adding new section to latest release..."
+        # Use awk to add the new section at the end of the latest release (just before the second H2 header).
+        awk -v header="$SECTION_HEADER" -v content="$processed_content" '
+            BEGIN { h2_count = 0; inserted = 0 }
+            /^## / {
+                h2_count++
+                if (h2_count == 2 && !inserted) {
+                    print ""; print header; if (content) print content; inserted = 1
+                }
+            }
+            { print }
+        ' "$CHANGELOG_FILE" >"$TMP_CHANGELOG"
+    fi
 fi
 
 # Overwrite the original file
