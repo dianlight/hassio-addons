@@ -32,8 +32,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "//Dockerfile$/",
-        "//build.yaml$/"
+        "//Dockerfile$/"
       ],
       "matchStringsStrategy": "any",
       "matchStrings": [
@@ -45,8 +44,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "//Dockerfile$/",
-        "//build.yaml$/"
+        "//Dockerfile$/"
       ],
       "matchStrings": [
         "HA_CLI_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"
@@ -58,7 +56,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "//build.yaml$/"
+        "//Dockerfile$/"
       ],
       "matchStrings": [
         "SRAT_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"

@@ -12,6 +12,7 @@ body:
       multiple: true
       options:
         - SambaNAS
+        - SambaNAS2
         - Plex
         - RPiMySensor
     validations:
@@ -75,6 +76,7 @@ body:
       multiple: true
       options:
         - HaOS
+        - Promox
         - Virtual Machine
         - Docker
         - Other
