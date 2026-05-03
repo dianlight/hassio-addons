@@ -22,6 +22,16 @@
 #### 🏗 Chore
 - Update SRAT to v2026.5.0-rc5
 
+### 🐭 Features from SRAT [v2026.5.0-rc5](https://github.com/dianlight/srat)
+
+#### ✨ Features
+
+- New startup wizard for first-run configuration of essential Samba settings (hostname, workgroup, admin password) and optional telemetry opt-in. The wizard is implemented as a multi-step dialog with a progress stepper and integrated with the existing guided tour system for contextual help. It is accessible from the Settings page and automatically shown on first run.
+
+#### 🐛 Bug Fixes
+
+#### 🏗 Chore
+
 ## 2026.4.0-rc4
 
 Internal release for testing and finalization of 2026.4.0-rc3 changes. No public changes since 2026.4.0-rc3.
