@@ -21,12 +21,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Extract branch name
         shell: bash
         run: |
@@ -67,8 +61,8 @@ jobs:
             EXPECTED_SUFFIX_TYPE="-beta"
           fi
 
-          # Strip any existing -alpha<num> or -beta<num> suffix from the current version to get the base version
-          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?)$//')
+          # Strip any existing -alpha<num>, -beta<num>, -dev<num>, -rc<num> suffix from the current version to get the base version
+          BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?|-rc(\.[0-9]+)?)$//')
 
           # Construct the version suffix using the determined type and the current run number.
           # This ensures a new pre-release number for each run if an EXPECTED_SUFFIX_TYPE is determined.
@@ -252,6 +246,24 @@ jobs:
               echo "Error: Failed to create new PR."
               # Continue on error as per original action's continue-on-error: true
             fi
+          fi
+          # 6. Enable auto-merge for the PR (optional, but can be useful for pre-release branches that should merge once checks pass)
+          # This will attempt to enable auto-merge regardless of whether the PR was just created or already existed, which is fine since enabling auto-merge on an already auto-merge-enabled PR is a no-op.
+          if [ -n "$EXISTING_PR_NUMBER" ]; then
+            PR_TO_ENABLE_AUTO_MERGE="$EXISTING_PR_NUMBER"
+          else
+            # If we just created the PR, we need to get its number to enable auto-merge
+            PR_TO_ENABLE_AUTO_MERGE=$(gh pr list -R "$TARGET_REPO" --head "$TARGET_COMPARE_BRANCH" --state open --json number -q '.[0].number')
+          fi
+          if [ -n "$PR_TO_ENABLE_AUTO_MERGE" ]; then
+            echo "Enabling auto-merge for PR #$PR_TO_ENABLE_AUTO_MERGE"
+            gh pr merge "$PR_TO_ENABLE_AUTO_MERGE" -R "$TARGET_REPO" --auto --squash
+            if [ $? -ne 0 ]; then
+              echo "Warning: Failed to enable auto-merge for PR #$PR_TO_ENABLE_AUTO_MERGE."
+              # Continue on error as per original action's continue-on-error: true
+            fi
+          else
+            echo "Warning: Could not determine PR number to enable auto-merge."
           fi
 
   create_master_pr:

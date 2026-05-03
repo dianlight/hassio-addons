@@ -1,0 +1,51 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ============================================================================
+# Gracefully stop NFS server stack
+# ============================================================================
+set -euo pipefail
+
+STATD_PID_FILE="/run/nfsd.statd.pid"
+IDMAPD_PID_FILE="/run/nfsd.idmapd.pid"
+
+stop_by_name() {
+  local name="$1"
+  local pids
+
+  pids=$(pidof "${name}" 2>/dev/null || true)
+  if [ -n "${pids}" ]; then
+    kill ${pids} 2>/dev/null || true
+  fi
+}
+
+stop_pidfile() {
+  local pidfile="$1"
+  local name="$2"
+
+  if [ -f "${pidfile}" ]; then
+    local pid
+    pid=$(cat "${pidfile}")
+    if kill -0 "${pid}" 2>/dev/null; then
+      kill "${pid}" 2>/dev/null || true
+      wait "${pid}" 2>/dev/null || true
+    else
+      stop_by_name "${name}"
+    fi
+    rm -f "${pidfile}"
+  else
+    stop_by_name "${name}"
+  fi
+}
+
+bashio::log.info "Stopping NFS services"
+
+stop_by_name rpc.mountd
+exportfs -au 2>/dev/null || true
+rpc.nfsd 0 2>/dev/null || true
+
+stop_pidfile "${IDMAPD_PID_FILE}" rpc.idmapd
+stop_pidfile "${STATD_PID_FILE}" rpc.statd
+stop_by_name rpcbind
+
+bashio::log.info "NFS services stopped"

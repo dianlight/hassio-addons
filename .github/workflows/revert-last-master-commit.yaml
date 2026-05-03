@@ -17,22 +17,22 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: Create Revert Branch
-        run: |
-          git checkout -b revert-last-commit
+#      - name: Create Revert Branch
+#        run: |
+#          git checkout -b revert-last-commit
 
       - name: Revert Last Commit
         run: |
           git revert $COMMIT_SHA --no-edit
 
-      - name: Push Revert Branch
-        run: |
-          git push origin revert-last-commit
+#      - name: Push Revert Branch
+#        run: |
+#          git push origin revert-last-commit
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           title: "Revert Last Commit"
           body: "This PR reverts the last commit on master."
-          head: revert-last-commit
-          base: master
+          branch: revert-last-commit
+          delete-branch: true
