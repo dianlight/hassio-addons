@@ -1,2 +1,4 @@
 .DS_Store
 env_file
+.claude/
+sambanas2/.imgenv
