@@ -18,6 +18,13 @@
 #### 🏗 Chore
 - Update SRAT to v2026.5.0-rc6
 
+
+### 🐭 Features from SRAT [v2026.5.0-rc6](https://github.com/dianlight/srat)
+
+#### 🐛 Bug Fixes
+- Fix compile issue in github actions that was cause of freezed UI in some cases.
+
+
 ## 2026.5.0-rc5
 
 #### 🏗 Chore
