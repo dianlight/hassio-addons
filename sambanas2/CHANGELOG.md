@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.5.0-rc6 [Unreleased]
+## 2026.5.0-rc6 
 
 ### 🙏 Thanks
 
@@ -14,6 +14,9 @@
 - ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
 - ***If you need HDIdle support don't update and wait future releases.***
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
+
+#### 🏗 Chore
+- Update SRAT to v2026.5.0-rc6
 
 ## 2026.5.0-rc5
 
