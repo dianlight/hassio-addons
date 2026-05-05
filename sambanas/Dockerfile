@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.1.0
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.1.1
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -60,7 +60,7 @@ ENV S6_SYNC_DISKS=1
 
 # Setup base
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION=5.0.0
+ARG HA_CLI_VERSION=5.1.0
 RUN apk add --no-cache \
     samba-common-tools \
     samba-server \
