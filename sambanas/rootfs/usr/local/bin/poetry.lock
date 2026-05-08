@@ -58,13 +58,13 @@ files = [
 
 [[package]]
 name = "diskinfo"
-version = "3.2.0"
+version = "4.1.2"
 description = "Disk information Python library for Linux"
 optional = false
 python-versions = "<4,>=3.10"
 files = [
-    {file = "diskinfo-3.2.0-py3-none-any.whl", hash = "sha256:b9c98f9e74da1b9fdb983da3d1fac347ed4d6c3c4dd23e17d0034c4bea88adbd"},
-    {file = "diskinfo-3.2.0.tar.gz", hash = "sha256:5f1336560ebe240054d236419aae3d5212cdcf6176d16ef6d476214ace325e88"},
+    {file = "diskinfo-4.1.2-py3-none-any.whl", hash = "sha256:f9ae9b100d8ae695a07f412bd59181748d5af01cef42da30efb84b41e371dcc9"},
+    {file = "diskinfo-4.1.2.tar.gz", hash = "sha256:98d53e7567c93e200f06ba8f701a28bd8e5d60faf5a8ce275c1fb753e4b50992"},
 ]
 
 [package.dependencies]
@@ -387,4 +387,4 @@ typing-extensions = ">=4.12.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "6ec4dc766f409ad459bc307b0451380aa7a5bf095418295c9607c1f6acc01570"
+content-hash = "ca9fae62c2844a290f51f7cb07f81c85c6a89c77e3400d2bfec30d51a8e86899"
