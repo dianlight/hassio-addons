@@ -34,7 +34,7 @@ if [ -f /tmp/cifs_network ]; then
     bashio::net.wait_for 445 ${ipaddress/\/*/} 60
     # smbstatus
 
-    while read -r -a device; do
+    while read -r device; do
         [[ ${device,,} == @(share|config|addons|ssl|backup|media|addon_configs|homeassistant) ]] && continue
         usage=$(jq -r --arg xshare "$device" '.acl[] | select(.share==$xshare) | .usage // "media"' <<<"$(bashio::addon.config)")
         cmdshare=$(jq -nrc --arg usage "${usage:-media}" --arg share "$device" --arg ip "${ipaddress/\/*/}" --arg user "$username" --arg pwd "$password" '.name=$share|.usage=$usage|.type="cifs"|.server=$ip|.share=$share|.username=$user|.password=$pwd')
