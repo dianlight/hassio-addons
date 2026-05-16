@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.5.0-rc6 
+## 2026.5.0-rc7
 
 ### 🙏 Thanks
 
@@ -15,7 +15,15 @@
 - ***If you need HDIdle support don't update and wait future releases.***
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
 
-#### 🏗 Chore
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc7
+
+### ✨ Features
+- Add a allert when Protected Mode is enabled in Home Assistant (See [DOCS](DOCS.md) )
+
+## 2026.5.0-rc6 
+
+### 🏗 Chore
 - Update SRAT to v2026.5.0-rc6
 
 ## 2026.5.0-rc5
