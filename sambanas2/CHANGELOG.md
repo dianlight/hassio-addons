@@ -21,6 +21,13 @@
 ### ✨ Features
 - Add a allert when Protected Mode is enabled in Home Assistant (See [DOCS](DOCS.md) )
 
+
+### 🐭 Features from SRAT [v2026.5.0-rc6](https://github.com/dianlight/srat)
+
+#### 🐛 Bug Fixes
+- Fix compile issue in github actions that was cause of freezed UI in some cases.
+
+
 ## 2026.5.0-rc6 
 
 ### 🏗 Chore
