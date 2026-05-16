@@ -10,8 +10,13 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "check-protection-mode/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
+# bashio::addon.protected always returns exit 0 and *prints* "true"/"false".
+# Capture the output and test with bashio::var.true (same pattern used by
+# bashio::require.protected / bashio::require.unprotected internally).
+protected="$(bashio::addon.protected)"
+
 # ── Nothing to do when protection mode is already disabled ───────────────────
-if ! bashio::addon.protected; then
+if bashio::var.false "${protected}"; then
     bashio::log.debug "Protection mode is disabled. Full functionality available."
     exit 0
 fi
