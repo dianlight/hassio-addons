@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.5.0-rc6 
+## 2026.5.0-rc7
 
 ### 🙏 Thanks
 
@@ -15,7 +15,36 @@
 - ***If you need HDIdle support don't update and wait future releases.***
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
 
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc7
+- Update homeassistant client to 5.1.0
+
+### ✨ Features
+- Add a allert when Protected Mode is enabled in Home Assistant (See [DOCS](DOCS.md) )
+
+
+### 🐭 Features from SRAT [v2026.5.0-rc7](https://github.com/dianlight/srat)
+
 #### 🏗 Chore
+
+- Change the frontend testing engine to vitest to be more stable and realistic.
+- Add a new test on browser directly.
+
+#### 🐛 Bug Fixes
+
+- **Reduce continuous disk access (#636)**: Optimized backend services to significantly reduce redundant disk I/O:
+  - `DiskStatsService`: Heavy tick (every 60s) fetches SMART data and partition metadata via `syscall.Statfs`; lightweight ticks (5 of every 6) reuse cached data from the previous tick, eliminating `smartctl` invocations and VFS probes on every 10s poll.
+  - `NetworkStatsService`: Settings are loaded from disk only on heavy ticks (every 60s); lightweight ticks reuse the in-memory cached settings.
+  - `HealthHandler`: Expensive `smbstatus` subprocess and samba process status broadcasts are gated to heavy ticks (~every 60s) instead of every 5s.
+  - `HDIdleService`: Disk power state (spun-up/spun-down) is tracked in memory; DB writes only occur on state transitions rather than on every polling cycle.
+  - `AddonConfigWatcherService`: File modification timestamp (`mtime`) is checked before reading and hashing `options.json`, skipping the full read when the file has not changed.
+  - Fixed `EnableSMART`/`DisableSMART` and `GetSmartInfo` emitting/returning `DiskId` set to the raw device path (`/dev/sda`) instead of the canonical device ID used to index the `DiskMap`. This caused SMART info to be silently lost after toggling SMART and caused the health API `per_disk_info[id].smart_info.disk_id` to show the raw path.
+  - Fixed `volume_service` `OnSmart` handler calling `AddSmartInfo` for self-test progress events (which carry an empty `SmartInfo.DiskId`), producing hundreds of spurious `WARN` log entries every 5s during a running self-test.
+
+
+## 2026.5.0-rc6 
+
+### 🏗 Chore
 - Update SRAT to v2026.5.0-rc6
 
 
