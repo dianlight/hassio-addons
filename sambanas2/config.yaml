@@ -65,7 +65,7 @@ schema:
   clean_upgrade_dir: bool?
   factory_reset: bool?
   use_external_kernel_modules: bool?
-image: ghcr.io/dianlight/addon-sambanas2
+#image: ghcr.io/dianlight/addon-sambanas2
 udev: true
 #usb: true
 host_dbus: true

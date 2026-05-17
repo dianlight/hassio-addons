@@ -156,7 +156,7 @@ ENV \
 # Setup base
 ARG BUILD_ARCH=amd64
 ARG HA_CLI_VERSION=5.1.0
-ARG SRAT_VERSION=2026.5.0-rc6
+ARG SRAT_VERSION=2026.5.0-rc7
 ARG SAMBA_VERSION=distribution
 
 # Copy compiled binaries from builder stages
