@@ -17,6 +17,7 @@
 
 ### 🏗 Chore
 - Update SRAT to v2026.5.0-rc7
+- Update homeassistant client to 5.1.0
 
 ### ✨ Features
 - Add a allert when Protected Mode is enabled in Home Assistant (See [DOCS](DOCS.md) )
