@@ -140,6 +140,24 @@ NFS services run under s6 supervision and the exports file is **automatically ma
 - 🔌 Depending on your HAOS architecture/board, NFS functionality may require enabling `use_external_kernel_modules` to load extra kernel modules
 - Changes made through SRAT are applied automatically without requiring an add-on restart
 
+## SMART Monitoring and Disk Health
+
+Samba NAS2 bundles the **[smartmontools-sdk](https://github.com/dianlight/smartmontools-sdk)** (`libsmartmon`) so that SMART queries are performed **in-process** — no subprocess is spawned to run `smartctl`. This provides:
+
+- Faster and more efficient disk health queries
+- Unified ATA/SATA, NVMe, and SCSI/SAS device support via a single native API
+- Structured JSON output for integration with the SRAT web interface
+
+The SDK is installed at build time:
+
+| Path | Contents |
+|---|---|
+| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools v7.5) |
+| `/usr/local/include/smartmon/` | Public C++ headers |
+
+`LIBRARY_PATH` and `CPATH` environment variables are automatically exported to all container processes and interactive shells so any component linking against `libsmartmon` finds the library without manual configuration.
+
+
 ## Configuration
 
 Example configuration with all available options and their default values:

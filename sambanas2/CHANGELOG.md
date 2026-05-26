@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026.5.0-rc8
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this addon better.
+
+### 🚨 Notes
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk.
+
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc8
+
+### ✨ Features
+- Install [smartmontools-sdk v7.5](https://github.com/dianlight/smartmontools-sdk) (`libsmartmon.a` + headers) providing in-process SMART device access without spawning a subprocess
+- Set `LIBRARY_PATH` and `CPATH` environment variables for all container processes so that components linking against `libsmartmon` are automatically found
+- Register `/etc/profile.d/smartmontools-sdk.sh` so interactive login shells also inherit the correct library and include paths
+
 ## 2026.5.0-rc7
 
 ### 🙏 Thanks
