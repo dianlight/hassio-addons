@@ -5,9 +5,15 @@
 ### 🙏 Thanks
 
 - Thanks to all the contributors and users that help to make this addon better.
+- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
 
 ### 🚨 Notes
-- This is a release candidate version, it may contain bugs and issues. Use it at your own risk.
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
+- This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
+- ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
+- ***If you need HDIdle support don't update and wait future releases.***
+- ***If you need Avahi/mDNS support don't update and wait future releases.***
 
 ### 🏗 Chore
 - Update SRAT to v2026.5.0-rc8
@@ -18,19 +24,6 @@
 - Register `/etc/profile.d/smartmontools-sdk.sh` so interactive login shells also inherit the correct library and include paths
 
 ## 2026.5.0-rc7
-
-### 🙏 Thanks
-
-- Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
-
-### 🚨 Notes
-- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
-- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
-- This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
-- ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
-- ***If you need HDIdle support don't update and wait future releases.***
-- ***If you need Avahi/mDNS support don't update and wait future releases.***
 
 ### 🏗 Chore
 - Update SRAT to v2026.5.0-rc7

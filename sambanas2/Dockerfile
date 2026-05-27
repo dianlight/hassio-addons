@@ -295,7 +295,7 @@ RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/do
 
 # Download and install smartmontools-sdk
 RUN curl -fsSL -o /tmp/smartmontools-sdk.tar.gz \
-        "https://github.com/dianlight/smartmontools-sdk/releases/download/v${SMARTMONTOOLS_SDK_VERSION}/libsmartmon-${SMARTMONTOOLS_SDK_VERSION}-linux-${BUILD_ARCH}.tar.gz" \
+        "https://github.com/dianlight/smartmontools-sdk/releases/download/v${SMARTMONTOOLS_SDK_VERSION}/libsmartmon-${SMARTMONTOOLS_SDK_VERSION}-linux-${BUILD_ARCH}-musl.tar.gz" \
     && tar -xzf /tmp/smartmontools-sdk.tar.gz -C /usr/local \
     && rm -f /tmp/smartmontools-sdk.tar.gz \
     && printf '%s\n' \
