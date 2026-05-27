@@ -23,6 +23,35 @@
 - Set `LIBRARY_PATH` and `CPATH` environment variables for all container processes so that components linking against `libsmartmon` are automatically found
 - Register `/etc/profile.d/smartmontools-sdk.sh` so interactive login shells also inherit the correct library and include paths
 
+
+### 🐭 Features from SRAT [v2026.5.0-rc8](https://github.com/dianlight/srat)
+
+#### ✨ Features
+
+- **Dashboard Actions: Mount and Share Wizard for Partitions**: Added an inline wizard from Dashboard action buttons so users can mount and share a selected partition without leaving the Dashboard. ([#633](https://github.com/dianlight/srat/issues/633))
+
+#### 🐛 Bug Fixes
+
+#### 🔄 Breaking Changes
+
+#### 🔧 Maintenance
+
+- **Telemetry migration to Sentry**: Replaced Rollbar integration across backend and frontend while preserving the existing consent-mode behavior (`ask`, `all`, `errors`, `disabled`).
+  - Backend now uses `sentry-go` with runtime environment detection and Sentry flush on shutdown.
+  - Frontend now uses `@sentry/react` (`ErrorBoundary`, telemetry hook, and console error bridge).
+  - Build/CI variables updated to `SENTRY_DSN` and `VITE_SENTRY_DSN`.
+  - Rollbar dependencies and direct references removed from active source paths.
+- **Optimize Continuous Disk Access**: Optimized service polling and state handling to reduce redundant disk reads/writes and lower continuous I/O pressure during normal operation. ([#636](https://github.com/dianlight/srat/issues/636))
+- **Unify documentation tool excludes via single .docsignore file**: Consolidated documentation ignore rules into `.docsignore` so local runs, IDE checks, and CI validate the same file set consistently. ([#653](https://github.com/dianlight/srat/issues/653))
+
+#### 🧑‍🏫 Documentation
+
+#### 🏗 Chore
+
+- Frontend lock-file maintenance updates from Renovate. ([#648](https://github.com/dianlight/srat/issues/648))
+- Merge updates from `main` into the working branch.
+
+
 ## 2026.5.0-rc7
 
 ### 🏗 Chore
