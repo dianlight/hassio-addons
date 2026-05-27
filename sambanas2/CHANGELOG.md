@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.5.0-rc8
+## 2026.5.0-rc9
 
 ### 🙏 Thanks
 
@@ -16,12 +16,17 @@
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
 
 ### 🏗 Chore
-- Update SRAT to v2026.5.0-rc8
+- Update SRAT to v2026.5.0-rc9
 
 ### ✨ Features
 - Install [smartmontools-sdk v7.5](https://github.com/dianlight/smartmontools-sdk) (`libsmartmon.a` + headers) providing in-process SMART device access without spawning a subprocess
 - Set `LIBRARY_PATH` and `CPATH` environment variables for all container processes so that components linking against `libsmartmon` are automatically found
 - Register `/etc/profile.d/smartmontools-sdk.sh` so interactive login shells also inherit the correct library and include paths
+
+## 2026.5.0-rc8
+
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc8
 
 ## 2026.5.0-rc7
 
