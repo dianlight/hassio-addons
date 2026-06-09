@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.5.0-rc6 
+## 2026.5.0-rc9
 
 ### 🙏 Thanks
 
@@ -11,11 +11,55 @@
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
 - This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
 - This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
-- ***Your existing configuration will be lost when updating to this version. Please backup your configuration before updating.***
+- ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
 - ***If you need HDIdle support don't update and wait future releases.***
 - ***If you need Avahi/mDNS support don't update and wait future releases.***
 
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc9
+
+### ✨ Features
+- Install [smartmontools-sdk v7.5](https://github.com/dianlight/smartmontools-sdk) (`libsmartmon.a` + headers) providing in-process SMART device access without spawning a subprocess
+- Set `LIBRARY_PATH` and `CPATH` environment variables for all container processes so that components linking against `libsmartmon` are automatically found
+- Register `/etc/profile.d/smartmontools-sdk.sh` so interactive login shells also inherit the correct library and include paths
+
+
+### 🐭 Features from SRAT [v2026.5.0-rc9](https://github.com/dianlight/srat)
+
+#### ✨ Features
+- **Lab Mode**: Added a new "Lab Mode" section in Settings → Advanced with experimental features that can be enabled for testing and feedback. 
+- **SMART Integration Mode**: Replaced the `disable_smart` boolean toggle with a 3-option `smart_mode` enum (`none`, `legacy`, `direct`).
+  - `none`: SMART integration disabled.
+  - `legacy`: Uses the `smartctl` executable (previous default behavior).
+  - `direct`: Uses the `libsmartmon_go.so` library back end (lab feature, requires lib availability at startup).
+  - The `direct` option is only shown in the UI when experimental lab mode is enabled and `libsmartmon_go.so` is detected at runtime.
+  - Backend detects `libsmartmon_go.so` availability at startup and exposes `lib_smart_available` in the settings API response.
+  - DB migration 00016 converts existing `DisableSmart` boolean properties to the new `smart_mode` string value.
+
+#### 🐛 Bug Fixes
+
 #### 🏗 Chore
+
+- **Static binary portability**: Default production builds (`CGO_ENABLED=0`) are now fully statically linked with zero shared-library dependencies, running unchanged on GNU/Linux systems using either glibc (Debian, Ubuntu) or musl (Alpine). The `libsmartmon_go.so` lib integration is now gated behind a new `smartlib` build tag so it no longer forces `libdl.so.2` dynamic linking in release binaries. Build with `--cgo` (which adds `-tags smartlib`) to opt in to the lib mode.
+
+
+## 2026.5.0-rc8
+
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc8
+
+## 2026.5.0-rc7
+
+### 🏗 Chore
+- Update SRAT to v2026.5.0-rc7
+- Update homeassistant client to 5.1.0
+
+### ✨ Features
+- Add a allert when Protected Mode is enabled in Home Assistant (See [DOCS](DOCS.md) )
+
+## 2026.5.0-rc6 
+
+### 🏗 Chore
 - Update SRAT to v2026.5.0-rc6
 
 

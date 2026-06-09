@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.1.0
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.2.0
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -6,7 +6,7 @@ ARG BUILD_REF=""
 ARG BUILD_REPOSITORY="dianlight/hassio-addons"
 ARG BUILD_VERSION=""
 ARG SAMBA_VERSION=distribution
-ARG HA_CLI_VERSION=5.0.0
+ARG HA_CLI_VERSION=5.1.0
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
@@ -151,13 +151,16 @@ ENV \
     S6_CMD_WAIT_FOR_SERVICES=1 \
     S6_KILL_GRACETIME=30000 \
     S6_SYNC_DISKS=1 \
+    CPATH="/usr/local/include" \
+    LIBRARY_PATH="/usr/local/lib" \
     TERM="xterm-256color"
 
 # Setup base
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION=5.0.0
-ARG SRAT_VERSION=2026.5.0-rc6
+ARG HA_CLI_VERSION=5.1.0
+ARG SRAT_VERSION=2026.5.0-rc9
 ARG SAMBA_VERSION=distribution
+ARG SMARTMONTOOLS_SDK_VERSION=7.5
 
 # Copy compiled binaries from builder stages
 #COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/
@@ -289,6 +292,16 @@ RUN wget -qO-  https://www.gershnik.com/alpine-repo/gershnik@hotmail.com-6643812
 # Download and install Home Assistant CLI
 RUN curl -fsSL -o /usr/bin/ha "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha
+
+# Download and install smartmontools-sdk
+RUN curl -fsSL -o /tmp/smartmontools-sdk.tar.gz \
+        "https://github.com/dianlight/smartmontools-sdk/releases/download/v${SMARTMONTOOLS_SDK_VERSION}/libsmartmon-${SMARTMONTOOLS_SDK_VERSION}-linux-${BUILD_ARCH}-musl.tar.gz" \
+    && tar -xzf /tmp/smartmontools-sdk.tar.gz -C /usr/local \
+    && rm -f /tmp/smartmontools-sdk.tar.gz \
+    && printf '%s\n' \
+        'export LIBRARY_PATH="/usr/local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"' \
+        'export CPATH="/usr/local/include${CPATH:+:$CPATH}"' \
+        > /etc/profile.d/smartmontools-sdk.sh
 
 # Download and install SRAT
 RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
