@@ -18,11 +18,12 @@ The following table compares the major functionalities available in SambaNAS and
 |------------------------------------|:--------:|:---------:|
 | **Network Sharing** | | |
 | CIFS Volume Exporting              |    ✔️     |    ✔️      |
-| NFS Volume Exporting               |    ❌     |  🧪 🔌 (internal HA-addon use only) |
+| NFS Volume Exporting               |    ❌     |  🧪 🔌 n |
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
-| Avahi/mDNS Support                 |    ✔️     |    🚧 Soon (via component)     |
+| Avahi/mDNS Support                 |    ✔️     |  ❌     |
+| HA mDNS Support                 |    ❌     |  🧪 (via component)     |
 | Samba over QUIC Support            |    ❌     |  🧪 🔌   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
@@ -43,14 +44,14 @@ The following table compares the major functionalities available in SambaNAS and
 | **Integration** | | |
 | MQTT integration                   |    ✔️     |    ❌      |
 | HA Native API Integration          |    ❌     |    ✔️      |
-| Component Integration              |    ❌     |  🚧 Soon   |
+| Component Integration              |    ❌     |  🧪 (limited)  |
 | **Disk Management** | | |
 | SMART Monitoring                  |    ✔️     |    ✔️    |
 | SMART Test Support                      |    ❌     |    ✔️   |
-| Disk Spindown Support              |    ✔️     |    🚧 Soon      |
-| Per Disk Spindown Support              |    ❌     |    🚧 Soon      |
+| Disk Spindown Support              |    ✔️     |    🧪      |
+| Per Disk Spindown Support              |    ❌     |    🧪      |
 | **Filesystem Support** | | |
-| Filesystem Checking  | ❌ | 🚧 Soon  |
+| Filesystem Checking  | ❌ | ✔️  |
 | Advanced XFS Support | ❌ | 🚧 Soon  |
 | Advanced BTRFS Support | ❌ | 🚧 Soon  |
 | Advanced ZFS Support                       |    ❌     |    🚧 Soon   |
@@ -58,7 +59,7 @@ The following table compares the major functionalities available in SambaNAS and
 | External Kernel Modules Support                     |    ❌     |    ✔️  |
 
 
-> ✔️ = Supported  ❌ = Not Supported  🧪 = Experimental  🔌 = Only with extra kernel modules (see hasos_more_modules)  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
+> ✔️ = Supported  ❌ = Not Supported  🧪 = Experimental (Lab Mode)  🔌 = Only with extra kernel modules (see hasos_more_modules)  🚧 Soon = Coming in future versions  🔚 EOL = End of Life
 
 ## Installation
 

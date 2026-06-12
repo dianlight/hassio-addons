@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026.6.0-rc10
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this addon better.
+- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
+
+### 🚨 Notes
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
+- This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
+- ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
+
+### 🏗 Chore
+- Update SRAT to v2026.6.0-rc10
+- Update Base image to v21.0.0 (Alpine base image to v3.24.0)
+
+### ✨ Features
+- New 'Lab Mode' setting in Settings → General section to enable experimental features and configurations for advanced users and testers. When enabled, this setting allows access to features that are still in development or testing phases, providing early access to new functionality while clearly indicating that these features may be unstable or subject to change.
+
 ## 2026.5.0-rc9
 
 ### 🙏 Thanks
