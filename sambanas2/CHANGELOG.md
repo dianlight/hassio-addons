@@ -20,6 +20,26 @@
 ### ✨ Features
 - New 'Lab Mode' setting in Settings → General section to enable experimental features and configurations for advanced users and testers. When enabled, this setting allows access to features that are still in development or testing phases, providing early access to new functionality while clearly indicating that these features may be unstable or subject to change.
 
+
+### 🐭 Features from SRAT [v2026.5.0-rc9](https://github.com/dianlight/srat)
+
+#### ✨ Features
+- **Lab Mode**: Added a new "Lab Mode" section in Settings → Advanced with experimental features that can be enabled for testing and feedback. 
+- **SMART Integration Mode**: Replaced the `disable_smart` boolean toggle with a 3-option `smart_mode` enum (`none`, `legacy`, `direct`).
+  - `none`: SMART integration disabled.
+  - `legacy`: Uses the `smartctl` executable (previous default behavior).
+  - `direct`: Uses the `libsmartmon_go.so` library back end (lab feature, requires lib availability at startup).
+  - The `direct` option is only shown in the UI when experimental lab mode is enabled and `libsmartmon_go.so` is detected at runtime.
+  - Backend detects `libsmartmon_go.so` availability at startup and exposes `lib_smart_available` in the settings API response.
+  - DB migration 00016 converts existing `DisableSmart` boolean properties to the new `smart_mode` string value.
+
+#### 🐛 Bug Fixes
+
+#### 🏗 Chore
+
+- **Static binary portability**: Default production builds (`CGO_ENABLED=0`) are now fully statically linked with zero shared-library dependencies, running unchanged on GNU/Linux systems using either glibc (Debian, Ubuntu) or musl (Alpine). The `libsmartmon_go.so` lib integration is now gated behind a new `smartlib` build tag so it no longer forces `libdl.so.2` dynamic linking in release binaries. Build with `--cgo` (which adds `-tags smartlib`) to opt in to the lib mode.
+
+
 ## 2026.5.0-rc9
 
 ### 🙏 Thanks
