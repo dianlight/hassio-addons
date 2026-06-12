@@ -29,7 +29,7 @@ jobs:
       has_scripts: ${{ steps.check_scripts.outputs.has_scripts }}
       has_image: ${{ steps.check_image.outputs.has_image }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           submodules: true
 
@@ -138,7 +138,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.setup.outputs.build_matrix) }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           submodules: true
           persist-credentials: false
@@ -180,7 +180,7 @@ jobs:
     if: needs.setup.outputs.has_scripts == 'true' || needs.setup.outputs.has_image == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           submodules: true
 
