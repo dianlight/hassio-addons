@@ -75,20 +75,20 @@
   },
   "devDependencies": {
     "@lit-labs/compiler": "1.1.2",
-    "@rollup/plugin-commonjs": "29.0.2",
+    "@rollup/plugin-commonjs": "29.0.3",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "12.3.0",
-    "@types/node": "24.12.2",
+    "@types/node": "24.13.1",
     "@web/rollup-plugin-html": "3.1.0",
-    "rollup": "4.60.2",
+    "rollup": "4.61.1",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dev": "2.1.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-md-icon": "1.0.0",
     "rollup-plugin-postcss": "4.0.2",
-    "sass": "1.99.0",
+    "sass": "1.100.0",
     "typescript": "5.9.3"
   }
 }
