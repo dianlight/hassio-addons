@@ -18,7 +18,7 @@ The following table compares the major functionalities available in SambaNAS and
 |------------------------------------|:--------:|:---------:|
 | **Network Sharing** | | |
 | CIFS Volume Exporting              |    ✔️     |    ✔️      |
-| NFS Volume Exporting               |    ❌     |  🧪 🔌 n |
+| NFS Volume Exporting               |    ❌     |  🧪 🔌 |
 | SMB Multichannel Support           |    ✔️     |    ✔️      |
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |

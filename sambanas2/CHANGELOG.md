@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.6.0-rc10
+## 2026.7.0-rc11
 
 ### 🙏 Thanks
 
@@ -12,6 +12,8 @@
 - This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
 - This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
 - ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
+
+## 2026.6.0-rc10
 
 ### 🏗 Chore
 - Update SRAT to v2026.6.0-rc10
