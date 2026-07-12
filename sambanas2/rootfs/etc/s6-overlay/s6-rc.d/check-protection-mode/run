@@ -1,0 +1,74 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Check Protection Mode - One-time startup check
+# Warns the user (log banner + HA persistent notification) when Protection Mode
+# is enabled, since this add-on requires it to be OFF for full functionality.
+# ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "check-protection-mode/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
+
+# bashio::addon.protected always returns exit 0 and *prints* "true"/"false".
+# Capture the output and test with bashio::var.true (same pattern used by
+# bashio::require.protected / bashio::require.unprotected internally).
+protected="$(bashio::addon.protected)"
+
+# ── Nothing to do when protection mode is already disabled ───────────────────
+if bashio::var.false "${protected}"; then
+    bashio::log.debug "Protection mode is disabled. Full functionality available."
+    exit 0
+fi
+
+# ── Warning banner in the add-on log ─────────────────────────────────────────
+bashio::log.yellow "╔══════════════════════════════════════════════════════════════════════════════╗"
+bashio::log.yellow "║                                                                              ║"
+bashio::log.yellow "║           ⚠️  WARNING: PROTECTION MODE IS ENABLED  ⚠️                        ║"
+bashio::log.yellow "║                                                                              ║"
+bashio::log.yellow "║  Samba NAS2 requires Protection Mode to be DISABLED for full functionality.  ║"
+bashio::log.yellow "║                                                                              ║"
+bashio::log.yellow "║  The following features will NOT work while Protection Mode is active:       ║"
+bashio::log.yellow "║    • Mounting external disks (MoreDisks / Automount)                         ║"
+bashio::log.yellow "║    • NFS server support                                                      ║"
+bashio::log.yellow "║    • Kernel module loading (modprobe)                                        ║"
+bashio::log.yellow "║    • Some SMB operations requiring elevated privileges                       ║"
+bashio::log.yellow "║                                                                              ║"
+bashio::log.yellow "║  To fix: Settings → Add-ons → Samba NAS2 → Info → disable Protection mode    ║"
+bashio::log.yellow "║                                                                              ║"
+bashio::log.yellow "╚══════════════════════════════════════════════════════════════════════════════╝"
+
+# ── Persistent notification in Home Assistant UI ──────────────────────────────
+bashio::log.info "Sending protection mode warning to Home Assistant notifications..."
+
+readonly NOTIFICATION_ID="sambanas2_protection_mode_warning"
+readonly NOTIFICATION_TITLE="⚠️ Samba NAS2: Protection Mode Enabled"
+readonly NOTIFICATION_MESSAGE="**Samba NAS2** is running with **Protection Mode enabled**.
+This prevents several features from working correctly.
+
+### Features that will NOT work:
+- Mounting external disks (MoreDisks / Automount)
+- NFS server support
+- Kernel module loading
+- Some SMB operations requiring elevated privileges
+
+### How to fix:
+1. Go to **Settings → Add-ons → Samba NAS2**
+2. Click the **Info** tab
+3. Toggle **OFF** the *Protection mode* switch
+4. Restart the add-on"
+
+notification_payload=$(jq -cn \
+    --arg id    "${NOTIFICATION_ID}" \
+    --arg title "${NOTIFICATION_TITLE}" \
+    --arg msg   "${NOTIFICATION_MESSAGE}" \
+    '{notification_id: $id, title: $title, message: $msg}') || {
+    bashio::log.warning "Failed to build notification JSON payload; skipping HA notification."
+    exit 0
+}
+
+bashio::api.supervisor POST /core/api/services/persistent_notification/create \
+    "${notification_payload}" \
+    || bashio::log.warning "Could not create HA persistent notification (non-critical). Check logs."
+
+bashio::log.info "Protection mode check complete."
