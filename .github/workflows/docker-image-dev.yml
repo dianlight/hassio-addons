@@ -198,6 +198,18 @@ jobs:
           yq -i ".name = \"${{ needs.setup.outputs.name }}\"" "$CONFIG_FILE"
           echo "Updated name to ${{ needs.setup.outputs.name }}"
 
+      - name: Ensure image key is uncommented in config.yaml
+        if: needs.setup.outputs.has_scripts == 'true'
+        shell: bash
+        run: |
+          CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
+          if grep -Eq '^\s*#\s*image\s*:' "$CONFIG_FILE"; then
+            sed -E -i 's/^([[:space:]]*)#[[:space:]]*(image[[:space:]]*:.*)$/\1\2/' "$CONFIG_FILE"
+            echo "Uncommented image key in $CONFIG_FILE"
+          else
+            echo "No commented image key found in $CONFIG_FILE"
+          fi
+
       - name: Run Addon custom scripts
         if: needs.setup.outputs.has_scripts == 'true'
         env:
