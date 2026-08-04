@@ -1,0 +1,182 @@
+name: opencode-pr-review
+
+# Process 1 — On-Demand PR Code Review Gate
+# Triggered when an authorized user comments /oc, /ocf, /oc review or /ocf review on a PR.
+# /oc → Go model, /ocf → free model.
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: opencode-pr-review-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login != 'github-actions[bot]' &&
+      github.event.comment.user.login != 'opencode-agent[bot]' &&
+      github.event.comment.user.login != 'coderabbitai[bot]' &&
+      github.event.comment.user.login != 'opencode-maintenance[bot]' &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) &&
+      github.event.issue.state == 'open' &&
+      startsWith(github.event.comment.body, '/oc') &&
+      !contains(github.event.comment.body, '/oc task') &&
+      !contains(github.event.comment.body, '/oc implement') &&
+      !contains(github.event.comment.body, '/oc retry') &&
+      !contains(github.event.comment.body, '/ocf task') &&
+      !contains(github.event.comment.body, '/ocf implement') &&
+      !contains(github.event.comment.body, '/ocf retry')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Parse command
+        id: parse
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          chmod +x .github/scripts/auth.sh 2>/dev/null || true
+          .github/scripts/auth.sh "$COMMENT_BODY"
+
+      - name: Verify PR is not a draft
+        id: pr-check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IS_DRAFT=$(gh pr view ${{ github.event.issue.number }} \
+            --json isDraft -q .isDraft)
+          if [[ "$IS_DRAFT" == "true" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::PR is a draft — skipping review"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve model
+        id: resolve
+        if: steps.pr-check.outputs.skip != 'true'
+        continue-on-error: true
+        env:
+          TIER: ${{ steps.parse.outputs.TIER }}
+        run: |
+          chmod +x .github/scripts/resolve-model.sh 2>/dev/null || true
+          .github/scripts/resolve-model.sh opencode-pr-review review "${TIER}"
+
+      - name: Resolve model failure feedback
+        if: steps.pr-check.outputs.skip != 'true' && steps.resolve.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          {
+            echo "❌ **Model resolution failed** — [View run details](${RUN_URL})"
+            echo ""
+            echo "No model could be resolved (config unreachable, invalid, or missing entry)."
+            echo "The OpenCode run was not attempted."
+          } > /tmp/oc-resolve-feedback.md
+          gh issue comment "$ISSUE_NUM" --body-file /tmp/oc-resolve-feedback.md
+          gh api --method POST \
+            "/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='-1' 2>/dev/null || \
+          gh api --method POST \
+            "/repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='-1' 2>/dev/null || true
+          exit 1
+
+      - name: Run opencode (PR code review)
+        id: opencode
+        if: steps.pr-check.outputs.skip != 'true'
+        continue-on-error: true
+        timeout-minutes: 25
+        uses: anomalyco/opencode/github@77fc88c8ade8e5a620ebbe1197f3a572d29ae91a # latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ steps.resolve.outputs.MODEL }}
+          use_github_token: true
+          share: ${{ github.event.repository.private == false }}
+          prompt: |
+            You are Process 1: PR Code Review. Read-only.
+            Submit a formal PR review with inline suggestions.
+
+            ## Context
+            - Repo: ${{ github.repository }}, PR: #${{ github.event.issue.number }}
+
+            ## Steps
+            1. Resolve outdated threads (GraphQL: check open threads,
+               resolve any fixed by current diff).
+            2. Submit review via `gh api` POST to
+               /repos/{owner}/{repo}/pulls/{num}/reviews.
+               - commit_id from `gh pr view --json headRefOid -q .headRefOid`
+               - event: REQUEST_CHANGES (CRITICAL/PERFORMANCE),
+                 COMMENT (QUALITY/NITPICK), APPROVE (clean)
+               - body: max 10 lines, issue counts per category
+               - comments[].body: prefix with category, include
+                 ```suggestion when possible
+
+            ## Categories
+            - 🚨 CRITICAL: Logic errors, crashes, security
+            - ⚡ PERFORMANCE: Inefficient algorithms, leaks
+            - 🛠️ QUALITY: Readability, maintainability
+            - 💡 NITPICK: Minor style
+
+            ## Constraints
+            - Never modify code. Inline threads only.
+            - Skip files with nothing to flag.
+
+      - name: Failure feedback
+        if: steps.opencode.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          {
+            echo "❌ **Opencode review failed** — [View run details](${RUN_URL})"
+            echo ""
+            echo "Possible causes: timeout, temporary service issue, or insufficient credits."
+            echo ""
+            echo "Reply with \`/oc retry\` or \`/ocf retry\` to re-run this operation."
+          } > /tmp/oc-feedback.md
+          gh issue comment ${{ github.event.issue.number }} --body-file /tmp/oc-feedback.md
+
+      - name: React ✅ on success
+        if: steps.opencode.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method POST \
+            "/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='hooray' 2>/dev/null || \
+          gh api --method POST \
+            "/repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='hooray' 2>/dev/null || true
+
+      - name: React ❌ on failure
+        if: steps.opencode.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method POST \
+            "/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='-1' 2>/dev/null || \
+          gh api --method POST \
+            "/repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='-1' 2>/dev/null || true
+
+      - name: Propagate failure
+        if: steps.opencode.outcome == 'failure'
+        run: exit 1
