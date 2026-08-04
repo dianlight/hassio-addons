@@ -1,0 +1,24 @@
+name: opencode-triage-issue (deprecated)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual trigger"
+        required: false
+        default: "deprecated — no-op"
+
+permissions:
+  contents: read
+
+jobs:
+  noop:
+    name: No-op (deprecated)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deprecation notice
+        run: |
+          echo "This workflow is deprecated and performs no operations."
+          echo "Use opencode-issue-handler.yml instead."
+      - name: Exit successfully (no-op)
+        run: exit 0
