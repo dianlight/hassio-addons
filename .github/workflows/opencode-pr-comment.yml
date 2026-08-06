@@ -277,14 +277,18 @@ jobs:
     timeout-minutes: 30
     permissions:
       id-token: write
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          persist-credentials: false
           fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Resolve model
         id: resolve
@@ -400,7 +404,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       id-token: write
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: Checkout repository
