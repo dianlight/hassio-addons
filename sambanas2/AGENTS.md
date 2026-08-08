@@ -1,32 +1,31 @@
-# Copilot Instructions for SambaNas2
+# SambaNas2 — Add-on Development Rules
 
-## Project Overview
-SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, representing a complete rewrite with improved performance and features.
+SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, a complete rewrite with improved performance and features. This file scopes the repository rules in `../AGENTS.md` to work in this add-on directory.
 
 ## Documentation Update Requirements
 
-### When making ANY change to sambanas2, you MUST update:
+When making ANY change to sambanas2, you MUST update:
 
-1. **README.md** - If changes affect:
+1. **README.md** — if changes affect:
    - Installation process
    - Features or capabilities
    - System requirements
    - User-facing functionality
 
-2. **DOCS.md** - If changes affect:
+2. **DOCS.md** — if changes affect:
    - Configuration options
    - Usage instructions
    - Service behavior
    - Examples or tutorials
 
-3. **CHANGELOG.md** - For ALL changes:
+3. **CHANGELOG.md** — for ALL changes:
    - Version information
    - Date of changes
    - Detailed description of modifications
    - Breaking changes highlighted
    - Migration notes if needed
 
-### Current Focus Areas (Active Development)
+## Current Focus Areas (Active Development)
 
 - **WSDD2 Integration**: Document all WSDD2 service configuration options
 - **S6 Overlay Services**: Keep service documentation current
@@ -34,29 +33,33 @@ SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, representi
 - **Performance Improvements**: Document any performance-related changes
 - **Migration from SambaNas**: Include migration guidance when relevant
 
-### Specific Documentation Guidelines
+## Specific Documentation Guidelines
 
-#### For Configuration Changes:
+### For Configuration Changes
+
 - Update `config.yaml` descriptions in DOCS.md
 - Include examples for new options
 - Document default values
 - Explain impact of configuration changes
 
-#### For Service Changes:
+### For Service Changes
+
 - Document new or modified S6 services
 - Update service dependencies
 - Include logging configuration changes
 - Document service startup/shutdown behavior
 
-#### For Feature Additions:
+### For Feature Additions
+
 - Update feature list in README.md
 - Add configuration examples in DOCS.md
 - Include troubleshooting information
 - Update installation requirements if needed
 
-### Key Documentation Sections to Maintain:
+## Key Documentation Sections to Maintain
 
-#### README.md Structure:
+### README.md Structure
+
 - Title with logo
 - Brief description
 - Installation badges
@@ -64,7 +67,8 @@ SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, representi
 - Basic installation instructions
 - Support information
 
-#### DOCS.md Structure:
+### DOCS.md Structure
+
 - Installation instructions
 - Configuration reference
 - Service configuration
@@ -72,14 +76,15 @@ SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, representi
 - Troubleshooting
 - Migration guide
 
-#### CHANGELOG.md Structure:
+### CHANGELOG.md Structure
+
 - Version headers
 - Release dates
 - Added/Changed/Fixed/Removed sections
 - Breaking changes notes
 - Migration instructions
 
-### Code-to-Documentation Mapping:
+## Code-to-Documentation Mapping
 
 | Code Change | Documentation Update Required |
 |-------------|------------------------------|
@@ -91,9 +96,10 @@ SambaNas2 is the next-generation Samba NAS add-on for Home Assistant, representi
 | Performance improvements | README.md + CHANGELOG.md |
 | Security updates | CHANGELOG.md + README.md |
 
-### Quality Checklist:
+## Quality Checklist
 
 Before completing any change:
+
 - [ ] Affected documentation files updated
 - [ ] Examples tested and working
 - [ ] Version information consistent
@@ -102,7 +108,8 @@ Before completing any change:
 - [ ] Installation instructions verified
 - [ ] Configuration examples validated
 
-### Forbidden Practices:
+## Forbidden Practices
+
 - ❌ Copying documentation from sambanas (original)
 - ❌ Generic documentation that doesn't match features
 - ❌ Outdated examples or configuration

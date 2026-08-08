@@ -1,17 +1,42 @@
 # Changelog
 
-## 2026.7.0-rc11
+## 2026.8.0-rc12 [UNRELEASED]
 
 ### 🙏 Thanks
 
 - Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
+- Special thanks to supporters and sponsors. With our support I was able to buy a opencode-go subscription to help me code faster and better.
 
 ### 🚨 Notes
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
 - This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
 - This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
 - ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
+
+### 💥 Breaking Changes
+
+- **Minimum Home Assistant version raised to `2026.4.0`** (previously `2025.8.0`), following the "add-on" to "app" rename in Home Assistant and the new Supervisor mount layout.
+- **Shares and map entries renamed to match the Home Assistant "app" rebranding**:
+  - Share `addons` -> `local_apps` (mounted at `/local_apps`)
+  - Share `addon_configs` -> `app_configs` (mounted at `/app_configs`)
+  - Map entries: `addons:rw` -> `local_apps:rw`, `addon_config:rw` -> `app_config:rw`, `all_addon_configs:rw` -> `all_app_configs:rw`
+
+### 🔄 Migration Notes
+
+- The `addons` and `addon_configs` shares are renamed to `local_apps` and `app_configs`, preserving their configured users and settings.
+- SMB clients connecting to the `addons` or `addon_configs` shares must use the new `local_apps` / `app_configs` names.
+- Update Home Assistant to 2026.4.0 or newer before installing this version.
+
+### 🏗 Chore
+- Update SRAT to v2026.8.0-rc12
+
+#### 🐛 Bug Fixes
+- Fix [#726](https://github.com/.../issues/726) [Samba NAS2] No way to manually mount disk
+
+## 2026.7.0-rc11
+
+### 🏗 Chore
+- Update SRAT to v2026.7.0-rc11
 
 ## 2026.6.0-rc10
 
@@ -23,19 +48,6 @@
 - New 'Lab Mode' setting in Settings → General section to enable experimental features and configurations for advanced users and testers. When enabled, this setting allows access to features that are still in development or testing phases, providing early access to new functionality while clearly indicating that these features may be unstable or subject to change.
 
 ## 2026.5.0-rc9
-
-### 🙏 Thanks
-
-- Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
-
-### 🚨 Notes
-- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
-- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
-- This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
-- ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
-- ***If you need HDIdle support don't update and wait future releases.***
-- ***If you need Avahi/mDNS support don't update and wait future releases.***
 
 ### 🏗 Chore
 - Update SRAT to v2026.5.0-rc9
