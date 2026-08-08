@@ -33,6 +33,18 @@
 #### 🐛 Bug Fixes
 - Fix [#726](https://github.com/.../issues/726) [Samba NAS2] No way to manually mount disk
 
+
+### 🐭 Features from SRAT [v2026.8.0-dev.0](https://github.com/dianlight/srat)
+
+#### ✨ Features
+
+#### 🐛 Bug Fixes
+
+- **Support disks without partitions**: Disks with no partition table (raw "superfloppy" whole-disk filesystems) and filesystems the Home Assistant Supervisor does not report are now visible and mountable. ([srat#849](https://github.com/dianlight/srat/issues/849), [hassio-addons#716](https://github.com/dianlight/hassio-addons/issues/716))
+
+#### 🏗 Chore
+
+
 ## 2026.7.0-rc11
 
 ### 🏗 Chore
