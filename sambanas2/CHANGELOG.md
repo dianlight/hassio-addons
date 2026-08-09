@@ -1,11 +1,11 @@
 # Changelog
 
-## 2026.7.0-rc11
+## 2026.8.0-rc12
 
 ### 🙏 Thanks
 
 - Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
+- Special thanks to supporters and sponsors. With our support I was able to buy a opencode-go subscription to help me code faster and better.
 
 ### 🚨 Notes
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
@@ -13,6 +13,89 @@
 - This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
 - ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
 
+### 💥 Breaking Changes
+
+- **Minimum Home Assistant version raised to `2026.4.0`** (previously `2025.8.0`), following the "add-on" to "app" rename in Home Assistant and the new Supervisor mount layout.
+- **Shares and map entries renamed to match the Home Assistant "app" rebranding**:
+  - Share `addons` -> `local_apps` (mounted at `/local_apps`)
+  - Share `addon_configs` -> `app_configs` (mounted at `/app_configs`)
+  - Map entries: `addons:rw` -> `local_apps:rw`, `addon_config:rw` -> `app_config:rw`, `all_addon_configs:rw` -> `all_app_configs:rw`
+
+### 🔄 Migration Notes
+
+- The `addons` and `addon_configs` shares are renamed to `local_apps` and `app_configs`, preserving their configured users and settings.
+- SMB clients connecting to the `addons` or `addon_configs` shares must use the new `local_apps` / `app_configs` names.
+- Update Home Assistant to 2026.4.0 or newer before installing this version.
+
+### 🏗 Chore
+- Update SRAT to v2026.8.0-rc12
+
+#### 🐛 Bug Fixes
+- Fix [#726](https://github.com/.../issues/726) [Samba NAS2] No way to manually mount disk
+
+
+### 🐭 Features from SRAT [v2026.8.0-rc12](https://github.com/dianlight/srat)
+
+#### ✨ Features
+
+- **mDNS settings simplified — master/proxy model**: `addon_mdns_registration`
+  is renamed to `mdns_registration` and becomes the **master switch** that
+  enables or disables mDNS registration entirely (no longer gated behind
+  `experimental_lab_mode`). The old `mdns_registration` is renamed to
+  `use_component_mdns_proxy` and now selects the implementation: the Home
+  Assistant custom component proxy (default) or SRAT's direct zeroconf
+  registration. The two switches are no longer mutually exclusive — the master
+  switch gates everything, and the proxy switch chooses the implementation.
+  A DB migration converts existing `addon_mdns_registration=true` installs to
+  `mdns_registration=true` + `use_component_mdns_proxy=false`.
+- **App-based shared directory migration**: legacy Supervisor directory names
+  (`addons` / `addon_configs`) are mapped to the new app-based layout
+  (`local_apps` / `app_configs`). A new `standard_share_names` setting
+  (`old` / `new` / `both`) selects which standard share names are exposed, the
+  dashboard shows a deprecation alert for old share names, and `VerifyShare`
+  marks a share unusable when its directory is missing. ([srat#898](https://github.com/dianlight/srat/issues/898))
+- **Resizable left panel on volumes page**: the volumes page left panel is now
+  drag-to-resize between 15–60 % (default 30 %) via a divider handle, with the
+  width preference persisted to `localStorage`.
+- **Visually coherent partition action icons**: `FontAwesomeSvgIcon` forwards
+  `SvgIconProps` for uniform icon sizing, and the compact-menu breakpoint was
+  widened so partition actions wrap cleanly instead of overflowing.
+
+#### 🐛 Bug Fixes
+
+- **Support disks without partitions**: Disks with no partition table (raw "superfloppy" whole-disk filesystems) and filesystems the Home Assistant Supervisor does not report are now visible and mountable. ([srat#849](https://github.com/dianlight/srat/issues/849), [hassio-addons#716](https://github.com/dianlight/hassio-addons/issues/716))
+- **Share validation and user disable corrected**: unusable shares serialize
+  `is_valid:false`, standard directories are verified first with a reachable
+  pre-exec check, invalid share data returns 422 instead of 500/201, and
+  disabling a user now persists `is_valid` while passwords are redacted.
+  ([srat#899](https://github.com/dianlight/srat/issues/899), [srat#900](https://github.com/dianlight/srat/issues/900), [srat#901](https://github.com/dianlight/srat/issues/901), [srat#902](https://github.com/dianlight/srat/issues/902), [srat#903](https://github.com/dianlight/srat/issues/903), [srat#904](https://github.com/dianlight/srat/issues/904))
+- **Partitions missing from supervisor filesystems synthesized**: a fallback
+  probe synthesizes missing child partitions from the parent disk, skipping
+  filesystems the Supervisor already reported to avoid duplicates.
+  ([srat#906](https://github.com/dianlight/srat/issues/906))
+- **Packed SMART attribute values decoded**: packed raw SMART attributes (e.g.
+  `power_on_time.hours` as 64-bit) are now decoded correctly from the smartlib
+  backend, and the top-level `smartctl` temperature takes precedence over the
+  ATA attribute health score.
+- **User API fixes**: `readOnly` / `writeOnly` auth fields are emitted for user
+  accounts, `has_default_password` is exposed for the admin user, the first-run
+  wizard validates users, and legacy standard shares stay valid in the UI.
+
+#### 🏗 Chore
+
+- **Remove addon mDNS interface selection**: addon-side mDNS now requires
+  telemetry and smart modes and no longer exposes an interface whitelist.
+- **Clean up dead UI actions** in the volumes tree view.
+- **Dependency bumps**: complete go-github v90 migration, regenerate enums with
+  goenums v0.7.0, update golang.org/x/net to v0.57.0.
+- **Build fixes**: build the smartlib musl variant dynamically and disable the
+  sanitizer in the zig musl CC step.
+
+
+## 2026.7.0-rc11
+
+### 🏗 Chore
+- Update SRAT to v2026.7.0-rc11
 
 ### 🐭 Features from SRAT [v2026.7.0-rc11](https://github.com/dianlight/srat)
 
@@ -117,19 +200,6 @@
 - New 'Lab Mode' setting in Settings → General section to enable experimental features and configurations for advanced users and testers. When enabled, this setting allows access to features that are still in development or testing phases, providing early access to new functionality while clearly indicating that these features may be unstable or subject to change.
 
 ## 2026.5.0-rc9
-
-### 🙏 Thanks
-
-- Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a copilot subscription to help me code faster and better.
-
-### 🚨 Notes
-- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
-- This version is not compatible with the previous SambaNas addon, it is a complete rewrite and refactor of the addon. It is recommended to backup your configuration before updating to this version.
-- This version is only tested with Home Assistant OS and Supervised installations. It may not work properly with Home Assistant Core or Container installations.
-- ***Your existing configuration may be lost when updating to this version. Please backup your configuration before updating.***
-- ***If you need HDIdle support don't update and wait future releases.***
-- ***If you need Avahi/mDNS support don't update and wait future releases.***
 
 ### 🏗 Chore
 - Update SRAT to v2026.5.0-rc9
