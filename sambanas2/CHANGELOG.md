@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.8.0-rc12 [UNRELEASED]
+## 2026.8.0-rc12
 
 ### 🙏 Thanks
 
