@@ -13,7 +13,7 @@ repos:
           - |
             # Get list of changed files (excluding .md files)
             changed_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(sambanas|sambanas2|plex|RPiMySensor|addon-plex)/' | grep -v '\.md$' || true)
-            
+
             if [ -n "$changed_files" ]; then
               echo "Code changes detected in projects. Please ensure documentation is updated:"
               
@@ -28,7 +28,7 @@ repos:
               done
               
               echo ""
-              echo "ℹ️  See .copilot-instructions.md for detailed guidelines"
+              echo "ℹ️  See AGENTS.md for detailed guidelines"
               echo "⚠️  Remember: Each project's documentation should be self-contained"
               echo ""
               
@@ -43,7 +43,7 @@ repos:
                 echo "$staged_md"
               fi
             fi
-        files: '^(sambanas|sambanas2|plex|RPiMySensor|addon-plex)/.*'
+        files: "^(sambanas|sambanas2|plex|RPiMySensor|addon-plex)/.*"
         exclude: '\.md$'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -62,5 +62,5 @@ repos:
     rev: v0.39.0
     hooks:
       - id: markdownlint
-        args: ['--fix']
+        args: ["--fix"]
         files: '\.md$'
