@@ -24,7 +24,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -113,7 +113,7 @@ jobs:
           done
 
       - name: Lock threads
-        uses: dessant/lock-threads@7266a7ce5c1df01b1c6db85bf8cd86c737dadbe7 # v6
+        uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c # v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           issue-inactive-days: '15'

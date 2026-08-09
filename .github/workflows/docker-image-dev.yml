@@ -29,7 +29,7 @@ jobs:
       has_scripts: ${{ steps.check_scripts.outputs.has_scripts }}
       has_image: ${{ steps.check_image.outputs.has_image }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: true
 
@@ -124,7 +124,7 @@ jobs:
 
       - name: Prepare multi-arch matrix
         id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
         with:
           architectures: ${{ steps.extract_archs.outputs.architectures }}
           image-name: ${{ steps.extract_archs.outputs.image_name }}
@@ -138,13 +138,13 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.setup.outputs.build_matrix) }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: true
           persist-credentials: false
 
       - name: Build image
-        uses: home-assistant/builder/actions/build-image@2026.03.2
+        uses: home-assistant/builder/actions/build-image@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
         with:
           arch: ${{ matrix.arch }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
@@ -166,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish multi-arch manifest
-        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@62a1597b84b3461abad9816d9cd92862a2b542c3 # 2026.03.2
         with:
           architectures: ${{ needs.setup.outputs.architectures }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
@@ -180,7 +180,7 @@ jobs:
     if: needs.setup.outputs.has_scripts == 'true' || needs.setup.outputs.has_image == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: true
 
