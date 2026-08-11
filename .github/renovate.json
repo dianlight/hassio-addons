@@ -64,6 +64,30 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "dianlight/srat",
       "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "//Dockerfile$/"
+      ],
+      "matchStrings": [
+        "SMARTMONTOOLS_SDK_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "dianlight/smartmontools-sdk",
+      "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "//Dockerfile$/"
+      ],
+      "matchStrings": [
+        "dnspython==[\"']?(?<currentValue>\\d+(?:\\.\\d+)+)[\"']?\\s"
+      ],
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "dnspython",
+      "versioningTemplate": "pep440"
     }
   ],
   "packageRules": [
