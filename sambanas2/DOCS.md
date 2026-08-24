@@ -149,11 +149,12 @@ Samba NAS2 bundles the **[smartmontools-sdk](https://github.com/dianlight/smartm
 - Unified ATA/SATA, NVMe, and SCSI/SAS device support via a single native API
 - Structured JSON output for integration with the SRAT web interface
 
-The SDK is installed at build time:
+The SDK is installed at build time from the native-core release tarball (`libsmartmon-8.0.2-pre.514-linux-<arch>-musl.tar.gz`) published on the [smartmontools-sdk releases page](https://github.com/dianlight/smartmontools-sdk/releases). The add-on tracks the SDK **dev channel** (prerelease builds), kept up to date automatically via Renovate:
 
 | Path | Contents |
 |---|---|
-| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools v7.5) |
+| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools core 8.0) |
+| `/usr/local/lib/libsmartmon_go.so` | C ABI wrapper shared library |
 | `/usr/local/include/smartmon/` | Public C++ headers |
 
 `LIBRARY_PATH` and `CPATH` environment variables are automatically exported to all container processes and interactive shells so any component linking against `libsmartmon` finds the library without manual configuration.

@@ -64,6 +64,18 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "dianlight/srat",
       "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "//Dockerfile$/"
+      ],
+      "matchStrings": [
+        "SMARTMONTOOLS_SDK_VERSION[=:]\\s*[\"']?(?<currentValue>.*?)[\"']?\\s"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "dianlight/smartmontools-sdk",
+      "versioningTemplate": "loose"
     }
   ],
   "packageRules": [
@@ -200,7 +212,8 @@
         "github-releases"
       ],
       "matchDepNames": [
-        "dianlight/srat"
+        "dianlight/srat",
+        "dianlight/smartmontools-sdk"
       ],
       "allowedVersions": ">0.0.0-0"
     }

@@ -158,9 +158,9 @@ ENV \
 # Setup base
 ARG BUILD_ARCH=amd64
 ARG HA_CLI_VERSION=5.3.1
-ARG SRAT_VERSION=2026.8.0-rc12
+ARG SRAT_VERSION=2026.8.0-rc13
 ARG SAMBA_VERSION=distribution
-ARG SMARTMONTOOLS_SDK_VERSION=7.5
+ARG SMARTMONTOOLS_SDK_VERSION=8.0.2-pre.514
 
 # Copy compiled binaries from builder stages
 #COPY --from=builder_wsdd /usr/sbin/wsdd2 /usr/sbin/
