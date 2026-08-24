@@ -64,7 +64,7 @@ The following table compares the major functionalities available in SambaNAS and
 ## Installation
 
 **Requirements:**
-- Home Assistant 2025.8.0 or newer
+- Home Assistant 2026.4.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
 - Supported architectures: ~~armv7,~~ aarch64, amd64
 
@@ -108,13 +108,15 @@ This add-on exposes the following directories over SMB (Samba):
 
 | Directory       | Description                                                              |
 | --------------- | ------------------------------------------------------------------------ |
-| `addons`        | Local add-ons storage.                                          |
+| `local_apps`   | Local apps storage.                                                      |
 | `backup`        | Home Assistant backups and snapshots.                                              |
 | `config`        | Home Assistant configuration files.                           |
-| `addon_configs` | Add-on base configuration directory.                     |
+| `app_configs`  | App base configuration directory.                                        |
 | `media`         | Local media files storage.                                           |
-| `share`         | Shared data between add-ons and Home Assistant. |
+| `share`         | Shared data between apps and Home Assistant.                             |
 | `ssl`           | SSL certificates storage.                                       |
+
+> **Note**: Following the Home Assistant "add-on" to "app" rebranding, the `addons` and `addon_configs` shares have been renamed to `local_apps` and `app_configs`. On existing installations the shares are migrated automatically, keeping their configured users and settings. SMB clients still using the old `addons` / `addon_configs` share names must be updated to the new names.
 
 ## NFS exports (🧪 Experimental, 🔌 Extra Modules on Some Boards)
 
