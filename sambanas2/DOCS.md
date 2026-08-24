@@ -23,7 +23,8 @@ The following table compares the major functionalities available in SambaNAS and
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
 | Avahi/mDNS Support                 |    ✔️     |  ❌     |
-| HA mDNS Support                 |    ❌     |  🧪 (via component)     |
+| HA mDNS Support                 |    ❌     |  ✔️     |
+| HA Native mDNS Support                 |    ❌     |  🧪 (via component)     |
 | Samba over QUIC Support            |    ❌     |  🧪 🔌   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
@@ -64,9 +65,9 @@ The following table compares the major functionalities available in SambaNAS and
 ## Installation
 
 **Requirements:**
-- Home Assistant 2026.4.0 or newer
+- Home Assistant 2026.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
-- Supported architectures: ~~armv7,~~ aarch64, amd64
+- Supported architectures: aarch64, amd64
 
 Follow these steps to get the add-on installed on your system:
 
@@ -151,7 +152,7 @@ Samba NAS2 bundles the **[smartmontools-sdk](https://github.com/dianlight/smartm
 - Unified ATA/SATA, NVMe, and SCSI/SAS device support via a single native API
 - Structured JSON output for integration with the SRAT web interface
 
-The SDK is installed at build time from the native-core release tarball (`libsmartmon-8.0.2-pre.514-linux-<arch>-musl.tar.gz`) published on the [smartmontools-sdk releases page](https://github.com/dianlight/smartmontools-sdk/releases). The add-on tracks the SDK **dev channel** (prerelease builds), kept up to date automatically via Renovate:
+The SDK is installed at build time from the native-core release tarball (`libsmartmon-<version>-linux-<arch>-musl.tar.gz`) published on the [smartmontools-sdk releases page](https://github.com/dianlight/smartmontools-sdk/releases). The add-on tracks the SDK **dev channel** (prerelease builds), kept up to date automatically via Renovate:
 
 | Path | Contents |
 |---|---|
