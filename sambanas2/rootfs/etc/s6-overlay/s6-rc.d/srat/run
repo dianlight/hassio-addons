@@ -55,5 +55,11 @@ if bashio::config.true 'disable_ipv6'; then
   fi
 fi
 
-exec /usr/local/bin/srat-server \
-  ${SRAT_ARGS}
+# Detect best binary variant for this system
+if [ -x /usr/local/bin/srat-server-musl ] && [ -f /lib/ld-musl-*.so.* ]; then
+  exec /usr/local/bin/srat-server-musl ${SRAT_ARGS}
+elif [ -x /usr/local/bin/srat-server-glib ] && [ -f /lib64/ld-linux-*.so.* ]; then
+  exec /usr/local/bin/srat-server-glib ${SRAT_ARGS}
+else
+  exec /usr/local/bin/srat-server ${SRAT_ARGS}
+fi

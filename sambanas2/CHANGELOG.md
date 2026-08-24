@@ -2,6 +2,11 @@
 
 ## 2026.8.0-rc13
 
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+- Special thanks to supporters and sponsors. With our support I was able to buy an opencode-go subscription to help me code faster and better.
+
 ### 🚨 Notes
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
 
@@ -10,12 +15,11 @@
 - Track the smartmontools-sdk **dev channel**: pin the latest prerelease build `v8.0.2-pre.514` instead of the stable `v8.0.x` line.
 - Add a Renovate custom manager for `SMARTMONTOOLS_SDK_VERSION` so dependency updates are proposed automatically, with prereleases allowed for `dianlight/smartmontools-sdk`.
 
+#### 🐛 Bug Fixes
+- Fix [#729](https://github.com/dianlight/hassio-addons/issues/729) 🐛 [SAMBA NAS2 - beta] Failing to load - Nil pointer in hardwareService
+- Fix [#727](https://github.com/dianlight/hassio-addons/issues/727) ❓ [addon] Upgrade from version 1
+
 ## 2026.8.0-rc12
-
-### 🙏 Thanks
-
-- Thanks to all the contributors and users that help to make this addon better.
-- Special thanks to supporters and sponsors. With our support I was able to buy a opencode-go subscription to help me code faster and better.
 
 ### 🚨 Notes
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
