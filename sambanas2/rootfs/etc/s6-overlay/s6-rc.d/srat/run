@@ -11,12 +11,17 @@ trap 'bashio::log.error "srat/run failed at line ${BASH_LINENO[0]} (exit code: $
 export HOSTNAME
 export ADDON_VERSION=$(bashio::app.version)
 
-# Hosted OAuth broker for the rclone cloud-sync lab feature (issue #954):
-# empty option keeps the variable unset so SRAT falls back to custom-app auth.
-if ! bashio::var.is_empty "$(bashio::config 'srat_oauth_broker_url' '')"; then
-  export SRAT_OAUTH_BROKER_URL="$(bashio::config 'srat_oauth_broker_url')"
-  bashio::log.info "SRAT OAuth broker enabled: ${SRAT_OAUTH_BROKER_URL}"
-fi
+# Hosted OAuth broker for the rclone cloud-sync lab feature (issue #954).
+# Exported unconditionally so resolution is centralized in SRAT:
+#   empty  ≡ unset → SRAT's baked-in default applies
+#   "off"          → hosted flow explicitly disabled
+#   value          → overrides the default
+export SRAT_OAUTH_BROKER_URL="$(bashio::config 'srat_oauth_broker_url' '')"
+case "${SRAT_OAUTH_BROKER_URL,,}" in
+  "") ;;
+  off) bashio::log.info "SRAT OAuth broker disabled via sentinel" ;;
+  *) bashio::log.info "SRAT OAuth broker override active" ;;
+esac
 
 ipaddress=$(bashio::app.ip_address)
 
