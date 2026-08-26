@@ -29,7 +29,7 @@ ensure_nfsd_available() {
   has_nfsd_support
 }
 
-if [ "$(bashio::addon.protected)" == "true" ]; then 
+if [ "$(bashio::app.protected)" == "true" ]; then 
   bashio::log.warning "Protected mode does not provide NFS server support; removing nfs-utils and skipping NFS setup."
 
   if apk info -e nfs-utils >/dev/null 2>&1; then

@@ -53,12 +53,12 @@ if bashio::config.true 'factory_reset'; then
   
   # Set clean_upgrade_dir to true so check-srat-update will clean it
   bashio::log.info "Setting clean_upgrade_dir to true for upgrade directory cleanup..."
-  bashio::addon.option 'clean_upgrade_dir' true || \
+  bashio::app.option 'clean_upgrade_dir' true || \
     bashio::log.warning "Could not set clean_upgrade_dir to true"
   
   # Reset factory_reset flag to false
   bashio::log.info "Resetting factory_reset flag to false..."
-  bashio::addon.option 'factory_reset' false || \
+  bashio::app.option 'factory_reset' false || \
     bashio::log.warning "Could not reset factory_reset to false"
   
   bashio::log.blue  "╔══════════════════════════════════════════════════════════════════════════════╗"

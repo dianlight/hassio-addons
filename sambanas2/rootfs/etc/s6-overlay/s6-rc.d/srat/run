@@ -9,9 +9,9 @@ exec 2>&1
 trap 'bashio::log.error "srat/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 export HOSTNAME
-export ADDON_VERSION=$(bashio::addon.version)
+export ADDON_VERSION=$(bashio::app.version)
 
-ipaddress=$(bashio::addon.ip_address)
+ipaddress=$(bashio::app.ip_address)
 
 #bashio::log.info "Wait Samba Server to going up..(max 60s)"
 #bashio::net.wait_for 445 ${ipaddress/\/*/} 60
@@ -24,8 +24,8 @@ if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
 fi
 bashio::log.debug "Hostname: ${HOSTNAME} Addon Version: ${ADDON_VERSION}"
 
-SRAT_ARGS="-port $(bashio::addon.ingress_port) \
-  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
+SRAT_ARGS="-port $(bashio::app.ingress_port) \
+  $(if [[ "$(bashio::app.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
   $(bashio::config.true 'leave_front_door_open' || echo " -addon") \
   -db /config/config.db3 \
   -out /etc/samba/smb.conf \
@@ -33,7 +33,7 @@ SRAT_ARGS="-port $(bashio::addon.ingress_port) \
   -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')" \
   -loglevel $(bashio::config 'log_level' 'info') \
   -update-channel $(bashio::config 'srat_update_channel' 'none') \
-  -ip-address $(bashio::addon.ip_address) \
+  -ip-address $(bashio::app.ip_address) \
   -upgrade-data-dir $(bashio::config.equals 'srat_update_channel' 'develop' && echo '/config/upgrade' || echo '/data/upgrade')"
 
 # Check if --auto-update flag is supported and add it if auto_update is true
