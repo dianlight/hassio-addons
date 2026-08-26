@@ -175,6 +175,7 @@ disable_ipv6: true
 leave_front_door_open: false
 factory_reset: false
 use_external_kernel_modules: false
+srat_oauth_broker_url: ""
 ```
 
 **Note**: All configuration options are optional. Only specify options when you want to change the default value.
@@ -276,6 +277,22 @@ It does not grant guest access to SMB shares. Access to your Samba shares contin
 ⚠️ **Security Warning**: Enabling this option exposes the administration UI without login. Anyone on your network could change settings, manage users, and modify shares. Enable only on trusted, isolated networks and only if you fully understand the risk.
 
 Defaults to `false` (authentication required for SRAT).
+
+### Option: `srat_oauth_broker_url` (optional) 🧪 _Experimental_
+
+Base URL of the hosted SRAT OAuth broker used by the **Cloud Sync lab feature**
+(Volumes → Cloud Link). The value is passed through to the SRAT binary as-is,
+which resolves it as follows:
+
+- **empty / unset** (default): SRAT falls back to the broker URL baked into
+  its release build — if none was baked in, the hosted flow stays disabled.
+- **`off`**: forces the hosted flow off even when a default is compiled in.
+- **any other value** (e.g. `https://oauth.example.com`): overrides the
+  default. When a working broker URL is in effect, the SRAT web UI offers
+  *"Hosted SRAT OAuth"* in the link wizard's Authorization selector, letting
+  users connect a cloud account without creating their own provider app.
+
+Defaults to `""` (use the SRAT build-time default).
 
 ### Option: `use_external_kernel_modules` (optional) ⚠️ 🧪🔌 _Experimental / Extra Modules_ — _Advanced Users Only_
 
