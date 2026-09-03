@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.2
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.4
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -6,7 +6,7 @@ ARG BUILD_REF=""
 ARG BUILD_REPOSITORY="dianlight/hassio-addons"
 ARG BUILD_VERSION=""
 ARG SAMBA_VERSION=distribution
-ARG HA_CLI_VERSION=5.3.1
+ARG HA_CLI_VERSION=5.5.0
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
@@ -157,7 +157,7 @@ ENV \
 
 # Setup base
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION=5.3.1
+ARG HA_CLI_VERSION=5.5.0
 ARG SRAT_VERSION=2026.8.0-rc13
 ARG SAMBA_VERSION=distribution
 ARG SMARTMONTOOLS_SDK_VERSION=8.0.2-pre.514
