@@ -5,6 +5,36 @@
 ### 🐛 Bug Fixes
 - Fix Docker dev build failure (`libcrypto3`/`libssl3` 3.5.7 vs `openssl` 3.5.8 conflict) by running `apk upgrade --no-cache` before `apk add` in the Samba install stage and builder stages.
 
+
+### 🐭 Features from SRAT [v2026.9.0-rc14](https://github.com/dianlight/srat)
+
+#### ✨ Features
+
+- **Lab feature registry with maturity tiers**: lab-gated features now flow
+  through a central registry (`GET /api/lab_features`) that assigns each feature
+  an alpha or beta tier and computes availability server-side. Beta features are
+  visible whenever `experimental_lab_mode` is enabled in any build; alpha
+  features (currently the Home Assistant custom-component tools) are exposed
+  only in development and prerelease builds and are unreachable in release
+  builds even with Lab Mode on — enforcement is server-side only, so no
+  frontend environment logic is needed for correctness. The frontend gates
+  lab-gated surfaces — for example the NavBar smb.conf tab, HDIdle badge and
+  disk metrics, HA custom-component panel, NetworkDevicesPanel, SMB over QUIC
+  and add-on mDNS registration — through a single `useLabFeatures()` hook, and
+  HDIdle's `useLabMode()` is now a thin wrapper over it.
+
+#### 🐛 Bug Fixes
+
+- **Colon mount paths rejected with a suggested retry**: mount point paths
+  containing `:` are now rejected up front by a shared `ValidateMountPointPath`
+  check (used by both the DB layer and the volume service) instead of failing
+  later with an obscure error. The 406 response carries a `SuggestedPath` hint
+  with the colon stripped, and the UI confirm dialog offers a one-click retry
+  with the suggested path.
+
+#### 🏗 Chore
+
+
 ## 2026.9.0-rc14
 
 ### 🙏 Thanks
