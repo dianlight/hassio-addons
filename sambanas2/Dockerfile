@@ -21,7 +21,8 @@ RUN mkdir -p /usr/local/quic
 
 # Install QUIC build dependencies only if we need to compile Samba with QUIC support
 RUN if [ "$SAMBA_VERSION" != "distribution" ]; then \
-    apk add --no-cache \
+    apk upgrade --no-cache \
+    && apk add --no-cache \
     build-base \
     cmake \
     git \
@@ -58,7 +59,8 @@ RUN mkdir -p /usr/local/samba
 
 # Install Samba build dependencies only if we need to compile Samba
 RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ "$SAMBA_VERSION" != "edge" ]; then \
-    apk add --no-cache \
+    apk upgrade --no-cache \
+    && apk add --no-cache \
     build-base \
     python3-dev \
     talloc-dev \
@@ -168,7 +170,9 @@ COPY --from=quic_builder /usr/local/quic/ /usr/local/quic/
 COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
 
 # Install Samba - either from distribution packages or use compiled binaries
-RUN if [ "$SAMBA_VERSION" = "distribution" ]; then \
+# Upgrade base first to avoid libssl3/libcrypto3 vs openssl version skew
+RUN apk upgrade --no-cache \
+    && if [ "$SAMBA_VERSION" = "distribution" ]; then \
     apk add --no-cache \
     samba-common-tools \
     samba-server \

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### 🐛 Bug Fixes
+- Fix Docker dev build failure (`libcrypto3`/`libssl3` 3.5.7 vs `openssl` 3.5.8 conflict) by running `apk upgrade --no-cache` before `apk add` in the Samba install stage and builder stages.
+
 ## 2026.9.0-rc14
 
 ### 🙏 Thanks
