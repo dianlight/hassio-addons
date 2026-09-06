@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.8.0-rc13
+## 2026.9.0-rc14
 
 ### 🙏 Thanks
 
@@ -9,6 +9,11 @@
 
 ### 🚨 Notes
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+
+### 🐛 Bug Fixes
+- Improved hardware service stability
+
+## 2026.8.0-rc13
 
 ### 🏗 Chore
 - Update [smartmontools-sdk](https://github.com/dianlight/smartmontools-sdk) to the new monorepo layout and release model: the SDK now ships as native-core releases (version scheme `v<AC_INIT>.<N>`), replacing the retired standalone `v7.5` tag. The release tarball additionally includes the `libsmartmon_go.so` C ABI wrapper shared library.
