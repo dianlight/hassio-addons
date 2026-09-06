@@ -76,6 +76,18 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "dianlight/smartmontools-sdk",
       "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "//Dockerfile$/"
+      ],
+      "matchStrings": [
+        "dnspython==[\"']?(?<currentValue>\\d+(?:\\.\\d+)+)[\"']?\\s"
+      ],
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "dnspython",
+      "versioningTemplate": "pep440"
     }
   ],
   "packageRules": [
@@ -96,6 +108,7 @@
     {
       "matchBaseBranches": "devrelease/sambanas",
       "matchFileNames": [
+        ".devcontainer/**",
         ".github/**",
         "sambanas2/**",
         "besim/**",
@@ -108,6 +121,7 @@
     {
       "matchBaseBranches": "devrelease/sambanas2",
       "matchFileNames": [
+        ".devcontainer/**",
         ".github/**",
         "sambanas/**",
         "besim/**",
@@ -120,6 +134,7 @@
     {
       "matchBaseBranches": "devrelease/besim",
       "matchFileNames": [
+        ".devcontainer/**",
         ".github/**",
         "sambanas2/**",
         "sambanas/**",
@@ -153,6 +168,7 @@
     {
       "matchBaseBranches": "devrelease/plex",
       "matchFileNames": [
+        ".devcontainer/**",        
         ".github/**",
         "sambanas/**",
         "sambanas2/**",
@@ -172,6 +188,7 @@
     {
       "matchBaseBranches": "devrelease/RPiMySensor",
       "matchFileNames": [
+        ".devcontainer/**",
         ".github/**",
         "sambanas/**",
         "sambanas2/**",
@@ -191,6 +208,7 @@
     {
       "matchBaseBranches": "devrelease/addon-plex",
       "matchFileNames": [
+        ".devcontainer/**",        
         ".github/**",
         "sambanas/**",
         "sambanas2/**",

@@ -17,7 +17,7 @@ jobs:
       # Output BR_PROJECT and CURRENT_BRANCH_NAME if they were needed by the next job and not easily re-derivable.
       # For this specific split, the next job can re-derive GITHUB_REF or use github.head_ref.
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: true
 
@@ -271,7 +271,7 @@ jobs:
     needs: create_beta_pr
     if: needs.create_beta_pr.outputs.ORIGINAL_NAME_IS_PLAIN == 'true'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: true # Match original top-level checkout for consistency
 
