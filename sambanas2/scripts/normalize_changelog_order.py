@@ -9,6 +9,8 @@ to the top of the first versioned (non-Unreleased) release.
 - Idempotent: exits 0 with "unchanged" when already ordered.
 
 Usage: normalize_changelog_order.py [CHANGELOG.md]
+When no path is given, defaults to the CHANGELOG.md next to this script's
+addon directory (so CI can run it from the repo root via its shebang).
 """
 import re
 import sys
@@ -78,4 +80,8 @@ def main(path):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "CHANGELOG.md"))
+    if len(sys.argv) > 1:
+        default = sys.argv[1]
+    else:
+        default = str(Path(__file__).resolve().parent.parent / "CHANGELOG.md")
+    sys.exit(main(default))
