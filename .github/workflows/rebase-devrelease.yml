@@ -1,0 +1,170 @@
+name: Rebase devrelease branches
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target devrelease branch (e.g. devrelease/sambanas2). Empty = all devrelease/* branches."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover:
+    name: Discover targets
+    # push and workflow_dispatch always run; closed PRs only when merged
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.resolve.outputs.source }}
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - name: Resolve source branch and target matrix
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MANUAL_TARGET: ${{ inputs.target }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SOURCE="${DEFAULT_BRANCH:-master}"
+          echo "Source branch: ${SOURCE}"
+          echo "source=${SOURCE}" >> "$GITHUB_OUTPUT"
+
+          if [ -n "${MANUAL_TARGET}" ]; then
+            case "${MANUAL_TARGET}" in
+              devrelease/*) ;;
+              *)
+                echo "::error::target must start with 'devrelease/' (got '${MANUAL_TARGET}')"
+                exit 1
+                ;;
+            esac
+            # Verify the branch exists (API needs slashes encoded)
+            ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "${MANUAL_TARGET}")
+            if ! gh api "repos/${{ github.repository }}/branches/${ENCODED}" --silent --jq '.name' >/dev/null; then
+              echo "::error::branch '${MANUAL_TARGET}' does not exist"
+              exit 1
+            fi
+            MATRIX=$(jq -cn --arg b "${MANUAL_TARGET}" '[$b]')
+          else
+            BRANCHES=$(gh api "repos/${{ github.repository }}/branches?per_page=100" --paginate \
+              --jq '[.[].name | select(startswith("devrelease/"))] | unique | sort | .[]' || true)
+            if [ -z "${BRANCHES}" ]; then
+              echo "No devrelease/* branches found."
+              MATRIX="[]"
+            else
+              MATRIX=$(printf '%s\n' "${BRANCHES}" | jq -R . | jq -cs '.')
+            fi
+          fi
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          echo "Targets: ${MATRIX}"
+
+  rebase:
+    name: Rebase ${{ matrix.branch }}
+    needs: discover
+    if: needs.discover.outputs.matrix != '' && needs.discover.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: rebase-${{ matrix.branch }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    env:
+      SOURCE_BRANCH: ${{ needs.discover.outputs.source }}
+      TARGET_BRANCH: ${{ matrix.branch }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Rebase onto source, or open fallback PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          echo "Fetching all branches..."
+          git fetch origin --prune
+
+          echo "Source: origin/${SOURCE_BRANCH}"
+          echo "Target: origin/${TARGET_BRANCH}"
+
+          git checkout "${TARGET_BRANCH}"
+          git reset --hard "origin/${TARGET_BRANCH}"
+
+          # Nothing to do when target already contains source
+          if git merge-base --is-ancestor "origin/${SOURCE_BRANCH}" HEAD; then
+            echo "'${TARGET_BRANCH}' already contains 'origin/${SOURCE_BRANCH}'. Nothing to do."
+            exit 0
+          fi
+
+          echo "Attempting: git rebase origin/${SOURCE_BRANCH}"
+          if git rebase "origin/${SOURCE_BRANCH}"; then
+            echo "Rebase succeeded, pushing with lease..."
+            git push --force-with-lease origin "${TARGET_BRANCH}"
+            echo "Pushed rebased '${TARGET_BRANCH}'."
+            exit 0
+          fi
+
+          echo "::warning::Rebase of '${TARGET_BRANCH}' onto 'origin/${SOURCE_BRANCH}' failed with conflicts."
+          git rebase --abort || true
+
+          echo "Checking for an existing open PR ${SOURCE_BRANCH} -> ${TARGET_BRANCH}..."
+          EXISTING=$(gh pr list \
+            --base "${TARGET_BRANCH}" \
+            --head "${SOURCE_BRANCH}" \
+            --state open \
+            --json number,url \
+            --jq 'length')
+
+          if [ "${EXISTING}" -gt 0 ]; then
+            gh pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --state open
+            echo "::notice::Open sync PR already exists for '${TARGET_BRANCH}'. Skipping creation."
+            exit 1
+          fi
+
+          echo "Creating fallback PR ${SOURCE_BRANCH} -> ${TARGET_BRANCH}..."
+          gh pr create \
+            --base "${TARGET_BRANCH}" \
+            --head "${SOURCE_BRANCH}" \
+            --title "Sync ${SOURCE_BRANCH} into ${TARGET_BRANCH} (rebase conflict)" \
+            --body "Automatic rebase of \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` failed with conflicts (trigger: ${{ github.event_name }}, run ${{ github.run_id }}).
+
+          Please resolve manually:
+
+          \`\`\`bash
+          git fetch origin
+          git checkout ${TARGET_BRANCH}
+          git rebase origin/${SOURCE_BRANCH}
+          # resolve conflicts, then:
+          git rebase --continue
+          git push --force-with-lease origin ${TARGET_BRANCH}
+          \`\`\`
+
+          Alternatively merge this PR from the GitHub UI to sync without rebasing."
+
+          echo "::error::Rebase conflict — fallback PR created from '${SOURCE_BRANCH}' to '${TARGET_BRANCH}'."
+          exit 1
