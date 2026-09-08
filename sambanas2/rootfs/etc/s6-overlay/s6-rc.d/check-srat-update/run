@@ -9,29 +9,29 @@ exec 2>&1
 trap 'bashio::log.error "check-srat-update/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
 export HOSTNAME
-export ADDON_VERSION=$(bashio::addon.version)
+export ADDON_VERSION=$(bashio::app.version)
 
 # Extract version from .note.metadata using objdump
 extract_version_from_binary() {
   local bin="$1"
   local ver
   local meta_line extracted_json
-  
+
   # Try strings method first
   if command -v strings >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     meta_line=$(strings -a "${bin}" | grep -oE 'SRAT_METADATA:\{[^}]*\}' | head -1)
-    
+
     if [ -n "${meta_line}" ]; then
       extracted_json=$(echo "${meta_line}" | grep -oE '\{[^}]+\}') || true
       ver=$(echo "${extracted_json}" | jq -r '.version' 2>/dev/null)
-      
+
       if [ -n "${ver}" ] && [ "${ver}" != "null" ]; then
         echo "${ver}"
         return 0
       fi
     fi
   fi
-  
+
   # Fallback to readelf method
   if command -v readelf >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     ver=$(readelf -p .note.metadata "${bin}" 2>/dev/null | grep -o '{"version":.*}' | jq .version -r 2>/dev/null)
@@ -40,7 +40,7 @@ extract_version_from_binary() {
       return 0
     fi
   fi
-  
+
   return 1
 }
 
@@ -135,9 +135,9 @@ if bashio::config.true 'clean_upgrade_dir'; then
     bashio::log.info "Upgrade directory does not exist, creating it"
     mkdir -p /data/upgrade
   fi
-  
+
   # Reset the config to false
-  bashio::addon.option 'clean_upgrade_dir' false || \
+  bashio::app.option 'clean_upgrade_dir' false || \
     bashio::log.warning "Could not reset clean_upgrade_dir to false"
 fi
 
