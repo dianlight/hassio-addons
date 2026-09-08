@@ -55,7 +55,8 @@ jobs:
             
             # Check if any .md files in the project were modified
             md_files_changed=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | grep "^$project/.*\.md$" || true)
-            
+            changelog_changed=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | grep "^$project/CHANGELOG.md$" || true)
+
             if [ -z "$md_files_changed" ]; then
               echo "❌ ERROR: Changes detected in $project but no .md files were updated!"
               echo "Please update the following files as needed:"
@@ -66,6 +67,11 @@ jobs:
             else
               echo "✅ Documentation files updated for $project:"
               echo "$md_files_changed"
+              if [ -z "$changelog_changed" ]; then
+                echo "⚠️ WARNING: $project/CHANGELOG.md was not updated in this PR."
+                echo "   The opencode-changelog workflow maintains ## Unreleased automatically,"
+                echo "   but verify the entry exists before merging."
+              fi
             fi
           done
 

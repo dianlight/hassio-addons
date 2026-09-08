@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 🏗 Chore
+- Automated `CHANGELOG.md` maintenance: new `opencode-changelog` workflow (no `/oc` commands) resolves the model via `dianlight/opencode-modelselect-action` (`docs`/`auto`, `OPENCODE_API_KEY`), syncs the `🐭 Features from SRAT` section deterministically and curates user-important entries per `sambanas2/.changelog-style.md`. `devrelease` keeps `## Unreleased`; `mergerelease` strips it and bumps beta (`PATCH+1`, calendar rollover in October); `prerelease` is created only for new versions (Us2/Us3).
+- Fix `docker-image-pr` version check to skip `## Unreleased` when comparing `config.yaml` with the changelog head.
+
 ### 🐛 Bug Fixes
 - Fix Docker dev build failure (`libcrypto3`/`libssl3` 3.5.7 vs `openssl` 3.5.8 conflict) by running `apk upgrade --no-cache` before `apk add` in the Samba install stage and builder stages.
 

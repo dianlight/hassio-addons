@@ -1,0 +1,85 @@
+name: OpenCode Changelog (sambanas2)
+
+# No /oc text commands. Automatic only: push + pull_request + manual dispatch.
+# Model is resolved via dianlight/opencode-modelselect-action (task-type: docs).
+# Auth uses OPENCODE_API_KEY (never ANTHROPIC_API_KEY).
+
+on:
+  push:
+    branches:
+      - devrelease/*
+      - mergerelease/*
+    paths:
+      - sambanas2/**
+  pull_request:
+    paths:
+      - sambanas2/**
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "maintain (default) or strip-unreleased (mergerelease/beta sync)"
+        required: false
+        default: maintain
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          submodules: true
+
+      - name: Sync SRAT section (deterministic base)
+        working-directory: sambanas2
+        shell: bash
+        run: |
+          if [ -f scripts/update_srat_changelog.sh ]; then
+            bash scripts/update_srat_changelog.sh || echo "::warning::SRAT changelog sync failed, continuing with AI curation only"
+          fi
+
+      - name: Select model
+        id: resolve
+        uses: dianlight/opencode-modelselect-action@v1
+        with:
+          task-type: docs
+          tier: auto
+          opencode-token: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Maintain CHANGELOG.md
+        # mergerelease/* is deterministic-only (strip ## Unreleased already done
+        # in docker-image-dev): never re-add Unreleased there, and avoid push loops.
+        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/')
+        # Pinned to a moving tag for bootstrap; pin to a reviewed SHA after first green run.
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ steps.resolve.outputs.model }}
+          use_github_token: true
+          prompt: |
+            Maintain ONLY sambanas2/CHANGELOG.md ## Unreleased per sambanas2/.changelog-style.md
+            (emoji sections, RC versions, no dates; config.yaml:version is source of truth).
+
+            Steps:
+            1. Diff origin/master...HEAD scoped to sambanas2/ (features, fixes, chores, breaking, migration notes).
+            2. SRAT ### 🐭 section was already synced deterministically; only curate it:
+               keep user-important breaking/features/fixes, drop internal churn, Thanks/Roadmap noise, duplicates.
+            3. Version rules (C=config.yaml:version, H=first ## != Unreleased):
+               - C==H: append to ## Unreleased only (Us1/Us4). Never bump versions here.
+               - C not in file + Unreleased non-empty: promote Unreleased -> ## C, leave new empty ## Unreleased (Us2/Us3).
+               - C in older ##: no duplication; ensure ## Unreleased exists.
+               - Never create -beta/-dev headers here; never add/remove ## Unreleased in a way that leaves two heads.
+               - This step never runs on mergerelease/* (skipped by job condition);
+                 Unreleased stripping there is deterministic (S2 = S1 minus U).
+               - Commit back to the same branch when on push/workflow_dispatch; on pull_request, commit only if the head repo is this repo, else post the ready-to-paste entry as a PR comment.
+            4. Keep it concise and user-facing. Do not touch config.yaml, Dockerfile, or translations.
