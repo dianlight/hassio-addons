@@ -20,7 +20,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  issues: write
 
 jobs:
   discover:
@@ -114,7 +114,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Rebase onto source, or open fallback PR
+      - name: Rebase onto source, or open fallback issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -150,39 +150,49 @@ jobs:
           echo "::warning::Rebase of '${TARGET_BRANCH}' onto 'origin/${SOURCE_BRANCH}' failed with conflicts."
           git rebase --abort || true
 
-          echo "Checking for an existing open PR ${SOURCE_BRANCH} -> ${TARGET_BRANCH}..."
-          EXISTING=$(gh pr list \
-            --base "${TARGET_BRANCH}" \
-            --head "${SOURCE_BRANCH}" \
+          ISSUE_TITLE="Rebase conflict: ${TARGET_BRANCH} needs manual sync with ${SOURCE_BRANCH}"
+          LABEL="rebase-conflict"
+
+          echo "Ensuring label '${LABEL}' exists..."
+          gh label create "${LABEL}" \
+            --description "Automatic rebase of a devrelease branch failed with conflicts" \
+            --color "D93F0B" 2>/dev/null || true
+
+          echo "Checking for an existing open issue '${ISSUE_TITLE}'..."
+          EXISTING=$(gh issue list \
+            --label "${LABEL}" \
             --state open \
+            --search "${ISSUE_TITLE} in:title" \
             --json number,url \
             --jq 'length')
 
           if [ "${EXISTING}" -gt 0 ]; then
-            gh pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --state open
-            echo "::notice::Open sync PR already exists for '${TARGET_BRANCH}'. Skipping creation."
+            gh issue list --label "${LABEL}" --state open --search "${ISSUE_TITLE} in:title"
+            echo "::notice::Open sync issue already exists for '${TARGET_BRANCH}'. Skipping creation."
             exit 1
           fi
 
-          echo "Creating fallback PR ${SOURCE_BRANCH} -> ${TARGET_BRANCH}..."
-          gh pr create \
-            --base "${TARGET_BRANCH}" \
-            --head "${SOURCE_BRANCH}" \
-            --title "Sync ${SOURCE_BRANCH} into ${TARGET_BRANCH} (rebase conflict)" \
-            --body "Automatic rebase of \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` failed with conflicts (trigger: ${{ github.event_name }}, run ${{ github.run_id }}).
+          echo "Creating fallback issue for '${TARGET_BRANCH}'..."
+          SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
+          gh issue create \
+            --title "${ISSUE_TITLE}" \
+            --label "${LABEL}" \
+            --body "Automatic rebase of \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` (\`${SOURCE_SHA}\`) failed with conflicts (trigger: ${{ github.event_name }}, run ${{ github.run_id }}: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
-          Please resolve manually:
+          Only \`${TARGET_BRANCH}\` needs fixing — \`${SOURCE_BRANCH}\` is untouched.
+
+          Please resolve manually on the \`${TARGET_BRANCH}\` branch:
 
           \`\`\`bash
           git fetch origin
           git checkout ${TARGET_BRANCH}
           git rebase origin/${SOURCE_BRANCH}
-          # resolve conflicts, then:
+          # resolve conflicts, keeping the devrelease-specific changes, then:
           git rebase --continue
           git push --force-with-lease origin ${TARGET_BRANCH}
           \`\`\`
 
-          Alternatively merge this PR from the GitHub UI to sync without rebasing."
+          This issue can be closed once \`${TARGET_BRANCH}\` contains \`origin/${SOURCE_BRANCH}\`."
 
-          echo "::error::Rebase conflict — fallback PR created from '${SOURCE_BRANCH}' to '${TARGET_BRANCH}'."
+          echo "::error::Rebase conflict — fallback issue created for '${TARGET_BRANCH}'."
           exit 1
