@@ -65,7 +65,7 @@ jobs:
             esac
             # Verify the branch exists (API needs slashes encoded)
             ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "${MANUAL_TARGET}")
-            if ! gh api "repos/${{ github.repository }}/branches/${ENCODED}" --silent --jq '.name' >/dev/null; then
+            if ! gh api "repos/${{ github.repository }}/branches/${ENCODED}" --jq '.name' >/dev/null; then
               echo "::error::branch '${MANUAL_TARGET}' does not exist"
               exit 1
             fi
