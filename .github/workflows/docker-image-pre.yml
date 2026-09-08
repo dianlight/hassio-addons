@@ -21,6 +21,12 @@ jobs:
         with:
           submodules: true
 
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.API_TOKEN_GITHUB }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
       - name: Extract branch name
         shell: bash
         run: |

@@ -45,6 +45,14 @@ jobs:
           persist-credentials: true
           submodules: true
 
+      # Defense in depth: secrets.* are auto-masked, but an explicit mask also
+      # covers failure dumps (e.g. a crashing tool printing its environment).
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.OPENCODE_API_KEY }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
       - name: Fetch SRAT changelog for AI curation
         working-directory: sambanas2
         shell: bash
@@ -142,6 +150,12 @@ jobs:
           persist-credentials: true
           submodules: true
 
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.OPENCODE_API_KEY }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
       - name: Fetch SRAT changelog for AI curation
         working-directory: sambanas2
         shell: bash
@@ -171,6 +185,8 @@ jobs:
         with:
           model: ${{ steps.resolve.outputs.model }}
           use_github_token: true
+          # Never upload the session transcript anywhere (public repos default to share).
+          share: false
           prompt: |
             Maintain ONLY sambanas2/CHANGELOG.md ## Unreleased per sambanas2/.changelog-style.md
             (emoji sections, RC versions, no dates; config.yaml:version is source of truth).
