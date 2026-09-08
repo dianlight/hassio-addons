@@ -102,7 +102,7 @@ jobs:
               exit 1
             fi
 
-            CHANGELOG_VERSION_LINE=$(grep '^## ' "$CHANGELOG_FILE_PATH" | grep -v -i unreleased | head -n1)
+            CHANGELOG_VERSION_LINE=$(grep -m 1 '^## ' "$CHANGELOG_FILE_PATH")
             if [ -z "$CHANGELOG_VERSION_LINE" ]; then
               echo "Error: No version line found in $CHANGELOG_FILE_PATH (expected a line starting with '## ' like '## 1.2.3')."
               exit 1

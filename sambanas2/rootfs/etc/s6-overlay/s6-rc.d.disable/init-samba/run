@@ -1,0 +1,99 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Prepare the Samba service for running
+# ==============================================================================
+declare password
+declare username
+declare -a interfaces=()
+export HOSTNAME
+
+# Check Login data
+bashio::config.require 'username'
+bashio::config.require 'password'
+
+# Read hostname from API or setting default "hassio"
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+    bashio::log.warning "Can't read hostname, using default."
+    HOSTNAME="homeassistant"
+fi
+bashio::log.info "Hostname: ${HOSTNAME}"
+
+if bashio::config.has_value 'interfaces'; then
+    bashio::log.debug "Interfaces from config: $(bashio::config 'interfaces')"
+    for interface in $(bashio::config 'interfaces'); do
+        if [ -d "/sys/class/net/${interface}" ]; then
+            interfaces+=("${interface}")
+        else
+            bashio::log.warning "Interface ${interface} not found, skipping."
+        fi
+    done
+else
+    # Get supported interfaces
+    for interface in $(bashio::network.interfaces); do
+        interfaces+=("${interface}")
+    done
+fi
+
+if [ ${#interfaces[@]} -eq 0 ]; then
+    bashio::exit.nok 'No supported interfaces found to bind on.'
+fi
+bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
+bashio::log.info "Docker Interface: $(bashio::network 'network.info.docker.inerface' '.docker.interface') $(bashio::network 'network.info.docker.network' '.docker.address')"
+
+# Generate Samba configuration.
+touch /tmp/local_mount
+if [[ ! -e /tmp/local_mount.json ]]; then
+    echo "{}" >/tmp/local_mount.json
+fi
+
+jq ".shares = $(jq -c </tmp/local_mount.json) | .interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") | .docker_interface = \"$(bashio::network 'network.info.docker.inerface' '.docker.interface')\" | .docker_net = \"$(bashio::network 'network.info.docker.network' '.docker.address')\" | .moredisks = $(jq -R -s -c 'split("\n") | map(select(length > 0)) | [ .[] | ltrimstr("/") ]' </tmp/local_mount) " /data/options.json |
+    tee /config/bootconfig.json |
+    tempio \
+        -template /usr/share/tempio/smb.gtpl \
+        -out /etc/samba/smb.conf
+
+if [[ "${__BASHIO_LOG_LEVEL_TRACE}" -eq "${__BASHIO_LOG_LEVEL}" ]]; then
+    bashio::log.info "${__BASHIO_LOG_LEVEL_TRACE} ${__BASHIO_LOG_LEVEL}"
+    bashio::log.trace "Dump SMB.conf to ADDON_CONFIG/$(hostname) share"
+    cp /etc/samba/smb.conf /config/smb.conf.dump
+fi
+
+function addSambaUser() { # $1 username $2 password
+    username=$1
+    password=$2
+    addgroup "${username}"
+    adduser -D -H -G "${username}" -s /bin/false "${username}"
+    (
+        echo "$password"
+        echo "$password"
+    ) |
+        smbpasswd -a -s -c "/etc/samba/smb.conf" "${username}"
+}
+
+# Init user
+username=$(bashio::config 'username')
+password=$(bashio::config 'password')
+addSambaUser "${username}" "${password}"
+
+# Init superuser
+if [ -f /tmp/cifs_network ]; then
+    username="_ha_mount_user_"
+    password=$(sed 's/[-]//g' /proc/sys/kernel/random/uuid | head -c 20)
+    addSambaUser "${username}" "${password}"
+    jq -n --arg username "${username}" --arg password "${password}" '{username:$username, password:$password}' >/tmp/auth.json
+fi
+
+# Create other users
+for user in $(bashio::config 'other_users'); do
+    username=$(echo "${user}" | jq -r '.username')
+    password=$(echo "${user}" | jq -r '.password')
+    addSambaUser "${username}" "${password}"
+done
+
+# Log exposed mounted shares
+bashio::log.blue "---------------------------------------------------"
+bashio::log.info "Exposed Disks Summary:\n$(awk '/\[.*\]$/{ DISK=$0; next } /.*path =(.*)/{ PATH=$0; next} /.*TM:(.*)/{ printf "%-20s %s %s#\n",DISK,PATH,$0 }' /etc/samba/smb.conf)"
+bashio::log.blue "---------------------------------------------------"

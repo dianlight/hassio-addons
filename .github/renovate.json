@@ -230,8 +230,7 @@
         "github-releases"
       ],
       "matchDepNames": [
-        "dianlight/srat",
-        "dianlight/smartmontools-sdk"
+        "dianlight/srat"
       ],
       "allowedVersions": ">0.0.0-0"
     }

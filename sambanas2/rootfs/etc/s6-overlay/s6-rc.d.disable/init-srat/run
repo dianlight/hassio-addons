@@ -1,0 +1,26 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Start srat-cli service
+# ==============================================================================
+export HOSTNAME
+export ADDON_VERSION=$(bashio::addon.version)
+
+# Read hostname from API or setting default "hassio"
+HOSTNAME=$(bashio::info.hostname)
+if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
+  bashio::log.warning "Can't read hostname, using default."
+  HOSTNAME="homeassistant"
+fi
+
+/usr/local/bin/srat-cli \
+  -db /config/config.db3 \
+  -loglevel $(bashio::config 'log_level' 'info') \
+  $(if [[ "$(bashio::addon.protected)" == "true" ]]; then echo "-protected-mode"; fi) \
+  start \
+  -out /etc/samba/smb.conf \
+  -docker-interface "$(bashio::network 'network.info.docker.inerface' '.docker.interface')" \
+  -docker-network "$(bashio::network 'network.info.docker.network' '.docker.address')"
+
+bashio::log.info "srat-cli ok"

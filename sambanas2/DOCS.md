@@ -23,8 +23,7 @@ The following table compares the major functionalities available in SambaNAS and
 | WSDD and WSDD2 Integration         |    ✔️     |    ❌     |
 | WSDD-Native                       |    ❌     |    ✔️     |
 | Avahi/mDNS Support                 |    ✔️     |  ❌     |
-| HA mDNS Support                 |    ❌     |  ✔️     |
-| HA Native mDNS Support                 |    ❌     |  🧪 (via component)     |
+| HA mDNS Support                 |    ❌     |  🧪 (via component)     |
 | Samba over QUIC Support            |    ❌     |  🧪 🔌   |
 | **Volume Management** | | |
 | Mounting additional volumes        |    ✔️     |    ✔️      |
@@ -65,9 +64,9 @@ The following table compares the major functionalities available in SambaNAS and
 ## Installation
 
 **Requirements:**
-- Home Assistant 2026.8.0 or newer
+- Home Assistant 2025.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
-- Supported architectures: aarch64, amd64
+- Supported architectures: ~~armv7,~~ aarch64, amd64
 
 Follow these steps to get the add-on installed on your system:
 
@@ -109,15 +108,13 @@ This add-on exposes the following directories over SMB (Samba):
 
 | Directory       | Description                                                              |
 | --------------- | ------------------------------------------------------------------------ |
-| `local_apps`   | Local apps storage.                                                      |
+| `addons`        | Local add-ons storage.                                          |
 | `backup`        | Home Assistant backups and snapshots.                                              |
 | `config`        | Home Assistant configuration files.                           |
-| `app_configs`  | App base configuration directory.                                        |
+| `addon_configs` | Add-on base configuration directory.                     |
 | `media`         | Local media files storage.                                           |
-| `share`         | Shared data between apps and Home Assistant.                             |
+| `share`         | Shared data between add-ons and Home Assistant. |
 | `ssl`           | SSL certificates storage.                                       |
-
-> **Note**: Following the Home Assistant "add-on" to "app" rebranding, the `addons` and `addon_configs` shares have been renamed to `local_apps` and `app_configs`. On existing installations the shares are migrated automatically, keeping their configured users and settings. SMB clients still using the old `addons` / `addon_configs` share names must be updated to the new names.
 
 ## NFS exports (🧪 Experimental, 🔌 Extra Modules on Some Boards)
 
@@ -152,12 +149,11 @@ Samba NAS2 bundles the **[smartmontools-sdk](https://github.com/dianlight/smartm
 - Unified ATA/SATA, NVMe, and SCSI/SAS device support via a single native API
 - Structured JSON output for integration with the SRAT web interface
 
-The SDK is installed at build time from the native-core release tarball (`libsmartmon-<version>-linux-<arch>-musl.tar.gz`) published on the [smartmontools-sdk releases page](https://github.com/dianlight/smartmontools-sdk/releases). The add-on tracks the SDK **dev channel** (prerelease builds), kept up to date automatically via Renovate:
+The SDK is installed at build time:
 
 | Path | Contents |
 |---|---|
-| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools core 8.0) |
-| `/usr/local/lib/libsmartmon_go.so` | C ABI wrapper shared library |
+| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools v7.5) |
 | `/usr/local/include/smartmon/` | Public C++ headers |
 
 `LIBRARY_PATH` and `CPATH` environment variables are automatically exported to all container processes and interactive shells so any component linking against `libsmartmon` finds the library without manual configuration.

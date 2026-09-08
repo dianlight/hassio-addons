@@ -21,12 +21,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Mask secrets in logs
-        shell: bash
-        run: |
-          echo "::add-mask::${{ secrets.API_TOKEN_GITHUB }}"
-          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
-
       - name: Extract branch name
         shell: bash
         run: |
@@ -70,11 +64,6 @@ jobs:
           # Strip any existing -alpha<num>, -beta<num>, -dev<num>, -rc<num> suffix from the current version to get the base version
           BASE_VERSION=$(echo "$CURRENT_VERSION_FROM_FILE" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?|-rc(\.[0-9]+)?)$//')
 
-          # Us2/Us3: keep pushed rc/release versions verbatim so config stays
-          # aligned with the promoted changelog head (no beta rewrite).
-          if [[ "$CURRENT_VERSION_FROM_FILE" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]*)?$ ]]; then
-            FINAL_VERSION_STRING="$CURRENT_VERSION_FROM_FILE"
-          else
           # Construct the version suffix using the determined type and the current run number.
           # This ensures a new pre-release number for each run if an EXPECTED_SUFFIX_TYPE is determined.
           # If EXPECTED_SUFFIX_TYPE is empty (e.g. name was not -⍺ or -β), VERSION_SUFFIX_VALUE will be just the run_number, which might not be desired.
@@ -82,8 +71,7 @@ jobs:
           VERSION_SUFFIX_VALUE="${EXPECTED_SUFFIX_TYPE}.${{ github.run_number }}"
 
           # Construct the final version string by appending the determined suffix to the base version
-            FINAL_VERSION_STRING="${BASE_VERSION}${VERSION_SUFFIX_VALUE}"
-          fi
+          FINAL_VERSION_STRING="${BASE_VERSION}${VERSION_SUFFIX_VALUE}"
 
           echo "FINAL_NAME_TO_SET=$PROCESSED_NAME" >> "$GITHUB_OUTPUT"
           echo "FINAL_VERSION_TO_SET=$FINAL_VERSION_STRING" >> "$GITHUB_OUTPUT" # Output the complete new version string

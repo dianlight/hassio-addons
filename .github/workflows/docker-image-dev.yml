@@ -184,52 +184,12 @@ jobs:
         with:
           submodules: true
 
-      - name: "Set version in config.yaml (mergerelease Us1/Us4 beta bump, Us2/Us3 keep C)"
+      - name: ✍🏼 Set version in config.yaml
         shell: bash
         run: |
           CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
-          CHANGELOG_FILE="./${{ needs.setup.outputs.addon_dir }}/CHANGELOG.md"
-          C=$(yq '.version' "$CONFIG_FILE")
-          echo "Pushed config version C=$C"
-          H=$(grep '^## ' "$CHANGELOG_FILE" | grep -v -i unreleased | head -n1 | sed -E -n 's/^##[[:space:]]*\[?v?([0-9]+\.[0-9]+\.[0-9]+[^][:space:]]*)\]?.*/\1/p')
-          echo "Changelog head H=$H"
-          # Decide: C present in file at all?
-          if grep -Eq "^##[[:space:]]*\[?v?${C//./\\.}(\]| |\$)" "$CHANGELOG_FILE"; then
-            C_IN_FILE=true
-          else
-            C_IN_FILE=false
-          fi
-          echo "C_IN_FILE=$C_IN_FILE"
-          if [ "$C_IN_FILE" = true ]; then
-            # Us1/Us4: bump PATCH+1 with calendar rollover, beta suffix for beta testing.
-            # Changelog intentionally NOT updated here (S2=S1 minus U is done below).
-            BASE=$(echo "$C" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?|-rc[0-9]*)$//')
-            MAJ=$(echo "$BASE" | cut -d. -f1); MIN=$(echo "$BASE" | cut -d. -f2); PATCH=$(echo "$BASE" | cut -d. -f3)
-            CUR_YM=$(date +%Y.%-m)
-            CUR_Y=${CUR_YM%.*}; CUR_M=${CUR_YM#*.}
-            if [ "$MAJ.$MIN" != "$CUR_Y.$CUR_M" ]; then
-              NEXT="${CUR_Y}.${CUR_M}.0-beta.${{ github.run_number }}"
-            else
-              NEXT="${MAJ}.${MIN}.$((PATCH + 1))-beta.${{ github.run_number }}"
-            fi
-            yq -i ".version = \"$NEXT\"" "$CONFIG_FILE"
-            echo "Us1/Us4 mergerelease bump: $C -> $NEXT"
-          else
-            # Us2/Us3: keep pushed C verbatim so prerelease gate (C==H) stays green.
-            echo "Us2/Us3 keep pushed version $C"
-          fi
-          echo "Final mergerelease version: $(yq '.version' "$CONFIG_FILE")"
-
-      - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
-        shell: bash
-        run: |
-          CHANGELOG_FILE="./${{ needs.setup.outputs.addon_dir }}/CHANGELOG.md"
-          if grep -q '^## Unreleased' "$CHANGELOG_FILE"; then
-            awk 'BEGIN{u=0} /^## Unreleased/{u=1;next} /^## /{u=0} !u{print}' "$CHANGELOG_FILE" > "$CHANGELOG_FILE.tmp" && mv "$CHANGELOG_FILE.tmp" "$CHANGELOG_FILE"
-            echo "Stripped ## Unreleased block for mergerelease"
-          else
-            echo "No ## Unreleased block to strip"
-          fi
+          yq -i ".version = \"${{ needs.setup.outputs.base_version }}\"" "$CONFIG_FILE"
+          echo "Updated version to ${{ needs.setup.outputs.base_version }}"
 
       - name: ✍🏼 Set name in config.yaml --> ${{ needs.setup.outputs.name }}
         shell: bash
@@ -275,6 +235,7 @@ jobs:
               echo "Warning: Script $SCRIPT_FILE finished with exit code $SCRIPT_EXIT_CODE."
             fi
           done
+
 
       - name: Create Merge Release Branch
         if: needs.setup.outputs.has_scripts == 'true'
@@ -322,22 +283,6 @@ jobs:
           ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
           BASE_VERSION="${{ needs.setup.outputs.base_version }}"
           PR_BASE_BRANCH_NAME="prerelease/${ADDON_DIR}_${BASE_VERSION}"
-
-          # Gate: prerelease/* is created only for Us2/Us3 (pushed C not in
-          # origin/master changelog). Us1/Us4 (C already released) stop at beta.
-          git fetch origin master || true
-          MASTER_CHANGELOG=$(git show origin/master:${ADDON_DIR}/CHANGELOG.md 2>/dev/null || echo "")
-          # C as pushed on the devrelease branch (mergerelease file was bumped already)
-          PUSHED_C=$(git show "origin/${CURRENT_WORKFLOW_BRANCH}:${ADDON_DIR}/config.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "")
-          if [ -z "$PUSHED_C" ]; then
-            PUSHED_C=$(yq '.version' "${ADDON_DIR}/config.yaml")
-          fi
-          echo "Pushed C=$PUSHED_C"
-          if [ -n "$PUSHED_C" ] && echo "$MASTER_CHANGELOG" | grep -Eq "^##[[:space:]]*\[?v?${PUSHED_C//./\\.}(\]| |\$)"; then
-            echo "Us1/Us4: $PUSHED_C already in origin/master changelog -> no prerelease branch."
-            exit 0
-          fi
-          echo "Us2/Us3: $PUSHED_C is new -> creating prerelease branch."
 
           MERGE_RELEASE_CHECK_BRANCH="mergerelease/${ADDON_DIR}"
           PR_HEAD_BRANCH_NAME="${{ env.CURRENT_WORKFLOW_BRANCH }}"

@@ -24,13 +24,4 @@ jobs:
             git config --global user.email "workflow-bot@github.com"
             git config --global user.name "Prerelease Bot"
             git fetch origin master ${BRANCH_NAME}
-            # Append (never overwrite): preserve opencode-changelog summaries already in the body.
-            EXISTING_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body -q .body)
-            CHANGELOG_DIFF=$(git log --no-merges --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME})
-            if [ -z "$EXISTING_BODY" ]; then
-              echo "$CHANGELOG_DIFF" | gh pr edit ${{ github.event.pull_request.number }} --body-file -
-            elif echo "$EXISTING_BODY" | grep -qF "$CHANGELOG_DIFF"; then
-              echo "PR body already contains current diff, skipping."
-            else
-              printf '%s\n\n---\n\n%s\n' "$EXISTING_BODY" "$CHANGELOG_DIFF" | gh pr edit ${{ github.event.pull_request.number }} --body-file -
-            fi
+            git log --no-merges --left-right --graph --cherry-pick --oneline origin/master...origin/${BRANCH_NAME} | gh pr edit ${{ github.event.pull_request.number }} --body-file -

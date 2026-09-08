@@ -1,0 +1,177 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Start mqtt service
+# ==============================================================================
+
+readonly MAX_TIMEFRAME=60
+readonly MIN_TIMEFRAME=5
+readonly AVG_TIMEFRAME=$(((MAX_TIMEFRAME + MIN_TIMEFRAME) / 2))
+
+if [ -f /root/.config/mosquitto_pub ]; then
+    bashio::log.info "Starting the MQTT daemon for partitions info..."
+
+    topic=$(bashio::config 'mqtt_topic' "sambanas")
+
+    # Send autodiscovery entities
+    if bashio::config.true "mqtt_nexgen_entities"; then
+        bashio::log.info "New MQTT integration"
+
+        host=$(bashio::config 'mqtt_host' "$(bashio::services 'mqtt' 'host')")
+        username=$(bashio::config 'mqtt_username' "$(bashio::services 'mqtt' 'username')")
+        password=$(bashio::config 'mqtt_password' "$(bashio::services 'mqtt' 'password')")
+        port=$(bashio::config 'mqtt_port' "$(bashio::services 'mqtt' 'port')")
+        log_level=$(bashio::string.lower "$(bashio::config log_level info)")
+
+        #bashio::log.info "New MQTT config ${host}:${port:-1883} ${username}:${password} ${topic}"
+
+        idleparam=""
+        if [ -p /tmp/hdidle.events ]; then
+            idleparam="-i /tmp/hdidle.events"
+        fi
+
+        exec /usr/bin/poetry -C /usr/local/bin/ run python /usr/local/bin/mqtt_daemon.py -b "${host}" -p "${port:-1883}" -u "${username}" -P "${password}" -t "${topic}" -v $(bashio::addon.version) ${idleparam} -l ${log_level^^}
+    else
+        bashio::log.info "MQTT integration"
+
+        #        disks=$(awk 'BEGIN { ORS=""; print "["}  /^   path = .*/g {  printf "%s\"%s\"",separator,$3 ; separator=","  } END { print "]" } ' /etc/samba/smb.conf)
+        disks=$(grep path /etc/samba/smb.conf | sed 's/.*path\ =\ //' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+        blk=$(lsblk -b -no PARTUUID,NAME,LABEL,FSTYPE,MOUNTPOINTS -J -y)
+        jdisks=$(jq --argjson disks "$disks" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i)' <<<${blk})
+
+        # Send discovery messages.
+        if ! bashio::config.true "autodiscovery.disable_persistent"; then prs="-r"; fi
+
+        #bashio::log.info $device
+        device=$(jq -r -c -n --arg topic "$topic" --arg smbv "$(smbd -V | sed s/Version\ //)" --arg addon "$(bashio::addon.version)" '
+        {device:{
+            identifiers:[],
+            name: "SambaNas Disk ",
+            hw_version: $addon,
+            sw_version: $smbv,
+            model: "SambaNas",
+            manufacturer: "@Dianlight",
+            via_device: $topic
+        }}')
+
+        for row in $(jq -r '.|map(.|@base64)|.[]' <<<"$jdisks"); do
+            for entity in name label mountpoints fssize fsused fsuse_pct fsavail fstype iostat.tps iostat.kB_read/s iostat.kB_wrtn/s iostat.kB_dscd/s iostat.kB_read iostat.kB_wrtn iostat.kB_dscd; do
+                exmsg={}
+                etype=""
+
+                base=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            name:($topic+" "+$entity +" "+ .label),
+                            unique_id:(.partuuid +"-"+ ($entity|explode|join(""))),
+                            value_template:("{{ value_json." + .name + "." +$entity+ "}}"),
+                            state_topic:($topic + "/state"),
+                            oth:{
+                                partuuid:.partuuid,
+                                name:.name,
+                                label:.label,
+                                root:("/dev/" + .name[:-1])
+                            }
+                        }' <<<"$row")
+
+                case "$entity" in
+                name | label | fstype | mountpoints) #TEXT
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            mode: "text",
+                            icon:"mdi:harddisk"
+                        }' <<<"$row")
+                    ;;
+                fssize | fsused | fsavail) #DATA_SIZE (Byte)
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "B",
+                            device_class: "data_size",
+                        }' <<<"$row")
+                    ;;
+                iostat.kB_read | iostat.kB_wrtn | iostat.kB_dscd) #DATA_SIZE (KB)
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "kB",
+                            device_class: "data_size",
+                        }' <<<"$row")
+                    ;;
+                iostat.kB_read/s | iostat.kB_wrtn/s | iostat.kB_dscd/s) #data_rate
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entityb "${entity%.*}" --arg entityd "${entity##*.}" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "kB/s",
+                            device_class: "data_rate",
+                            value_template:("{{ value_json." + .name + "." +$entityb+ "['"'"'" + $entityd + "'"'"']}}"),
+                            icon:"mdi:database-refresh"
+                        }' <<<"$row")
+                    ;;
+                iostat.tps) #TPS
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "tps",
+                            icon:"mdi:database-search"
+                        }' <<<"$row")
+                    ;;
+                fsuse_pct) # PERCENT
+                    etype="sensor"
+                    exmsg=$(jq --arg topic "$topic" --arg entity "$entity" -R '@base64d|fromjson|
+                        {
+                            unit_of_measurement: "%",
+                            icon:"mdi:database-eye"
+                        }' <<<"$row")
+                    ;;
+                *)
+                    bashio::log.warning "Autodiscovery for $entity missing!"
+                    ;;
+                esac
+                msg=$(echo "$base" "$device" "$exmsg" | jq -s 'add|.device.identifiers[.device.identifiers|length]=.oth.partuuid|.device.name=(.device.name + .oth.label)|.device.via_device=(.oth.root | explode | join(""))|del(.oth)')
+                #bashio::log.debug "$msg"
+                mosquitto_pub "${prs}" -t "homeassistant/${etype}/${topic}/$(jq -R -r '@base64d|fromjson|.partuuid' <<<"$row")-${entity//[\.\/]/-}/config" -m "$msg"
+            done
+        done
+
+        mkfifo /tmp/mqtt-hanlder
+        # Send status message process
+        tail -F /tmp/mqtt-hanlder | mosquitto_pub -l -t "${topic}/state" &
+
+        sleepTime=$AVG_TIMEFRAME
+        shaOldMessage="-"
+
+        while true; do
+            blk=$(lsblk -b -no NAME,LABEL,FSSIZE,FSUSED,FSUSE%,FSAVAIL,FSTYPE,MOUNTPOINTS -J -y | jq 'walk(if type == "object"  and .fsuse_pct != null  then .fsuse_pct|=(rtrimstr("%")|tonumber) else . end)')
+            liostat=$(/usr/bin/iostat "$(jq -r '.|map(.name)|.[]' <<<"""$jdisks""")" -k -d -p -o JSON)
+            status=$(jq -c --argjson disks "$disks" --argjson iostat "$liostat" 'reduce (.blockdevices[].children[]? |select(.mountpoints? - $disks != .mountpoints) ) as $i ({};.[$i.name] = $i+{iostat:($iostat.sysstat.hosts[0].statistics[0].disk[] | select(.disk_device==$i.name))})' <<<"${blk}")
+            # Send status message
+            shaMessage=$(sha1sum <<<"$status")
+            if [ "$shaOldMessage" = "$shaMessage" ]; then
+                sleepTime=$((sleepTime * 2))
+                [ $sleepTime -gt $MAX_TIMEFRAME ] && sleepTime=$MAX_TIMEFRAME
+            else
+                # Send status message
+                if [ $sleepTime -gt $AVG_TIMEFRAME ]; then
+                    sleepTime=$((sleepTime / 2))
+                else
+                    sleepTime=$((sleepTime - MIN_TIMEFRAME))
+                fi
+                [ $sleepTime -le $MIN_TIMEFRAME ] && sleepTime=$MIN_TIMEFRAME
+            fi
+            jq -c --arg st "$sleepTime" --arg sh "$shaMessage" '. +
+                {
+                    ref: {
+                        mws: $st,
+                        sha: $sh
+                    }
+                }' <<<"${status}" >/tmp/mqtt-hanlder
+            shaOldMessage=$shaMessage
+            # Sleep
+            sleep $sleepTime
+        done
+    fi
+
+else
+    exec sleep infinity
+fi
