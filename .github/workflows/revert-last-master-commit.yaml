@@ -37,6 +37,8 @@ jobs:
           else
             git revert "$COMMIT_SHA" --no-edit
           fi
+          # Tag the revert so the rebase-devrelease workflow skips it.
+          git commit --amend -m "$(git log -1 --format=%B)" -m "[skip rebase]"
 
       - name: Push Revert Branch
         run: |

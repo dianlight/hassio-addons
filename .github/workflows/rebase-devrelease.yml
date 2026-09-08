@@ -31,6 +31,7 @@ jobs:
     outputs:
       source: ${{ steps.resolve.outputs.source }}
       matrix: ${{ steps.resolve.outputs.matrix }}
+      skip: ${{ steps.resolve.outputs.skip }}
     steps:
       - name: Resolve source branch and target matrix
         id: resolve
@@ -75,10 +76,27 @@ jobs:
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Targets: ${MATRIX}"
 
+          # Skip auto-rebase for reverts: a revert on master must never be
+          # replayed onto devrelease branches. Matches the [skip rebase]
+          # marker (added by the revert workflow) and Revert commits/PRs,
+          # checking every commit in the push payload so merges of revert
+          # PRs are covered too. Manual workflow_dispatch runs never skip.
+          SKIP="false"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            MSGS=$(jq -r '[(.commits // [])[].message, (.head_commit.message // empty), (.pull_request.title // empty), (.pull_request.head.ref // empty)] | join("\n")' "$GITHUB_EVENT_PATH")
+            if printf '%s\n' "${MSGS}" | grep -qiE 'skip rebase|^revert[ "'\''/:_-]'; then
+              echo "Revert detected — skipping auto-rebase."
+              SKIP="true"
+              MATRIX="[]"
+              echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          echo "skip=${SKIP}" >> "$GITHUB_OUTPUT"
+
   rebase:
     name: Rebase ${{ matrix.branch }}
     needs: discover
-    if: needs.discover.outputs.matrix != '' && needs.discover.outputs.matrix != '[]'
+    if: needs.discover.outputs.skip != 'true' && needs.discover.outputs.matrix != '' && needs.discover.outputs.matrix != '[]'
     runs-on: ubuntu-latest
     concurrency:
       group: rebase-${{ matrix.branch }}
