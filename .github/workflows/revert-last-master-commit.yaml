@@ -6,33 +6,48 @@ on:
 jobs:
   revert:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout Master
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: master
+          fetch-depth: 0
+
+      - name: Setup Git Identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get Last Commit SHA
         id: get_commit
         run: |
-          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-#      - name: Create Revert Branch
-#        run: |
-#          git checkout -b revert-last-commit
+      - name: Create Revert Branch
+        run: |
+          git checkout -B revert-last-commit
 
       - name: Revert Last Commit
         run: |
-          git revert $COMMIT_SHA --no-edit
+          if git rev-parse --verify -q HEAD^2 >/dev/null; then
+            git revert -m 1 "$COMMIT_SHA" --no-edit
+          else
+            git revert "$COMMIT_SHA" --no-edit
+          fi
 
-#      - name: Push Revert Branch
-#        run: |
-#          git push origin revert-last-commit
+      - name: Push Revert Branch
+        run: |
+          git push --force origin revert-last-commit
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
-        with:
-          title: "Revert Last Commit"
-          body: "This PR reverts the last commit on master."
-          branch: revert-last-commit
-          delete-branch: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base master \
+            --head revert-last-commit \
+            --title "Revert ${COMMIT_SHA}" \
+            --body "This PR reverts ${COMMIT_SHA} on master."
