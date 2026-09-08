@@ -38,13 +38,17 @@ jobs:
           persist-credentials: true
           submodules: true
 
-      - name: Sync SRAT section (deterministic base)
+      - name: Fetch SRAT changelog for AI curation
         working-directory: sambanas2
         shell: bash
         run: |
-          if [ -f scripts/update_srat_changelog.sh ]; then
-            bash scripts/update_srat_changelog.sh || echo "::warning::SRAT changelog sync failed, continuing with AI curation only"
-          fi
+          SRAT_VERSION=$(grep -m1 'ARG SRAT_VERSION=' Dockerfile | cut -d= -f2 | tr -d '"')
+          echo "SRAT_VERSION=$SRAT_VERSION"
+          curl --silent --fail --location \
+            "https://raw.githubusercontent.com/dianlight/srat/${SRAT_VERSION}/CHANGELOG.md" \
+            -o /tmp/srat-CHANGELOG.md \
+            && echo "SRAT changelog fetched." \
+            || echo "::warning::Could not fetch SRAT changelog for $SRAT_VERSION; AI will note the version without curated items."
 
       - name: Select model
         id: resolve
@@ -72,8 +76,18 @@ jobs:
 
             Steps:
             1. Diff origin/master...HEAD scoped to sambanas2/ (features, fixes, chores, breaking, migration notes).
-            2. SRAT ### 🐭 section was already synced deterministically; only curate it:
-               keep user-important breaking/features/fixes, drop internal churn, Thanks/Roadmap noise, duplicates.
+            2. SRAT (no dedicated section, ever):
+               - Read Dockerfile ARG SRAT_VERSION; the full upstream notes are at
+                 /tmp/srat-CHANGELOG.md (fetched by the previous step; fall back to
+                 https://raw.githubusercontent.com/dianlight/srat/<ver>/CHANGELOG.md).
+               - Add ONE Chore bullet referencing the version with a link to the full log:
+                 `- Update SRAT to [v<ver>](https://github.com/dianlight/srat/blob/<ver>/CHANGELOG.md)`.
+               - Report only important user-facing SRAT changes inside the normal
+                 ### ✨ Features / ### 🐛 Bug Fixes sections, each suffixed with
+                 `(from SRAT v<ver>)`. Drop internal churn, Thanks/Roadmap noise and
+                 duplicates of add-on bullets. If the SRAT fetch failed, keep just
+                 the Chore version bullet.
+               - Never create a ### 🐭 Features from SRAT section.
             3. Version rules (C=config.yaml:version, H=first ## != Unreleased):
                - C==H: append to ## Unreleased only (Us1/Us4). Never bump versions here.
                - C not in file + Unreleased non-empty: promote Unreleased -> ## C, leave new empty ## Unreleased (Us2/Us3).
@@ -82,4 +96,25 @@ jobs:
                - This step never runs on mergerelease/* (skipped by job condition);
                  Unreleased stripping there is deterministic (S2 = S1 minus U).
                - Commit back to the same branch when on push/workflow_dispatch; on pull_request, commit only if the head repo is this repo, else post the ready-to-paste entry as a PR comment.
-            4. Keep it concise and user-facing. Do not touch config.yaml, Dockerfile, or translations.
+            4. Section order: in the first versioned release put ### 🙏 Thanks first
+               and ### 🚨 Notes second (a deterministic step re-sorts them anyway).
+            5. Keep it concise and user-facing. Do not touch config.yaml, Dockerfile, or translations.
+
+      - name: Normalize Thanks/Notes order (deterministic)
+        shell: bash
+        run: |
+          python3 sambanas2/scripts/normalize_changelog_order.py sambanas2/CHANGELOG.md
+
+      - name: Commit normalization (push/dispatch only)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          if git diff --quiet -- sambanas2/CHANGELOG.md; then
+            echo "CHANGELOG.md unchanged, nothing to commit."
+            exit 0
+          fi
+          git config user.email "workflow-bot@github.com"
+          git config user.name "Changelog Bot"
+          git add sambanas2/CHANGELOG.md
+          git commit -m "chore: normalize changelog Thanks/Notes order" || exit 0
+          git push || echo "::warning::Could not push normalization commit."
