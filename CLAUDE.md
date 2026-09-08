@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> This file mirrors the configuration in `.github/copilot-instructions.md` and `.github/instructions/` so Claude Code and GitHub Copilot can be used interchangeably. The canonical Copilot skills and prompts live under `.github/skills/` and `.github/prompts/`.
+> This file mirrors the configuration in `AGENTS.md` and `.github/instructions/` so Claude Code and GitHub Copilot can be used interchangeably. The canonical skills and prompts live under `.github/skills/` and `.github/prompts/`.
 
 ---
 
