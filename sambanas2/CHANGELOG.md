@@ -1,19 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### 🏗 Chore
-- Automated `CHANGELOG.md` maintenance: new `opencode-changelog` workflow (no `/oc` commands) resolves the model via `dianlight/opencode-modelselect-action` (`docs`/`auto`, `OPENCODE_API_KEY`) and curates user-important entries per `sambanas2/.changelog-style.md`. `devrelease` keeps `## Unreleased`; `mergerelease` strips it and bumps beta (`PATCH+1`, calendar rollover in October); `prerelease` is created only for new versions (Us2/Us3).
-- Fix `docker-image-pr` version check to skip `## Unreleased` when comparing `config.yaml` with the changelog head.
-- `🙏 Thanks` is always first and `🚨 Notes` always second in the first versioned release; enforced by `.github/scripts/normalize_changelog_order.py` in the changelog workflow.
-- Removed the `🐭 Features from SRAT` section (retired `scripts/update_srat_changelog.sh`): the used SRAT version is referenced in `🏗 Chore` with a link to the full upstream changelog, and only important SRAT changes are reported in `✨ Features` / `🐛 Bug Fixes` as `(from SRAT v...)` items curated by the AI changelog action.
-- Refactor `opencode-changelog` workflow into a generic engine: shared logic (SRAT fetch, prompt rendering, opencode run, normalize) moved to `.github/scripts/opencode-maintain-changelog.sh` (parameterized by add-on, proven on `sambanas2` first), the normalizer promoted to `.github/scripts/normalize_changelog_order.py`, and per-add-on conventions stay in `<addon>/.changelog-style.md`. Nothing changelog-related lives in `<addon>/scripts/`, so dev builds never auto-execute it.
-
-### 🐛 Bug Fixes
-- Fix documentation-validation failure on release PRs: remove stale commented stats badge from `sambanas2/README.md` that referenced the original add-on and tripped the cross-project reference check.
-- Fix Docker dev build failure (`libcrypto3`/`libssl3` 3.5.7 vs `openssl` 3.5.8 conflict) by running `apk upgrade --no-cache` before `apk add` in the Samba install stage and builder stages.
-- Fix `docker-image-dev` `Create release branch` failure (exit 1, `Usage: normalize_changelog_order.py CHANGELOG.md`) by removing the `sambanas2/scripts/normalize_changelog_order.py` shim: it was auto-executed with no args and `set -e` aborted the job before the merge-release branch could be pushed. The normalizer now lives only in `.github/scripts/`.
-
 ## 2026.9.0-rc14
 
 ### 🙏 Thanks
