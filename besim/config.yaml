@@ -6,7 +6,6 @@ description: A simulator for the cloud server the BeSMART thermostat/wifi box co
 url: https://github.com/dianlight/hassio-addons/tree/master/besim
 codenotary: lucio.tarantino@gmail.com
 arch:
-  - armv7
   - aarch64
   - amd64
 startup: system
