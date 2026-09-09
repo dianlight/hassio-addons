@@ -10,6 +10,7 @@
 - Refactor `opencode-changelog` workflow into a generic engine: shared logic (SRAT fetch, prompt rendering, opencode run, normalize) moved to `.github/scripts/opencode-maintain-changelog.sh` (parameterized by add-on, proven on `sambanas2` first), the normalizer promoted to `.github/scripts/normalize_changelog_order.py`, and per-add-on conventions stay in `<addon>/.changelog-style.md`. Nothing changelog-related lives in `<addon>/scripts/`, so dev builds never auto-execute it.
 
 ### 🐛 Bug Fixes
+- Fix documentation-validation failure on release PRs: remove stale commented stats badge from `sambanas2/README.md` that referenced the original add-on and tripped the cross-project reference check.
 - Fix Docker dev build failure (`libcrypto3`/`libssl3` 3.5.7 vs `openssl` 3.5.8 conflict) by running `apk upgrade --no-cache` before `apk add` in the Samba install stage and builder stages.
 - Fix `docker-image-dev` `Create release branch` failure (exit 1, `Usage: normalize_changelog_order.py CHANGELOG.md`) by removing the `sambanas2/scripts/normalize_changelog_order.py` shim: it was auto-executed with no args and `set -e` aborted the job before the merge-release branch could be pushed. The normalizer now lives only in `.github/scripts/`.
 
