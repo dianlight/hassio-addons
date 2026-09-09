@@ -90,30 +90,50 @@ jobs:
       - name: Validate markdown files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Check for cross-project references in documentation
+          # Check for cross-project references in user-facing documentation.
+          # Only README.md, DOCS.md and CHANGELOG.md are scanned: internal
+          # guidance such as AGENTS.md must name other projects to forbid
+          # copying between them. Only projects touched by this PR are
+          # checked so legacy references in untouched add-ons don't block
+          # unrelated releases.
           echo "Checking for cross-project references..."
+
+          affected=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | cut -d'/' -f1 | sort -u)
+          echo "Affected top-level paths: $affected"
 
           cross_ref_found=false
           projects=("sambanas" "sambanas2" "plex" "RPiMySensor" "addon-plex")
+          docs_files=("README.md" "DOCS.md" "CHANGELOG.md")
 
           for project in "${projects[@]}"; do
-            if [ -d "$project" ]; then
-              for md_file in "$project"/*.md; do
-                if [ -f "$md_file" ]; then
-                  for other_project in "${projects[@]}"; do
-                    if [ "$project" != "$other_project" ]; then
-                      # Check for references to other projects (excluding allowed sambanas->sambanas2 migration notes)
-                      if [ "$project" != "sambanas" ] || [ "$other_project" != "sambanas2" ]; then
-                        if grep -q "\b$other_project\b" "$md_file"; then
-                          echo "❌ Cross-project reference found in $md_file referencing $other_project"
-                          cross_ref_found=true
-                        fi
-                      fi
-                    fi
-                  done
+            if ! echo "$affected" | grep -qx "$project"; then
+              echo "Skipping untouched project: $project"
+              continue
+            fi
+            if [ ! -d "$project" ]; then
+              continue
+            fi
+            for doc in "${docs_files[@]}"; do
+              md_file="$project/$doc"
+              if [ ! -f "$md_file" ]; then
+                continue
+              fi
+              for other_project in "${projects[@]}"; do
+                if [ "$project" != "$other_project" ]; then
+                  # Migration notes between sambanas and sambanas2 are
+                  # legitimate in both directions (sambanas2 documents
+                  # migration from the original add-on).
+                  if { [ "$project" = "sambanas" ] && [ "$other_project" = "sambanas2" ]; } || \
+                     { [ "$project" = "sambanas2" ] && [ "$other_project" = "sambanas" ]; }; then
+                    continue
+                  fi
+                  if grep -q "\b$other_project\b" "$md_file"; then
+                    echo "❌ Cross-project reference found in $md_file referencing $other_project"
+                    cross_ref_found=true
+                  fi
                 fi
               done
-            fi
+            done
           done
 
           if [ "$cross_ref_found" = true ]; then
