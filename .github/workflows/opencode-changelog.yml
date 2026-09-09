@@ -105,8 +105,10 @@ jobs:
           done
 
   # pull_request: official action (push is the only unsupported event).
+  # mergerelease/* heads are deterministic-only (strip already done in
+  # docker-image-dev): skip like the push job does for refs/heads/mergerelease/.
   changelog-pr:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
