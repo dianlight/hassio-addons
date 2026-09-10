@@ -1,0 +1,131 @@
+name: Bot Dependency Changelog
+
+# Dependency bots (Renovate / Dependabot) only touch Dockerfiles, manifests,
+# or lockfiles, so documentation-validation would fail on missing .md updates.
+# This workflow prepends a one-line entry to the relative add-on CHANGELOG.md
+# (top, under ## Unreleased / ### Changed) and pushes it back to the PR branch.
+# Idempotent: re-runs skip add-ons whose CHANGELOG already references the PR.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bot-changelog:
+    if: >
+      github.event.pull_request.user.login == 'renovate[bot]' ||
+      github.event.pull_request.user.login == 'dependabot[bot]' ||
+      github.event.pull_request.user.login == 'dependabot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Prepend bot entry to relative CHANGELOG.md
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$BASE_REF" --depth=1 >/dev/null 2>&1 || true
+
+          # Add-ons touched by this PR (top-level dirs that own a CHANGELOG.md).
+          mapfile -t changed < <(git diff --name-only "origin/$BASE_REF...HEAD" -- || true)
+          addons=()
+          for f in "${changed[@]:-}"; do
+            top="${f%%/*}"
+            case "$top" in
+              sambanas|sambanas2|plex|RPiMySensor|addon-plex)
+                [[ " ${addons[*]} " == *" $top "* ]] || addons+=("$top")
+                ;;
+            esac
+          done
+          if [[ "${#addons[@]}" -eq 0 ]]; then
+            echo "No add-on directories touched, nothing to do."
+            exit 0
+          fi
+
+          # Clean the PR title for changelog use: strip leading ⬆️ and the
+          # trailing " (branch/context)" suffix Renovate appends.
+          clean_title="$(echo "$PR_TITLE" | sed -E -e 's/^[⬆️[:space:]]*//' -e 's/[[:space:]]*\([^()]*\)[[:space:]]*$//')"
+          entry="- ⬆️ ${clean_title} (#${PR_NUMBER})"
+
+          touched=false
+          for addon in "${addons[@]}"; do
+            changelog="$addon/CHANGELOG.md"
+            if [[ ! -f "$changelog" ]]; then
+              echo "Skipping $addon: no CHANGELOG.md"
+              continue
+            fi
+            if grep -qF "(#${PR_NUMBER})" "$changelog"; then
+              echo "Skipping $addon: entry for #$PR_NUMBER already present."
+              continue
+            fi
+
+            python3 - "$changelog" "$entry" <<'EOF'
+          import sys
+          path, entry = sys.argv[1], sys.argv[2]
+          with open(path) as fh:
+              lines = fh.readlines()
+
+          # 1. Ensure "## Unreleased" exists at start (after "# Changelog" title).
+          idx = next((i for i, l in enumerate(lines) if l.startswith("## Unreleased")), None)
+          if idx is None:
+              insert_at = 0
+              if lines and lines[0].startswith("# "):
+                  insert_at = 1
+                  while insert_at < len(lines) and lines[insert_at].strip() == "":
+                      insert_at += 1
+              lines[insert_at:insert_at] = ["## Unreleased\n", "\n"]
+              idx = insert_at
+
+          # 2. Ensure "### Changed" directly under "## Unreleased".
+          end = next((i for i in range(idx + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+          changed_idx = next(
+              (i for i in range(idx + 1, end) if lines[i].startswith("### Changed")), None
+          )
+          if changed_idx is None:
+              lines[idx + 1:idx + 1] = ["\n", "### Changed\n", "\n"]
+              changed_idx = idx + 2
+              end += 3
+
+          # 3. Prepend entry as first bullet under "### Changed" (start of section).
+          pos = changed_idx + 1
+          while pos < end and lines[pos].strip() == "":
+              pos += 1
+          lines[pos:pos] = [entry + "\n"]
+          if pos + 1 >= len(lines) or lines[pos + 1].strip() != "":
+              lines[pos + 1:pos + 1] = ["\n"]
+
+          with open(path, "w") as fh:
+              text = "".join(lines)
+              while "\n\n\n" in text:
+                  text = text.replace("\n\n\n", "\n\n")
+              fh.write(text)
+          print(f"Prepended to {path}: {entry}")
+          EOF
+            touched=true
+          done
+
+          if [[ "$touched" == "false" ]]; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+
+          git config user.email "workflow-bot@github.com"
+          git config user.name "Dependency Changelog Bot"
+          git add -- sambanas/CHANGELOG.md sambanas2/CHANGELOG.md plex/CHANGELOG.md RPiMySensor/CHANGELOG.md addon-plex/CHANGELOG.md 2>/dev/null || true
+          git diff --cached --quiet && echo "Nothing staged." && exit 0
+          git commit -m "chore: add CHANGELOG entry for bot PR #${PR_NUMBER}"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
