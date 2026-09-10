@@ -184,43 +184,97 @@ jobs:
         with:
           submodules: true
 
-      - name: "Set version in config.yaml (mergerelease Us1/Us4 beta bump, Us2/Us3 keep C)"
+      - name: "Resolve devrelease version (Rule1 past-date / Rule2 bump / Rule3 mergerelease)"
+        id: resolve_version
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         shell: bash
         run: |
-          CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
-          CHANGELOG_FILE="./${{ needs.setup.outputs.addon_dir }}/CHANGELOG.md"
+          ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
+          CONFIG_FILE="./${ADDON_DIR}/config.yaml"
           C=$(yq '.version' "$CONFIG_FILE")
           echo "Pushed config version C=$C"
-          H=$(grep '^## ' "$CHANGELOG_FILE" | grep -v -i unreleased | head -n1 | sed -E -n 's/^##[[:space:]]*\[?v?([0-9]+\.[0-9]+\.[0-9]+[^][:space:]]*)\]?.*/\1/p')
-          echo "Changelog head H=$H"
-          # Decide: C present in file at all?
-          if grep -Eq "^##[[:space:]]*\[?v?${C//./\\.}(\]| |\$)" "$CHANGELOG_FILE"; then
-            C_IN_FILE=true
+          echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
+
+          # Only calendar versions participate in Rule1/Rule2; anything else
+          # (e.g. -beta/-dev/-alpha) falls through to Rule3 mergerelease as-is.
+          if [[ "$C" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]*))?$ ]]; then
+            CY="${BASH_REMATCH[1]}"; CM="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
+            RC="${BASH_REMATCH[4]}"; RCN="${BASH_REMATCH[5]}"
           else
-            C_IN_FILE=false
+            echo "Rule3: non-calendar version, keep C verbatim for mergerelease."
+            exit 0
           fi
-          echo "C_IN_FILE=$C_IN_FILE"
-          if [ "$C_IN_FILE" = true ]; then
-            # Us1/Us4: bump PATCH+1 with calendar rollover, beta suffix for beta testing.
-            # Changelog intentionally NOT updated here (S2=S1 minus U is done below).
-            BASE=$(echo "$C" | sed -E 's/(-alpha(\.[0-9]+)?|-beta(\.[0-9]+)?|-dev(\.[0-9]+)?|-rc[0-9]*)$//')
-            MAJ=$(echo "$BASE" | cut -d. -f1); MIN=$(echo "$BASE" | cut -d. -f2); PATCH=$(echo "$BASE" | cut -d. -f3)
-            CUR_YM=$(date +%Y.%-m)
-            CUR_Y=${CUR_YM%.*}; CUR_M=${CUR_YM#*.}
-            if [ "$MAJ.$MIN" != "$CUR_Y.$CUR_M" ]; then
-              NEXT="${CUR_Y}.${CUR_M}.0-beta.${{ github.run_number }}"
-            else
-              NEXT="${MAJ}.${MIN}.$((PATCH + 1))-beta.${{ github.run_number }}"
-            fi
+          CUR_Y=$(date +%Y); CUR_M=$(date +%-m)
+          echo "C calendar $CY.$CM patch $PATCH rc [$RCN], today $CUR_Y.$CUR_M"
+
+          commit_back() {
+            local NEXT="$1" WHY="$2"
             yq -i ".version = \"$NEXT\"" "$CONFIG_FILE"
-            echo "Us1/Us4 mergerelease bump: $C -> $NEXT"
-          else
-            # Us2/Us3: keep pushed C verbatim so prerelease gate (C==H) stays green.
-            echo "Us2/Us3 keep pushed version $C"
+            echo "$WHY: $C -> $NEXT"
+            echo "decision=devrelease-commit" >> "$GITHUB_OUTPUT"
+            echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+            git config user.email "workflow-bot@github.com"
+            git config user.name "Prerelease Bot"
+            git add "$CONFIG_FILE"
+            if git diff --cached --quiet; then
+              echo "Nothing to commit."
+              return
+            fi
+            git commit -m "chore(version): $WHY $C -> $NEXT [version-bot]"
+            git push origin "HEAD:${BRANCH_NAME}"
+          }
+
+          # Rule1: year/month in the past -> reset to today year.month.0, keep rc number.
+          if [[ "$CY" -lt "$CUR_Y" || ("$CY" -eq "$CUR_Y" && "$CM" -lt "$CUR_M") ]]; then
+            NEXT="${CUR_Y}.${CUR_M}.0${RC}"
+            commit_back "$NEXT" "Rule1 past-date reset"
+            exit 0
           fi
+
+          # Rule1 only fires for the past; a future year/month falls to Rule3.
+          if [[ "$CY.$CM" != "$CUR_Y.$CUR_M" ]]; then
+            echo "Rule3: future calendar version, keep C verbatim for mergerelease."
+            exit 0
+          fi
+
+          # Rule2: current calendar and C(dev) <= max C(prerelease) -> bump on devrelease.
+          MAX_PRE=""
+          PRE_REFS=$(git ls-remote origin "prerelease/${ADDON_DIR}_*" 2>/dev/null | awk '{print $2}' | sed 's|refs/heads/||')
+          if [ -n "$PRE_REFS" ]; then
+            # shellcheck disable=SC2086
+            git fetch origin $PRE_REFS 2>/dev/null || true
+            while IFS= read -r REF; do
+              [ -z "$REF" ] && continue
+              V=$(git show "origin/${REF}:${ADDON_DIR}/config.yaml" 2>/dev/null | yq '.version' 2>/dev/null || true)
+              [ -z "$V" ] && continue
+              if [ -z "$MAX_PRE" ]; then
+                MAX_PRE="$V"
+              else
+                MAX_PRE=$(printf '%s\n%s\n' "$MAX_PRE" "$V" | sort -V | tail -n1)
+              fi
+            done < <(echo "$PRE_REFS")
+          fi
+          echo "Max prerelease version MAX_PRE=${MAX_PRE:-<none>}"
+          if [ -n "$MAX_PRE" ]; then
+            SMALLEST=$(printf '%s\n%s\n' "$C" "$MAX_PRE" | sort -V | head -n1)
+            if [ "$C" = "$MAX_PRE" ] || [ "$SMALLEST" = "$C" ]; then
+              if [ -n "$RC" ]; then
+                N="${RCN:-0}"
+                NEXT="${CY}.${CM}.${PATCH}-rc$((N + 1))"
+              else
+                NEXT="${CY}.${CM}.$((PATCH + 1))"
+              fi
+              commit_back "$NEXT" "Rule2 bump over prerelease $MAX_PRE"
+              exit 0
+            fi
+          fi
+
+          echo "Rule3: keep C=$C verbatim for mergerelease."
           echo "Final mergerelease version: $(yq '.version' "$CONFIG_FILE")"
 
       - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
         shell: bash
         run: |
           CHANGELOG_FILE="./${{ needs.setup.outputs.addon_dir }}/CHANGELOG.md"
@@ -232,6 +286,7 @@ jobs:
           fi
 
       - name: ✍🏼 Set name in config.yaml --> ${{ needs.setup.outputs.name }}
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
         shell: bash
         run: |
           CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
@@ -239,7 +294,7 @@ jobs:
           echo "Updated name to ${{ needs.setup.outputs.name }}"
 
       - name: Ensure image key is uncommented in config.yaml
-        if: needs.setup.outputs.has_scripts == 'true'
+        if: needs.setup.outputs.has_scripts == 'true' && steps.resolve_version.outputs.decision == 'mergerelease'
         shell: bash
         run: |
           CONFIG_FILE="./${{ needs.setup.outputs.addon_dir }}/config.yaml"
@@ -251,7 +306,7 @@ jobs:
           fi
 
       - name: Run Addon custom scripts
-        if: needs.setup.outputs.has_scripts == 'true'
+        if: needs.setup.outputs.has_scripts == 'true' && steps.resolve_version.outputs.decision == 'mergerelease'
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         shell: bash
@@ -277,7 +332,7 @@ jobs:
           done
 
       - name: Create Merge Release Branch
-        if: needs.setup.outputs.has_scripts == 'true'
+        if: needs.setup.outputs.has_scripts == 'true' && steps.resolve_version.outputs.decision == 'mergerelease'
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         shell: bash
@@ -307,7 +362,7 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: needs.setup.outputs.has_image == 'true'
+        if: needs.setup.outputs.has_image == 'true' && steps.resolve_version.outputs.decision == 'mergerelease'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURRENT_WORKFLOW_BRANCH: ${{ github.head_ref || github.ref_name }}
