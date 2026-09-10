@@ -143,7 +143,7 @@ jobs:
           bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
           {
             echo "text<<PROMPT_OUT"
-            cat "/tmp/changelog-prompt-${ADDON}.txt"
+            cat ".github/tmp/changelog-prompt-${ADDON}.txt"
             echo "- Commit only if the head repo is this repo, else post the ready-to-paste entry as a PR comment."
             echo "PROMPT_OUT"
           } >> "$GITHUB_OUTPUT"

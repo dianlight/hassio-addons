@@ -1,4 +1,5 @@
 .DS_Store
 env_file
 .claude/
+.github/tmp/
 sambanas2/.imgenv
