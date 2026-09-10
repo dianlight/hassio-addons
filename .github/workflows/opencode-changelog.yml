@@ -1,0 +1,167 @@
+name: OpenCode Changelog (sambanas2)
+
+# No /oc text commands. Automatic only: push + pull_request + manual dispatch.
+# Shared logic lives in .github/scripts/opencode-maintain-changelog.sh
+# (generic over ADDON, proven on sambanas2 first). Per-addon conventions live
+# in <addon>/.changelog-style.md. This workflow keeps only orchestration:
+# triggers, model resolution, opencode execution mode, and commit-back.
+# Model is resolved via dianlight/opencode-modelselect-action (task-type: docs).
+# Auth uses OPENCODE_API_KEY (never ANTHROPIC_API_KEY).
+#
+# NOTE: anomalyco/opencode/github only supports issue/PR/schedule/dispatch
+# events ("Unsupported event type: push"), so push/dispatch runs use the
+# opencode CLI directly (opencode run) via the shared script.
+#
+# Nothing changelog-related lives in <addon>/scripts/: docker-image-dev.yml
+# auto-executes every file there at build time.
+
+on:
+  push:
+    branches:
+      - devrelease/*
+      - mergerelease/*
+    paths:
+      - sambanas2/**
+  pull_request:
+    paths:
+      - sambanas2/**
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "maintain (default) or strip-unreleased (mergerelease/beta sync)"
+        required: false
+        default: maintain
+      dry_run:
+        description: "render prompt and diff stat without editing (true/false)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+env:
+  ADDON: sambanas2
+
+jobs:
+  # push + dispatch: headless CLI run (the github wrapper action rejects push).
+  changelog-push:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          submodules: true
+
+      # Defense in depth: the shared script masks secrets itself, but an
+      # explicit mask also covers earlier steps (e.g. a crashing tool
+      # printing its environment).
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.OPENCODE_API_KEY }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Select model
+        id: resolve
+        uses: dianlight/opencode-modelselect-action@v1
+        with:
+          task-type: docs
+          tier: auto
+          opencode-token: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Maintain CHANGELOG.md via shared script
+        # mergerelease/* is deterministic-only (strip ## Unreleased already done
+        # in docker-image-dev): never re-add Unreleased there, and avoid push loops.
+        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/')
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_MODEL: ${{ steps.resolve.outputs.model }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
+
+      - name: Commit back (push/dispatch only)
+        shell: bash
+        run: |
+          if git diff --quiet -- sambanas2/CHANGELOG.md; then
+            echo "CHANGELOG.md unchanged, nothing to commit."
+            exit 0
+          fi
+          git config user.email "workflow-bot@github.com"
+          git config user.name "Changelog Bot"
+          git add sambanas2/CHANGELOG.md
+          git commit -m "chore: update sambanas2 CHANGELOG.md Unreleased via opencode" || exit 0
+          for i in 1 2 3; do
+            git pull --rebase && git push && break || sleep 10
+          done
+
+  # pull_request: official action (push is the only unsupported event).
+  # mergerelease/* heads are deterministic-only (strip already done in
+  # docker-image-dev): skip like the push job does for refs/heads/mergerelease/.
+  changelog-pr:
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          submodules: true
+
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.OPENCODE_API_KEY }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Select model
+        id: resolve
+        uses: dianlight/opencode-modelselect-action@v1
+        with:
+          task-type: docs
+          tier: auto
+          opencode-token: ${{ secrets.OPENCODE_API_KEY }}
+
+      # Render the shared prompt (dry-run: no edits) and append the PR-only
+      # fork rule, so the github action uses the same prompt as push runs.
+      - name: Render shared prompt
+        id: render
+        env:
+          DRY_RUN: "true"
+        shell: bash
+        run: |
+          bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
+          {
+            echo "text<<PROMPT_OUT"
+            cat "/tmp/changelog-prompt-${ADDON}.txt"
+            echo "- Commit only if the head repo is this repo, else post the ready-to-paste entry as a PR comment."
+            echo "PROMPT_OUT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Maintain CHANGELOG.md
+        # Pinned to a moving tag for bootstrap; pin to a reviewed SHA after first green run.
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ steps.resolve.outputs.model }}
+          use_github_token: true
+          # Never upload the session transcript anywhere (public repos default to share).
+          share: false
+          prompt: ${{ steps.render.outputs.text }}
+
+      - name: Normalize Thanks/Notes order (deterministic)
+        shell: bash
+        run: |
+          python3 .github/scripts/normalize_changelog_order.py sambanas2/CHANGELOG.md
