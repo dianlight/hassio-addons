@@ -17,16 +17,28 @@ on:
         description: "Target devrelease branch (e.g. devrelease/sambanas2). Empty = all devrelease/* branches."
         required: false
         default: ""
+  # Issues trigger drives the opencode auto-resolve below: the rebase job
+  # creates a `rebase-conflict` issue on push, and this same workflow
+  # re-triggers on that issue (opened/labeled) where the
+  # anomalyco/opencode/github action is supported (it rejects `push` events
+  # with "Unsupported event type: push", so it can never run in the rebase job).
+  issues:
+    types:
+      - opened
+      - labeled
 
 permissions:
   contents: write
   issues: write
+  pull-requests: write
+  id-token: write
 
 jobs:
   discover:
     name: Discover targets
-    # push and workflow_dispatch always run; closed PRs only when merged
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    # push and workflow_dispatch always run; closed PRs only when merged.
+    # Never runs on the issues trigger (that path is owned by auto-resolve).
+    if: github.event_name != 'issues' && (github.event_name != 'pull_request' || github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     outputs:
       source: ${{ steps.resolve.outputs.source }}
@@ -96,7 +108,7 @@ jobs:
   rebase:
     name: Rebase ${{ matrix.branch }}
     needs: discover
-    if: needs.discover.outputs.skip != 'true' && needs.discover.outputs.matrix != '' && needs.discover.outputs.matrix != '[]'
+    if: github.event_name != 'issues' && needs.discover.outputs.skip != 'true' && needs.discover.outputs.matrix != '' && needs.discover.outputs.matrix != '[]'
     runs-on: ubuntu-latest
     concurrency:
       group: rebase-${{ matrix.branch }}
@@ -117,6 +129,10 @@ jobs:
       - name: Rebase onto source, or open fallback issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -uo pipefail
@@ -148,7 +164,122 @@ jobs:
           fi
 
           echo "::warning::Rebase of '${TARGET_BRANCH}' onto 'origin/${SOURCE_BRANCH}' failed with conflicts."
+
+          # ---- Conflict detail (captured BEFORE abort, while index holds U entries) ----
+          CONFLICT_FILES=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
+          if [ -z "${CONFLICT_FILES}" ]; then
+            CONFLICT_FILES=$(git status --porcelain 2>/dev/null | awk '$1 ~ /U|AA|DD/ {print $2}' || true)
+          fi
+          if [ -z "${CONFLICT_FILES}" ]; then
+            CONFLICT_FILES="(unlisted - see run logs)"
+          fi
+          echo "Conflicted files:"
+          printf '%s\n' "${CONFLICT_FILES}"
+
+          # Target addon is the suffix of devrelease/<addon>.
+          # A file is in-scope when it lives under <addon>/, out-of-scope otherwise.
+          ADDON="${TARGET_BRANCH#devrelease/}"
+          SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}" 2>/dev/null || echo "unknown")
+          TARGET_SHA=$(git rev-parse "origin/${TARGET_BRANCH}" 2>/dev/null || echo "unknown")
+
+          INSIDE_N=0
+          OUTSIDE_N=0
+          TOTAL_N=0
+          INSIDE_LIST=""
+          OUTSIDE_LIST=""
+          while IFS= read -r F; do
+            [ -z "${F}" ] && continue
+            if [ "${F}" = "(unlisted - see run logs)" ]; then
+              continue
+            fi
+            TOTAL_N=$((TOTAL_N + 1))
+            case "${F}" in
+              "${ADDON}/"*)
+                INSIDE_N=$((INSIDE_N + 1))
+                INSIDE_LIST="${INSIDE_LIST}${F}
+          "
+                ;;
+              *)
+                OUTSIDE_N=$((OUTSIDE_N + 1))
+                OUTSIDE_LIST="${OUTSIDE_LIST}${F}
+          "
+                ;;
+            esac
+          done <<< "${CONFLICT_FILES}"
+
+          if [ "${TOTAL_N}" -gt 0 ] && [ "${INSIDE_N}" -eq 0 ]; then
+            OUTSIDE_ONLY="true"
+          else
+            OUTSIDE_ONLY="false"
+          fi
+          echo "Addon: ${ADDON} | total=${TOTAL_N} inside=${INSIDE_N} outside=${OUTSIDE_N} outside_only=${OUTSIDE_ONLY}"
+
           git rebase --abort || true
+
+          export TARGET_BRANCH SOURCE_BRANCH SOURCE_SHA TARGET_SHA ADDON
+          export TOTAL_N INSIDE_N OUTSIDE_N OUTSIDE_ONLY
+          export CONFLICT_FILES INSIDE_LIST OUTSIDE_LIST
+          export EVENT_NAME RUN_ID SERVER_URL REPO
+          python3 - <<'PYEOF' > /tmp/rebase-issue.md
+          import os
+          target = os.environ.get("TARGET_BRANCH", "")
+          source = os.environ.get("SOURCE_BRANCH", "")
+          addon = os.environ.get("ADDON", "")
+          source_sha = os.environ.get("SOURCE_SHA", "unknown")
+          target_sha = os.environ.get("TARGET_SHA", "unknown")
+          total = os.environ.get("TOTAL_N", "0")
+          inside_n = os.environ.get("INSIDE_N", "0")
+          outside_n = os.environ.get("OUTSIDE_N", "0")
+          outside_only = os.environ.get("OUTSIDE_ONLY", "false")
+          inside_list = (os.environ.get("INSIDE_LIST", "") or "").strip().splitlines()
+          outside_list = (os.environ.get("OUTSIDE_LIST", "") or "").strip().splitlines()
+          conflict_files = (os.environ.get("CONFLICT_FILES", "") or "").strip().splitlines()
+          event_name = os.environ.get("EVENT_NAME", "")
+          run_id = os.environ.get("RUN_ID", "")
+          server_url = os.environ.get("SERVER_URL", "")
+          repo = os.environ.get("REPO", "")
+          run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if run_id else ""
+          def items(files):
+              files = [f for f in files if f]
+              return "\n".join(f"- `{f}`" for f in files) if files else "- _(none)_"
+          print(f"Automatic rebase of `{target}` onto `origin/{source}` (`{source_sha}`) failed with conflicts (trigger: {event_name}, run {run_id}: {run_url}).")
+          print("")
+          print(f"Only `{target}` needs fixing - `{source}` is untouched.")
+          print("")
+          print(f"> ⚠️ All resolution work MUST happen on `{target}` (`devrelease/*`) - NEVER commit to, push to, or force-push `{source}`, `master`, or `main`. The source branch is strictly read-only for this sync.")
+          print("")
+          print("## Conflict detail")
+          print("")
+          print(f"- Target addon (from `{target}`): `{addon}`")
+          print(f"- Source SHA: `{source_sha}` / target SHA (origin): `{target_sha}`")
+          print(f"- Conflicted files ({total}):")
+          print(items(conflict_files))
+          print(f"- Inside `{addon}/` ({inside_n} - needs manual review):")
+          print(items(inside_list))
+          print(f"- Outside `{addon}/` ({outside_n} - generic files):")
+          print(items(outside_list))
+          print(f"- All conflicts outside target addon: `{outside_only}`")
+          print("")
+          if outside_only == "true":
+              print("All conflicts are outside the target addon directory, so the `auto-resolve` job in this workflow will attempt an opencode-assisted rebase. It pushes only on a 100% functional resolution; on any doubt it stops and comments here, leaving this issue open for manual sync.")
+          else:
+              print("At least one conflict touches the target addon directory, so automatic resolution is disabled. Please resolve manually on the target branch (the bot stops on any doubt for in-addon files).")
+          print("")
+          print("<!-- rebase-meta target=%s source=%s addon=%s outside_only=%s source_sha=%s target_sha=%s -->" % (target, source, addon, outside_only, source_sha, target_sha))
+          print("")
+          print("Please resolve manually on the `%s` branch:" % target)
+          print("")
+          print("```bash")
+          print("git fetch origin")
+          print(f"git checkout {target}")
+          print(f"git rebase origin/{source}")
+          print("# resolve conflicts, keeping the devrelease-specific changes, then:")
+          print("git rebase --continue")
+          print(f"git push --force-with-lease origin {target}")
+          print("```")
+          print("")
+          print(f"This issue can be closed once `{target}` contains `origin/{source}`.")
+          PYEOF
 
           ISSUE_TITLE="Rebase conflict: ${TARGET_BRANCH} needs manual sync with ${SOURCE_BRANCH}"
           LABEL="rebase-conflict"
@@ -159,29 +290,193 @@ jobs:
             --color "D93F0B" 2>/dev/null || true
 
           echo "Checking for an existing open issue '${ISSUE_TITLE}'..."
-          EXISTING=$(gh issue list \
+          EXISTING_NUM=$(gh issue list \
             --label "${LABEL}" \
             --state open \
             --search "${ISSUE_TITLE} in:title" \
-            --json number,url \
-            --jq 'length')
+            --json number \
+            --jq '.[0].number // empty')
 
-          if [ "${EXISTING}" -gt 0 ]; then
-            gh issue list --label "${LABEL}" --state open --search "${ISSUE_TITLE} in:title"
-            echo "::notice::Open sync issue already exists for '${TARGET_BRANCH}'. Skipping creation."
+          if [ -n "${EXISTING_NUM}" ]; then
+            echo "::notice::Open sync issue #${EXISTING_NUM} already exists for '${TARGET_BRANCH}'. Adding fresh conflict detail."
+            gh issue comment "${EXISTING_NUM}" --body-file /tmp/rebase-issue.md
+            if [ "${OUTSIDE_ONLY}" = "true" ]; then
+              # Re-fire the issues/labeled trigger so auto-resolve retries the
+              # fresh conflict set (a plain comment does not trigger it).
+              gh issue edit "${EXISTING_NUM}" --remove-label "${LABEL}" >/dev/null || true
+              gh issue edit "${EXISTING_NUM}" --add-label "${LABEL}" >/dev/null || true
+            fi
+            echo "::error::Rebase conflict — updated #${EXISTING_NUM} for '${TARGET_BRANCH}'."
             exit 1
           fi
 
           echo "Creating fallback issue for '${TARGET_BRANCH}'..."
-          SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
           gh issue create \
             --title "${ISSUE_TITLE}" \
             --label "${LABEL}" \
-            --body "Automatic rebase of \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` (\`${SOURCE_SHA}\`) failed with conflicts (trigger: ${{ github.event_name }}, run ${{ github.run_id }}: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            --body-file /tmp/rebase-issue.md
 
-          Only \`${TARGET_BRANCH}\` needs fixing — \`${SOURCE_BRANCH}\` is untouched.
+          echo "::error::Rebase conflict — fallback issue created for '${TARGET_BRANCH}'."
+          exit 1
 
-          Please resolve manually on the \`${TARGET_BRANCH}\` branch:
+  # Runs on the `issues` trigger (opened/labeled), where the opencode github
+  # action is supported. Attempts the rebase only when every conflicted file
+  # is OUTSIDE the target addon directory (derived from devrelease/<addon>).
+  # In-addon conflicts, or any doubt about correctness, stop with an issue
+  # comment and leave the issue open for manual sync.
+  auto-resolve:
+    name: Auto-resolve rebase conflict
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: auto-resolve-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          echo "::add-mask::${{ secrets.OPENCODE_API_KEY }}"
+          echo "::add-mask::${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Parse rebase issue
+        id: parse
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          LABELS=$(gh issue view "${ISSUE_NUMBER}" --json labels --jq '[.labels[].name] | join(",")')
+          echo "Issue #${ISSUE_NUMBER} labels: ${LABELS}"
+          if ! printf '%s' "${LABELS}" | tr ',' '\n' | grep -qx 'rebase-conflict'; then
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "Not a rebase-conflict issue. Skipping."
+            exit 0
+          fi
+          TITLE=$(gh issue view "${ISSUE_NUMBER}" --json title --jq '.title')
+          BODY=$(gh issue view "${ISSUE_NUMBER}" --json body --jq '.body')
+          META=$(printf '%s\n' "${BODY}" | grep -o '<!-- rebase-meta[^>]*-->' | head -n1 || true)
+          TARGET=$(printf '%s\n' "${META}" | grep -o 'target=[^ ]*' | cut -d= -f2- || true)
+          SOURCE=$(printf '%s\n' "${META}" | grep -o 'source=[^ ]*' | cut -d= -f2- | head -n1 || true)
+          ADDON=$(printf '%s\n' "${META}" | grep -o 'addon=[^ ]*' | cut -d= -f2- || true)
+          SOURCE_SHA=$(printf '%s\n' "${META}" | grep -o 'source_sha=[^ ]*' | cut -d= -f2- || true)
+          if [ -z "${TARGET}" ]; then
+            TARGET=$(printf '%s\n' "${TITLE}" | sed -n 's/^Rebase conflict: \([^ ]*\) needs.*/\1/p')
+          fi
+          if [ -z "${SOURCE}" ]; then
+            SOURCE=$(printf '%s\n' "${TITLE}" | sed -n 's/.*with \([^ ]*\)$/\1/p')
+          fi
+          if [ -z "${ADDON}" ] && [[ "${TARGET}" == devrelease/* ]]; then
+            ADDON="${TARGET#devrelease/}"
+          fi
+          if [[ "${TARGET}" != devrelease/* ]] || [ -z "${SOURCE}" ] || [ -z "${ADDON}" ]; then
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Could not parse target/source/addon from issue #${ISSUE_NUMBER} (target='${TARGET}' source='${SOURCE}' addon='${ADDON}'). Leaving for manual triage."
+            gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve stopped: could not parse \`target\`/\`source\`/\`addon\` from this issue (title: \`${TITLE}\`). Expected title \`Rebase conflict: devrelease/<addon> needs manual sync with <source>\` plus the \`<!-- rebase-meta ... -->\` block. Please sync manually."
+            exit 0
+          fi
+          {
+            echo "proceed=true"
+            echo "target=${TARGET}"
+            echo "source=${SOURCE}"
+            echo "addon=${ADDON}"
+            echo "source_sha=${SOURCE_SHA}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Parsed: target=${TARGET} source=${SOURCE} addon=${ADDON}"
+
+      - name: Live conflict check
+        if: steps.parse.outputs.proceed == 'true'
+        id: live
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ steps.parse.outputs.target }}
+          SOURCE_BRANCH: ${{ steps.parse.outputs.source }}
+          ADDON: ${{ steps.parse.outputs.addon }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin --prune
+          git checkout "${TARGET_BRANCH}"
+          git reset --hard "origin/${TARGET_BRANCH}"
+
+          if git merge-base --is-ancestor "origin/${SOURCE_BRANCH}" HEAD; then
+            echo "already_merged=true" >> "$GITHUB_OUTPUT"
+            echo "outside_only=false" >> "$GITHUB_OUTPUT"
+            gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve check: \`${TARGET_BRANCH}\` already contains \`origin/${SOURCE_BRANCH}\`. Closing as resolved (no opencode run needed)."
+            gh issue close "${ISSUE_NUMBER}" --reason completed
+            exit 0
+          fi
+          echo "already_merged=false" >> "$GITHUB_OUTPUT"
+
+          if git rebase "origin/${SOURCE_BRANCH}"; then
+            # Merged cleanly on retry (race with a manual fix): push and close.
+            git push --force-with-lease origin "${TARGET_BRANCH}"
+            echo "outside_only=false" >> "$GITHUB_OUTPUT"
+            echo "clean_retry=true" >> "$GITHUB_OUTPUT"
+            SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
+            gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve: rebase of \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` (\`${SOURCE_SHA}\`) succeeded on retry with no remaining conflicts. Pushed with \`--force-with-lease\`. Merged: \`origin/${SOURCE_BRANCH}\` is now an ancestor of \`${TARGET_BRANCH}\`."
+            gh issue close "${ISSUE_NUMBER}" --reason completed
+            exit 0
+          fi
+          echo "clean_retry=false" >> "$GITHUB_OUTPUT"
+
+          CONFLICT_FILES=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
+          if [ -z "${CONFLICT_FILES}" ]; then
+            CONFLICT_FILES=$(git status --porcelain 2>/dev/null | awk '$1 ~ /U|AA|DD/ {print $2}' || true)
+          fi
+          INSIDE_N=0
+          while IFS= read -r F; do
+            [ -z "${F}" ] && continue
+            case "${F}" in
+              "${ADDON}/"*) INSIDE_N=$((INSIDE_N + 1)) ;;
+            esac
+          done <<< "${CONFLICT_FILES}"
+          {
+            echo "conflict_files<<LIVE_EOF"
+            printf '%s\n' "${CONFLICT_FILES}"
+            echo "LIVE_EOF"
+          } >> "$GITHUB_OUTPUT"
+          if [ "${INSIDE_N}" -eq 0 ] && [ -n "${CONFLICT_FILES}" ]; then
+            echo "outside_only=true" >> "$GITHUB_OUTPUT"
+            echo "All conflicts are outside '${ADDON}/' - eligible for opencode attempt."
+          else
+            echo "outside_only=false" >> "$GITHUB_OUTPUT"
+            echo "In-addon conflicts detected - automatic resolution disabled."
+          fi
+          git rebase --abort || true
+
+      - name: Stop on in-addon conflicts (manual needed)
+        if: steps.parse.outputs.proceed == 'true' && steps.live.outputs.already_merged != 'true' && steps.live.outputs.clean_retry != 'true' && steps.live.outputs.outside_only != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ steps.parse.outputs.target }}
+          SOURCE_BRANCH: ${{ steps.parse.outputs.source }}
+          ADDON: ${{ steps.parse.outputs.addon }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          CONFLICT_FILES: ${{ steps.live.outputs.conflict_files }}
+        shell: bash
+        run: |
+          LIST=$(printf '%s\n' "${CONFLICT_FILES}" | sed 's/^/- `/' | sed 's/$/`/' | head -n 50)
+          gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve stopped: at least one conflicted file is inside the target addon directory \`${ADDON}/\`, so no automatic fix was attempted (only 100% safe out-of-addon resolutions are allowed).
+
+          Conflicted files:
+
+          ${LIST}
+
+          Please resolve manually on \`${TARGET_BRANCH}\`:
 
           \`\`\`bash
           git fetch origin
@@ -190,9 +485,117 @@ jobs:
           # resolve conflicts, keeping the devrelease-specific changes, then:
           git rebase --continue
           git push --force-with-lease origin ${TARGET_BRANCH}
-          \`\`\`
+          \`\`\`"
+          echo "::notice::In-addon conflicts - left #${ISSUE_NUMBER} open for manual sync."
 
-          This issue can be closed once \`${TARGET_BRANCH}\` contains \`origin/${SOURCE_BRANCH}\`."
+      - name: Select model
+        if: steps.parse.outputs.proceed == 'true' && steps.live.outputs.already_merged != 'true' && steps.live.outputs.clean_retry != 'true' && steps.live.outputs.outside_only == 'true'
+        id: resolve
+        uses: dianlight/opencode-modelselect-action@97f7f5c377aae0f922a08222d433b1eb0475bddf # v1
+        with:
+          task-type: code
+          tier: auto
+          opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
-          echo "::error::Rebase conflict — fallback issue created for '${TARGET_BRANCH}'."
-          exit 1
+      - name: Resolve rebase conflicts via opencode
+        if: steps.parse.outputs.proceed == 'true' && steps.live.outputs.already_merged != 'true' && steps.live.outputs.clean_retry != 'true' && steps.live.outputs.outside_only == 'true'
+        uses: anomalyco/opencode/github@77fc88c8ade8e5a620ebbe1197f3a572d29ae91a # latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ steps.resolve.outputs.model }}
+          use_github_token: true
+          share: false
+          prompt: |
+            You are resolving a git rebase conflict for a Home Assistant add-ons monorepo (issue-driven run).
+
+            Context:
+            - Target branch needing the fix: `${{ steps.parse.outputs.target }}` (SOURCE branch is untouched; fix only the target).
+            - Source to rebase onto: `origin/${{ steps.parse.outputs.source }}` (SHA `${{ steps.parse.outputs.source_sha }}`).
+            - Target addon directory: `${{ steps.parse.outputs.addon }}/`.
+            - Proven fact from the workflow's live check: EVERY conflicted file is OUTSIDE `${{ steps.parse.outputs.addon }}/` (generic repo files). Conflicted files:
+            ${{ steps.live.outputs.conflict_files }}
+            - Related issue: #${{ github.event.issue.number }} (`${{ github.event.issue.title }}`).
+
+            Task (in this runner workspace, which already has the repo with git credentials):
+            1. `git fetch origin`, `git checkout ${{ steps.parse.outputs.target }}`, `git reset --hard origin/${{ steps.parse.outputs.target }}`, then `git rebase origin/${{ steps.parse.outputs.source }}` to reproduce the conflicts.
+            2. Resolve each conflicted file by understanding both sides. For generic files outside the addon directory, prefer `origin/${{ steps.parse.outputs.source }}` unless that would clearly drop devrelease intent. Never invent behavior; preserve devrelease-specific changes.
+            3. `git add` the resolved files and `git rebase --continue` until the rebase is clean.
+            4. Verify with `git merge-base --is-ancestor origin/${{ steps.parse.outputs.source }} HEAD`.
+            5. Only then `git push --force-with-lease origin ${{ steps.parse.outputs.target }}`.
+
+            BRANCH SCOPE (binding, overrides everything else):
+            - Do ALL work on `${{ steps.parse.outputs.target }}`. Push ONLY to `origin/${{ steps.parse.outputs.target }}` with `--force-with-lease`.
+            - NEVER commit to, push to, or force-push `master`, `main`, `origin/master`, `origin/main`, or `origin/${{ steps.parse.outputs.source }}`. Treat the source branch as strictly read-only (`git fetch` + rebase onto it only).
+            - If supporting plumbing proposes a PR against `master`/`main`, do NOT follow it - resolve directly on the devrelease branch as instructed above.
+
+            STRICT CORRECTNESS RULE (binding):
+            - Push ONLY on a 100% functional and correct resolution.
+            - On ANY doubt about semantics, behavior, or intent: STOP. Do NOT push, do NOT finish the rebase. Leave the working tree as-is and explain in your final response exactly which file/hunk is doubtful and why, so the workflow can post it as an issue comment and keep the issue open for a human.
+            - On success, end your response with a `MERGED:` summary listing what was rebased (source SHA), which files you resolved and how (one line per file), and the verification command output.
+
+      - name: Verify outcome and close or comment
+        if: steps.parse.outputs.proceed == 'true' && steps.live.outputs.already_merged != 'true' && steps.live.outputs.clean_retry != 'true' && steps.live.outputs.outside_only == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ steps.parse.outputs.target }}
+          SOURCE_BRANCH: ${{ steps.parse.outputs.source }}
+          ADDON: ${{ steps.parse.outputs.addon }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          git fetch origin --prune
+          # The opencode agent pushes directly to the target branch (it switches
+          # branches itself, so the action's own PR plumbing is bypassed).
+          if git merge-base --is-ancestor "origin/${SOURCE_BRANCH}" "origin/${TARGET_BRANCH}"; then
+            SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
+            TARGET_SHA=$(git rev-parse "origin/${TARGET_BRANCH}")
+            MERGED_FILES=$(git diff --name-only "${SOURCE_SHA}^" "${TARGET_SHA}" 2>/dev/null | head -n 30 || git log --oneline "${SOURCE_SHA}..${TARGET_SHA}" | head -n 20)
+            gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve succeeded: opencode rebased \`${TARGET_BRANCH}\` onto \`origin/${SOURCE_BRANCH}\` (\`${SOURCE_SHA}\`) and pushed (all conflicts were outside \`${ADDON}/\`). New \`${TARGET_BRANCH}\` SHA: \`${TARGET_SHA}\`.
+
+            What was merged:
+            - \`origin/${SOURCE_BRANCH}\` (\`${SOURCE_SHA}\`) is now an ancestor of \`${TARGET_BRANCH}\`.
+            - Changed/merged files (first 30):
+            $(printf '%s\n' "${MERGED_FILES}" | sed 's/^/- `/;s/$/`/')
+            - Run: ${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}
+
+            See the opencode run comment above for the per-file resolution summary."
+            gh issue close "${ISSUE_NUMBER}" --reason completed
+            echo "Closed #${ISSUE_NUMBER} as resolved."
+            exit 0
+          fi
+          echo "::warning::Target '${TARGET_BRANCH}' still does not contain 'origin/${SOURCE_BRANCH}' after opencode run. Leaving issue open."
+          git checkout "${TARGET_BRANCH}" 2>/dev/null || true
+          git reset --hard "origin/${TARGET_BRANCH}" 2>/dev/null || true
+          REMAINING=""
+          if ! git rebase "origin/${SOURCE_BRANCH}" >/dev/null 2>&1; then
+            REMAINING=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
+            git rebase --abort || true
+          fi
+          if [ -n "${REMAINING}" ]; then
+            LIST=$(printf '%s\n' "${REMAINING}" | sed 's/^/- `/' | sed 's/$/`/')
+          else
+            LIST="- (could not determine - see [run log](${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}))"
+          fi
+          gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve stopped with doubts: opencode did NOT push a resolution (correctness rule), or the push did not land. \`${TARGET_BRANCH}\` still does not contain \`origin/${SOURCE_BRANCH}\`. The issue stays open for manual sync.
+
+          Remaining conflicted files (re-checked):
+
+          ${LIST}
+
+          Opencode's reply above has the per-hunk doubt details. To finish manually:
+
+          \`\`\`bash
+          git fetch origin
+          git checkout ${TARGET_BRANCH}
+          git rebase origin/${SOURCE_BRANCH}
+          # resolve conflicts, keeping the devrelease-specific changes, then:
+          git rebase --continue
+          git push --force-with-lease origin ${TARGET_BRANCH}
+          \`\`\`"
+          exit 0
