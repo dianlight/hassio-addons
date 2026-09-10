@@ -1,6 +1,6 @@
 ---
 name: BeSim
-version: 0.0.3
+version: 2026.9.0
 slug: besim
 description: A simulator for the cloud server the BeSMART thermostat/wifi box connects to.
 url: https://github.com/dianlight/hassio-addons/tree/master/besim
