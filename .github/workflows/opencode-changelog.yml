@@ -70,7 +70,7 @@ jobs:
 
       - name: Select model
         id: resolve
-        uses: dianlight/opencode-modelselect-action@v1
+        uses: dianlight/opencode-modelselect-action@97f7f5c377aae0f922a08222d433b1eb0475bddf # v1
         with:
           task-type: docs
           tier: auto
@@ -126,7 +126,7 @@ jobs:
 
       - name: Select model
         id: resolve
-        uses: dianlight/opencode-modelselect-action@v1
+        uses: dianlight/opencode-modelselect-action@97f7f5c377aae0f922a08222d433b1eb0475bddf # v1
         with:
           task-type: docs
           tier: auto
@@ -150,7 +150,7 @@ jobs:
 
       - name: Maintain CHANGELOG.md
         # Pinned to a moving tag for bootstrap; pin to a reviewed SHA after first green run.
-        uses: anomalyco/opencode/github@latest
+        uses: anomalyco/opencode/github@77fc88c8ade8e5a620ebbe1197f3a572d29ae91a # latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
