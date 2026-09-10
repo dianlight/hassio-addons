@@ -223,7 +223,11 @@ jobs:
           export TOTAL_N INSIDE_N OUTSIDE_N OUTSIDE_ONLY
           export CONFLICT_FILES INSIDE_LIST OUTSIDE_LIST
           export EVENT_NAME RUN_ID SERVER_URL REPO
-          python3 - <<'PYEOF' > /tmp/rebase-issue.md
+          # Workspace-local tmp (opencode CLI denies /tmp as external_directory).
+          REBASE_TMP="${GITHUB_WORKSPACE}/.rebase-tmp"
+          mkdir -p "${REBASE_TMP}"
+          export REBASE_TMP
+          python3 - <<'PYEOF' > "${REBASE_TMP}/rebase-issue.md"
           import os
           target = os.environ.get("TARGET_BRANCH", "")
           source = os.environ.get("SOURCE_BRANCH", "")
@@ -302,14 +306,14 @@ jobs:
 
           if [ -n "${EXISTING_NUM}" ]; then
             echo "::notice::Open sync issue #${EXISTING_NUM} already exists for '${TARGET_BRANCH}'. Adding fresh conflict detail."
-            gh issue comment "${EXISTING_NUM}" --body-file /tmp/rebase-issue.md
+            gh issue comment "${EXISTING_NUM}" --body-file "${REBASE_TMP}/rebase-issue.md"
             ISSUE_NUM="${EXISTING_NUM}"
           else
             echo "Creating fallback issue for '${TARGET_BRANCH}'..."
             ISSUE_URL=$(gh issue create \
               --title "${ISSUE_TITLE}" \
               --label "${LABEL}" \
-              --body-file /tmp/rebase-issue.md)
+              --body-file "${REBASE_TMP}/rebase-issue.md")
             echo "Created: ${ISSUE_URL}"
             ISSUE_NUM=$(printf '%s' "${ISSUE_URL}" | grep -oE '[0-9]+$' || true)
           fi
@@ -329,8 +333,8 @@ jobs:
             printf '%s\n' "${CONFLICT_FILES}"
             echo "REBASE_EOF"
           } >> "$GITHUB_OUTPUT"
-          printf '%s' "${ISSUE_NUM}" > /tmp/rebase-issue-number
-          printf '%s' "${CONFLICT_FILES}" > /tmp/rebase-conflict-files
+          printf '%s' "${ISSUE_NUM}" > "${REBASE_TMP}/rebase-issue-number"
+          printf '%s' "${CONFLICT_FILES}" > "${REBASE_TMP}/rebase-conflict-files"
           echo "::warning::Rebase conflict — fallback issue #${ISSUE_NUM} for '${TARGET_BRANCH}' (outside_only=${OUTSIDE_ONLY})."
           exit 0
 
@@ -355,7 +359,8 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          LIST=$(sed 's/^/- `/' /tmp/rebase-conflict-files | sed 's/$/`/' | head -n 50)
+          REBASE_TMP="${GITHUB_WORKSPACE}/.rebase-tmp"
+          LIST=$(sed 's/^/- `/' "${REBASE_TMP}/rebase-conflict-files" | sed 's/$/`/' | head -n 50)
           gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve stopped: at least one conflicted file is inside the target addon directory \`${ADDON}/\`, so no automatic fix was attempted (only 100% safe out-of-addon resolutions are allowed).
 
           Conflicted files:
@@ -407,7 +412,11 @@ jobs:
           ADDON="${TARGET_BRANCH#devrelease/}"
           SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}" 2>/dev/null || echo "unknown")
           export TARGET_BRANCH SOURCE_BRANCH ADDON SOURCE_SHA ISSUE_NUMBER RUN_ID SERVER_URL REPO
-          python3 - <<'PYEOF' > /tmp/rebase-prompt.md
+          # Workspace-local tmp (opencode CLI denies /tmp as external_directory).
+          REBASE_TMP="${GITHUB_WORKSPACE}/.rebase-tmp"
+          mkdir -p "${REBASE_TMP}"
+          export REBASE_TMP
+          python3 - <<'PYEOF' > "${REBASE_TMP}/rebase-prompt.md"
           import os
           target = os.environ.get("TARGET_BRANCH", "")
           source = os.environ.get("SOURCE_BRANCH", "")
@@ -417,9 +426,10 @@ jobs:
           run_id = os.environ.get("RUN_ID", "")
           server_url = os.environ.get("SERVER_URL", "")
           repo = os.environ.get("REPO", "")
+          rebase_tmp = os.environ.get("REBASE_TMP", "./.rebase-tmp")
           run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if run_id else ""
           try:
-              with open("/tmp/rebase-conflict-files") as f:
+              with open(os.path.join(rebase_tmp, "rebase-conflict-files")) as f:
                   files = [l.strip() for l in f if l.strip()]
           except OSError:
               files = []
@@ -441,6 +451,10 @@ jobs:
           print(f"4. Verify with `git merge-base --is-ancestor origin/{source} HEAD`.")
           print(f"5. Only then `git push --force-with-lease origin {target}`.")
           print("")
+          print("FILESYSTEM SCOPE (binding):")
+          print("- NEVER read from, write to, or create files under `/tmp` (the tool sandbox denies it as external_directory and the run fails).")
+          print(f"- Use only workspace-local paths: repo root and `{rebase_tmp}/` for any scratch/diff files you need.")
+          print("")
           print("BRANCH SCOPE (binding, overrides everything else):")
           print(f"- Do ALL work on `{target}`. Push ONLY to `origin/{target}` with `--force-with-lease`.")
           print(f"- NEVER commit to, push to, or force-push `master`, `main`, `origin/master`, `origin/main`, or `origin/{source}`. Treat the source branch as strictly read-only (`git fetch` + rebase onto it only).")
@@ -452,7 +466,7 @@ jobs:
           print("- On success, end your response with a `MERGED:` summary listing what was rebased (source SHA), which files you resolved and how (one line per file), and the verification command output.")
           PYEOF
           echo "--- Prompt ---"
-          cat /tmp/rebase-prompt.md
+          cat "${REBASE_TMP}/rebase-prompt.md"
 
           if ! command -v opencode >/dev/null; then
             echo "opencode CLI not found, installing..."
@@ -466,9 +480,9 @@ jobs:
           OPENCODE_DISABLE_AUTOUPDATE="true" opencode run \
             --model "${OPENCODE_MODEL}" \
             --agent build \
-            "$(cat /tmp/rebase-prompt.md)" 2>&1 | tee /tmp/rebase-opencode.log || true
+            "$(cat "${REBASE_TMP}/rebase-prompt.md")" 2>&1 | tee "${REBASE_TMP}/rebase-opencode.log" || true
           echo "--- opencode run finished ---"
-          tail -n 30 /tmp/rebase-opencode.log || true
+          tail -n 30 "${REBASE_TMP}/rebase-opencode.log" || true
 
       - name: Verify auto-resolve outcome
         if: steps.rebase.outputs.conflict == 'true'
