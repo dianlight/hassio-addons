@@ -1,0 +1,96 @@
+name: Reset Master to Last PR Merge Parent
+
+# DANGER: hard-resets master to the first parent of HEAD, permanently
+# dropping the merge commit from master history (recoverable only via the
+# backup/master-<sha> safety branch pushed before the reset).
+# Dispatch-only. HEAD itself must be a "Merge pull request #NNN" merge.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Expected PR number (optional). When set, HEAD must be that PR's merge commit."
+        required: false
+        default: ""
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Master
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Setup Git Identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Verify HEAD Is a PR Merge
+        id: verify
+        env:
+          EXPECTED_PR: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "HEAD is ${HEAD_SHA}"
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+
+          if ! git rev-parse --verify -q HEAD^2 >/dev/null; then
+            echo "::error::HEAD ${HEAD_SHA} ('$(git log -1 --format=%s)') is not a merge commit. Aborting."
+            exit 1
+          fi
+
+          SUBJECT="$(git log -1 --format=%s)"
+          if [[ ! "${SUBJECT}" =~ ^Merge\ pull\ request\ #([0-9]+)\  ]]; then
+            echo "::error::HEAD is a merge but not a PR merge ('${SUBJECT}'). Aborting."
+            exit 1
+          fi
+          PR_NUMBER="${BASH_REMATCH[1]}"
+          echo "HEAD is the merge of PR #${PR_NUMBER}."
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+
+          if [ -n "${EXPECTED_PR}" ]; then
+            if [ "${EXPECTED_PR}" != "${PR_NUMBER}" ]; then
+              echo "::error::HEAD is PR #${PR_NUMBER} but input asked for PR #${EXPECTED_PR}. Aborting."
+              exit 1
+            fi
+          fi
+
+          PARENT="$(git rev-parse HEAD^1)"
+          echo "Reset target (first parent): ${PARENT}"
+          echo "parent_sha=${PARENT}" >> "$GITHUB_OUTPUT"
+          echo "Commits that will leave master history:"
+          git log --oneline "${PARENT}..HEAD"
+
+      - name: Create Safety Backup Branch
+        run: |
+          set -euo pipefail
+          BACKUP="backup/master-${{ steps.verify.outputs.head_sha }}"
+          git branch -f "${BACKUP}" HEAD
+          git push origin "${BACKUP}"
+          echo "Backup pushed: ${BACKUP}"
+
+      - name: Hard Reset to First Parent
+        run: |
+          set -euo pipefail
+          git reset --hard "${{ steps.verify.outputs.parent_sha }}"
+          git log --oneline -3
+
+      - name: Force Push Master
+        run: |
+          set -euo pipefail
+          if ! git push --force-with-lease origin master; then
+            echo "::error::Force push rejected (master is likely locked for GITHUB_TOKEN without bypass)."
+            echo "Recover manually from a checkout at ${{ steps.verify.outputs.head_sha }}:"
+            echo "  git checkout -b backup/master-${{ steps.verify.outputs.head_sha }}"
+            echo "  git push origin backup/master-${{ steps.verify.outputs.head_sha }}"
+            echo "  git checkout master"
+            echo "  git reset --hard ${{ steps.verify.outputs.parent_sha }}"
+            echo "  git push --force-with-lease origin master"
+            exit 1
+          fi
