@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/base-python:3.13-alpine3.22
+ARG BUILD_FROM=ghcr.io/home-assistant/base-python:3.14-alpine3.22
 ARG BUILD_DATE
 ARG BUILD_DESCRIPTION
 ARG BUILD_NAME
