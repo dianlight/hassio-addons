@@ -158,12 +158,107 @@ jobs:
           echo "Attempting: git rebase origin/${SOURCE_BRANCH}"
           if git rebase "origin/${SOURCE_BRANCH}"; then
             echo "Rebase succeeded, pushing with lease..."
-            git push --force-with-lease origin "${TARGET_BRANCH}"
-            echo "Pushed rebased '${TARGET_BRANCH}'."
-            echo "conflict=false" >> "$GITHUB_OUTPUT"
-            echo "outside_only=false" >> "$GITHUB_OUTPUT"
-            echo "issue_number=" >> "$GITHUB_OUTPUT"
-            exit 0
+            # Workspace-local tmp (opencode CLI denies /tmp as external_directory).
+            REBASE_TMP="${GITHUB_WORKSPACE}/.rebase-tmp"
+            mkdir -p "${REBASE_TMP}"
+            export REBASE_TMP
+            if git push --force-with-lease origin "${TARGET_BRANCH}" 2>&1 | tee "${REBASE_TMP}/rebase-push.log"; then
+              echo "Pushed rebased '${TARGET_BRANCH}'."
+              echo "conflict=false" >> "$GITHUB_OUTPUT"
+              echo "outside_only=false" >> "$GITHUB_OUTPUT"
+              echo "issue_number=" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::warning::Rebase of '${TARGET_BRANCH}' succeeded locally but push was rejected (likely workflow-file permission)."
+            PUSH_LOG="$(cat "${REBASE_TMP}/rebase-push.log" 2>/dev/null || true)"
+            ADDON="${TARGET_BRANCH#devrelease/}"
+            SOURCE_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}" 2>/dev/null || echo "unknown")
+            LOCAL_SHA=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+            REMOTE_SHA=$(git rev-parse "origin/${TARGET_BRANCH}" 2>/dev/null || echo "unknown")
+            REBASED_FILES=$(git diff --name-only "origin/${TARGET_BRANCH}...HEAD" 2>/dev/null | head -n 50 || true)
+            REBASED_COMMITS=$(git log --oneline "origin/${TARGET_BRANCH}..HEAD" 2>/dev/null | head -n 20 || true)
+            export TARGET_BRANCH SOURCE_BRANCH ADDON SOURCE_SHA LOCAL_SHA REMOTE_SHA PUSH_LOG REBASED_FILES REBASED_COMMITS
+            export EVENT_NAME RUN_ID SERVER_URL REPO
+            python3 - <<'PYEOF' > "${REBASE_TMP}/rebase-push-issue.md"
+            import os
+            target = os.environ.get("TARGET_BRANCH", "")
+            source = os.environ.get("SOURCE_BRANCH", "")
+            addon = os.environ.get("ADDON", "")
+            source_sha = os.environ.get("SOURCE_SHA", "unknown")
+            local_sha = os.environ.get("LOCAL_SHA", "unknown")
+            remote_sha = os.environ.get("REMOTE_SHA", "unknown")
+            push_log = (os.environ.get("PUSH_LOG", "") or "").strip()
+            files = (os.environ.get("REBASED_FILES", "") or "").strip().splitlines()
+            commits = (os.environ.get("REBASED_COMMITS", "") or "").strip().splitlines()
+            event_name = os.environ.get("EVENT_NAME", "")
+            run_id = os.environ.get("RUN_ID", "")
+            server_url = os.environ.get("SERVER_URL", "")
+            repo = os.environ.get("REPO", "")
+            run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if run_id else ""
+            def items(vals):
+                vals = [v for v in vals if v]
+                return "\n".join(f"- `{v}`" for v in vals) if vals else "- _(none)_"
+            print(f"Rebase of `{target}` onto `origin/{source}` (`{source_sha}`) succeeded locally, but the push was rejected (trigger: {event_name}, run {run_id}: {run_url}). This is NOT a rebase conflict - the rebased branch just needs a manual push with the right permissions.")
+            print("")
+            print(f"Only `{target}` needs fixing - `{source}` is untouched.")
+            print("")
+            print(f"> ⚠️ All work MUST happen on `{target}` (`devrelease/*`) - NEVER commit to, push to, or force-push `{source}`, `master`, or `main`.")
+            print("")
+            print("## Push detail")
+            print("")
+            print(f"- Target addon: `{addon}`")
+            print(f"- Source SHA: `{source_sha}` / local rebased SHA: `{local_sha}` / remote SHA: `{remote_sha}`")
+            print("- Rebased commits (local, not yet pushed):")
+            print(items(commits))
+            print("- Changed files (remote...local):")
+            print(items(files))
+            print("- Push output:")
+            print("```")
+            print(push_log if push_log else "(no push output captured)")
+            print("```")
+            print("")
+            print("GITHUB_TOKEN cannot push `.github/workflows/` files (no `workflows` permission for tokens in workflow files - PAT-only scope). If the push output mentions `refusing to allow a GitHub App to create or update workflow`, push manually with a PAT that has the `workflow` scope (or as a human with rights):")
+            print("")
+            print("```bash")
+            print("git fetch origin")
+            print(f"git checkout {target}")
+            print(f"# if your local {target} already has the rebased commits, just push; otherwise rebase first:")
+            print(f"git rebase origin/{source}")
+            print(f"git push --force-with-lease origin {target}")
+            print("```")
+            print("")
+            print(f"This issue can be closed once `{target}` contains `origin/{source}`.")
+            PYEOF
+            ISSUE_TITLE="Rebase push blocked: ${TARGET_BRANCH} needs manual push with workflows permission"
+            LABEL="rebase-conflict"
+            gh label create "${LABEL}" \
+              --description "Automatic rebase of a devrelease branch failed with conflicts" \
+              --color "D93F0B" 2>/dev/null || true
+            EXISTING_NUM=$(gh issue list \
+              --label "${LABEL}" \
+              --state open \
+              --search "${ISSUE_TITLE} in:title" \
+              --json number \
+              --jq '.[0].number // empty')
+            if [ -n "${EXISTING_NUM}" ]; then
+              echo "::notice::Open push-blocked issue #${EXISTING_NUM} already exists for '${TARGET_BRANCH}'."
+              gh issue comment "${EXISTING_NUM}" --body-file "${REBASE_TMP}/rebase-push-issue.md"
+              ISSUE_NUM="${EXISTING_NUM}"
+            else
+              ISSUE_URL=$(gh issue create \
+                --title "${ISSUE_TITLE}" \
+                --label "${LABEL}" \
+                --body-file "${REBASE_TMP}/rebase-push-issue.md")
+              echo "Created: ${ISSUE_URL}"
+              ISSUE_NUM=$(printf '%s' "${ISSUE_URL}" | grep -oE '[0-9]+$' || true)
+            fi
+            {
+              echo "conflict=false"
+              echo "outside_only=false"
+              echo "issue_number=${ISSUE_NUM}"
+            } >> "$GITHUB_OUTPUT"
+            echo "::error::Rebase push blocked — #${ISSUE_NUM} left open for manual push with workflows permission."
+            exit 1
           fi
 
           echo "::warning::Rebase of '${TARGET_BRANCH}' onto 'origin/${SOURCE_BRANCH}' failed with conflicts."
