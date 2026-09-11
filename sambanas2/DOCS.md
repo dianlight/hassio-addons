@@ -65,7 +65,7 @@ The following table compares the major functionalities available in SambaNAS and
 ## Installation
 
 **Requirements:**
-- Home Assistant 2026.4.0 or newer (2026.8.0+ recommended)
+- Home Assistant 2025.8.0 or newer
 - Home Assistant Operating System (HAOS) - recommended and tested platform
 - Supported architectures: aarch64, amd64
 
