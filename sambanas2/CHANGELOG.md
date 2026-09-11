@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### ✨ Features
+- Lab features now flow through a central registry with alpha/beta tiers; beta features appear with Lab Mode on while developer-only alpha tools stay hidden in stable builds (from SRAT v2026.9.0-rc14)
+
+### 🐛 Bug Fixes
+- Mount paths containing `:` are rejected up front with a suggested path and one-click retry instead of failing later (from SRAT v2026.9.0-rc14)
+
+### 🏗 Chore
+- Update SRAT to [v2026.9.0-rc14](https://github.com/dianlight/srat/blob/2026.9.0-rc14/CHANGELOG.md)
+- Update HA CLI to 5.5.0
+
 ## 2026.9.1-rc14
 
 ### 🏗 Chore
