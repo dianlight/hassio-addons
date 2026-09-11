@@ -65,7 +65,7 @@ The following table compares the major functionalities available in SambaNAS and
 ## Installation
 
 **Requirements:**
-- Home Assistant 2026.8.0 or newer
+- Home Assistant 2026.4.0 or newer (2026.8.0+ recommended)
 - Home Assistant Operating System (HAOS) - recommended and tested platform
 - Supported architectures: aarch64, amd64
 
@@ -99,6 +99,14 @@ Samba NAS2 includes an integrated web interface for management and configuration
 
 The web interface provides access to SRAT (Samba REST Administration Tool), which offers a user-friendly interface for configuring and managing your Samba shares, users, and settings.
 
+On first run a setup wizard guides hostname, workgroup, admin password, and telemetry choice. You can reopen it in Settings.
+
+The pages also work on phones: tables compact, the setup wizard goes full-screen, and share/partition actions use a compact menu.
+
+## Lab Mode (🧪 Experimental)
+
+Lab Mode unlocks experimental features. Turn it on under Settings → General → Lab Mode. Most experimental features then appear; a few developer-only tools appear only in test versions and never in stable releases, even with Lab Mode on. Gated areas include the Samba config preview, disk-sleep hints and stats, network device discovery, and extra discovery/connection options.
+
 ## Connection
 
 To connect to the shares:
@@ -118,6 +126,18 @@ This add-on exposes the following directories over SMB (Samba):
 | `ssl`           | SSL certificates storage.                                       |
 
 > **Note**: Following the Home Assistant "add-on" to "app" rebranding, the `addons` and `addon_configs` shares have been renamed to `local_apps` and `app_configs`. On existing installations the shares are migrated automatically, keeping their configured users and settings. SMB clients still using the old `addons` / `addon_configs` share names must be updated to the new names.
+
+### Share names
+
+In Settings choose old share names, new names, or both while migrating. Old names show a reminder to switch. A share with a missing folder is marked unusable until the folder exists.
+
+### Local-network discovery
+
+Discovery on your local network can be turned on or off in Settings. You can choose automatic discovery through Home Assistant (recommended) or direct discovery from the add-on. Older setups migrate automatically.
+
+### Guest access
+
+To allow guests without a password, turn on Guest access in Settings → General. You still control which shares guests can use.
 
 ## NFS exports (🧪 Experimental, 🔌 Extra Modules on Some Boards)
 
@@ -146,22 +166,28 @@ NFS services run under s6 supervision and the exports file is **automatically ma
 
 ## SMART Monitoring and Disk Health
 
-Samba NAS2 bundles the **[smartmontools-sdk](https://github.com/dianlight/smartmontools-sdk)** (`libsmartmon`) so that SMART queries are performed **in-process** — no subprocess is spawned to run `smartctl`. This provides:
+Disk health checks run efficiently, with support for common drive types (SATA, NVMe, SAS).
 
-- Faster and more efficient disk health queries
-- Unified ATA/SATA, NVMe, and SCSI/SAS device support via a single native API
-- Structured JSON output for integration with the SRAT web interface
+### Disk health mode
 
-The SDK is installed at build time from the native-core release tarball (`libsmartmon-<version>-linux-<arch>-musl.tar.gz`) published on the [smartmontools-sdk releases page](https://github.com/dianlight/smartmontools-sdk/releases). The add-on tracks the SDK **dev channel** (prerelease builds), kept up to date automatically via Renovate:
+In Settings → Advanced choose how disk health is checked: classic, faster built-in (Lab Mode, when supported), or off — off helps sleeping disks stay asleep.
 
-| Path | Contents |
-|---|---|
-| `/usr/local/lib/libsmartmon.a` | Pre-built static library (smartmontools core 8.0) |
-| `/usr/local/lib/libsmartmon_go.so` | C ABI wrapper shared library |
-| `/usr/local/include/smartmon/` | Public C++ headers |
 
-`LIBRARY_PATH` and `CPATH` environment variables are automatically exported to all container processes and interactive shells so any component linking against `libsmartmon` finds the library without manual configuration.
+## Disk Sleep (🧪 Lab Mode)
 
+Disk sleep is set per disk (Lab Mode) and starts automatically once a disk is enabled — no global switch. Hard drives that are not set up yet show an "Enable?" hint you can accept or dismiss. Sleep is meant for spinning hard drives — turning it on for SSDs asks for extra confirmation.
+
+## Volumes and Mounts
+
+The disk list can be resized, and the main page helper mounts and shares in one flow. Whole disks without partitions work. Names with `:` cannot be used — remove the colon and try again. Mounting is blocked while protection or read-only mode is on.
+
+## Faster Connections (🧪 Lab Mode, 🔌 Extra Modules)
+
+Faster QUIC connections are off by default and experimental. They need Lab Mode plus extra system support; otherwise normal connections are used.
+
+## Error Reporting
+
+You control error reporting in Settings (ask first, send all, errors only, or off). The Report button at the top helps open a support request with basic details attached.
 
 ## Configuration
 
@@ -173,6 +199,7 @@ auto_update: true
 log_level: warning
 disable_ipv6: true
 leave_front_door_open: false
+clean_upgrade_dir: false
 factory_reset: false
 use_external_kernel_modules: false
 ```
@@ -309,6 +336,15 @@ GitHub releases that match your HAOS version and board, then loads them into the
 option if you understand the implications and trust the module source.
 
 Defaults to `false`.
+
+## Troubleshooting
+
+- **Share cannot be saved**: its folder is missing. Check the folder exists.
+- **Name with `:` does not work**: remove the colon and try again.
+- **Extra question when enabling disk sleep**: normal for SSDs. Only confirm if you want sleep on that disk.
+- **Mount does not work**: turn off protection mode and try again.
+- **Editing a user asks for a password**: leave it empty to keep the old one.
+- **Old share names stop working**: use the new names, or show both while you switch over.
 
 ## Support
 

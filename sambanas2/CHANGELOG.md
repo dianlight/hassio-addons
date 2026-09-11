@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2026.9.1-rc14
+
 ### 🏗 Chore
 - ⬆️ Update ghcr.io/hassio-addons/base Docker tag to v21.0.5 (#740)
 - Automated `CHANGELOG.md` maintenance: new `opencode-changelog` workflow (no `/oc` commands) resolves the model via `dianlight/opencode-modelselect-action` (`docs`/`auto`, `OPENCODE_API_KEY`) and curates user-important entries per `sambanas2/.changelog-style.md`. `devrelease` keeps `## Unreleased`; `mergerelease` strips it and bumps beta (`PATCH+1`, calendar rollover in October); `prerelease` is created only for new versions (Us2/Us3).
