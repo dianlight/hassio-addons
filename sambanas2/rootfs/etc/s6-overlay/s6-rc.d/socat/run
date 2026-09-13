@@ -8,10 +8,10 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "socat/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
-if bashio::var.has_value "$(bashio::addon.port 3000)"; then
+if bashio::var.has_value "$(bashio::app.port 3000)"; then
   bashio::log.yellow "$(figlet -p -f big -w 600 'ALLERT!')"
-  bashio::log.warning "Addon OPEN ACCESS PORT port is set to  $(bashio::addon.port 3000)->$(bashio::addon.ingress_port)"
-  exec socat TCP-LISTEN:$(bashio::addon.port 3000),fork TCP:127.0.0.1:$(bashio::addon.ingress_port)
+  bashio::log.warning "Addon OPEN ACCESS PORT port is set to  $(bashio::app.port 3000)->$(bashio::app.ingress_port)"
+  exec socat TCP-LISTEN:$(bashio::app.port 3000),fork TCP:127.0.0.1:$(bashio::app.ingress_port)
 else
   exec sleep infinity
 fi

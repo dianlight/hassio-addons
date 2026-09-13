@@ -173,7 +173,7 @@ main() {
         echo "2. Update DOCS.md for configuration changes"
         echo "3. Update CHANGELOG.md with your changes"
         echo "4. Keep each project's documentation self-contained"
-        echo "5. See .copilot-instructions.md for detailed guidelines"
+        echo "5. See AGENTS.md for detailed guidelines"
         exit 1
     fi
 }
