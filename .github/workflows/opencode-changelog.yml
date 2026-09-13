@@ -111,7 +111,7 @@ jobs:
   # (S2 = S1 minus Unreleased), and bot-authored release PRs lack write
   # permission for the github action commit-back, so skip both.
   changelog-pr:
-    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/') && !startsWith(github.head_ref, 'prerelease/') && github.actor != 'github-actions[bot]'
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/') && !startsWith(github.head_ref, 'prerelease/') && github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -69,7 +69,7 @@
 - Update SRAT to v2026.8.0-rc12
 
 #### 🐛 Bug Fixes
-- Fix [#726](https://github.com/.../issues/726) [Samba NAS2] No way to manually mount disk
+- Fix [#726](https://github.com/dianlight/hassio-addons/issues/726) [Samba NAS2] No way to manually mount disk
 
 ## 2026.7.0-rc11
 
