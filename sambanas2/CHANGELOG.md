@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026.9.1-rc15
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### 🏗 Chore
+
+- Update SRAT to v2026.9.1-rc15
+- Update smartmontools-sdk to v8.0.2-pre.541 (dev channel)
+
+### 🐭 Features from SRAT [v2026.9.1-rc15](https://github.com/dianlight/srat/releases/tag/2026.9.1-rc15)
+
+#### ✨ Features
+
+- Speed up Shares tab first paint with deferred Swagger load and cached user validity
+- Dashboard news abstracts with type icons and version gate
+- Replace smart_mode enum with smart_on toggle
+
+#### 🐛 Bug Fixes
+
+- Simplify mount path suggestion retry logic
+- Annotate mode-hidden standard shares with is_hidden
+- Avoid logging full share struct with password flow
+- Harden zip extraction against ZipSlip escape
+- Bound-check loop minor before uint32 conversion
+
 ## 2026.9.1-rc14
 
 ### 🙏 Thanks
