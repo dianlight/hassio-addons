@@ -107,8 +107,11 @@ jobs:
   # pull_request: official action (push is the only unsupported event).
   # mergerelease/* heads are deterministic-only (strip already done in
   # docker-image-dev): skip like the push job does for refs/heads/mergerelease/.
+  # prerelease/* heads never contain ## Unreleased per <addon>/.changelog-style.md
+  # (S2 = S1 minus Unreleased), and bot-authored release PRs lack write
+  # permission for the github action commit-back, so skip both.
   changelog-pr:
-    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/')
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/') && !startsWith(github.head_ref, 'prerelease/') && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -117,6 +120,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
           submodules: true
+
+      - name: Configure git identity
+        shell: bash
+        run: |
+          git config user.email "workflow-bot@github.com"
+          git config user.name "Changelog Bot"
 
       - name: Mask secrets in logs
         shell: bash

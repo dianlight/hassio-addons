@@ -9,7 +9,7 @@
 ### 🚨 Notes
 
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
-- Minimum supported Home Assistant version is 2025.8.0.
+- Minimum supported Home Assistant version is 2026.4.0.
 
 ### ✨ Features
 
