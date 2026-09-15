@@ -38,18 +38,38 @@ jobs:
           # This action reads all top-level keys, so 'name' and 'version' will be available
           # as steps.read_config.outputs.name and steps.read_config.outputs.version
 
-      # Prerelease pushes keep version and name exactly as pushed (no rewrites).
-      # The beta sync below copies the working tree verbatim to hassio-addons-beta.
-      - name: Use pushed version/name verbatim
-        id: use_pushed
+      # Source prerelease branch keeps version/name verbatim.
+      # Only the hassio-addons-beta copy gets -β name suffix and .<run_number>
+      # version suffix (e.g. 2026.9.1-rc14 -> 2026.9.1-rc14.<run>).
+      - name: Prepare beta-only name/version suffix
+        id: prepare_beta_suffix
         shell: bash
         run: |
           CONFIG_FILE="./${{ steps.extract_branch.outputs.BR_PROJECT }}/config.yaml"
           PUSHED_VERSION=$(yq '.version' "$CONFIG_FILE")
           PUSHED_NAME=$(yq '.name' "$CONFIG_FILE")
-          echo "value_new=$PUSHED_VERSION" >> "$GITHUB_OUTPUT"
-          echo "value_name=$PUSHED_NAME" >> "$GITHUB_OUTPUT"
-          echo "Using pushed version '$PUSHED_VERSION' and name '$PUSHED_NAME' as-is"
+
+          FINAL_NAME="$PUSHED_NAME"
+          if [[ ! "$FINAL_NAME" =~ -[β⍺]$ ]]; then
+            FINAL_NAME="${FINAL_NAME}-β"
+          fi
+
+          # Strip a prior beta trailer so reruns are idempotent (source is
+          # verbatim so this is defensive only): `-beta.<n>` or `-rc<n>.<m>`.
+          BASE_VERSION="$PUSHED_VERSION"
+          if [[ "$BASE_VERSION" =~ ^(.*)-beta\.[0-9]+$ ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$BASE_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+-rc[0-9]*)\.[0-9]+$ ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+          fi
+
+          FINAL_VERSION="${BASE_VERSION}.${{ github.run_number }}"
+
+          echo "value_pushed_version=$PUSHED_VERSION" >> "$GITHUB_OUTPUT"
+          echo "value_pushed_name=$PUSHED_NAME" >> "$GITHUB_OUTPUT"
+          echo "value_new=$FINAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "value_name=$FINAL_NAME" >> "$GITHUB_OUTPUT"
+          echo "Beta-only: name '$PUSHED_NAME' -> '$FINAL_NAME', version '$PUSHED_VERSION' -> '$FINAL_VERSION' (source stays verbatim)"
 
       - name: Create pull request for Beta Repository ${{ steps.extract_branch.outputs.BR_PROJECT }}
         # uses: thzois/autobot@v1.0.3 # Replaced with gh CLI commands
@@ -63,7 +83,9 @@ jobs:
         run: |
           # --- Script Setup ---
           SOURCE_DIR="${{ steps.extract_branch.outputs.BR_PROJECT }}"
-          NEW_VERSION="${{ steps.use_pushed.outputs.value_new }}"
+          PUSHED_VERSION="${{ steps.prepare_beta_suffix.outputs.value_pushed_version }}"
+          NEW_VERSION="${{ steps.prepare_beta_suffix.outputs.value_new }}"
+          NEW_NAME="${{ steps.prepare_beta_suffix.outputs.value_name }}"
           TARGET_REPO="dianlight/hassio-addons-beta"
           TARGET_REPO_URL="github.com/$TARGET_REPO"
           TARGET_BASE_BRANCH="master"
@@ -75,7 +97,9 @@ jobs:
           echo "--- Starting autobot replacement script ---"
           echo "Configuration:"
           echo "  Source Project Dir (in this repo): $SOURCE_DIR"
-          echo "  New Version: $NEW_VERSION"
+          echo "  Pushed Version (source verbatim): $PUSHED_VERSION"
+          echo "  Beta Version: $NEW_VERSION"
+          echo "  Beta Name: $NEW_NAME"
           echo "  Target Repository: $TARGET_REPO"
           echo "  Target Base Branch: $TARGET_BASE_BRANCH"
           echo "  Target Compare Branch: $TARGET_COMPARE_BRANCH"
@@ -124,6 +148,14 @@ jobs:
             echo "Error: Failed to rsync source directory contents."
             exit 1
           fi
+
+          # 3b. Beta-only rewrite: suffix name/version on the TEMP beta copy.
+          # The prerelease source in $GITHUB_WORKSPACE is left verbatim.
+          echo "Applying beta-only suffix: name -> $NEW_NAME, version -> $NEW_VERSION"
+          BETA_CONFIG="./$SOURCE_DIR/config.yaml"
+          yq -i ".version = \"$NEW_VERSION\"" "$BETA_CONFIG"
+          yq -i ".name = \"$NEW_NAME\"" "$BETA_CONFIG"
+          echo "Beta config now: version=$(yq '.version' "$BETA_CONFIG") name=$(yq '.name' "$BETA_CONFIG")"
 
           # 4. Stage all modified files and commit (if changes exist)
           echo "Staging changes..."
