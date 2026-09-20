@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## 2026.9.2-rc16
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### ✨ Features
+
+- Alerts settings category with per-alert toggles and permanent ignore (from SRAT v2026.9.2-rc16)
+- Protected mode now raises an ignorable HA repair issue (from SRAT v2026.9.2-rc16)
+- Hide delete on internal shares, color-code user shares (from SRAT v2026.9.2-rc16)
+- Gate Supervisor discovery behind opt-in setting (from SRAT v2026.9.2-rc16)
+
+### 🐛 Bug Fixes
+
+- Re-enable ignored alerts via `PUT /api/problems/{key}` (was a no-op) (from SRAT v2026.9.2-rc16)
+- Dismiss stale custom-component problem when alerts are disabled in settings (from SRAT v2026.9.2-rc16)
+- Hide server-ignored issues on the dashboard without a local seed (from SRAT v2026.9.2-rc16)
+- Report SMART self-test progress and reconcile health check (from SRAT v2026.9.2-rc16)
+- Reject shares on unmounted volumes (from SRAT v2026.9.2-rc16)
+- Persist falsy booleans on share update (from SRAT v2026.9.2-rc16)
+- Preserve stored password on password-less rename (from SRAT v2026.9.2-rc16)
+- Dismiss problem toast and badge on ignore (from SRAT v2026.9.2-rc16)
+- Persist user share removals on update (from SRAT v2026.9.2-rc16)
+- Reset clears dirty state, reject empty hostname (from SRAT v2026.9.2-rc16)
+
+### 🏗 Chore
+
+- Update SRAT to [v2026.9.2-rc16](https://github.com/dianlight/srat/blob/2026.9.2-rc16/CHANGELOG.md)
+
 ## 2026.9.1-rc15
 
 ### 🙏 Thanks
