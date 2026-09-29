@@ -1,0 +1,217 @@
+name: SRAT Fix Tracker
+
+# Periodically checks open sambanas2 issues linked to dianlight/srat issues.
+# When a linked srat issue is closed and a srat release (or pre-release)
+# contains its fix, the workflow comments on the issue. It then checks whether
+# the fix is included in the beta channel (dianlight/hassio-addons-beta) and
+# in the stable release (master of this repo), closing the issue once released.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  track-srat-fixes:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MAIN_REPO: dianlight/hassio-addons
+      SRAT_REPO: dianlight/srat
+      BETA_REPO: dianlight/hassio-addons-beta
+      ADDON_LABEL: sambanas2
+      ADDON_DIR: sambanas2
+    steps:
+      - name: Track SRAT fixes in open sambanas2 issues
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ver_ge() {
+            # ver_ge A B returns true if A >= B (calver + optional -rcN suffix).
+            local a="$1" b="$2"
+            local ab="${a%%-*}"; local bb="${b%%-*}"
+            local asuf="${a#"$ab"}"; local bsuf="${b#"$bb"}"
+            if [ "$ab" != "$bb" ]; then
+              [ "$(printf '%s\n%s\n' "$ab" "$bb" | sort -V | tail -n 1)" = "$ab" ]
+              return
+            fi
+            # Same base: a bare release outranks any pre-release suffix.
+            if [ -z "$asuf" ] && [ -n "$bsuf" ]; then return 0; fi
+            if [ -n "$asuf" ] && [ -z "$bsuf" ]; then return 1; fi
+            [ "$(printf '%s\n%s\n' "$a" "$b" | sort -V | tail -n 1)" = "$a" ]
+          }
+
+          norm_ver() {
+            # Strip a leading 'v' so tags and Dockerfile ARGs compare cleanly.
+            printf '%s' "$1" | sed -e 's/^v//'
+          }
+
+          issue_text() {
+            # $1 = issue number in MAIN_REPO -> body + all comment bodies.
+            {
+              gh api "repos/${MAIN_REPO}/issues/$1" --jq '.body // ""'
+              gh api "repos/${MAIN_REPO}/issues/$1/comments" --paginate --jq '.[].body // ""'
+            }
+          }
+
+          srat_docker_arg() {
+            # $1 = repo (owner/name), $2 = branch -> SRAT_VERSION from Dockerfile.
+            curl -fsSL "https://raw.githubusercontent.com/$1/$2/${ADDON_DIR}/Dockerfile" \
+              | grep -m1 '^ARG SRAT_VERSION=' | cut -d= -f2- | tr -d '"\r' | xargs
+          }
+
+          addon_config_version() {
+            # $1 = repo (owner/name), $2 = branch -> version from config.yaml.
+            curl -fsSL "https://raw.githubusercontent.com/$1/$2/${ADDON_DIR}/config.yaml" \
+              | grep -m1 '^version:' | sed -e 's/^version:[[:space:]]*//' | tr -d '"\r' | xargs
+          }
+
+          find_fix_release() {
+            # $1 = srat issue number, $2... = merged PR numbers that closed it.
+            # Prints "<tag>\t<prerelease true|false>\t<html_url>" of the oldest
+            # release whose notes or CHANGELOG reference the issue or a merged PR.
+            local issue="$1"
+            shift
+            local prs="$*"
+            local pattern="#${issue}\\b|pull/(${issue})\\b|issues/${issue}\\b"
+            local pr
+            for pr in $prs; do
+              pattern="${pattern}|#${pr}\\b|pull/${pr}\\b"
+            done
+
+            local tag prerelease url body changelog
+            while IFS=$'\t' read -r tag prerelease url body; do
+              [ -z "$tag" ] && continue
+              if printf '%s' "$body" | grep -qE "$pattern"; then
+                printf '%s\t%s\t%s\n' "$tag" "$prerelease" "$url"
+                return 0
+              fi
+              changelog=$(curl -fsSL "https://raw.githubusercontent.com/${SRAT_REPO}/${tag}/CHANGELOG.md" 2>/dev/null || true)
+              if [ -n "$changelog" ] && printf '%s' "$changelog" | grep -qE "$pattern"; then
+                printf '%s\t%s\t%s\n' "$tag" "$prerelease" "$url"
+                return 0
+              fi
+            done < <(gh api "repos/${SRAT_REPO}/releases?per_page=100" \
+              --jq 'sort_by(.published_at) | .[] | [.tag_name, (.prerelease | tostring), .html_url, (.body // "")] | @tsv')
+            return 1
+          }
+
+          echo "Fetching stable channel versions (master of ${MAIN_REPO})..."
+          STABLE_SRAT=$(norm_ver "$(srat_docker_arg "$MAIN_REPO" "master")")
+          STABLE_VER=$(addon_config_version "$MAIN_REPO" "master")
+          echo "Stable: addon ${STABLE_VER} with SRAT ${STABLE_SRAT}"
+
+          echo "Fetching beta channel versions (master of ${BETA_REPO})..."
+          BETA_SRAT=$(norm_ver "$(srat_docker_arg "$BETA_REPO" "master")")
+          BETA_VER=$(addon_config_version "$BETA_REPO" "master")
+          echo "Beta: addon ${BETA_VER} with SRAT ${BETA_SRAT}"
+
+          ISSUES=$(gh api "repos/${MAIN_REPO}/issues?labels=${ADDON_LABEL}&state=open&per_page=100" \
+            --paginate --jq '.[] | select(.pull_request == null) | .number')
+          [ -z "$ISSUES" ] && echo "No open issues with label ${ADDON_LABEL}." && exit 0
+
+          for ISSUE in $ISSUES; do
+            echo "=== Processing ${MAIN_REPO}#${ISSUE} ==="
+            TEXT=$(issue_text "$ISSUE")
+            SRAT_ISSUES=$(printf '%s' "$TEXT" \
+              | grep -oE 'github\.com/dianlight/srat/issues/[0-9]+' \
+              | grep -oE '[0-9]+$' | sort -u || true)
+            if [ -z "$SRAT_ISSUES" ]; then
+              echo "No linked srat issues, skipping."
+              continue
+            fi
+            echo "Linked srat issues: $(echo "$SRAT_ISSUES" | tr '\n' ' ')"
+
+            ALL_FIXED=true
+            for SRAT_NUM in $SRAT_ISSUES; do
+              STATE=$(gh api "repos/${SRAT_REPO}/issues/${SRAT_NUM}" --jq '.state')
+              if [ "$STATE" != "closed" ]; then
+                echo "srat#${SRAT_NUM} is still open, skipping."
+                ALL_FIXED=false
+                continue
+              fi
+
+              # Collect merged PRs that reference (and thereby may close) the issue.
+              CANDIDATE_PRS=$(gh api "repos/${SRAT_REPO}/issues/${SRAT_NUM}/timeline" \
+                -H "Accept: application/vnd.github.mockingbird-preview" --paginate \
+                --jq '[.[] | select(.event == "cross-referenced" and .source.issue.pull_request != null) | .source.issue.number] | unique | .[]' \
+                2>/dev/null || true)
+              MERGED_PRS=""
+              for PR in $CANDIDATE_PRS; do
+                if [ "$(gh api "repos/${SRAT_REPO}/pulls/${PR}" --jq '.merged')" = "true" ]; then
+                  MERGED_PRS="${MERGED_PRS} ${PR}"
+                fi
+              done
+              echo "srat#${SRAT_NUM} closed; merged referencing PRs:${MERGED_PRS:- <none>}"
+
+              # shellcheck disable=SC2086
+              if ! FIX_INFO=$(find_fix_release "$SRAT_NUM" $MERGED_PRS); then
+                echo "No srat release found containing the fix for srat#${SRAT_NUM}."
+                ALL_FIXED=false
+                continue
+              fi
+              FIX_TAG=$(printf '%s' "$FIX_INFO" | cut -f1)
+              FIX_PRE=$(printf '%s' "$FIX_INFO" | cut -f2)
+              FIX_URL=$(printf '%s' "$FIX_INFO" | cut -f3)
+              FIX_VER=$(norm_ver "$FIX_TAG")
+              if [ "$FIX_PRE" = "true" ]; then KIND="pre-release"; else KIND="release"; fi
+              echo "Fix for srat#${SRAT_NUM} found in SRAT ${FIX_TAG} (${KIND})."
+
+              FIX_MARKER="<!-- srat-fix-tracker:fix:srat-${SRAT_NUM}:${FIX_TAG} -->"
+              if printf '%s' "$TEXT" | grep -qF "$FIX_MARKER"; then
+                echo "Fix already announced, skipping fix comment."
+              else
+                gh issue comment "$ISSUE" --repo "$MAIN_REPO" --body "🤖 **SRAT fix detected**
+
+          The linked upstream issue [dianlight/srat#${SRAT_NUM}](https://github.com/dianlight/srat/issues/${SRAT_NUM}) is closed and the fix is included in [SRAT ${FIX_TAG}](${FIX_URL}) (${KIND}).
+
+          ${FIX_MARKER}"
+                echo "Posted fix comment for srat#${SRAT_NUM}."
+              fi
+
+              if ver_ge "$BETA_SRAT" "$FIX_VER"; then
+                BETA_MARKER="<!-- srat-fix-tracker:beta:srat-${SRAT_NUM}:${BETA_VER} -->"
+                if printf '%s' "$TEXT" | grep -qF "$BETA_MARKER"; then
+                  echo "Beta inclusion already announced, skipping beta comment."
+                else
+                  gh issue comment "$ISSUE" --repo "$MAIN_REPO" --body "🧪 **Fixed in beta channel**
+
+          SRAT ${FIX_TAG} (fix for [dianlight/srat#${SRAT_NUM}](https://github.com/dianlight/srat/issues/${SRAT_NUM})) is included in \`SambaNAS2-β\` version \`${BETA_VER}\` (SRAT \`${BETA_SRAT}\`) on the beta channel.
+
+          ${BETA_MARKER}"
+                  echo "Posted beta comment for srat#${SRAT_NUM}."
+                fi
+              else
+                echo "Beta SRAT ${BETA_SRAT} does not contain the fix yet."
+              fi
+
+              if ver_ge "$STABLE_SRAT" "$FIX_VER"; then
+                echo "Stable SRAT ${STABLE_SRAT} contains the fix for srat#${SRAT_NUM}."
+              else
+                echo "Stable SRAT ${STABLE_SRAT} does not contain the fix yet."
+                ALL_FIXED=false
+              fi
+            done
+
+            if [ "$ALL_FIXED" = "true" ]; then
+              echo "All linked srat fixes are in stable ${STABLE_VER}; closing #${ISSUE}."
+              STABLE_MARKER="<!-- srat-fix-tracker:stable:${STABLE_VER} -->"
+              if printf '%s' "$TEXT" | grep -qF "$STABLE_MARKER"; then
+                gh issue close "$ISSUE" --repo "$MAIN_REPO" --reason completed
+              else
+                gh issue close "$ISSUE" --repo "$MAIN_REPO" --reason completed --comment "✅ **Released**
+
+          All linked SRAT fixes are included in SambaNAS2 version \`${STABLE_VER}\` (SRAT \`${STABLE_SRAT}\`). Closing as completed.
+
+          ${STABLE_MARKER}"
+              fi
+              echo "Closed #${ISSUE}."
+            else
+              echo "Not all linked fixes are released in stable; leaving #${ISSUE} open."
+            fi
+          done
