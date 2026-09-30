@@ -171,7 +171,10 @@ COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
 
 # Install Samba - either from distribution packages or use compiled binaries
 # Upgrade base first to avoid libssl3/libcrypto3 vs openssl version skew
+# TEMP-BUILD-WORKAROUND: base:21.0.5 pins libcrypto3/libssl3=3.5.8 in world while
+# Alpine now serves openssl-3.5.9 (needs 3.5.9) — lift the pins before adding packages.
 RUN apk upgrade --no-cache \
+    && apk add --no-cache -u libcrypto3 libssl3 \
     && if [ "$SAMBA_VERSION" = "distribution" ]; then \
     apk add --no-cache \
     samba-common-tools \
@@ -321,9 +324,13 @@ RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
     && rm -f /tmp/srat.zip
 
 # Initialize Samba configuration files
+# /etc/samba/smbusers is a dummy placeholder: the Samba config references it as
+# `username map` and SRAT regenerates it at runtime (see server_process_service.go).
+# Touching it here avoids "can't open username map /etc/samba/smbusers" at startup.
 RUN mkdir -p /var/lib/samba \
     && touch \
     /etc/samba/lmhosts \
+    /etc/samba/smbusers \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
