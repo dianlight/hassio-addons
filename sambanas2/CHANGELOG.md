@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### 🏗 Chore
+
+- Update SRAT to [v2026.10.0-rc17](https://github.com/dianlight/srat/blob/2026.10.0-rc17/CHANGELOG.md)
+- Update base image to v21.0.7.
+
 ## 2026.9.2-rc16
 
 ### 🙏 Thanks
