@@ -477,7 +477,7 @@ jobs:
       - name: Select model for auto-resolve
         if: steps.rebase.outputs.conflict == 'true' && steps.rebase.outputs.outside_only == 'true'
         id: model
-        uses: dianlight/opencode-modelselect-action@97f7f5c377aae0f922a08222d433b1eb0475bddf # v1
+        uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: code
           tier: auto
