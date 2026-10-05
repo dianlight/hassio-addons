@@ -359,13 +359,13 @@ dev = ["coveralls", "pdoc", "pytest", "pytest-cov"]
 
 [[package]]
 name = "pyudev"
-version = "0.24.4"
+version = "0.24.5"
 description = "A libudev binding"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 files = [
-    {file = "pyudev-0.24.4-py3-none-any.whl", hash = "sha256:b3b6b01c68e6fc628428cc45ff3fe6c277afbb5d96507f14473ddb4a6b959e00"},
-    {file = "pyudev-0.24.4.tar.gz", hash = "sha256:e788bb983700b1a84efc2e88862b0a51af2a995d5b86bc9997546505cf7b36bc"},
+    {file = "pyudev-0.24.5-py3-none-any.whl", hash = "sha256:a9c62d04a83472fb05ad5e014ef85933e5cf2fef193caf8b77bb7a9e8ded4812"},
+    {file = "pyudev-0.24.5.tar.gz", hash = "sha256:4e7faaec419b81a902d057568101819f448972c0cf448bb9c22203e4fc6a8eb9"},
 ]
 
 [[package]]
