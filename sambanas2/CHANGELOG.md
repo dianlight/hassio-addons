@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 2026.10.0-rc18
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### 🐛 Bug Fixes
+
+- Trust HA ingress proxy WebSocket and CORS origins so the UI is no longer rejected behind ingress (from SRAT v2026.10.0-rc18)
+
 ### 🏗 Chore
 
 - Update SRAT to [v2026.10.0-rc18](https://github.com/dianlight/srat/blob/2026.10.0-rc18/CHANGELOG.md)
