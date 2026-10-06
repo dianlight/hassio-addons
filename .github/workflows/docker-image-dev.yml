@@ -194,15 +194,20 @@ jobs:
           CONFIG_FILE="./${ADDON_DIR}/config.yaml"
           C=$(yq '.version' "$CONFIG_FILE")
           echo "Pushed config version C=$C"
-          echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
+          BUMPED="false"
 
           # Only calendar versions participate in Rule1/Rule2; anything else
           # (e.g. -beta/-dev/-alpha) falls through to Rule3 mergerelease as-is.
+          # NOTE: Rule1/Rule2 bumps no longer stop the job. GITHUB_TOKEN pushes
+          # don't trigger a follow-up run, so the bump is committed back and the
+          # same job continues straight into the mergerelease path below.
           if [[ "$C" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]*))?$ ]]; then
             CY="${BASH_REMATCH[1]}"; CM="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
             RC="${BASH_REMATCH[4]}"; RCN="${BASH_REMATCH[5]}"
           else
             echo "Rule3: non-calendar version, keep C verbatim for mergerelease."
+            echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           CUR_Y=$(date +%Y); CUR_M=$(date +%-m)
@@ -212,7 +217,6 @@ jobs:
             local NEXT="$1" WHY="$2"
             yq -i ".version = \"$NEXT\"" "$CONFIG_FILE"
             echo "$WHY: $C -> $NEXT"
-            echo "decision=devrelease-commit" >> "$GITHUB_OUTPUT"
             echo "next=$NEXT" >> "$GITHUB_OUTPUT"
             git config user.email "workflow-bot@github.com"
             git config user.name "Prerelease Bot"
@@ -223,18 +227,31 @@ jobs:
             fi
             git commit -m "chore(version): $WHY $C -> $NEXT [version-bot]"
             git push origin "HEAD:${BRANCH_NAME}"
+            C="$NEXT"
+            BUMPED="true"
+          }
+
+          reparse_C() {
+            CY="$(echo "$C" | cut -d. -f1)"; CM="$(echo "$C" | cut -d. -f2)"; PATCH="$(echo "$C" | cut -d. -f3 | cut -d- -f1)"
+            if [[ "$C" =~ -rc([0-9]*)$ ]]; then
+              RCN="${BASH_REMATCH[1]}"; RC="-rc${RCN}"
+            else
+              RC=""; RCN=""
+            fi
           }
 
           # Rule1: year/month in the past -> reset to today year.month.0, keep rc number.
           if [[ "$CY" -lt "$CUR_Y" || ("$CY" -eq "$CUR_Y" && "$CM" -lt "$CUR_M") ]]; then
             NEXT="${CUR_Y}.${CUR_M}.0${RC}"
             commit_back "$NEXT" "Rule1 past-date reset"
-            exit 0
+            reparse_C
           fi
 
           # Rule1 only fires for the past; a future year/month falls to Rule3.
-          if [[ "$CY.$CM" != "$CUR_Y.$CUR_M" ]]; then
+          if [[ "$BUMPED" == "false" && "$CY.$CM" != "$CUR_Y.$CUR_M" ]]; then
             echo "Rule3: future calendar version, keep C verbatim for mergerelease."
+            echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -266,11 +283,12 @@ jobs:
                 NEXT="${CY}.${CM}.$((PATCH + 1))"
               fi
               commit_back "$NEXT" "Rule2 bump over prerelease $MAX_PRE"
-              exit 0
             fi
           fi
 
           echo "Rule3: keep C=$C verbatim for mergerelease."
+          echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
+          echo "bumped=$BUMPED" >> "$GITHUB_OUTPUT"
           echo "Final mergerelease version: $(yq '.version' "$CONFIG_FILE")"
 
       - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
@@ -376,14 +394,25 @@ jobs:
 
           ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
           BASE_VERSION="${{ needs.setup.outputs.base_version }}"
+          # The version may have been bumped by Rule1/Rule2 earlier in this same
+          # job, so derive the effective version from the local file (post-bump)
+          # rather than the setup-job output captured before the bump.
+          LOCAL_C=$(yq '.version' "${ADDON_DIR}/config.yaml" 2>/dev/null || echo "")
+          if [ -n "$LOCAL_C" ]; then
+            BASE_VERSION="$LOCAL_C"
+          fi
           PR_BASE_BRANCH_NAME="prerelease/${ADDON_DIR}_${BASE_VERSION}"
 
           # Gate: prerelease/* is created only for Us2/Us3 (pushed C not in
           # origin/master changelog). Us1/Us4 (C already released) stop at beta.
           git fetch origin master || true
           MASTER_CHANGELOG=$(git show origin/master:${ADDON_DIR}/CHANGELOG.md 2>/dev/null || echo "")
-          # C as pushed on the devrelease branch (mergerelease file was bumped already)
-          PUSHED_C=$(git show "origin/${CURRENT_WORKFLOW_BRANCH}:${ADDON_DIR}/config.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "")
+          # C as released by this job: prefer the local (post-bump) file, fall
+          # back to the remote devrelease branch (may be stale mid-job).
+          PUSHED_C="$LOCAL_C"
+          if [ -z "$PUSHED_C" ]; then
+            PUSHED_C=$(git show "origin/${CURRENT_WORKFLOW_BRANCH}:${ADDON_DIR}/config.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "")
+          fi
           if [ -z "$PUSHED_C" ]; then
             PUSHED_C=$(yq '.version' "${ADDON_DIR}/config.yaml")
           fi
