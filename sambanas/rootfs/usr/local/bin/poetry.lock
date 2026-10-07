@@ -83,18 +83,18 @@ pyudev = "*"
 
 [[package]]
 name = "ha-mqtt-discoverable"
-version = "0.25.2"
+version = "0.26.0"
 description = "Python library for creating MQTT entities compatible with Home Assistant"
 optional = false
-python-versions = ">=3.10.0"
+python-versions = ">=3.11.0"
 files = [
-    {file = "ha_mqtt_discoverable-0.25.2-py3-none-any.whl", hash = "sha256:28f54c137aaa18f8342b7a8ced1ba987fdf5cc055471dd6afcf6c12d7ad0ffff"},
-    {file = "ha_mqtt_discoverable-0.25.2.tar.gz", hash = "sha256:1b9cefb12c54ade4c8b242626721fde0cb86d5e7ec41b1444ef282f2938ba09f"},
+    {file = "ha_mqtt_discoverable-0.26.0-py3-none-any.whl", hash = "sha256:3562f499d84d1c487dc13bf6ef6adaa968b6ac722454bd3426f77c5a6fca291c"},
+    {file = "ha_mqtt_discoverable-0.26.0.tar.gz", hash = "sha256:8d1184b00ea6b7b94e2cbf9a29698bde7c691154368ac199c7fae078aa575dd4"},
 ]
 
 [package.dependencies]
 paho-mqtt = ">=2.1.0"
-pydantic = ">=2.13.3"
+pydantic = ">=2.13.5"
 
 [[package]]
 name = "humanfriendly"
@@ -396,4 +396,4 @@ typing-extensions = ">=4.15.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "5df22b2960c0185d18cbc9f50f23b176466723b7edd91b6e26a90b47d81d6507"
+content-hash = "f19a24e676bcd3f16c24e3510e1496bda3f859165fa4d6f335ceeac3be6e3aab"
