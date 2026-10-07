@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## 2026.10.0-rc18
 
 ### 🙏 Thanks
