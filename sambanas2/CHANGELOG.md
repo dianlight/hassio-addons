@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026.10.0-rc17
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### 🐛 Bug Fixes
+
+- Fix Time Machine backups with a dedicated recycle VFS module (from SRAT v2026.10.0-rc17)
+- Show non-internal shares when protected mode is active (from SRAT v2026.10.0-rc17)
+- Sanitize hyphenated share names so Supervisor mounts are accepted (from SRAT v2026.10.0-rc17)
+- Apply per-filesystem mount defaults and Samba `force-user` mapping, fixing NTFS/FAT volumes (from SRAT v2026.10.0-rc17)
+- Retry automount on transient device-not-found errors during boot (from SRAT v2026.10.0-rc17)
+- Retain post-format filesystem labels across hardware refreshes (from SRAT v2026.10.0-rc17)
+- Send the full volumes snapshot on WebSocket connect to avoid stale disk state (from SRAT v2026.10.0-rc17)
+- Derive the notification badge from live problem state (from SRAT v2026.10.0-rc17)
+- Suppress full UI reloads on brief WebSocket reconnects (from SRAT v2026.10.0-rc17)
+- Auto-clear the restart reminder when the HA component reconnects (from SRAT v2026.10.0-rc17)
+- Harden CORS, WebSocket origin, and IP allowlist enforcement (from SRAT v2026.10.0-rc17)
+- Create `/etc/samba/smbusers` placeholder so Samba starts without `username map` errors ([#764](https://github.com/dianlight/hassio-addons/issues/764))
+- Lift `libcrypto3`/`libssl3` pins before adding packages to avoid openssl version skew on base 21.0.7
+
+### 🏗 Chore
+
+- Update SRAT to [v2026.10.0-rc17](https://github.com/dianlight/srat/blob/2026.10.0-rc17/CHANGELOG.md)
+- Update base image to v21.0.7.
+
 ## 2026.9.2-rc16
 
 ### 🙏 Thanks
