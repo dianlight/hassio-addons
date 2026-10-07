@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.5
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.7
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -160,7 +160,7 @@ ENV \
 # Setup base
 ARG BUILD_ARCH=amd64
 ARG HA_CLI_VERSION=5.5.0
-ARG SRAT_VERSION=2026.9.2-rc16
+ARG SRAT_VERSION=2026.10.0-rc18
 ARG SAMBA_VERSION=distribution
 ARG SMARTMONTOOLS_SDK_VERSION=8.0.2-pre.541
 
@@ -171,7 +171,10 @@ COPY --from=samba_builder /usr/local/samba/ /usr/local/samba/
 
 # Install Samba - either from distribution packages or use compiled binaries
 # Upgrade base first to avoid libssl3/libcrypto3 vs openssl version skew
+# TEMP-BUILD-WORKAROUND: base:21.0.x may pin libcrypto3/libssl3 in world while
+# Alpine serves a newer openssl — lift the pins before adding packages.
 RUN apk upgrade --no-cache \
+    && apk add --no-cache -u libcrypto3 libssl3 \
     && if [ "$SAMBA_VERSION" = "distribution" ]; then \
     apk add --no-cache \
     samba-common-tools \
@@ -321,9 +324,13 @@ RUN SRAT_ARCH_SUFFIX="${BUILD_ARCH}"; \
     && rm -f /tmp/srat.zip
 
 # Initialize Samba configuration files
+# /etc/samba/smbusers is a dummy placeholder: the Samba config references it as
+# `username map` and SRAT regenerates it at runtime (see server_process_service.go).
+# Touching it here avoids "can't open username map /etc/samba/smbusers" at startup.
 RUN mkdir -p /var/lib/samba \
     && touch \
     /etc/samba/lmhosts \
+    /etc/samba/smbusers \
     /var/lib/samba/account_policy.tdb \
     /var/lib/samba/registry.tdb \
     /var/lib/samba/winbindd_idmap.tdb
