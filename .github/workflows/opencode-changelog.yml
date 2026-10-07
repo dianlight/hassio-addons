@@ -110,8 +110,10 @@ jobs:
   # prerelease/* heads never contain ## Unreleased per <addon>/.changelog-style.md
   # (S2 = S1 minus Unreleased), and bot-authored release PRs lack write
   # permission for the github action commit-back, so skip both.
+  # renovate[bot] fork PRs have permission: none — the action's comment fallback
+  # also fails for forks, so skip rather than noise a red X on every dep bump.
   changelog-pr:
-    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/') && !startsWith(github.head_ref, 'prerelease/') && github.event.pull_request.user.login != 'github-actions[bot]'
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'mergerelease/') && !startsWith(github.head_ref, 'prerelease/') && github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.user.login != 'renovate[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
