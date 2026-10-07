@@ -291,6 +291,50 @@ jobs:
           echo "bumped=$BUMPED" >> "$GITHUB_OUTPUT"
           echo "Final mergerelease version: $(yq '.version' "$CONFIG_FILE")"
 
+      - name: Select model for changelog maintenance
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        id: changelog_model
+        uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
+        with:
+          task-type: docs
+          tier: auto
+          opencode-token: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Maintain CHANGELOG.md via opencode (soft-fail)
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        continue-on-error: true
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_MODEL: ${{ steps.changelog_model.outputs.model }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          echo "::add-mask::${OPENCODE_API_KEY}"
+          bash .github/scripts/opencode-maintain-changelog.sh sambanas2
+
+      - name: Normalize Thanks/Notes order
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        shell: bash
+        run: |
+          python3 .github/scripts/normalize_changelog_order.py sambanas2/CHANGELOG.md
+
+      - name: Commit changelog back to devrelease (soft-fail)
+        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        continue-on-error: true
+        shell: bash
+        run: |
+          if git diff --quiet -- sambanas2/CHANGELOG.md; then
+            echo "CHANGELOG.md unchanged, nothing to commit."
+            exit 0
+          fi
+          git config user.email "workflow-bot@github.com"
+          git config user.name "Changelog Bot"
+          git add sambanas2/CHANGELOG.md
+          git commit -m "chore: update sambanas2 CHANGELOG.md Unreleased via opencode" || exit 0
+          for i in 1 2 3; do
+            git pull --rebase && git push && break || sleep 10
+          done
+
       - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
         if: steps.resolve_version.outputs.decision == 'mergerelease'
         shell: bash
