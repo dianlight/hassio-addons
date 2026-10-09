@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.7
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.8
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -95,7 +95,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ "$SAMBA_VERSION" != "edge" ];
     py3-pip \
     wget \
     cmocka-dev \
-    && python3 -m pip install --no-cache-dir dnspython==2.8.0 \
+    && python3 -m pip install --no-cache-dir dnspython==2.9.0 \
     && cd /tmp \
     && wget -q "https://download.samba.org/pub/samba/stable/samba-${SAMBA_VERSION}.tar.gz" \
     && tar -xzf "samba-${SAMBA_VERSION}.tar.gz" \
