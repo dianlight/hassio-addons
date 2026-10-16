@@ -1,6 +1,6 @@
 name: OpenCode Changelog (sambanas2)
 
-# No /oc text commands. Automatic only: push + pull_request + manual dispatch.
+# No /oc text commands. Automatic only: pull_request + manual dispatch.
 # Shared logic lives in .github/scripts/opencode-maintain-changelog.sh
 # (generic over ADDON, proven on sambanas2 first). Per-addon conventions live
 # in <addon>/.changelog-style.md. This workflow keeps only orchestration:
@@ -9,19 +9,17 @@ name: OpenCode Changelog (sambanas2)
 # Auth uses OPENCODE_API_KEY (never ANTHROPIC_API_KEY).
 #
 # NOTE: anomalyco/opencode/github only supports issue/PR/schedule/dispatch
-# events ("Unsupported event type: push"), so push/dispatch runs use the
+# events ("Unsupported event type: push"), so dispatch runs use the
 # opencode CLI directly (opencode run) via the shared script.
+#
+# devrelease/* push changelog maintenance is handled by docker-image-dev.yml
+# post-build (single writer, no race). This workflow covers PR feedback and
+# manual dispatch only.
 #
 # Nothing changelog-related lives in <addon>/scripts/: docker-image-dev.yml
 # auto-executes every file there at build time.
 
 on:
-  push:
-    branches:
-      - devrelease/*
-      - mergerelease/*
-    paths:
-      - sambanas2/**
   pull_request:
     paths:
       - sambanas2/**
@@ -49,7 +47,7 @@ env:
 jobs:
   # push + dispatch: headless CLI run (the github wrapper action rejects push).
   changelog-push:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -77,9 +75,7 @@ jobs:
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Maintain CHANGELOG.md via shared script
-        # mergerelease/* is deterministic-only (strip ## Unreleased already done
-        # in docker-image-dev): never re-add Unreleased there, and avoid push loops.
-        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/')
+        if: inputs.mode != 'strip-unreleased'
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_MODEL: ${{ steps.resolve.outputs.model }}
@@ -89,7 +85,7 @@ jobs:
         run: |
           bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
 
-      - name: Commit back (push/dispatch only)
+      - name: Commit back (dispatch only)
         shell: bash
         run: |
           if git diff --quiet -- sambanas2/CHANGELOG.md; then
