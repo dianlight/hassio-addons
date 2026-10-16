@@ -12,6 +12,7 @@ jobs:
       issues: write
       pull-requests: write
       contents: write
+      discussions: write
     steps:
       - name: Comment on inactive closed PRs with branch reference
         run: |
