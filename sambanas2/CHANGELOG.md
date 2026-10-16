@@ -13,11 +13,20 @@
 - This is a release candidate version, it may contain bugs and issues. Use it at your own risk. It is not recommended to use this version in production environments.
 - Minimum supported Home Assistant version is 2026.4.0.
 
+### 🐛 Bug Fixes
+
+- Share names containing hyphens are now accepted, and suggested names preserve hyphens instead of being rejected or mangled (from SRAT v2026.10.0-rc19)
+- Automount now skips native/system mounts and protected-mode environments, avoiding failed mount attempts and log noise (from SRAT v2026.10.0-rc19)
+- Already-mounted devices are skipped quietly, with corrected NTFS defaults that prevent remount loops (from SRAT v2026.10.0-rc19)
+- NTFS shares omit force user when MountFlagProber is wired into ServerService (from SRAT v2026.10.0-rc19)
+- A supervisor "target not empty" response is downgraded to a warning instead of surfacing as an error (from SRAT v2026.10.0-rc19)
+- Wizard commit failures now surface backend error context in the UI (from SRAT v2026.10.0-rc19)
+
 ### 🏗 Chore
 
 - Update base image to v21.0.8.
 - Update dnspython to v2.9.0.
-- Update SRAT to [v2026.10.0-rc18](https://github.com/dianlight/srat/blob/2026.10.0-rc18/CHANGELOG.md)
+- Update SRAT to [v2026.10.0-rc19](https://github.com/dianlight/srat/blob/2026.10.0-rc19/CHANGELOG.md)
 
 ## 2026.10.0-rc18
 
