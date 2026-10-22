@@ -75,7 +75,9 @@ jobs:
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Maintain CHANGELOG.md via shared script
-        if: inputs.mode != 'strip-unreleased'
+        # mergerelease/* heads already had ## Unreleased stripped by
+        # docker-image-dev (S2 = S1 minus U); maintain mode would re-add it.
+        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/')
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_MODEL: ${{ steps.resolve.outputs.model }}

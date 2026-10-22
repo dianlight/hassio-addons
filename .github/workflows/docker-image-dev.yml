@@ -302,38 +302,57 @@ jobs:
 
       - name: Maintain CHANGELOG.md via opencode (soft-fail)
         if: steps.resolve_version.outputs.decision == 'mergerelease'
-        continue-on-error: true
+        # Hard requirement when this run bumped the version (Rule1/Rule2):
+        # a published release must carry its changelog update. Un-bumped
+        # runs stay soft-fail so a flaky model can't block a retry.
+        continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_MODEL: ${{ steps.changelog_model.outputs.model }}
+          ADDON: ${{ needs.setup.outputs.addon_dir }}
         timeout-minutes: 10
         shell: bash
         run: |
           echo "::add-mask::${OPENCODE_API_KEY}"
-          bash .github/scripts/opencode-maintain-changelog.sh sambanas2
+          # Shallow checkout: origin/master must exist before the script
+          # (and opencode) diff origin/master...HEAD.
+          git fetch origin master
+          bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
 
       - name: Normalize Thanks/Notes order
         if: steps.resolve_version.outputs.decision == 'mergerelease'
+        env:
+          ADDON: ${{ needs.setup.outputs.addon_dir }}
         shell: bash
         run: |
-          python3 .github/scripts/normalize_changelog_order.py sambanas2/CHANGELOG.md
+          python3 .github/scripts/normalize_changelog_order.py "${ADDON}/CHANGELOG.md"
 
       - name: Commit changelog back to devrelease (soft-fail)
         if: steps.resolve_version.outputs.decision == 'mergerelease'
-        continue-on-error: true
+        # Same gate as the maintain step: when this run bumped the version,
+        # failing to persist the changelog must stop the release branch.
+        continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}
+        env:
+          ADDON: ${{ needs.setup.outputs.addon_dir }}
         shell: bash
         run: |
-          if git diff --quiet -- sambanas2/CHANGELOG.md; then
+          if git diff --quiet -- "${ADDON}/CHANGELOG.md"; then
             echo "CHANGELOG.md unchanged, nothing to commit."
             exit 0
           fi
           git config user.email "workflow-bot@github.com"
           git config user.name "Changelog Bot"
-          git add sambanas2/CHANGELOG.md
-          git commit -m "chore: update sambanas2 CHANGELOG.md Unreleased via opencode" || exit 0
+          git add "${ADDON}/CHANGELOG.md"
+          git commit -m "chore: update ${ADDON} CHANGELOG.md Unreleased via opencode" || exit 0
+          pushed=false
           for i in 1 2 3; do
-            git pull --rebase && git push && break || sleep 10
+            if git pull --rebase && git push; then pushed=true; break; fi
+            sleep 10
           done
+          if [ "$pushed" != "true" ]; then
+            echo "::error::Failed to push ${ADDON}/CHANGELOG.md after 3 attempts."
+            exit 1
+          fi
 
       - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
         if: steps.resolve_version.outputs.decision == 'mergerelease'
