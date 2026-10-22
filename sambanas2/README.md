@@ -6,6 +6,8 @@ share your disks over the network using Windows file sharing.
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield]
 
+2026.10.1 is the first stable release of Samba NAS2, closing the 2026.10 release candidate series.
+
 ## Installations
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas2.total&label=SambaNas2%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)
