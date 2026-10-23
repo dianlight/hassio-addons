@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### 🏗 Chore
-
-- Update base image to v21.0.9.
-
 ## 2026.10.1
 
 ### 🙏 Thanks
