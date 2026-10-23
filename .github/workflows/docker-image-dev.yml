@@ -240,6 +240,25 @@ jobs:
             fi
           }
 
+          # ver_max A B -> the higher of two versions, sort -V ordering.
+          ver_max() {
+            printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1
+          }
+
+          # next_version_after V -> V with its own rc/patch counter incremented.
+          next_version_after() {
+            local V="$1" VY VM VP RN
+            VY="$(echo "$V" | cut -d. -f1)"
+            VM="$(echo "$V" | cut -d. -f2)"
+            VP="$(echo "$V" | cut -d. -f3 | cut -d- -f1)"
+            if [[ "$V" =~ -rc([0-9]*)$ ]]; then
+              RN="${BASH_REMATCH[1]:-0}"
+              echo "${VY}.${VM}.${VP}-rc$((RN + 1))"
+            else
+              echo "${VY}.${VM}.$((VP + 1))"
+            fi
+          }
+
           # Rule1: year/month in the past -> reset to today year.month.0, keep rc number.
           if [[ "$CY" -lt "$CUR_Y" || ("$CY" -eq "$CUR_Y" && "$CM" -lt "$CUR_M") ]]; then
             NEXT="${CUR_Y}.${CUR_M}.0${RC}"
@@ -255,7 +274,11 @@ jobs:
             exit 0
           fi
 
-          # Rule2: current calendar and C(dev) <= max C(prerelease) -> bump on devrelease.
+          # Rule2: bump on devrelease when C is already taken. "Taken" means a
+          # prerelease branch carries a version above C, or C itself is already
+          # released (origin/master carries C or newer). A pending release line
+          # (C above master, already published as prerelease/<...C>) keeps C, so
+          # its PR keeps targeting prerelease/<...C> instead of minting C+1.
           MAX_PRE=""
           PRE_REFS=$(git ls-remote origin "prerelease/${ADDON_DIR}_*" 2>/dev/null | awk '{print $2}' | sed 's|refs/heads/||')
           if [ -n "$PRE_REFS" ]; then
@@ -268,22 +291,34 @@ jobs:
               if [ -z "$MAX_PRE" ]; then
                 MAX_PRE="$V"
               else
-                MAX_PRE=$(printf '%s\n%s\n' "$MAX_PRE" "$V" | sort -V | tail -n1)
+                MAX_PRE=$(ver_max "$MAX_PRE" "$V")
               fi
             done < <(echo "$PRE_REFS")
           fi
           echo "Max prerelease version MAX_PRE=${MAX_PRE:-<none>}"
-          if [ -n "$MAX_PRE" ]; then
-            SMALLEST=$(printf '%s\n%s\n' "$C" "$MAX_PRE" | sort -V | head -n1)
-            if [ "$C" = "$MAX_PRE" ] || [ "$SMALLEST" = "$C" ]; then
-              if [ -n "$RC" ]; then
-                N="${RCN:-0}"
-                NEXT="${CY}.${CM}.${PATCH}-rc$((N + 1))"
-              else
-                NEXT="${CY}.${CM}.$((PATCH + 1))"
-              fi
-              commit_back "$NEXT" "Rule2 bump over prerelease $MAX_PRE"
-            fi
+
+          MASTER_C=""
+          git fetch --depth=1 origin master >/dev/null 2>&1 || true
+          MASTER_C=$(git show "origin/master:${ADDON_DIR}/config.yaml" 2>/dev/null | yq '.version' 2>/dev/null || true)
+          [ "$MASTER_C" = "null" ] && MASTER_C=""
+          echo "Master (released) version MASTER_C=${MASTER_C:-<unknown>}"
+
+          RELEASED="false"
+          if [ -n "$MASTER_C" ] && [ "$(ver_max "$C" "$MASTER_C")" = "$MASTER_C" ]; then
+            RELEASED="true"
+          fi
+          echo "C=$C already released on master: $RELEASED"
+
+          if [ -z "$MAX_PRE" ] && [ "$RELEASED" = "false" ]; then
+            echo "Rule2 skip: C=$C is above master (${MASTER_C:-<unknown>}) and no prerelease branch exists -> keep C."
+          elif [ "$C" = "$MAX_PRE" ] && [ "$RELEASED" = "false" ]; then
+            echo "Rule2 skip: C=$C equals pending MAX_PRE=$MAX_PRE but is not released yet (master ${MASTER_C:-<unknown>}) -> keep C and reuse its prerelease branch."
+          elif [ -n "$MAX_PRE" ] && [ "$C" != "$MAX_PRE" ] && [ "$(ver_max "$C" "$MAX_PRE")" = "$C" ]; then
+            echo "Rule2 skip: C=$C is above pending MAX_PRE=$MAX_PRE."
+          else
+            BASE=$(ver_max "$(ver_max "$C" "${MASTER_C:-$C}")" "$MAX_PRE")
+            NEXT=$(next_version_after "$BASE")
+            commit_back "$NEXT" "Rule2 bump over max(C=$C, master ${MASTER_C:-?}, prerelease $MAX_PRE)"
           fi
 
           echo "Rule3: keep C=$C verbatim for mergerelease."
