@@ -10,6 +10,7 @@
 
 - This is the first stable release of the 2026.10 line, closing the release candidate series.
 - Minimum supported Home Assistant version is 2026.4.0.
+- **Breaking change:** the `srat_update_channel: develop` option is no longer accepted in this stable release. Existing configurations using `develop` should migrate to `prerelease` (or `release`) before upgrading.
 
 ### 🏗 Chore
 
