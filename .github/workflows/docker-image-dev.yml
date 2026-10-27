@@ -240,9 +240,40 @@ jobs:
             fi
           }
 
-          # ver_max A B -> the higher of two versions, sort -V ordering.
+          # ver_key V -> sortable key for release-aware ordering (numeric
+          # components, then stable releases rank above any -rcN).
+          ver_key() {
+            local V="$1" y m p rcflag rcn
+            if [ -z "$V" ]; then
+              printf '0000 0000 0000 0 0000'
+              return
+            fi
+            y="$(echo "$V" | cut -d. -f1)"
+            m="$(echo "$V" | cut -d. -f2)"
+            p="$(echo "$V" | cut -d. -f3 | cut -d- -f1)"
+            if [[ "$V" =~ -rc([0-9]*)$ ]]; then
+              rcflag=0
+              rcn="${BASH_REMATCH[1]:-0}"
+            else
+              rcflag=1
+              rcn=0
+            fi
+            printf '%04d %04d %04d %d %04d' "$y" "$m" "$p" "$rcflag" "$rcn"
+          }
+
+          # ver_max A B -> the higher of two versions, release-aware ordering
+          # (numeric components first, then a stable release ranks above RCs).
           ver_max() {
-            printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1
+            local a="$1" b="$2" ka kb
+            ka="$(ver_key "$a")"
+            kb="$(ver_key "$b")"
+            if [ "$ka" = "$kb" ]; then
+              printf '%s\n' "$a"
+            elif [ "$(printf '%s\n%s\n' "$ka" "$kb" | LC_ALL=C sort | tail -n1)" = "$ka" ]; then
+              printf '%s\n' "$a"
+            else
+              printf '%s\n' "$b"
+            fi
           }
 
           # next_version_after V -> V with its own rc/patch counter incremented.
