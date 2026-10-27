@@ -1,5 +1,22 @@
 # Changelog
 
+## [2026.10.1] - 2026-10-27
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- This is the first stable release of the 2026.10 line, closing the release candidate series.
+- Minimum supported Home Assistant version is 2026.4.0.
+- **Breaking change:** the `srat_update_channel: develop` option is no longer accepted in this stable release. Existing configurations using `develop` should migrate to `prerelease` (or `release`) before upgrading.
+
+### 🏗 Chore
+
+- Update HA CLI to v5.6.0.
+- Update SRAT to [v2026.10.1](https://github.com/dianlight/srat/blob/2026.10.1/CHANGELOG.md)
+
 ## 2026.10.0-rc19
 
 ### 🙏 Thanks
