@@ -344,7 +344,7 @@ jobs:
             echo "Rule2 skip: C=$C is above master (${MASTER_C:-<unknown>}) and no prerelease branch exists -> keep C."
           elif [ "$C" = "$MAX_PRE" ] && [ "$RELEASED" = "false" ]; then
             echo "Rule2 skip: C=$C equals pending MAX_PRE=$MAX_PRE but is not released yet (master ${MASTER_C:-<unknown>}) -> keep C and reuse its prerelease branch."
-          elif [ -n "$MAX_PRE" ] && [ "$C" != "$MAX_PRE" ] && [ "$(ver_max "$C" "$MAX_PRE")" = "$C" ]; then
+          elif [ -n "$MAX_PRE" ] && [ "$C" != "$MAX_PRE" ] && [ "$RELEASED" = "false" ] && [ "$(ver_max "$C" "$MAX_PRE")" = "$C" ]; then
             echo "Rule2 skip: C=$C is above pending MAX_PRE=$MAX_PRE."
           else
             BASE=$(ver_max "$(ver_max "$C" "${MASTER_C:-$C}")" "$MAX_PRE")
