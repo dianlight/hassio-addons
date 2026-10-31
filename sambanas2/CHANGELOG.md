@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 🐛 Bug Fixes
+
+- Fixed the app failing to start when the NFS root image (`/root/nfs_root.img`) was already mounted at `/mnt`: the mount in `init-nfsd` is now idempotent and logs a warning instead of aborting startup. Resolves [dianlight/srat#1500](https://github.com/dianlight/srat/issues/1500).
+
 ## 2026.10.1
 
 ### 🙏 Thanks
