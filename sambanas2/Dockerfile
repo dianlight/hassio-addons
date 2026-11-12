@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.10
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.11
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -6,7 +6,7 @@ ARG BUILD_REF=""
 ARG BUILD_REPOSITORY="dianlight/hassio-addons"
 ARG BUILD_VERSION=""
 ARG SAMBA_VERSION=distribution
-ARG HA_CLI_VERSION=5.6.0
+ARG HA_CLI_VERSION=5.7.0
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
@@ -95,7 +95,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ "$SAMBA_VERSION" != "edge" ];
     py3-pip \
     wget \
     cmocka-dev \
-    && python3 -m pip install --no-cache-dir dnspython==2.9.0 \
+    && python3 -m pip install --no-cache-dir dnspython==2.9.2 \
     && cd /tmp \
     && wget -q "https://download.samba.org/pub/samba/stable/samba-${SAMBA_VERSION}.tar.gz" \
     && tar -xzf "samba-${SAMBA_VERSION}.tar.gz" \
@@ -159,7 +159,7 @@ ENV \
 
 # Setup base
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION=5.6.0
+ARG HA_CLI_VERSION=5.7.0
 ARG SRAT_VERSION=2026.10.1
 ARG SAMBA_VERSION=distribution
 ARG SMARTMONTOOLS_SDK_VERSION=8.0.2-pre.541
