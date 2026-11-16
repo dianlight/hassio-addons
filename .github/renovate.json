@@ -23,11 +23,13 @@
   "commitMessagePrefix": "⬆️",
   "configMigration": true,
   "rebaseWhen": "behind-base-branch",
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true,
+    "autoclose": true
+  },
   "major": {
     "dependencyDashboardApproval": true
   },
-  "dependencyDashboardAutoclose": true,
   "customManagers": [
     {
       "customType": "regex",
