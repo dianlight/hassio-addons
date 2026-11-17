@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## [2026.11.0] - 2026-11-17
 
 ### 🙏 Thanks
