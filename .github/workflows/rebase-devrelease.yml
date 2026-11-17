@@ -477,14 +477,20 @@ jobs:
       - name: Select model for auto-resolve
         if: steps.rebase.outputs.conflict == 'true' && steps.rebase.outputs.outside_only == 'true'
         id: model
+        # Model routing is external: OpenCode Zen can be fully exhausted
+        # (free tier 429 + Go monthly quota at 100%). Keep the job alive and
+        # skip the auto-resolve instead of failing on quota we cannot fix here.
+        continue-on-error: true
         uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: code
           tier: auto
+          # Let a transient free-tier 429 clear instead of failing instantly.
+          max-wait-seconds: 300
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Resolve rebase conflicts via opencode CLI
-        if: steps.rebase.outputs.conflict == 'true' && steps.rebase.outputs.outside_only == 'true'
+        if: steps.rebase.outputs.conflict == 'true' && steps.rebase.outputs.outside_only == 'true' && steps.model.outputs.model != ''
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_MODEL: ${{ steps.model.outputs.model }}
@@ -579,8 +585,18 @@ jobs:
           echo "--- opencode run finished ---"
           tail -n 30 "${REBASE_TMP}/rebase-opencode.log" || true
 
+      - name: Comment when no model could be selected
+        if: steps.rebase.outputs.conflict == 'true' && steps.rebase.outputs.outside_only == 'true' && steps.model.outputs.model == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.rebase.outputs.issue_number }}
+          ADDON: ${{ steps.rebase.outputs.addon }}
+        shell: bash
+        run: |
+          gh issue comment "${ISSUE_NUMBER}" --body "Auto-resolve skipped: no OpenCode model could be selected for task-type=code (Zen free tier exhausted and Go monthly quota at 100%). No changes were attempted on \`${ADDON}\`; the issue stays open for manual sync."
+
       - name: Verify auto-resolve outcome
-        if: steps.rebase.outputs.conflict == 'true'
+        if: steps.rebase.outputs.conflict == 'true' && steps.model.outputs.model != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ steps.rebase.outputs.issue_number }}
