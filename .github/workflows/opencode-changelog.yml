@@ -68,16 +68,25 @@ jobs:
 
       - name: Select model
         id: resolve
+        # Model routing is external: OpenCode Zen can be fully exhausted
+        # (free tier 429 + Go monthly quota at 100%). Keep the job alive and
+        # let the changelog steps below decide what "no model" means
+        # (push job skips maintenance; PR job falls back to a comment).
+        continue-on-error: true
         uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: docs
           tier: auto
+          # Let a transient free-tier 429 clear instead of failing instantly.
+          max-wait-seconds: 300
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Maintain CHANGELOG.md via shared script
         # mergerelease/* heads already had ## Unreleased stripped by
         # docker-image-dev (S2 = S1 minus U); maintain mode would re-add it.
-        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/')
+        # Also skip when no model could be resolved: the shared script exits
+        # 1 on "no model given".
+        if: inputs.mode != 'strip-unreleased' && !startsWith(github.ref, 'refs/heads/mergerelease/') && steps.resolve.outputs.model != ''
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_MODEL: ${{ steps.resolve.outputs.model }}
@@ -135,16 +144,24 @@ jobs:
 
       - name: Select model
         id: resolve
+        # Same gate as changelog-push: Zen quota exhaustion is external and
+        # must not fail the PR job; the steps below fall back gracefully.
+        continue-on-error: true
         uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: docs
           tier: auto
+          # Let a transient free-tier 429 clear instead of failing instantly.
+          max-wait-seconds: 300
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       # Render the shared prompt (dry-run: no edits) and append the PR-only
       # fork rule, so the github action uses the same prompt as push runs.
       - name: Render shared prompt
         id: render
+        # Skip when no model could be resolved: the prompt would be rendered
+        # for a run that can never execute it.
+        if: steps.resolve.outputs.model != ''
         env:
           DRY_RUN: "true"
         shell: bash
@@ -158,6 +175,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Maintain CHANGELOG.md
+        if: steps.resolve.outputs.model != ''
         # Pinned to a moving tag for bootstrap; pin to a reviewed SHA after first green run.
         uses: anomalyco/opencode/github@77fc88c8ade8e5a620ebbe1197f3a572d29ae91a # latest
         env:
@@ -171,6 +189,8 @@ jobs:
           prompt: ${{ steps.render.outputs.text }}
 
       - name: Normalize Thanks/Notes order (deterministic)
+        # Only meaningful when the maintain step above could run.
+        if: steps.resolve.outputs.model != ''
         shell: bash
         run: |
           python3 .github/scripts/normalize_changelog_order.py sambanas2/CHANGELOG.md
