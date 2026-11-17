@@ -93,6 +93,12 @@ Never mix documentation or logic across add-ons. The `documentation-validation.y
 | Feature / behavior | `README.md` + `DOCS.md` + `CHANGELOG.md` |
 | Bug fix / security | `CHANGELOG.md` |
 
+### Commit consent
+
+- **Never create commits on the `master` branch without the user's explicit consent.** Work on branches (e.g. `devrelease/<addon>`); commits to `master` only happen when the user explicitly asks for a release.
+- Do not create any other commits unless explicitly asked (`git commit`, `git push`). Preparing changes — editing files, writing changelog entries, preparing releases — does not include committing.
+- If unsure whether to commit, stop and ask instead of committing "just in case."
+
 ### Changelog format (`.github/CHANGELOG_TEMPLATE.md`)
 
 ```markdown
