@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 🐛 Bug Fixes
+
+- Fixed a startup race that could hide USB volumes from SMB shares: the `srat` service now depends on the `init-nfsd` oneshot, so the NFS root image (`/root/nfs_root.img`) is always mounted on `/mnt` before SRAT mounts volumes below it and the shares are never shadowed.
+
 ## [2026.11.0] - 2026-11-17
 
 ### 🙏 Thanks
