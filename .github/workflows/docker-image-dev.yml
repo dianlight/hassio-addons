@@ -360,14 +360,24 @@ jobs:
       - name: Select model for changelog maintenance
         if: steps.resolve_version.outputs.decision == 'mergerelease'
         id: changelog_model
+        # Model routing is external: OpenCode Zen can be fully exhausted
+        # (free tier 429 + Go monthly quota at 100%), which has no repo-side
+        # fix. Only a bumped release (Rule1/Rule2) must stop on that; an
+        # un-bumped run keeps the branch alive without the changelog touch-up,
+        # matching the soft-fail gate on the changelog steps below.
+        continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}
         uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: docs
           tier: auto
+          # Let a transient free-tier 429 clear instead of failing instantly.
+          max-wait-seconds: 300
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Maintain CHANGELOG.md via opencode (soft-fail)
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        # Skip (not fail) when no model could be resolved: the shared script
+        # exits 1 on "no model given".
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         # Hard requirement when this run bumped the version (Rule1/Rule2):
         # a published release must carry its changelog update. Un-bumped
         # runs stay soft-fail so a flaky model can't block a retry.
@@ -386,7 +396,7 @@ jobs:
           bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
 
       - name: Normalize Thanks/Notes order
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         env:
           ADDON: ${{ needs.setup.outputs.addon_dir }}
         shell: bash
@@ -394,7 +404,7 @@ jobs:
           python3 .github/scripts/normalize_changelog_order.py "${ADDON}/CHANGELOG.md"
 
       - name: Commit changelog back to devrelease (soft-fail)
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         # Same gate as the maintain step: when this run bumped the version,
         # failing to persist the changelog must stop the release branch.
         continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}

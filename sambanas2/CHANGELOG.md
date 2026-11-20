@@ -1,6 +1,41 @@
 # Changelog
 
-## [2026.10.1] - 2026-10-27
+## [2026.11.0] - 2026-11-17
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- Minimum supported Home Assistant version is 2026.4.0.
+- SRAT v2026.11.0 adds compatibility with Home Assistant 2026.11 native USB disk mounting.
+
+### 🏗 Chore
+
+- Update HA CLI to v6.0.0.
+- Update dnspython to v2.9.2.
+- Update SRAT to [v2026.11.0](https://github.com/dianlight/srat/blob/2026.11.0/CHANGELOG.md)
+
+## 2026.10.2
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### 🐛 Bug Fixes
+
+- Fixed the app failing to start when the NFS root image (`/root/nfs_root.img`) was already mounted at `/mnt`: the mount in `init-nfsd` is now idempotent and logs a warning instead of aborting startup. Resolves [dianlight/srat#1500](https://github.com/dianlight/srat/issues/1500).
+
+### 🏗 Chore
+
+- Update base image to v21.0.10.
+
+## 2026.10.1
 
 ### 🙏 Thanks
 

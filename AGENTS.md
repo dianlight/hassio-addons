@@ -19,6 +19,12 @@ Root build entrypoint is `build.sh`. Add-on configs use either `config.yaml` or 
 - Prefer minimal edits and preserve existing shell/YAML conventions in each add-on.
 - Update documentation alongside code changes. See [Documentation Update Rules](#documentation-update-rules).
 
+## Git And Commit Rules
+
+- **Never create commits on the `master` branch without the user's explicit consent.** Work on branches (e.g. `devrelease/<addon>`); commits to `master` only happen when the user explicitly asks for a release.
+- Do not create any other commits unless explicitly asked (`git commit`, `git push`). Preparing changes — editing files, writing changelog entries, preparing releases — does not include committing.
+- If unsure whether to commit, stop and ask instead of committing "just in case."
+
 ## Build And Test
 
 Run these checks before or with build-related changes:
