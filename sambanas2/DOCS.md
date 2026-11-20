@@ -157,6 +157,7 @@ NFS services run under s6 supervision and the exports file is **automatically ma
 
 **Notes:**
 - At startup the `srat` service waits for the `init-nfsd` oneshot to complete before starting, so the NFS root image is mounted on `/mnt` before SRAT mounts volumes below it; volume mounts are therefore never hidden by the NFS root mount.
+- **Fixed**: The `srat/run` script now correctly detects single-dash flag forms (`-auto-update`, `-ipv4-only`) from `srat-server --help` output, ensuring configured `auto_update` and `disable_ipv6` options are properly passed to the binary.
 - NFS exports are **only** available for the following share types: `Media`, `Backup`, and `Share`
 - NFS is intended for internal communication between Home Assistant and the add-on, not for external network access
 - Not all filesystem types support safe NFS re-export. Depending on the source filesystem and mount options, some paths may be incompatible with NFS export semantics.

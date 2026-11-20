@@ -10,6 +10,8 @@ share your disks over the network using Windows file sharing.
 
 2026.11.0 updates SRAT to v2026.11.0 (HA 2026.11 native USB mounting compatibility) and the Home Assistant CLI to v6.0.0.
 
+The `srat` startup script now correctly detects single-dash flags (`-auto-update`, `-ipv4-only`) from `srat-server --help` output, so the `auto_update` and `disable_ipv6` options are properly passed to the SRAT binary.
+
 ## Installations
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas2.total&label=SambaNas2%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)

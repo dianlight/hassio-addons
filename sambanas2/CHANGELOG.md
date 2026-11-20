@@ -5,6 +5,7 @@
 ### 🐛 Bug Fixes
 
 - Fixed a startup race that could hide USB volumes from SMB shares: the `srat` service now depends on the `init-nfsd` oneshot, so the NFS root image (`/root/nfs_root.img`) is always mounted on `/mnt` before SRAT mounts volumes below it and the shares are never shadowed.
+- Fixed `srat/run` silently dropping `-auto-update` and `-ipv4-only` flags: the script probed `srat-server --help` for double-dash forms (`--auto-update`, `--ipv4-only`) but Go's `flag` package prints single-dash forms (`-auto-update`, `-ipv4-only`). The grep patterns now match the single-dash form so configured `auto_update` and `disable_ipv6` options are correctly passed to the binary.
 
 ## [2026.11.0] - 2026-11-17
 

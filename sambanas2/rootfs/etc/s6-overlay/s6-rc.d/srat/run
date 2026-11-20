@@ -39,17 +39,15 @@ SRAT_ARGS="-port $(bashio::app.ingress_port) \
 # Check if --auto-update flag is supported and add it if auto_update is true
 if bashio::config.true 'auto_update'; then
   help_text=$(/usr/local/bin/srat-server --help 2>&1 || true)
-  if echo "${help_text}" | grep -q -- '--auto-update'; then
-    SRAT_ARGS="${SRAT_ARGS} --auto-update"
+  if echo "${help_text}" | grep -q -- '-auto-update'; then
+    SRAT_ARGS="${SRAT_ARGS} -auto-update"
   fi
 fi
-  
+
 if bashio::config.true 'disable_ipv6'; then
   help_text=$(/usr/local/bin/srat-server --help 2>&1 || true)
-  if echo "${help_text}" | grep -q -- '--ipv4-only'; then
-    SRAT_ARGS="${SRAT_ARGS} --ipv4-only"
-  elif echo "${help_text}" | grep -q -- ' -4'; then
-    SRAT_ARGS="${SRAT_ARGS} -4"
+  if echo "${help_text}" | grep -q -- '-ipv4-only'; then
+    SRAT_ARGS="${SRAT_ARGS} -ipv4-only"
   else
     bashio::log.warning "wsddn IPv4-only flag not detected; relying on IPv6 sysctl disable"
   fi

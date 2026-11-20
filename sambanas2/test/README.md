@@ -95,6 +95,22 @@ Unit test for the ZFS support output logic used by `modprobe/run`.
 ./test-zfs-support-output.sh
 ```
 
+### SRAT Args Flag Test (`test-srat-args-flags.sh`)
+
+Unit test for the SRAT_ARGS flag detection logic in `srat/run`.
+
+**What it tests:**
+- `-auto-update` is detected from `srat-server --help` output (single-dash Go flag format)
+- `-ipv4-only` is detected from `srat-server --help` output (single-dash Go flag format)
+- Old double-dash patterns (`--auto-update`, `--ipv4-only`) are NOT matched
+- Flags are only added when `auto_update` / `disable_ipv6` are true
+- No false matches on the removed `-4` fallback
+
+**Run it:**
+```bash
+./test-srat-args-flags.sh
+```
+
 ### `buildLocal.sh`
 Builds the add-on container image locally for testing.
 
@@ -106,7 +122,7 @@ Sample configuration for local testing.
 
 ## Running All Tests
 
-To run both upgrade tests:
+To run all tests:
 
 ```bash
 # Unit tests (always available)
@@ -117,6 +133,9 @@ To run both upgrade tests:
 
 # ZFS output unit test
 ./test-zfs-support-output.sh
+
+# SRAT args flag detection unit test
+./test-srat-args-flags.sh
 ```
 
 ## CI/CD Integration
@@ -137,6 +156,8 @@ test:
       run: ./sambanas2/test/test-binary-upgrade-integration.sh
     - name: Run ZFS output tests
       run: ./sambanas2/test/test-zfs-support-output.sh
+    - name: Run SRAT args flag tests
+      run: ./sambanas2/test/test-srat-args-flags.sh
 ```
 
 ## Manual Testing with Real Binaries
