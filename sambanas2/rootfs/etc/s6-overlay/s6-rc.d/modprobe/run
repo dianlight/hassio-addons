@@ -8,6 +8,13 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "modprobe/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
+# Drop stale bashio caches so addon options come from the live Supervisor API.
+if declare -F bashio::cache.flush_all >/dev/null 2>&1; then
+  bashio::cache.flush_all
+else
+  rm -f /tmp/.bashio/*.cache
+fi
+
 bashio::log.debug  "-> Loading kernel modules..."
 
 KERNEL_RELEASE=$(uname -r)
