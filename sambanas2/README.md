@@ -12,6 +12,8 @@ share your disks over the network using Windows file sharing.
 
 The `srat` startup script now correctly detects single-dash flags (`-auto-update`, `-ipv4-only`) from `srat-server --help` output, so the `auto_update` and `disable_ipv6` options are properly passed to the SRAT binary.
 
+Stale `bashio` caches are removed from the image and flushed at startup, so ingress port and add-on options always come from the live Supervisor. Binary self-upgrade accepts 4-part versions (`YYYY.MM.DD.PATCH`).
+
 ## Installations
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas2.total&label=SambaNas2%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)

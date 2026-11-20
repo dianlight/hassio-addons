@@ -149,7 +149,7 @@ test_section "Simulating upgrade workflow"
 # Copy the upgrade function logic here
 is_semver_valid() {
   local v="$1"
-  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z\.-]+)?$ ]]
+  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z\.-]+)?$ ]]
 }
 
 normalize_version() {

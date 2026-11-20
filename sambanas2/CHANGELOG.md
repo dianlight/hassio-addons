@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Binary self-upgrade now accepts 4-part versions (`YYYY.MM.DD.PATCH`), so staged SRAT binaries are no longer rejected as invalid. Resolves [dianlight/hassio-addons#819](https://github.com/dianlight/hassio-addons/issues/819).
+- Stale `bashio` API caches are no longer baked into the image and are flushed at startup, so ingress port and addon options are read live from Supervisor. Resolves [dianlight/hassio-addons#818](https://github.com/dianlight/hassio-addons/issues/818).
+
 ## [2026.11.0] - 2026-11-17
 
 ### 🙏 Thanks

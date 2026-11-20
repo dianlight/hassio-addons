@@ -36,7 +36,7 @@ extract_version_from_binary() {
 
 is_semver_valid() {
   local v="$1"
-  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z\.-]+)?$ ]]
+  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z\.-]+)?$ ]]
 }
 
 normalize_version() {
@@ -88,6 +88,18 @@ if is_semver_valid "v2025.12.0-dev.8"; then
   test_pass "Valid semver with prerelease: v2025.12.0-dev.8"
 else
   test_fail "Valid semver with prerelease: v2025.12.0-dev.8"
+fi
+
+if is_semver_valid "2026.11.19.4"; then
+  test_pass "Valid 4-part semver: 2026.11.19.4"
+else
+  test_fail "Valid 4-part semver: 2026.11.19.4"
+fi
+
+if is_semver_valid "v2026.11.18.1"; then
+  test_pass "Valid 4-part semver with 'v': v2026.11.18.1"
+else
+  test_fail "Valid 4-part semver with 'v': v2026.11.18.1"
 fi
 
 if is_semver_valid "1.2"; then
@@ -154,6 +166,12 @@ if is_version_newer "1.9.0" "1.10.0"; then
   test_pass "1.10.0 is newer than 1.9.0"
 else
   test_fail "1.10.0 is newer than 1.9.0"
+fi
+
+if is_version_newer "2026.11.18.1" "2026.11.19.4"; then
+  test_pass "2026.11.19.4 is newer than 2026.11.18.1"
+else
+  test_fail "2026.11.19.4 is newer than 2026.11.18.1"
 fi
 
 # ==============================================================================

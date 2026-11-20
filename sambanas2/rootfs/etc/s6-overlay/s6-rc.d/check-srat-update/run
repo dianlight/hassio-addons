@@ -8,6 +8,13 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "check-srat-update/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
+# Drop stale bashio caches so addon options come from the live Supervisor API.
+if declare -F bashio::cache.flush_all >/dev/null 2>&1; then
+  bashio::cache.flush_all
+else
+  rm -f /tmp/.bashio/*.cache
+fi
+
 export HOSTNAME
 export ADDON_VERSION=$(bashio::app.version)
 
@@ -44,10 +51,11 @@ extract_version_from_binary() {
   return 1
 }
 
-# Validate semver, allow optional leading 'v'
+# Validate semver, allow optional leading 'v' and an optional 4th numeric
+# component (YYYY.MM.DD.PATCH is used by SRAT release binaries).
 is_semver_valid() {
   local v="$1"
-  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z\.-]+)?$ ]]
+  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z\.-]+)?$ ]]
 }
 
 # Normalize version: strip leading 'v'
