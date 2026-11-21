@@ -8,6 +8,7 @@ Generate release notes for the specified add-on using the current workspace chan
 
 Requirements:
 - Use the changelog structure from [.github/CHANGELOG_TEMPLATE.md](../CHANGELOG_TEMPLATE.md).
+- Never commit unless the user explicitly asks; generating notes never includes committing. Never create commits on `master` without explicit consent.
 - Keep notes scoped to one add-on unless explicitly asked to summarize multiple add-ons.
 - Include sections only when they have content:
   - Added
