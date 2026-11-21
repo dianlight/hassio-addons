@@ -19,9 +19,9 @@
 ### 🏗 Chore
 
 - Update base image to v21.0.11.
+- Update HA CLI to v6.0.0.
+- Update dnspython to v2.9.2.
 - Update SRAT to [v2026.11.0](https://github.com/dianlight/srat/blob/2026.11.0/CHANGELOG.md)
-
-## [2026.11.0] - 2026-11-17
 
 ### 🙏 Thanks
 
@@ -31,12 +31,6 @@
 
 - Minimum supported Home Assistant version is 2026.4.0.
 - SRAT v2026.11.0 adds compatibility with Home Assistant 2026.11 native USB disk mounting.
-
-### 🏗 Chore
-
-- Update HA CLI to v6.0.0.
-- Update dnspython to v2.9.2.
-- Update SRAT to [v2026.11.0](https://github.com/dianlight/srat/blob/2026.11.0/CHANGELOG.md)
 
 ## 2026.10.2
 

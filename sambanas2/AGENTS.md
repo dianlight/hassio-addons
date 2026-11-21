@@ -84,6 +84,15 @@ When making ANY change to sambanas2, you MUST update:
 - Breaking changes notes
 - Migration instructions
 
+### Changelog Release State
+
+- `## Unreleased` is always first and must always exist (empty when nothing pending).
+- Until a version is released, all of its content lives under `## Unreleased`.
+- Release transitions (Unreleased -> version, version -> Unreleased, strip for beta) are
+  deterministic via `.github/scripts/changelog_release.py`; never hand-edit version headings.
+- When the beta release PR is cut: Unreleased -> promote to beta version -> (beta: strip) ->
+  prerelease branch of the upcoming final version.
+
 ## Code-to-Documentation Mapping
 
 | Code Change | Documentation Update Required |

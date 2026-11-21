@@ -120,6 +120,15 @@ Before any code change validation:
 7. ✅ Ensure documentation language is consistent within project
 8. ✅ Validate that examples and code snippets are current
 
+### Changelog And Release State
+
+- `## Unreleased` is always the first CHANGELOG section and must always exist (even when empty).
+- A versioned heading (`## [Version] - YYYY-MM-DD`) may only exist for a released version.
+- Until a version is released, all of its content lives under `## Unreleased`.
+- Release transitions (Unreleased -> version, version -> Unreleased, strip for beta) are
+  deterministic via `.github/scripts/changelog_release.py`; never hand-edit version headings.
+- Release PRs/beta PRs follow: Unreleased -> promote to release/beta version -> (beta: strip) -> prerelease branch.
+
 ### Documentation Style Guidelines
 
 - Use clear, concise language

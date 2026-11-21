@@ -102,6 +102,8 @@ Never mix documentation or logic across add-ons. The `documentation-validation.y
 ### Changelog format (`.github/CHANGELOG_TEMPLATE.md`)
 
 ```markdown
+## Unreleased
+
 ## [Version] - YYYY-MM-DD
 
 ### Added
@@ -112,7 +114,12 @@ Never mix documentation or logic across add-ons. The `documentation-validation.y
 ### Migration Notes
 ```
 
-Include only sections that have content. Use semantic versioning (`MAJOR.MINOR.PATCH`).
+- `## Unreleased` is always first and must always exist (empty when nothing pending).
+- A versioned heading (`## [Version] - YYYY-MM-DD`) may only exist for a released version.
+- Until a version is released, all its content lives under `## Unreleased`.
+- Release transitions (Unreleased -> version, version -> Unreleased, strip for beta) are
+  deterministic via `.github/scripts/changelog_release.py`; never hand-edit version headings.
+- Include only sections that have content. Use semantic versioning (`MAJOR.MINOR.PATCH`).
 
 ### Shell scripts (`.github/instructions/shell.instructions.md`)
 

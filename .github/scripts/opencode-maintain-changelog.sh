@@ -122,7 +122,7 @@ fi
 # 5. Render the opencode prompt (single source of truth lives here).
 cat > "${PROMPT_FILE}" <<PROMPT_EOF
 Maintain ONLY ${ADDON}/CHANGELOG.md ## Unreleased per ${STYLE_DESC}
-(emoji sections, RC versions, no dates; config.yaml:version is source of truth).
+(content sections only; versioned release headings are CI-owned via changelog_release.py).
 You run non-interactively in the repo root. Edit that one file only; do not commit.
 Steps:
 1. Diff origin/master...HEAD scoped to ${ADDON}/ (features, fixes, chores, breaking, migration notes).
@@ -139,11 +139,13 @@ Steps:
      the Chore version bullet.
    - Never create a ### 🐭 Features from SRAT section.
    - Skip this step entirely when Dockerfile has no ARG SRAT_VERSION.
-3. Version rules (C=config.yaml:version, H=first ## != Unreleased):
-   - C==H: append to ## Unreleased only (Us1/Us4). Never bump versions here.
-   - C not in file + Unreleased non-empty: promote Unreleased -> ## C, leave new empty ## Unreleased (Us2/Us3).
-   - C in older ##: no duplication; ensure ## Unreleased exists.
-   - Never create -beta/-dev headers here; never add/remove ## Unreleased in a way that leaves two heads.
+3. Content rules (C=config.yaml:version is source of truth; the model never bumps versions):
+   - Maintain ONLY ## Unreleased content. Never create versioned headings here.
+   - If ## Unreleased is missing, create it above the newest released version.
+   - Never add/remove ## Unreleased in a way that leaves two heads.
+   - Release transitions (Unreleased -> version heading, version heading -> Unreleased,
+     strip ## Unreleased) are deterministic via .github/scripts/changelog_release.py and
+     owned by CI; never perform them from this prompt.
 4. Section order: in the first versioned release put ### 🙏 Thanks first
    and ### 🚨 Notes second (a deterministic step re-sorts them anyway).
 5. Keep it concise and user-facing. Do not touch config.yaml, Dockerfile, or translations.

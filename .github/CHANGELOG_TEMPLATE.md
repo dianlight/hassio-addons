@@ -5,6 +5,8 @@
 Use this template when updating CHANGELOG.md files in any project:
 
 ```markdown
+## Unreleased
+
 ## [Version] - YYYY-MM-DD
 
 ### Added
