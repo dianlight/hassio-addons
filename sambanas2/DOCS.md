@@ -347,6 +347,7 @@ Defaults to `false`.
 - **Mount does not work**: turn off protection mode and try again.
 - **Editing a user asks for a password**: leave it empty to keep the old one.
 - **Old share names stop working**: use the new names, or show both while you switch over.
+- **Startup log mentions `supervisor.info.hostname` or `init-smbd/run failed`**: the certificate bootstrap now creates bashio's cache directory and falls back to `homeassistant.local` when the supervisor hostname is unavailable. No action is needed; SSL certificates are regenerated with that FQDN.
 
 ## Support
 

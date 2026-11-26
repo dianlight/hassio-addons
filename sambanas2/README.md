@@ -12,6 +12,8 @@ share your disks over the network using Windows file sharing.
 
 The `srat` startup script now correctly detects single-dash flags (`-auto-update`, `-ipv4-only`) from `srat-server --help` output, so the `auto_update` and `disable_ipv6` options are properly passed to the SRAT binary.
 
+The `init-smbd` startup script now initializes bashio's cache directory and falls back to the default hostname when the supervisor hostname cannot be read, so SSL certificate generation no longer aborts on a fresh container.
+
 ## Installations
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Faddons.json&query=%24.1a32f091_sambanas2.total&label=SambaNas2%20Installations&link=https%3A%2F%2Faddonstats.poeschl.xyz%2F%23)

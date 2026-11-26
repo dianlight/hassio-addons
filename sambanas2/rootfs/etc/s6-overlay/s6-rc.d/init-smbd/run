@@ -11,6 +11,11 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "init-smbd/run failed at line ${LINENO} (exit code: ${?})"' ERR
 
+# bashio caches supervisor responses under /tmp/.bashio. On a fresh container
+# that directory may not exist yet; create it so cache writes (for example from
+# bashio::info.hostname) cannot fail and abort this oneshot.
+mkdir -p /tmp/.bashio 2>/dev/null || true
+
 CERT_DIR="/ssl/sambanas/"
 CA_KEY_FILE="${CERT_DIR}/ca.key"
 CA_CERT_FILE="${CERT_DIR}/ca.crt"
@@ -28,8 +33,9 @@ fi
 
 
 
-# Read hostname from API or use default
-HOSTNAME=$(bashio::info.hostname)
+# Read hostname from API or use default. The supervisor cache may be unavailable,
+# so absorb a lookup failure and let the fallback below handle it.
+HOSTNAME=$(bashio::info.hostname 2>/dev/null) || HOSTNAME=""
 if bashio::var.is_empty "${HOSTNAME}" || [ "${HOSTNAME}" == "null" ]; then
   bashio::log.warning "Can't read hostname, using default."
   HOSTNAME="homeassistant"
