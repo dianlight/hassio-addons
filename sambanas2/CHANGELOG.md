@@ -8,6 +8,8 @@
 
 ### 🐛 Bug Fixes
 
+- Binary self-upgrade now accepts 4-part versions (`YYYY.MM.DD.PATCH`), so staged SRAT binaries are no longer rejected as invalid. Resolves [dianlight/hassio-addons#819](https://github.com/dianlight/hassio-addons/issues/819).
+- Stale `bashio` API caches are no longer baked into the image and are flushed at startup, so ingress port and addon options are read live from Supervisor. Resolves [dianlight/hassio-addons#818](https://github.com/dianlight/hassio-addons/issues/818).
 - Fixed `init-smbd` failing at startup when bashio's supervisor cache directory (`/tmp/.bashio`) did not exist: the directory is now created before the first bashio call, and a failed hostname lookup falls back to `homeassistant` instead of aborting certificate generation.
 - Fixed a startup race that could hide USB volumes from SMB shares: the `srat` service now depends on the `init-nfsd` oneshot, so the NFS root image (`/root/nfs_root.img`) is always mounted on `/mnt` before SRAT mounts volumes below it and the shares are never shadowed.
 - Fixed `srat/run` silently dropping `-auto-update` and `-ipv4-only` flags: the script probed `srat-server --help` for double-dash forms (`--auto-update`, `--ipv4-only`) but Go's `flag` package prints single-dash forms (`-auto-update`, `-ipv4-only`). The grep patterns now match the single-dash form so configured `auto_update` and `disable_ipv6` options are correctly passed to the binary.

@@ -17,7 +17,7 @@ Pure bash unit tests for version extraction, comparison, and upgrade decision lo
 - No compiler needed
 
 **What it tests:**
-- Semver validation (with/without 'v' prefix, prerelease tags)
+- Semver validation (with/without 'v' prefix, prerelease tags, 4-part `YYYY.MM.DD.PATCH` versions)
 - Version normalization
 - Version comparison using `sort -V`
 - Upgrade decision workflow
@@ -111,6 +111,19 @@ Unit test for the SRAT_ARGS flag detection logic in `srat/run`.
 ./test-srat-args-flags.sh
 ```
 
+### Bashio Cache Test (`test-bashio-cache.sh`)
+
+Static regression check for stale bashio API caches.
+
+**What it tests:**
+- The `Dockerfile` removes `/tmp/.bashio` at build time
+- `srat/run`, `socat/run`, `modprobe/run`, and `check-srat-update/run` flush stale caches before reading ingress/options
+
+**Run it:**
+```bash
+./test-bashio-cache.sh
+```
+
 ### `buildLocal.sh`
 Builds the add-on container image locally for testing.
 
@@ -136,6 +149,9 @@ To run all tests:
 
 # SRAT args flag detection unit test
 ./test-srat-args-flags.sh
+
+# Bashio cache regression check
+./test-bashio-cache.sh
 ```
 
 ## CI/CD Integration

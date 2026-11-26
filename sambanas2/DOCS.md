@@ -97,6 +97,8 @@ Samba NAS2 includes an integrated web interface for management and configuration
 
 2. **Direct Access**: If you need to access the interface outside of Home Assistant, connect directly using `http://<HOME_ASSISTANT_IP>:3000`. Note that this port is not exposed by default and may require additional configuration.
 
+The ingress port and add-on options are always read live from the Home Assistant Supervisor; no cached values from image build time are used.
+
 The web interface provides access to SRAT (Samba REST Administration Tool), which offers a user-friendly interface for configuring and managing your Samba shares, users, and settings.
 
 On first run a setup wizard guides hostname, workgroup, admin password, and telemetry choice. You can reopen it in Settings.
@@ -256,6 +258,8 @@ Setting this option to `release`, `prerelease`, or `develop` enables automatic u
 ⚠️ **Important**: When you select `release`, `prerelease`, or `develop`, SRAT updates are downloaded and installed automatically. These updates are persistent and stored in the add-on's data directory.
 
 If you switch to `none`, any previously downloaded updates in the data directory will be ignored but not removed. To clean up the directory and remove old downloads, use the `clean_upgrade_dir` option.
+
+The upgrade check accepts both 3-part (`1.2.3`) and 4-part (`YYYY.MM.DD.PATCH`, for example `2026.11.19.4`) version strings, with an optional leading `v` and prerelease suffix.
 
 Defaults to `none`.
 

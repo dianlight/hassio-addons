@@ -8,6 +8,13 @@ set -euo pipefail
 exec 2>&1
 trap 'bashio::log.error "socat/run failed at line ${BASH_LINENO[0]} (exit code: ${?})"' ERR
 
+# Drop stale bashio caches so ingress/options come from the live Supervisor API.
+if declare -F bashio::cache.flush_all >/dev/null 2>&1; then
+  bashio::cache.flush_all
+else
+  rm -f /tmp/.bashio/*.cache
+fi
+
 if bashio::var.has_value "$(bashio::app.port 3000)"; then
   bashio::log.yellow "$(figlet -p -f big -w 600 'ALLERT!')"
   bashio::log.warning "Addon OPEN ACCESS PORT port is set to  $(bashio::app.port 3000)->$(bashio::app.ingress_port)"
