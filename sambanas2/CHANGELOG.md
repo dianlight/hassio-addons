@@ -18,7 +18,7 @@
 
 ### 🏗 Chore
 
-- Update base image to v21.0.11.
+- Update base image to v21.0.12.
 - Update HA CLI to v6.0.0.
 - Update dnspython to v2.9.2.
 - Update SRAT to [v2026.11.0](https://github.com/dianlight/srat/blob/2026.11.0/CHANGELOG.md)
