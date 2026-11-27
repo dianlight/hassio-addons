@@ -2,9 +2,9 @@
 # ==============================================================================
 # Regression check for stale bashio API caches in the sambanas2 image
 # ==============================================================================
-# Verifies that no bashio cache can be baked into the image and that every s6
-# service which reads ingress/options from Supervisor flushes stale caches
-# before doing so. See dianlight/hassio-addons#818.
+# Verifies that no bashio cache is baked into the image and that a single
+# startup service flushes caches before any service reads Supervisor data.
+# See dianlight/hassio-addons#818.
 
 set -uo pipefail
 
@@ -31,6 +31,7 @@ test_section() {
 }
 
 ADDON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+S6_DIR="${ADDON_DIR}/rootfs/etc/s6-overlay/s6-rc.d"
 
 test_section "Dockerfile removes baked-in bashio caches"
 
@@ -40,25 +41,37 @@ else
   test_fail "Dockerfile must remove /tmp/.bashio at build time"
 fi
 
-test_section "s6 services flush stale bashio caches at startup"
+test_section "Centralized bashio-cache oneshot"
 
-SCRIPTS=(
-  "srat/run"
-  "socat/run"
-  "modprobe/run"
-  "check-srat-update/run"
-)
+CACHE_RUN="${S6_DIR}/bashio-cache/run"
+if [[ -f "${CACHE_RUN}" ]] &&
+   grep -q 'bashio::cache.flush_all' "${CACHE_RUN}" &&
+   grep -q 'rm -rf /tmp/.bashio' "${CACHE_RUN}" &&
+   [[ -f "${S6_DIR}/bashio-cache/up" ]] &&
+   [[ -f "${S6_DIR}/bashio-cache/dependencies.d/base" ]] &&
+   [[ "$(tr -d '[:space:]' <"${S6_DIR}/bashio-cache/type")" == "oneshot" ]]; then
+  test_pass "bashio-cache flushes caches once as a base oneshot"
+else
+  test_fail "bashio-cache must be a base oneshot that flushes caches centrally"
+fi
 
-for script in "${SCRIPTS[@]}"; do
-  path="${ADDON_DIR}/rootfs/etc/s6-overlay/s6-rc.d/${script}"
-  if [[ ! -f "$path" ]]; then
-    test_fail "Missing service script: ${script}"
-    continue
-  fi
-  if grep -q 'bashio::cache.flush_all' "$path" && grep -q 'rm -f /tmp/.bashio/\*.cache' "$path"; then
-    test_pass "${script} flushes stale bashio caches"
+test_section "Startup services wait for bashio-cache"
+
+for service in check-protection-mode check-srat-update clean-config factory-reset init-smbd modprobe; do
+  if [[ -f "${S6_DIR}/${service}/dependencies.d/bashio-cache" ]]; then
+    test_pass "${service} depends on bashio-cache"
   else
-    test_fail "${script} must flush stale bashio caches"
+    test_fail "${service} must depend on bashio-cache"
+  fi
+done
+
+test_section "No service flushes caches on its own"
+
+for script in srat/run socat/run modprobe/run check-srat-update/run; do
+  if grep -qE 'bashio::cache\.flush_all|rm -f /tmp/\.bashio/\*\.cache' "${S6_DIR}/${script}"; then
+    test_fail "${script} still flushes caches locally"
+  else
+    test_pass "${script} does not flush caches locally"
   fi
 done
 

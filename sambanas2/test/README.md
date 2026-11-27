@@ -117,7 +117,9 @@ Static regression check for stale bashio API caches.
 
 **What it tests:**
 - The `Dockerfile` removes `/tmp/.bashio` at build time
-- `srat/run`, `socat/run`, `modprobe/run`, and `check-srat-update/run` flush stale caches before reading ingress/options
+- A single `bashio-cache` oneshot flushes caches before services read Supervisor data
+- `check-protection-mode`, `check-srat-update`, `clean-config`, `factory-reset`, `init-smbd`, and `modprobe` depend on it
+- No service flushes caches locally, avoiding the parallel `rm -rf /tmp/.bashio` startup race
 
 **Run it:**
 ```bash

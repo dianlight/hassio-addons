@@ -343,6 +343,10 @@ option if you understand the implications and trust the module source.
 
 Defaults to `false`.
 
+## Startup services
+
+At startup the `bashio-cache` oneshot flushes Supervisor caches once. Services that read options, ingress ports, or protection state (`check-protection-mode`, `check-srat-update`, `clean-config`, `factory-reset`, `init-smbd`, `modprobe`, and everything that depends on them) wait for it, so no service can remove `/tmp/.bashio` while another is caching a response.
+
 ## Troubleshooting
 
 - **Share cannot be saved**: its folder is missing. Check the folder exists.
@@ -352,6 +356,7 @@ Defaults to `false`.
 - **Editing a user asks for a password**: leave it empty to keep the old one.
 - **Old share names stop working**: use the new names, or show both while you switch over.
 - **Startup log mentions `supervisor.info.hostname` or `init-smbd/run failed`**: the certificate bootstrap now creates bashio's cache directory and falls back to `homeassistant.local` when the supervisor hostname is unavailable. No action is needed; SSL certificates are regenerated with that FQDN.
+- **Startup stops with `check-protection-mode/run failed` or `An error occurred while storing addons.self.protected to cache`**: caches are flushed once by the `bashio-cache` oneshot before other services start. No action is needed; restart the add-on after updating.
 
 ## Support
 
