@@ -1,0 +1,20 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# vim: ft=bash
+# ==============================================================================
+# Flush stale bashio Supervisor caches once, before other services start.
+# ==============================================================================
+set -euo pipefail
+exec 2>&1
+trap 'bashio::log.error "bashio-cache/run failed at line ${LINENO} (exit code: ${?})"' ERR
+
+# A single service owns cache invalidation. Running flush_all from parallel
+# services races with cache writes: it removes /tmp/.bashio while another
+# service is caching a Supervisor response, which can abort startup.
+if declare -F bashio::cache.flush_all >/dev/null 2>&1; then
+    bashio::cache.flush_all
+else
+    rm -rf /tmp/.bashio
+fi
+
+bashio::log.debug "Supervisor caches flushed."

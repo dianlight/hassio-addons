@@ -97,6 +97,8 @@ Samba NAS2 includes an integrated web interface for management and configuration
 
 2. **Direct Access**: If you need to access the interface outside of Home Assistant, connect directly using `http://<HOME_ASSISTANT_IP>:3000`. Note that this port is not exposed by default and may require additional configuration.
 
+The ingress port and add-on options are always read live from the Home Assistant Supervisor; no cached values from image build time are used.
+
 The web interface provides access to SRAT (Samba REST Administration Tool), which offers a user-friendly interface for configuring and managing your Samba shares, users, and settings.
 
 On first run a setup wizard guides hostname, workgroup, admin password, and telemetry choice. You can reopen it in Settings.
@@ -156,6 +158,8 @@ NFS services run under s6 supervision and the exports file is **automatically ma
 4. The NFS server will detect the changes and apply them automatically
 
 **Notes:**
+- At startup the `srat` service waits for the `init-nfsd` oneshot to complete before starting, so the NFS root image is mounted on `/mnt` before SRAT mounts volumes below it; volume mounts are therefore never hidden by the NFS root mount.
+- **Fixed**: The `srat/run` script now correctly detects single-dash flag forms (`-auto-update`, `-ipv4-only`) from `srat-server --help` output, ensuring configured `auto_update` and `disable_ipv6` options are properly passed to the binary.
 - NFS exports are **only** available for the following share types: `Media`, `Backup`, and `Share`
 - NFS is intended for internal communication between Home Assistant and the add-on, not for external network access
 - Not all filesystem types support safe NFS re-export. Depending on the source filesystem and mount options, some paths may be incompatible with NFS export semantics.
@@ -255,6 +259,8 @@ Setting this option to `release`, `prerelease`, or `develop` enables automatic u
 
 If you switch to `none`, any previously downloaded updates in the data directory will be ignored but not removed. To clean up the directory and remove old downloads, use the `clean_upgrade_dir` option.
 
+The upgrade check accepts both 3-part (`1.2.3`) and 4-part (`YYYY.MM.DD.PATCH`, for example `2026.11.19.4`) version strings, with an optional leading `v` and prerelease suffix.
+
 Defaults to `none`.
 
 ### Option: `clean_upgrade_dir` (optional)
@@ -337,6 +343,10 @@ option if you understand the implications and trust the module source.
 
 Defaults to `false`.
 
+## Startup services
+
+At startup the `bashio-cache` oneshot flushes Supervisor caches once. Services that read options, ingress ports, or protection state (`check-protection-mode`, `check-srat-update`, `clean-config`, `factory-reset`, `init-smbd`, `modprobe`, and everything that depends on them) wait for it, so no service can remove `/tmp/.bashio` while another is caching a response.
+
 ## Troubleshooting
 
 - **Share cannot be saved**: its folder is missing. Check the folder exists.
@@ -345,6 +355,8 @@ Defaults to `false`.
 - **Mount does not work**: turn off protection mode and try again.
 - **Editing a user asks for a password**: leave it empty to keep the old one.
 - **Old share names stop working**: use the new names, or show both while you switch over.
+- **Startup log mentions `supervisor.info.hostname` or `init-smbd/run failed`**: the certificate bootstrap now creates bashio's cache directory and falls back to `homeassistant.local` when the supervisor hostname is unavailable. No action is needed; SSL certificates are regenerated with that FQDN.
+- **Startup stops with `check-protection-mode/run failed` or `An error occurred while storing addons.self.protected to cache`**: caches are flushed once by the `bashio-cache` oneshot before other services start. No action is needed; restart the add-on after updating.
 
 ## Support
 

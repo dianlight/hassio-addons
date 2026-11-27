@@ -17,7 +17,7 @@ Pure bash unit tests for version extraction, comparison, and upgrade decision lo
 - No compiler needed
 
 **What it tests:**
-- Semver validation (with/without 'v' prefix, prerelease tags)
+- Semver validation (with/without 'v' prefix, prerelease tags, 4-part `YYYY.MM.DD.PATCH` versions)
 - Version normalization
 - Version comparison using `sort -V`
 - Upgrade decision workflow
@@ -95,6 +95,37 @@ Unit test for the ZFS support output logic used by `modprobe/run`.
 ./test-zfs-support-output.sh
 ```
 
+### SRAT Args Flag Test (`test-srat-args-flags.sh`)
+
+Unit test for the SRAT_ARGS flag detection logic in `srat/run`.
+
+**What it tests:**
+- `-auto-update` is detected from `srat-server --help` output (single-dash Go flag format)
+- `-ipv4-only` is detected from `srat-server --help` output (single-dash Go flag format)
+- Old double-dash patterns (`--auto-update`, `--ipv4-only`) are NOT matched
+- Flags are only added when `auto_update` / `disable_ipv6` are true
+- No false matches on the removed `-4` fallback
+
+**Run it:**
+```bash
+./test-srat-args-flags.sh
+```
+
+### Bashio Cache Test (`test-bashio-cache.sh`)
+
+Static regression check for stale bashio API caches.
+
+**What it tests:**
+- The `Dockerfile` removes `/tmp/.bashio` at build time
+- A single `bashio-cache` oneshot flushes caches before services read Supervisor data
+- `check-protection-mode`, `check-srat-update`, `clean-config`, `factory-reset`, `init-smbd`, and `modprobe` depend on it
+- No service flushes caches locally, avoiding the parallel `rm -rf /tmp/.bashio` startup race
+
+**Run it:**
+```bash
+./test-bashio-cache.sh
+```
+
 ### `buildLocal.sh`
 Builds the add-on container image locally for testing.
 
@@ -106,7 +137,7 @@ Sample configuration for local testing.
 
 ## Running All Tests
 
-To run both upgrade tests:
+To run all tests:
 
 ```bash
 # Unit tests (always available)
@@ -117,6 +148,12 @@ To run both upgrade tests:
 
 # ZFS output unit test
 ./test-zfs-support-output.sh
+
+# SRAT args flag detection unit test
+./test-srat-args-flags.sh
+
+# Bashio cache regression check
+./test-bashio-cache.sh
 ```
 
 ## CI/CD Integration
@@ -137,6 +174,8 @@ test:
       run: ./sambanas2/test/test-binary-upgrade-integration.sh
     - name: Run ZFS output tests
       run: ./sambanas2/test/test-zfs-support-output.sh
+    - name: Run SRAT args flag tests
+      run: ./sambanas2/test/test-srat-args-flags.sh
 ```
 
 ## Manual Testing with Real Binaries

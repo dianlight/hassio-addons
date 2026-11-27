@@ -1,6 +1,53 @@
 # Changelog
 
-## [2026.10.1] - 2026-10-27
+## Unreleased
+
+## [2026.11.0] - 2026-11-27
+
+### ✨ Features
+
+- Compatibility with Home Assistant 2026.11 native USB disk mounting, so newly attached USB volumes are detected and managed (from SRAT v2026.11.0)
+
+### 🐛 Bug Fixes
+
+- Binary self-upgrade now accepts 4-part versions (`YYYY.MM.DD.PATCH`), so staged SRAT binaries are no longer rejected as invalid. Resolves [dianlight/hassio-addons#819](https://github.com/dianlight/hassio-addons/issues/819).
+- Stale `bashio` API caches are no longer baked into the image and are flushed at startup, so ingress port and addon options are read live from Supervisor. Resolves [dianlight/hassio-addons#818](https://github.com/dianlight/hassio-addons/issues/818).
+- Fixed `init-smbd` failing at startup when bashio's supervisor cache directory (`/tmp/.bashio`) did not exist: the directory is now created before the first bashio call, and a failed hostname lookup falls back to `homeassistant` instead of aborting certificate generation.
+- Fixed a fresh-install startup failure where parallel `bashio::cache.flush_all` calls removed `/tmp/.bashio` while `check-protection-mode` was caching the protection state. Cache invalidation now runs once in a new `bashio-cache` oneshot that the early startup services depend on.
+- Fixed a startup race that could hide USB volumes from SMB shares: the `srat` service now depends on the `init-nfsd` oneshot, so the NFS root image (`/root/nfs_root.img`) is always mounted on `/mnt` before SRAT mounts volumes below it and the shares are never shadowed.
+- Fixed `srat/run` silently dropping `-auto-update` and `-ipv4-only` flags: the script probed `srat-server --help` for double-dash forms (`--auto-update`, `--ipv4-only`) but Go's `flag` package prints single-dash forms (`-auto-update`, `-ipv4-only`). The grep patterns now match the single-dash form so configured `auto_update` and `disable_ipv6` options are correctly passed to the binary.
+- Clear stale invalid mount-point flags so affected volumes no longer stay stuck in an invalid state (from SRAT v2026.11.0)
+- Verify XFS format results instead of reporting success when the format failed (from SRAT v2026.11.0)
+- Mark WebSocket problem REMOVE frames as terminal so dismissed issues do not reappear (from SRAT v2026.11.0)
+- Reflect HDIdle on/off changes immediately in the UI (from SRAT v2026.11.0)
+- Harden custom-component installation against zip-slip path traversal and bound integer conversion (from SRAT v2026.11.0)
+
+### 🏗 Chore
+
+- Update base image to v21.0.12.
+- Update HA CLI to v6.0.0.
+- Update dnspython to v2.9.2.
+- Update SRAT to [v2026.11.0](https://github.com/dianlight/srat/blob/2026.11.0/CHANGELOG.md)
+
+## 2026.10.2
+
+### 🙏 Thanks
+
+- Thanks to all the contributors and users that help to make this app better.
+
+### 🚨 Notes
+
+- Minimum supported Home Assistant version is 2026.4.0.
+
+### 🐛 Bug Fixes
+
+- Fixed the app failing to start when the NFS root image (`/root/nfs_root.img`) was already mounted at `/mnt`: the mount in `init-nfsd` is now idempotent and logs a warning instead of aborting startup. Resolves [dianlight/srat#1500](https://github.com/dianlight/srat/issues/1500).
+
+### 🏗 Chore
+
+- Update base image to v21.0.10.
+
+## 2026.10.1
 
 ### 🙏 Thanks
 
@@ -359,3 +406,4 @@ If you are pulling the image directly (outside of HA Supervisor), update your im
 
 
 [docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
+

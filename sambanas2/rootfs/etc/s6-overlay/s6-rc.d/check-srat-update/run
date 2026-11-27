@@ -44,10 +44,11 @@ extract_version_from_binary() {
   return 1
 }
 
-# Validate semver, allow optional leading 'v'
+# Validate semver, allow optional leading 'v' and an optional 4th numeric
+# component (YYYY.MM.DD.PATCH is used by SRAT release binaries).
 is_semver_valid() {
   local v="$1"
-  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z\.-]+)?$ ]]
+  [[ "$v" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z\.-]+)?$ ]]
 }
 
 # Normalize version: strip leading 'v'

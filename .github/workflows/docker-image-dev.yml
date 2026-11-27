@@ -356,18 +356,29 @@ jobs:
           echo "decision=mergerelease" >> "$GITHUB_OUTPUT"
           echo "bumped=$BUMPED" >> "$GITHUB_OUTPUT"
           echo "Final mergerelease version: $(yq '.version' "$CONFIG_FILE")"
+          echo "final_version=$(yq '.version' "$CONFIG_FILE")" >> "$GITHUB_OUTPUT"
 
       - name: Select model for changelog maintenance
         if: steps.resolve_version.outputs.decision == 'mergerelease'
         id: changelog_model
+        # Model routing is external: OpenCode Zen can be fully exhausted
+        # (free tier 429 + Go monthly quota at 100%), which has no repo-side
+        # fix. Only a bumped release (Rule1/Rule2) must stop on that; an
+        # un-bumped run keeps the branch alive without the changelog touch-up,
+        # matching the soft-fail gate on the changelog steps below.
+        continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}
         uses: dianlight/opencode-modelselect-action@3ec36a41d90fad0d56e0670699f960ae8d4e3eef # v1
         with:
           task-type: docs
           tier: auto
+          # Let a transient free-tier 429 clear instead of failing instantly.
+          max-wait-seconds: 300
           opencode-token: ${{ secrets.OPENCODE_API_KEY }}
 
       - name: Maintain CHANGELOG.md via opencode (soft-fail)
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        # Skip (not fail) when no model could be resolved: the shared script
+        # exits 1 on "no model given".
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         # Hard requirement when this run bumped the version (Rule1/Rule2):
         # a published release must carry its changelog update. Un-bumped
         # runs stay soft-fail so a flaky model can't block a retry.
@@ -386,7 +397,7 @@ jobs:
           bash .github/scripts/opencode-maintain-changelog.sh "$ADDON"
 
       - name: Normalize Thanks/Notes order
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         env:
           ADDON: ${{ needs.setup.outputs.addon_dir }}
         shell: bash
@@ -394,7 +405,7 @@ jobs:
           python3 .github/scripts/normalize_changelog_order.py "${ADDON}/CHANGELOG.md"
 
       - name: Commit changelog back to devrelease (soft-fail)
-        if: steps.resolve_version.outputs.decision == 'mergerelease'
+        if: steps.resolve_version.outputs.decision == 'mergerelease' && steps.changelog_model.outputs.model != ''
         # Same gate as the maintain step: when this run bumped the version,
         # failing to persist the changelog must stop the release branch.
         continue-on-error: ${{ steps.resolve_version.outputs.bumped != 'true' }}
@@ -420,14 +431,37 @@ jobs:
             exit 1
           fi
 
-      - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
+      - name: Promote Unreleased to release version (deterministic)
+        # Release invariant: a versioned heading may only exist for a released
+        # version. Cutting a release promotes ## Unreleased -> ## [<version>] -
+        # <date> here (deterministic via .github/scripts/changelog_release.py).
+        # The AI maintain step only curates content under ## Unreleased and must
+        # never create versioned headings; it leaves the promote/strip/demote
+        # transitions to this script and CI.
         if: steps.resolve_version.outputs.decision == 'mergerelease'
+        shell: bash
+        run: |
+          ADDON_DIR="${{ needs.setup.outputs.addon_dir }}"
+          CHANGELOG="./${ADDON_DIR}/CHANGELOG.md"
+          VERSION="$(yq '.version' "${ADDON_DIR}/config.yaml")"
+          RELEASE_DATE="$(date +%F)"
+          echo "Promoting ## Unreleased -> ## [${VERSION}] - ${RELEASE_DATE}"
+          python3 .github/scripts/changelog_release.py "${CHANGELOG}" promote "${VERSION}" "${RELEASE_DATE}"
+
+      - name: Strip ## Unreleased for mergerelease/beta (S2 = S1 minus U)
+        # Only beta releases (versioned with -beta / -rc) strip the fresh empty
+        # ## Unreleased left by the promote step. A final (stable) release keeps
+        # the fresh empty ## Unreleased on top of the released version.
+        if: >-
+          steps.resolve_version.outputs.decision == 'mergerelease' &&
+          steps.resolve_version.outputs.final_version != '' &&
+          (contains(steps.resolve_version.outputs.final_version, '-beta') || contains(steps.resolve_version.outputs.final_version, '-rc'))
         shell: bash
         run: |
           CHANGELOG_FILE="./${{ needs.setup.outputs.addon_dir }}/CHANGELOG.md"
           if grep -q '^## Unreleased' "$CHANGELOG_FILE"; then
             awk 'BEGIN{u=0} /^## Unreleased/{u=1;next} /^## /{u=0} !u{print}' "$CHANGELOG_FILE" > "$CHANGELOG_FILE.tmp" && mv "$CHANGELOG_FILE.tmp" "$CHANGELOG_FILE"
-            echo "Stripped ## Unreleased block for mergerelease"
+            echo "Stripped ## Unreleased block for mergerelease/beta"
           else
             echo "No ## Unreleased block to strip"
           fi

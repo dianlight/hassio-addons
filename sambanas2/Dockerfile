@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.9
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.12
 ARG BUILD_DATE=""
 ARG BUILD_DESCRIPTION=""
 ARG BUILD_NAME=""
@@ -6,7 +6,7 @@ ARG BUILD_REF=""
 ARG BUILD_REPOSITORY="dianlight/hassio-addons"
 ARG BUILD_VERSION=""
 ARG SAMBA_VERSION=distribution
-ARG HA_CLI_VERSION=5.6.0
+ARG HA_CLI_VERSION=6.0.0
 
 # QUIC Builder Stage (only if SAMBA_VERSION is not "distribution")
 # hadolint ignore=DL3006
@@ -95,7 +95,7 @@ RUN if [ "$SAMBA_VERSION" != "distribution" ] && [ "$SAMBA_VERSION" != "edge" ];
     py3-pip \
     wget \
     cmocka-dev \
-    && python3 -m pip install --no-cache-dir dnspython==2.9.0 \
+    && python3 -m pip install --no-cache-dir dnspython==2.9.2 \
     && cd /tmp \
     && wget -q "https://download.samba.org/pub/samba/stable/samba-${SAMBA_VERSION}.tar.gz" \
     && tar -xzf "samba-${SAMBA_VERSION}.tar.gz" \
@@ -159,8 +159,8 @@ ENV \
 
 # Setup base
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION=5.6.0
-ARG SRAT_VERSION=2026.10.1
+ARG HA_CLI_VERSION=6.0.0
+ARG SRAT_VERSION=2026.11.0
 ARG SAMBA_VERSION=distribution
 ARG SMARTMONTOOLS_SDK_VERSION=8.0.2-pre.541
 
@@ -340,6 +340,10 @@ COPY rootfs /
 
 # Set executable permissions on s6-overlay scripts
 RUN find /etc/s6-overlay -type f -exec chmod a+x {} +
+
+# Never bake bashio API caches into the image: a cached ingress port or options
+# response would make s6 scripts ignore the live Supervisor values at startup.
+RUN rm -rf /tmp/.bashio
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5m --retries=3 \
     CMD smbcontrol smbd ping || exit 1
