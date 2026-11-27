@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [2026.11.0] - 2026-11-27
+
 ### ✨ Features
 
 - Compatibility with Home Assistant 2026.11 native USB disk mounting, so newly attached USB volumes are detected and managed (from SRAT v2026.11.0)
@@ -404,3 +406,4 @@ If you are pulling the image directly (outside of HA Supervisor), update your im
 
 
 [docs]: https://github.com/dianlight/hassio-addons/blob/master/sambanas2/DOCS.md
+
